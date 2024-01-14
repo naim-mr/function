@@ -2,67 +2,67 @@
 
 ## conditional termination (CFG)
 
-./function tests/euclid.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x == y" > logs/ctl/euclid_1CFG.log					            # TRUE
+./function tests/termination/euclid.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x == y" > logs/ctl/euclid_1CFG.log					            # TRUE
 #./function tests/euclid.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x > 0 && y > 0" > logs/ctl/euclid_2CFG.log            # TODO: ?
-./function tests/example0.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x > 10" > logs/ctl/example0CFG.log                   # TRUE
+./function tests/termination/example0.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x > 10" > logs/ctl/example0CFG.log                   # TRUE
 #./function tests/example0.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x <= 10 && x % 2 == 1" > logs/ctl/example0CFG.log   # TODO: needs parity domain
-./function tests/example5.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x > 0" -joinbwd 4 > logs/ctl/example5CFG.log         # TRUE
-./function tests/example7.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x > 6" > logs/ctl/example7_1CFG.log	  			        # TRUE
+./function tests/termination/example5.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x > 0" -joinbwd 4 > logs/ctl/example5CFG.log         # TRUE
+./function tests/termination/example7.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x > 6" > logs/ctl/example7_1CFG.log	  			        # TRUE
 #./function tests/example7.c -domain polyhedra -ctl-cfg "EF{exit: true}" > logs/ctl/example7_2CFG.log				                                # TODO: ?
 #./function tests/issue8.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x + z >= 0" > logs/ctl/issue8_1CFG.log				        # TODO: ?
 #./function tests/issue8.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "y >= 1" > logs/ctl/issue8_2CFG.log				            # TODO: ?
 #./function tests/issue8.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "-2 * y + z >= 0" > logs/ctl/issue8_3CFG.log				    # TODO: ?
 #./function tests/issue8.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "-x >= 2" > logs/ctl/issue8_4CFG.log				            # TODO: ?
-./function tests/sas2014a.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "r <= 0" > logs/ctl/sas2014a_1CFG.log				          # TRUE
+./function tests/termination/sas2014a.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "r <= 0" > logs/ctl/sas2014a_1CFG.log				          # TRUE
 #./function tests/sas2014a.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x < y" > logs/ctl/sas2014a_2CFG.log				          # TODO: ?
-./function tests/sas2014c.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x <= 0" > logs/ctl/sas2014c_1CFG.log				          # TRUE
+./function tests/termination/sas2014c.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x <= 0" > logs/ctl/sas2014c_1CFG.log				          # TRUE
 #./function tests/sas2014c.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "y > 0" > logs/ctl/sas2014c_2CFG.log				          # TODO: ?
-./function tests/tap2008a.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x < 25" > logs/ctl/tap2008a_1CFG.log				          # TRUE
-./function tests/tap2008a.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x > 30" > logs/ctl/tap2008a_2CFG.log				          # TRUE
-./function tests/tap2008b.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x < -5" > logs/ctl/tap2008b_1CFG.log				          # TRUE
-./function tests/tap2008b.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "0 <= x && x <= 30" > logs/ctl/tap2008b_2CFG.log      # TRUE
-./function tests/tap2008b.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x > 35" > logs/ctl/tap2008b_3CFG.log				          # TRUE
-./function tests/tap2008c.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x < 30" > logs/ctl/tap2008cCFG.log				            # TRUE
-./function tests/tap2008d.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x <= 0" > logs/ctl/tap2008dCFG.log				            # TRUE
-./function tests/tap2008e.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x <= 11" > logs/ctl/tap2008d_1CFG.log				        # TRUE
-./function tests/tap2008e.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x >= 40" > logs/ctl/tap2008d_2CFG.log				        # TRUE
+./function tests/termination/tap2008a.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x < 25" > logs/ctl/tap2008a_1CFG.log				          # TRUE
+./function tests/termination/tap2008a.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x > 30" > logs/ctl/tap2008a_2CFG.log				          # TRUE
+./function tests/termination/tap2008b.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x < -5" > logs/ctl/tap2008b_1CFG.log				          # TRUE
+./function tests/termination/tap2008b.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "0 <= x && x <= 30" > logs/ctl/tap2008b_2CFG.log      # TRUE
+./function tests/termination/tap2008b.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x > 35" > logs/ctl/tap2008b_3CFG.log				          # TRUE
+./function tests/termination/tap2008c.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x < 30" > logs/ctl/tap2008cCFG.log				            # TRUE
+./function tests/termination/tap2008d.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x <= 0" > logs/ctl/tap2008dCFG.log				            # TRUE
+./function tests/termination/tap2008e.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x <= 11" > logs/ctl/tap2008d_1CFG.log				        # TRUE
+./function tests/termination/tap2008e.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x >= 40" > logs/ctl/tap2008d_2CFG.log				        # TRUE
 #./function tests/tap2008f.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x % 2 == 0" > logs/ctl/tap2008d_2CFG.log				    # TODO: needs parity domain
-./function tests/vmcai2004b.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x < 3" > logs/ctl/vmcai2004b_1CFG.log				      # TRUE
-./function tests/vmcai2004b.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x > 3" -joinbwd 3 > logs/ctl/vmcai2004b_2CFG.log   # TRUE
-./function tests/widening3.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x <= 0" > logs/ctl/widening3_1CFG.log				        # TRUE
+./function tests/termination/vmcai2004b.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x < 3" > logs/ctl/vmcai2004b_1CFG.log				      # TRUE
+./function tests/termination/vmcai2004b.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x > 3" -joinbwd 3 > logs/ctl/vmcai2004b_2CFG.log   # TRUE
+./function tests/termination/widening3.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "x <= 0" > logs/ctl/widening3_1CFG.log				        # TRUE
 #./function tests/widening3.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "y > 0" > logs/ctl/widening3_2CFG.log               # TODO: ?
 #./function tests/zune.c -domain polyhedra -ctl-cfg "AF{exit: true}" -precondition "days <= 365" > logs/ctl/zuneCFG.log				              # TODO: call to unknown functions should be approximated with non-determinism
 
 ## conditional termination (AST)
 
-./function tests/euclid.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x == y" > logs/ctl/euclid_1AST.log					           # TRUE
+./function tests/termination/euclid.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x == y" > logs/ctl/euclid_1AST.log					           # TRUE
 #./function tests/euclid.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x > 0 && y > 0" > logs/ctl/euclid_2AST.log            # TODO: ?
-./function tests/example0.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x > 10" > logs/ctl/example0AST.log                   # TRUE
+./function tests/termination/example0.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x > 10" > logs/ctl/example0AST.log                   # TRUE
 #./function tests/example0.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x <= 10 && x % 2 == 1" > logs/ctl/example0AST.log   # TODO: needs parity domain
-./function tests/example5.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x > 0" -joinbwd 5 > logs/ctl/example5AST.log         # TRUE
-./function tests/example7.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x > 6" > logs/ctl/example7_1AST.log	  			         # TRUE
+./function tests/termination/example5.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x > 0" -joinbwd 5 > logs/ctl/example5AST.log         # TRUE
+./function tests/termination/example7.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x > 6" > logs/ctl/example7_1AST.log	  			         # TRUE
 #./function tests/example7.c -domain polyhedra -ctl-ast "EF{exit: true}" > logs/ctl/example7_2AST.log				                               # TODO: ?
 #./function tests/issue8.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x + z >= 0" > logs/ctl/issue8_1AST.log				         # TODO: ?
 #./function tests/issue8.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "y >= 1" > logs/ctl/issue8_2AST.log				             # TODO: ?
 #./function tests/issue8.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "-2 * y + z >= 0" > logs/ctl/issue8_3AST.log				   # TODO: ?
 #./function tests/issue8.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "-x >= 2" > logs/ctl/issue8_4AST.log				           # TODO: ?
-./function tests/sas2014a.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "r <= 0" > logs/ctl/sas2014a_1AST.log				         # TRUE
+./function tests/termination/sas2014a.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "r <= 0" > logs/ctl/sas2014a_1AST.log				         # TRUE
 #./function tests/sas2014a.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x < y" > logs/ctl/sas2014a_2AST.log				         # TODO: ?
-./function tests/sas2014c.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x <= 0" > logs/ctl/sas2014c_1AST.log				         # TRUE
+./function tests/termination/sas2014c.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x <= 0" > logs/ctl/sas2014c_1AST.log				         # TRUE
 #./function tests/sas2014c.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "y > 0" > logs/ctl/sas2014c_2AST.log				         # TODO: ?
-./function tests/tap2008a.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x < 25" > logs/ctl/tap2008a_1AST.log				         # TRUE
-./function tests/tap2008a.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x > 30" > logs/ctl/tap2008a_2AST.log				         # TRUE
-./function tests/tap2008b.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x < -5" > logs/ctl/tap2008b_1AST.log				         # TRUE
-./function tests/tap2008b.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "0 <= x && x <= 30" > logs/ctl/tap2008b_2AST.log      # TRUE
-./function tests/tap2008b.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x > 35" > logs/ctl/tap2008b_3AST.log				         # TRUE
-./function tests/tap2008c.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x < 30" > logs/ctl/tap2008cAST.log				           # TRUE
-./function tests/tap2008d.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x <= 0" > logs/ctl/tap2008dAST.log				           # TRUE
-./function tests/tap2008e.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x <= 11" > logs/ctl/tap2008d_1AST.log				         # TRUE
-./function tests/tap2008e.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x >= 40" > logs/ctl/tap2008d_2AST.log				         # TRUE
+./function tests/termination/tap2008a.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x < 25" > logs/ctl/tap2008a_1AST.log				         # TRUE
+./function tests/termination/tap2008a.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x > 30" > logs/ctl/tap2008a_2AST.log				         # TRUE
+./function tests/termination/tap2008b.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x < -5" > logs/ctl/tap2008b_1AST.log				         # TRUE
+./function tests/termination/tap2008b.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "0 <= x && x <= 30" > logs/ctl/tap2008b_2AST.log      # TRUE
+./function tests/termination/tap2008b.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x > 35" > logs/ctl/tap2008b_3AST.log				         # TRUE
+./function tests/termination/tap2008c.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x < 30" > logs/ctl/tap2008cAST.log				           # TRUE
+./function tests/termination/tap2008d.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x <= 0" > logs/ctl/tap2008dAST.log				           # TRUE
+./function tests/termination/tap2008e.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x <= 11" > logs/ctl/tap2008d_1AST.log				         # TRUE
+./function tests/termination/tap2008e.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x >= 40" > logs/ctl/tap2008d_2AST.log				         # TRUE
 #./function tests/tap2008f.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x % 2 == 0" > logs/ctl/tap2008d_2AST.log				     # TODO: needs parity domain
-./function tests/vmcai2004b.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x < 3" -joinbwd 3 > logs/ctl/vmcai2004b_1AST.log   # TRUE
-./function tests/vmcai2004b.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x > 3" -joinbwd 4 > logs/ctl/vmcai2004b_2AST.log   # TRUE
-./function tests/widening3.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x <= 0" > logs/ctl/widening3_1AST.log				       # TRUE
+./function tests/termination/vmcai2004b.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x < 3" -joinbwd 3 > logs/ctl/vmcai2004b_1AST.log   # TRUE
+./function tests/termination/vmcai2004b.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x > 3" -joinbwd 4 > logs/ctl/vmcai2004b_2AST.log   # TRUE
+./function tests/termination/widening3.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "x <= 0" > logs/ctl/widening3_1AST.log				       # TRUE
 #./function tests/widening3.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "y > 0" > logs/ctl/widening3_2AST.log               # TODO: ?
 #./function tests/zune.c -domain polyhedra -ctl-ast "AF{exit: true}" -precondition "days <= 365" > logs/ctl/zuneAST.log				             # TODO: call to unknown functions should be approximated with non-determinism
 
@@ -72,7 +72,7 @@
 
 # conditional guarantee (AST)
 
-./function tests/simple.c -ctl-ast "AF{x == 3}" -domain polyhedra -precondition "x <= 3" > logs/ctl/simple_1AST.log    # TRUE
+./function tests/guarantee/simple.c -ctl-ast "AF{x == 3}" -domain polyhedra -precondition "x <= 3" > logs/ctl/simple_1AST.log    # TRUE
 
 # conditional recurrence (CFG)
 
@@ -80,7 +80,7 @@
 
 # conditional recurrence (AST)
 
- ./function tests/simple.c -ctl-ast "AG{AF{x == 3}}" -domain polyhedra -joinbwd 3 -precondition "x < 0" > logs/ctl/simple_2CFG.log         # TRUE
+ ./function tests/guarantee/simple.c -ctl-ast "AG{AF{x == 3}}" -domain polyhedra -joinbwd 3 -precondition "x < 0" > logs/ctl/simple_2CFG.log         # TRUE
 
 ##########
 
