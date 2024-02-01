@@ -40,7 +40,9 @@ sig
   val until: t -> t -> t -> t
   val refine : t -> B.t -> t
   val mask: t -> t -> t
-
+  val learn: t -> t -> t
+  val conflict : t -> B.t list
+  val reinit: t -> t
   val compress : t -> t
   val print : Format.formatter -> t -> unit
   val print_graphviz_dot : Format.formatter -> t -> unit
