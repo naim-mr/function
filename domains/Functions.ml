@@ -19,7 +19,7 @@ sig
   type f
   val env : f -> Environment.t
   val vars : f -> var list
-
+  val reinit: f -> f
   val bot : Environment.t -> var list -> f
   val zero : Environment.t -> var list -> f
   val top : Environment.t -> var list -> f
@@ -35,7 +35,7 @@ sig
   val join : kind -> B.t -> f -> f -> f
   val widen : ?jokers:int -> B.t -> f -> f -> f
   val extend : B.t -> B.t -> f -> f -> f
-
+  val learn : B.t -> f -> f -> f
   val reset : f -> f
   val predecessor : f -> f
   val successor : f -> f
