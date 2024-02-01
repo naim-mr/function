@@ -113,6 +113,205 @@ module Numerical(N: NUMERICAL)(C: CONSTRAINT): PARTITION = struct
     for i=0 to (Lincons1.array_length a)-1 do
       cs := (Lincons1.array_get a i)::!cs; (*TODO: normalization *)
     done; { constraints = !cs; env = env; vars = vars }
+  let assume ?(pow = 5.) b =
+    let addScalar c1 c2 =
+      match (c1, c2) with
+      | Scalar.Float c1, Scalar.Float c2 -> Scalar.Float (c1 +. c2)
+      | Scalar.Float c1, Scalar.Mpqf c2 ->
+          Scalar.Float (c1 +. Mpqf.to_float c2)
+      | Scalar.Float c1, Scalar.Mpfrf c2 ->
+          Scalar.Float (c1 +. Mpfrf.to_float c2)
+      | Scalar.Mpqf c1, Scalar.Float c2 ->
+          Scalar.Float (Mpqf.to_float c1 +. c2)
+      | Scalar.Mpqf c1, Scalar.Mpqf c2 -> Scalar.Mpqf (Mpqf.add c1 c2)
+      | Scalar.Mpqf c1, Scalar.Mpfrf c2 ->
+          Scalar.Mpqf (Mpqf.add c1 (Mpfrf.to_mpqf c2))
+      | Scalar.Mpfrf c1, Scalar.Float c2 ->
+          Scalar.Float (Mpfrf.to_float c1 +. c2)
+      | Scalar.Mpfrf c1, Scalar.Mpqf c2 ->
+          Scalar.Mpqf (Mpqf.add (Mpfrf.to_mpqf c1) c2)
+      | Scalar.Mpfrf c1, Scalar.Mpfrf c2 ->
+          Scalar.Mpfrf (Mpfrf.add c1 c2 Mpfr.Zero)
+    in
+    let mulScalar c1 c2 =
+      match (c1, c2) with
+      | Scalar.Float c1, Scalar.Float c2 -> Scalar.Float (c1 *. c2)
+      | Scalar.Float c1, Scalar.Mpqf c2 ->
+          Scalar.Float (c1 *. Mpqf.to_float c2)
+      | Scalar.Float c1, Scalar.Mpfrf c2 ->
+          Scalar.Float (c1 *. Mpfrf.to_float c2)
+      | Scalar.Mpqf c1, Scalar.Float c2 ->
+          Scalar.Float (Mpqf.to_float c1 *. c2)
+      | Scalar.Mpqf c1, Scalar.Mpqf c2 -> Scalar.Mpqf (Mpqf.mul c1 c2)
+      | Scalar.Mpqf c1, Scalar.Mpfrf c2 ->
+          Scalar.Mpqf (Mpqf.mul c1 (Mpfrf.to_mpqf c2))
+      | Scalar.Mpfrf c1, Scalar.Float c2 ->
+          Scalar.Float (Mpfrf.to_float c1 *. c2)
+      | Scalar.Mpfrf c1, Scalar.Mpqf c2 ->
+          Scalar.Mpqf (Mpqf.mul (Mpfrf.to_mpqf c1) c2)
+      | Scalar.Mpfrf c1, Scalar.Mpfrf c2 ->
+          Scalar.Mpfrf (Mpfrf.mul c1 c2 Mpfr.Zero)
+    in
+    let divScalar c1 c2 =
+      match (c1, c2) with
+      | Scalar.Float c1, Scalar.Float c2 -> Scalar.Float (c1 /. c2)
+      | Scalar.Float c1, Scalar.Mpqf c2 ->
+          Scalar.Float (c1 /. Mpqf.to_float c2)
+      | Scalar.Float c1, Scalar.Mpfrf c2 ->
+          Scalar.Float (c1 /. Mpfrf.to_float c2)
+      | Scalar.Mpqf c1, Scalar.Float c2 ->
+          Scalar.Float (Mpqf.to_float c1 /. c2)
+      | Scalar.Mpqf c1, Scalar.Mpqf c2 -> Scalar.Mpqf (Mpqf.div c1 c2)
+      | Scalar.Mpqf c1, Scalar.Mpfrf c2 ->
+          Scalar.Mpqf (Mpqf.div c1 (Mpfrf.to_mpqf c2))
+      | Scalar.Mpfrf c1, Scalar.Float c2 ->
+          Scalar.Float (Mpfrf.to_float c1 /. c2)
+      | Scalar.Mpfrf c1, Scalar.Mpqf c2 ->
+          Scalar.Mpqf (Mpqf.div (Mpfrf.to_mpqf c1) c2)
+      | Scalar.Mpfrf c1, Scalar.Mpfrf c2 ->
+          Scalar.Mpfrf (Mpfrf.div c1 c2 Mpfr.Zero)
+    in
+    let env = b.env in
+    let vars = b.vars in
+    (* count occurrences of variables within the polyhedral constraints *)
+    let occ =
+      List.map
+        (fun x ->
+          let o =
+            List.fold_left
+              (fun ao c -> if C.var x c then ao + 1 else ao)
+              0 b.constraints
+          in
+          (x, o) )
+        vars
+    in
+    (* selecting the variable with less occurrences *)
+    let x =
+      fst
+        (List.hd
+           (List.sort
+              (fun (x1, o1) (x2, o2) ->
+                if x1.varName = x1.varId && x2.varName != x2.varId then 1
+                else if x1.varName != x1.varId && x2.varName = x2.varId then
+                  -1
+                else compare o1 o2 )
+              occ ) )
+    in
+    (* creating an APRON variable *)
+    let v = Var.of_string x.varId in
+    (* creating an APRON polyhedra *)
+    let a = Lincons1.array_make env (List.length b.constraints) in
+    let i = ref 0 in
+    List.iter
+      (fun c ->
+        Lincons1.array_set a !i c ;
+        i := !i + 1 )
+      b.constraints ;
+    let p = Abstract1.of_lincons_array manager env a in
+    (* creating an APRON polyhedra *)
+    (* getting the interval of variation of the variable in the polyhedra *)
+    let i = Abstract1.bound_variable manager p v in
+    (* splitting the interval making assumtions *)
+    let inf = i.Interval.inf in
+    let sup = i.Interval.sup in
+    if 1 = Scalar.is_infty sup then (
+      if -1 = Scalar.is_infty inf then (
+        (* infinite domain: for -inf <= v <= +oo*)
+        let e = Linexpr1.make env in
+        Linexpr1.set_coeff e v (Coeff.s_of_int 1) ;
+        Linexpr1.set_cst e (Coeff.s_of_int (-1)) ;
+        let c = Lincons1.make e Lincons1.SUPEQ in
+        (* split on : c = v >= -1 *)
+        ( {constraints= c :: b.constraints; env; vars}
+        , {constraints= C.negate c :: b.constraints; env; vars} ) )
+      else
+        (*  m <= v <= +oo *)
+        let mid = int_of_float (2. ** pow) in
+        let e = Linexpr1.make env in
+        Linexpr1.set_coeff e v (Coeff.s_of_int 1) ;
+        Linexpr1.set_cst e (Coeff.Scalar (mulScalar (Scalar.of_int (-1)) inf));
+        let c = Lincons1.make e Lincons1.SUPEQ in
+        (*  c =  v  >= m  *)
+        let e1 = Linexpr1.make env in
+        Linexpr1.set_coeff e1 v (Coeff.s_of_int (-1)) ;
+        Linexpr1.set_cst e1 (Coeff.s_of_int (mid)) ;
+        let c1 = Lincons1.make e1 Lincons1.SUPEQ in
+        let e3 = Linexpr1.make env in
+        Linexpr1.set_coeff e3 v (Coeff.s_of_int 1) ;
+        Linexpr1.set_cst e3 (Coeff.s_of_int (-mid)) ;
+        let c3 = Lincons1.make e3 Lincons1.SUPEQ in
+        (* c3 =  v >= 2 ^ n *)
+        (* split on: 
+           a- c && c1 ==  m <= v <= 2^n
+           b- c3      ==  2^n <= v <= +oo
+        *)
+        ( {constraints= c :: c1 :: b.constraints; env; vars}
+        , {constraints= c3 :: b.constraints; env; vars} ) )
+    else if -1 = Scalar.is_infty inf then (
+      (* -oo <= v <= M*)
+      let e = Linexpr1.make env in
+      Linexpr1.set_coeff e v (Coeff.s_of_int (-1)) ;
+      Linexpr1.set_cst e (Coeff.Scalar (addScalar sup (Scalar.of_int (-1)))) ;
+      let c = Lincons1.make e Lincons1.SUPEQ in
+      (* c ==  v <= (M - 1) *)
+      let e1 = Linexpr1.make env in
+      Linexpr1.set_coeff e1 v (Coeff.s_of_int 1) ;
+      Linexpr1.set_cst e1 (Coeff.Scalar (Scalar.neg sup)) ;
+      let c1 = Lincons1.make e1 Lincons1.SUPEQ in
+      (* c1 ==  v >= -M *)
+      let e2 = Linexpr1.make env in
+      Linexpr1.set_coeff e2 v (Coeff.s_of_int (-1)) ;
+      Linexpr1.set_cst e2 (Coeff.Scalar (Scalar.neg  (sup)));
+      let c2 = Lincons1.make e2 Lincons1.SUPEQ in
+      (* c2 ==   -M >= v   *)
+      (* split on: 
+           a- c1 && c2 ==  -M <= v <= M -1 
+           b- c        ==  -oo<= v <= -M
+      *)
+      ( {constraints= c1 :: c2 :: b.constraints; env; vars}
+      , {constraints= c :: b.constraints; env; vars} ) )
+    else if Scalar.equal inf sup then (
+      (* -m <= v <= m : v == m *)
+      let e = Linexpr1.make env in
+      Linexpr1.set_coeff e v (Coeff.s_of_int 1) ;
+      Linexpr1.set_cst e (Coeff.Scalar inf) ;
+      let c = Lincons1.make e Lincons1.SUPEQ in
+      (* split on: 
+           c == v >= m && v<=m
+      *)
+      ( {constraints= c :: b.constraints; env; vars}
+      , {constraints= C.negate c :: b.constraints; env; vars} ) )
+    else
+      (* m <= v <= M *)
+      let e = Linexpr1.make env in
+      Linexpr1.set_coeff e v (Coeff.s_of_int 1) ;
+      let s = addScalar sup inf |> divScalar (Scalar.of_int 2) in
+      (* s = ((m + M) / 2 *)
+      Linexpr1.set_cst e (Coeff.Scalar (Scalar.neg s)) ;
+      let c = Lincons1.make e Lincons1.SUPEQ in
+      (* c = x >= ((m + M) / 2)   *)
+      let e2 = Linexpr1.make env in
+      Linexpr1.set_coeff e2 v (Coeff.s_of_int (-1)) ;
+      Linexpr1.set_cst e2 (Coeff.Scalar sup) ;
+      let c2 = Lincons1.make e2 Lincons1.SUPEQ in
+      (* c2 = x <= M *)
+      let e3 = Linexpr1.make env in
+      Linexpr1.set_coeff e3 v (Coeff.s_of_int (-1)) ;
+      Linexpr1.set_cst e3 (Coeff.Scalar s) ;
+      let c3 = Lincons1.make e3 Lincons1.SUPEQ in
+      (* c3 = x <= ((m + M / 2) + 1) *)
+      let e4 = Linexpr1.make env in
+      Linexpr1.set_coeff e4 v (Coeff.s_of_int 1) ;
+      Linexpr1.set_cst e4 (Coeff.Scalar inf) ;
+      let c4 = Lincons1.make e2 Lincons1.SUPEQ in
+      (* c4 = x >= m *)
+      (* split on: 
+           a- c && c2   == ((m + M / 2) + 1) <= v <= M 
+           b- c3 && c4  ==  m <= v <= ((m + M / 2) ) 
+      *)
+      ( {constraints= c :: c2 :: b.constraints; env; vars}
+      , {constraints= c3 :: c4 :: b.constraints; env; vars} )
+
 
   let join b1 b2 = 
     let env = b1.env in

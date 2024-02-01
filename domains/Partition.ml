@@ -27,7 +27,7 @@ module type PARTITION = sig
 
   val isBot : t -> bool
   val isLeq : t -> t -> bool
-
+  val assume : ?pow:float -> t -> t * t
   val join : t -> t -> t
   val widen : t -> t -> t
   val meet : t -> t -> t
