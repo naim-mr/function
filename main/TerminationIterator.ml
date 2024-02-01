@@ -10,34 +10,34 @@
 
 open AbstractSyntax
 open InvMap
+open Config
 open Apron
 open Domain
 open Functions
-open Iterator
+open Semantics
+open DecisionTree
+open ForwardIterator
 
-module TerminationIterator (D: RANKING_FUNCTION) =
+module TerminationIterator (D: RANKING_FUNCTION): SEMANTIC  =
 struct
+  type r = D.t * D.t * bool 
 
   module D = D
 
   module B = D.B
-
+  
+  module ForwardIteratorB = ForwardIterator(B)
+  let dummy_prop = Exp (StringMap.empty)
   let fwdInvMap = ref InvMap.empty
-
   let addFwdInv l (a:B.t) = fwdInvMap := InvMap.add l a !fwdInvMap
-
   let fwdMap_print fmt m = InvMap.iter (fun l a -> 
       Format.fprintf fmt "%a: %a\n" label_print l B.print a) m
-
   let bwdInvMap = ref InvMap.empty
-
   let addBwdInv l (a:D.t) = bwdInvMap := InvMap.add l a !bwdInvMap
-
   let bwdMap_print fmt m = InvMap.iter (fun l a -> 
       Format.fprintf fmt "%a: %a\n" label_print l D.print a) m
 
   (* Forward Iterator *)
-
   let rec fwdStm funcs env vars p s =
     match s with
     | A_label _ -> p
@@ -92,7 +92,7 @@ struct
 
   (* Backward Iterator + Recursion *)
 
-  let rec bwdStm ?domain funcs env vars (p,r,flag) s =
+  let rec bwdStm ?property ?domain funcs env vars (p,r,flag) s =
     match s with
     | A_label _ -> (p,r,flag)
     | A_return -> D.zero ?domain:domain env vars, r, flag
@@ -187,13 +187,13 @@ struct
              bwdStm ~domain:domain funcs env vars (ap, ar, aflag) s
            ) (r, r, true) ss)
 
-  and bwdBlk funcs env vars (p,r,flag) (b:block) : D.t * D.t * bool =
+  and bwdBlk ?property funcs env vars (p,r,flag) (b:block) : D.t * D.t * bool =
     let result_print l p =
       Format.fprintf !fmt "### %a ###:\n%a@." label_print l D.print p
     in
     match b with
-    | A_empty l ->
-      let a = InvMap.find l !fwdInvMap in
+    | A_empty l ->  
+      let a = InvMap.find l !fwdInvMap in 
       let p = if !refine then D.refine p a else p in
       if !tracebwd && not !minimal then result_print l p;
       addBwdInv l p; (p,r,flag)
@@ -211,7 +211,7 @@ struct
         if !tracebwd && not !minimal then result_print l p;
         addBwdInv l p; (p,r,flag)
 
-  and bwdRec funcs env vars (p:D.t) (b:block) : D.t = 
+  and bwdRec ?property funcs env vars (p:D.t) (b:block) : D.t = 
     let (res, _, _) = bwdBlk funcs env vars (p,D.bot env vars,false) b  in
     res
 
@@ -264,7 +264,7 @@ struct
     | A_block (l,(s,_),b) -> addBwdInv l (D.bot env vars); 
       initStm env vars s; initBlk env vars b
 
-  let analyze (vars,stmts,funcs) main =
+  let analyze ?(precondition = A_TRUE) ?property (vars,stmts,funcs) main =
     let rec aux xs env = match xs with
       | [] -> env
       | x::xs -> 

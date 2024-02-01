@@ -8,19 +8,15 @@
 (*                                                 *)
 (***************************************************)
 
+open Cda
+open Config
+open Semantics
+
+
+
 (* parsing *)
 
-let analysis = ref "termination"
-let domain = ref "boxes"
-let filename = ref ""
-let fmt = ref Format.std_formatter
-let main = ref "main"
-let minimal = ref false
-let ordinals = ref false
-let property = ref ""
-let precondition = ref "true"
-let time = ref false
-let noinline = ref false
+
 
 let parseFile filename =
   let f = open_in filename in
@@ -132,66 +128,73 @@ let parse_args () =
     match args with
     (* General arguments -----------------------------------------------------*)
     | "-domain"::x::r -> (* abstract domain: boxes|octagons|polyhedra *)
-      domain := x; doit r
+      Config.domain := x; doit r
     | "-timeout"::x::r -> (* analysis timeout *)
-      Iterator.timeout := float_of_string x; doit r
+      Config.timeout := float_of_string x; doit r
     | "-joinfwd"::x::r -> (* widening delay in forward analysis *)
-      Iterator.joinfwd := int_of_string x; doit r
+      Config.joinfwd := int_of_string x; doit r
     | "-joinbwd"::x::r -> (* widening delay in backward analysis *)
-      Iterator.joinbwd := int_of_string x; doit r
-    | "-main"::x::r -> (* analyzer entry point *) main := x; doit r
+      Config.joinbwd := int_of_string x; doit r
+    | "-main"::x::r -> (* analyzer entry point *) Config.main := x; doit r
     | "-meetbwd"::x::r -> (* dual widening delay in backward analysis *)
-      Iterator.meetbwd := int_of_string x; doit r
+      Config.meetbwd := int_of_string x; doit r
     | "-minimal"::r -> (* analysis result only *)
-      minimal := true; Iterator.minimal := true; doit r
+      Config.minimal := true; Config.minimal := true; doit r
     | "-ordinals"::x::r -> (* ordinal-valued ranking functions *)
-      ordinals := true; Ordinals.max := int_of_string x; doit r
+      Config.ordinals := true; Ordinals.max := int_of_string x; doit r
     | "-refine"::r -> (* refine in backward analysis *)
-      Iterator.refine := true; doit r
+      Config.refine := true; doit r
     | "-retrybwd"::x::r ->
-      Iterator.retrybwd := int_of_string x;
+      Config.retrybwd := int_of_string x;
       DecisionTree.retrybwd := int_of_string x;
       doit r
     | "-tracefwd"::r -> (* forward analysis trace *)
-      Iterator.tracefwd := true; doit r
+      Config.tracefwd := true; doit r
     | "-tracebwd"::r -> (* backward analysis trace *)
-      Iterator.tracebwd := true;
+      Config.tracebwd := true;
       DecisionTree.tracebwd := true;
       CFGInterpreter.trace := true;
       CFGInterpreter.trace_states := true;
       doit r
+    (* Conflict driven analysis arguments -------------------------------------------------*)
+    | "-cda"::x::r -> 
+      Config.cda := true;
+      Config.size :=  int_of_string x;
+      Config.refine := true;
+      doit r;
     (* Termination arguments -------------------------------------------------*)
     | "-termination"::r -> (* guarantee analysis *)
-      analysis := "termination"; doit r
+      Config.analysis := "termination"; doit r
     (* Recurrence / Guarantee arguments --------------------------------------*)
     | "-guarantee"::x::r -> (* guarantee analysis *)
-      analysis := "guarantee"; property := x; doit r
+      Config.analysis := "guarantee"; Config.property := x; doit r
     | "-recurrence"::x::r -> (* recurrence analysis *)
-      analysis := "recurrence"; property := x; doit r
+      Config.analysis := "recurrence";Config.property := x; doit r
     | "-time"::r -> (* track analysis time *)
-      time := true; doit r
+      Config.time := true; doit r
+    
     | "-timefwd"::r -> (* track forward analysis time *)
-      Iterator.timefwd := true; doit r
+      Config.timefwd := true; doit r
     | "-timebwd"::r -> (* track backward analysis time *)
-      Iterator.timebwd := true; doit r
+      Config.timebwd := true; doit r
     (* CTL arguments ---------------------------------------------------------*)
     | "-ctl"::x::r -> (* CTL analysis *)
-      analysis := "ctl"; property := x; doit r
+      Config.analysis := "ctl"; Config.property := x; doit r
     | "-ctl-ast"::x::r -> (* CTL analysis *)
-      analysis := "ctl-ast"; property := x; doit r
+      Config.analysis := "ctl-ast"; Config.property := x; doit r
     | "-ctl-cfg"::x::r -> (* CTL analysis *)
-      analysis := "ctl-cfg"; property := x; doit r
+      Config.analysis := "ctl-cfg"; Config.property := x; doit r
     | "-dot"::r -> (* print CFG and decision trees in 'dot' format *)
-      Iterator.dot := true; doit r
+      Config.dot := true; doit r
     | "-precondition"::c::r -> (* optional precondition that holds 
                                   at the start of the program, default = true *)
-      precondition := c; doit r 
+      Config.precondition := c; doit r 
     | "-ctl_existential_equivalence"::r -> (* use CTL equivalence relations to 
                                               convert existential to universal CTL properties *)
-        Iterator.ctl_existential_equivalence := true; doit r
+      Config.ctl_existential_equivalence := true; doit r
     | "-noinline"::r -> (* don't inline function calls, only for CFG based analysis *)
-      noinline := true; doit r
-    | x::r -> filename := x; doit r
+      Config.noinline := true; doit r
+    | x::r -> Config.filename := x; doit r
     | [] -> ()
   in
   doit (List.tl (Array.to_list Sys.argv))
@@ -251,40 +254,104 @@ module CFGCTLOctagonsOrdinals = CFGCTLIterator.CFGCTLIterator(DecisionTree.TSOO)
 module CFGCTLPolyhedra = CFGCTLIterator.CFGCTLIterator(DecisionTree.TSAP)
 module CFGCTLPolyhedraOrdinals = CFGCTLIterator.CFGCTLIterator(DecisionTree.TSOP)
 
+
+
 let result = ref false
 
 let run_analysis analysis_function program () =
   try 
+    
     let start = Sys.time () in
     let terminating = analysis_function program !main in
     let stop = Sys.time () in
-    Format.fprintf !fmt "Analysis Result: ";
+    Format.fprintf !fmt "Final Analysis Result: ";
     let result = if terminating then "TRUE" else "UNKNOWN" in
     Format.fprintf !fmt "%s\n" result;
     if !time then
       Format.fprintf !fmt "Time: %f s\n" (stop-.start);
-    Format.fprintf !fmt "\nDone.\n"
+    Format.fprintf !fmt "\nDone.\n";
+    terminating
   with
-  | Iterator.Timeout ->
+  | Config.Timeout ->
     Format.fprintf !fmt "\nThe Analysis Timed Out!\n";
-    Format.fprintf !fmt "\nDone.\n"
+    Format.fprintf !fmt "\nDone.\n";
+    false
 
-let termination () =
-  if !filename = "" then raise (Invalid_argument "No Source File Specified");
+let cda_run s : (module Cda.CDA_ITERATOR)= 
+  let module D = (val s: SEMANTIC) in
+  (module Cda.Make(D))
+  
+  
+let termination_iterator (): (module SEMANTIC)=
+  let module S =
+    (val (match !domain with
+    | "boxes" -> if !ordinals then (module TerminationBoxesOrdinals) else (module TerminationBoxes)
+    | "octagons" -> if !ordinals then (module TerminationOctagonsOrdinals) else (module TerminationOctagons)
+    | "polyhedra" -> if !ordinals then (module TerminationPolyhedraOrdinals) else (module TerminationPolyhedra)
+    | _ -> raise (Invalid_argument "Unknown Abstract Domain"))
+    : SEMANTIC)
+  in 
+  (module S)
+
+let guarantee_iterator (): (module SEMANTIC)=
+  let module S =
+    (val (match !domain with
+    | "boxes" -> if !ordinals then (module GuaranteeBoxesOrdinals) else (module GuaranteeBoxes)
+    | "octagons" -> if !ordinals then (module GuaranteeOctagonsOrdinals) else (module GuaranteeOctagons)
+    | "polyhedra" -> if !ordinals then (module GuaranteePolyhedraOrdinals) else (module GuaranteePolyhedra)
+    | _ -> raise (Invalid_argument "Unknown Abstract Domain"))
+    : SEMANTIC)
+  in 
+  (module S)
+
+
+
+let recurrence_iterator (): (module SEMANTIC)=
+  let module S =
+    (val (match !domain with
+    | "boxes" -> if !ordinals then (module RecurrenceBoxesOrdinals) else (module RecurrenceBoxes)
+    | "octagons" -> if !ordinals then (module RecurrenceOctagonsOrdinals) else (module RecurrenceOctagons)
+    | "polyhedra" -> if !ordinals then (module RecurrencePolyhedra) else (module RecurrencePolyhedraOrdinals)
+    | _ -> raise (Invalid_argument "Unknown Abstract Domain"))
+    : SEMANTIC)
+  in 
+  (module S)
+
+  
+let ctl_iterator (): (module SEMANTIC)=
+  let module S =
+    (val (match !domain with
+    | "boxes" -> if !ordinals then (module CTLBoxesOrdinals) else (module CTLBoxes)
+    | "octagons" -> if !ordinals then (module CTLOctagonsOrdinals) else (module CTLOctagons)
+    | "polyhedra" -> if !ordinals then (module CTLPolyhedraOrdinals) else (module CTLPolyhedra)
+    | _ -> raise (Invalid_argument "Unknown Abstract Domain"))
+    : SEMANTIC)
+  in 
+  (module S)
+
+let termination ()  =
+  if !filename = "" then raise (Invalid_argument "No Source File Specified") ;
   let sources = parseFile !filename in
-  let (program,_) = ItoA.prog_itoa sources in
-  if not !minimal then
-    begin
-      Format.fprintf !fmt "\nAbstract Syntax:\n";
-      AbstractSyntax.prog_print !fmt program;
-    end;
+  let program, _ = ItoA.prog_itoa sources in
+  if not !minimal then (
+    Format.fprintf !fmt "\nAbstract Syntax:\n" ;
+    AbstractSyntax.prog_print !fmt program ) ;
+  let open AbstractSyntax in 
   let analysis_function =
     match !domain with
-    | "boxes" -> if !ordinals then TerminationBoxesOrdinals.analyze else TerminationBoxes.analyze
-    | "octagons" -> if !ordinals then TerminationOctagonsOrdinals.analyze else TerminationOctagons.analyze
-    | "polyhedra" -> if !ordinals then TerminationPolyhedraOrdinals.analyze else TerminationPolyhedra.analyze
+    | "boxes" ->
+        if !ordinals then TerminationBoxesOrdinals.analyze ~property: TerminationBoxesOrdinals.dummy_prop
+        else TerminationBoxes.analyze  ~property: TerminationBoxes.dummy_prop
+    | "octagons" ->
+        if !ordinals then TerminationOctagonsOrdinals.analyze ~property:TerminationOctagonsOrdinals.dummy_prop
+        else TerminationOctagons.analyze ~property:TerminationOctagons.dummy_prop
+    | "polyhedra" ->
+        if !ordinals then TerminationPolyhedraOrdinals.analyze ~property:TerminationPolyhedraOrdinals.dummy_prop
+        else TerminationPolyhedra.analyze ~property:TerminationPolyhedra.dummy_prop
     | _ -> raise (Invalid_argument "Unknown Abstract Domain")
-  in run_analysis analysis_function program ()
+  in
+  run_analysis  analysis_function program ()
+
 
 let guarantee () =
   if !filename = "" then raise (Invalid_argument "No Source File Specified");
@@ -305,13 +372,13 @@ let guarantee () =
       Format.fprintf !fmt "\nProperty: ";
       AbstractSyntax.property_print !fmt property;
     end;
-  let analysis_function =
+  let analysis_function  =
     match !domain with
     | "boxes" -> if !ordinals then GuaranteeBoxesOrdinals.analyze else GuaranteeBoxes.analyze
     | "octagons" -> if !ordinals then GuaranteeOctagonsOrdinals.analyze else GuaranteeOctagons.analyze
     | "polyhedra" -> if !ordinals then GuaranteePolyhedraOrdinals.analyze else GuaranteePolyhedra.analyze
     | _ -> raise (Invalid_argument "Unknown Abstract Domain")
-  in run_analysis (analysis_function property) program ()
+  in run_analysis (analysis_function ~property:(Exp property)) program ()
 
 let recurrence () =
   if !filename = "" then raise (Invalid_argument "No Source File Specified");
@@ -338,7 +405,7 @@ let recurrence () =
     | "octagons" -> if !ordinals then RecurrenceOctagonsOrdinals.analyze else RecurrenceOctagons.analyze
     | "polyhedra" -> if !ordinals then RecurrencePolyhedraOrdinals.analyze else RecurrencePolyhedra.analyze
     | _ -> raise (Invalid_argument "Unknown Abstract Domain")
-  in run_analysis (analysis_function property) program ()
+  in run_analysis (analysis_function ~property:(Exp property)) program ()
 
 let ctl_ast () =
   if !filename = "" then raise (Invalid_argument "No Source File Specified");
@@ -354,7 +421,6 @@ let ctl_ast () =
       AbstractSyntax.prog_print !fmt prog;
       Format.fprintf !fmt "\n";
     end;
-  let program = CTLIterator.program_of_prog prog !main in
   let analyze =
     match !domain with
     | "boxes" -> if !ordinals then CTLBoxesOrdinals.analyze else CTLBoxes.analyze
@@ -362,19 +428,20 @@ let ctl_ast () =
     | "polyhedra" -> if !ordinals then CTLPolyhedraOrdinals.analyze else CTLPolyhedra.analyze
     | _ -> raise (Invalid_argument "Unknown Abstract Domain")
   in
-  let result = analyze ~precondition:precondition program property in
+  let result = analyze ~precondition:precondition  ~property:(Ctl property) prog "" in
   if !time then begin
     let stoptime = Sys.time () in
     Format.fprintf !fmt "\nTime: %f" (stoptime-.starttime)
   end;
   if result then 
-    Format.fprintf !fmt "\nAnalysis Result: TRUE\n"
+    Format.fprintf !fmt "\nFinal Analysis Result: TRUE\n"
   else 
-    Format.fprintf !fmt "\nAnalysis Result: UNKNOWN\n"
-
+    Format.fprintf !fmt "\nFinal Analysis Result: UNKNOWN\n"
+  ;
+  result
 let ctl_cfg () =
   if !filename = "" then raise (Invalid_argument "No Source File Specified");
-  if !property = "" then raise (Invalid_argument "No Property Specified");
+  if !property = "" then raise (Invalid_argument "No Property Specifilet s = Lexing.dummy_posed");
   let starttime = Sys.time () in
   let (cfg, getProperty) = Tree_to_cfg.prog (File_parser.parse_file !filename) !main in
   let mainFunc = Cfg.find_func !main cfg in
@@ -397,7 +464,7 @@ let ctl_cfg () =
       Printf.printf "%a" Cfg_printer.print_cfg cfg;
       Printf.printf "\n";
     end;
-  if not !minimal && !Iterator.dot then
+  if not !minimal && !Config.dot then
     begin
       Printf.printf "CFG_DOT:\n %a" Cfg_printer.output_dot cfg;
       Printf.printf "\n";
@@ -414,16 +481,66 @@ let ctl_cfg () =
     Format.fprintf !fmt "\nAnalysis Result: TRUE\n"
   else 
     Format.fprintf !fmt "\nAnalysis Result: UNKNOWN\n"
+  ;
+  result
 
-let doit () =
+let doit () =  
   parse_args ();
-  match !analysis with
-  | "termination" -> termination ()
-  | "guarantee" -> guarantee ()
-  | "recurrence" -> recurrence ()
-  | "ctl" -> ctl_ast ()     (* default CTL analysis is CTL-AST *)
-  | "ctl-ast" -> ctl_ast ()
-  | "ctl-cfg" -> ctl_cfg ()
-  | _ -> raise (Invalid_argument "Unknown Analysis")
+  if !Config.cda then 
+    let semantic = 
+    match !analysis with
+    | "termination" -> termination_iterator ()
+    | "guarantee"   -> guarantee_iterator ()
+    | "recurrence"  -> recurrence_iterator ()
+    | "ctl" 
+    | "ctl-ast"  
+    | "ctl-cfg" ->  ctl_iterator ()
+    | _ -> raise (Invalid_argument "Unknown Analysis") 
+    in
+    if !filename = "" then raise (Invalid_argument "No Source File Specified");
+    if !property = "" then 
+      begin
+      match !analysis with
+       | "termination" -> ()
+       | _ ->  raise (Invalid_argument "No Property File Specified")
+      end;
+    let sources = parseFile !filename in
+    (* 
+      #TODO
+      let alert_prop =
+        function
+       | None -> raise (Invalid_argument "Unknown Property")
+       | Some property -> property 
+    in*)
+    let program,property = match !analysis with  
+                          | "termination" ->  let s = Lexing.dummy_pos in 
+                                              let p =  ((IntermediateSyntax.I_universal (IntermediateSyntax.I_TRUE,(s,s))),(s,s)) in 
+                                              let program , property =  ItoA.prog_itoa ~property:(!main,p) sources in
+                                              program, (Semantics.Exp (Option.get property))
+                                              
 
+                          | "guarantee"  
+                          | "recurrence" ->  let program,property  = ItoA.prog_itoa ~property:(!main,parseProperty !property ) sources in program ,(Semantics.Exp (Option.get property))
+                          | "ctl" 
+                          | "ctl-ast"  
+                          | "ctl-cfg" ->  let parsedProperty = parseCTLPropertyString !property in
+                                          let program, property = ItoA.ctl_prog_itoa parsedProperty !main (parseFile !filename) in
+                                          program,(Semantics.Ctl property) 
+    | _ -> raise (Invalid_argument "Unknown Analysis") 
+    in
+    if not !minimal then (
+      Format.fprintf !fmt "\nAbstract Syntax:\n" ;
+      AbstractSyntax.prog_print !fmt program ) ;
+    let (vars,b,func)  = program  in
+    let module C = (val (cda_run semantic): CDA_ITERATOR) in
+    C.analyze ~property:property func vars b !main
+  else
+    match !analysis with
+    | "termination" -> termination ()
+    | "guarantee"   -> guarantee  ()
+    | "recurrence" -> recurrence ()   
+    | "ctl" -> ctl_ast  ()  (* default CTL analysis is CTL-AST *)
+    | "ctl-ast" -> ctl_ast ()
+    | "ctl-cfg" -> ctl_ast ()
+    | _ -> raise (Invalid_argument "Unknown Analysis")   
 let _ = doit () 

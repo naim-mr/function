@@ -5,8 +5,9 @@ open Apron
 open Domain
 open Partition
 open Functions
-open Iterator
+open Semantics
 open ForwardIterator
+open Config
 
 (* type for CTL properties, instantiated with bExp for atomic propositions *)
 type ctl_property = AbstractSyntax.bExp CTLProperty.generic_property
@@ -130,7 +131,7 @@ let prog_of_program (program:program) : prog =
   (varMap, program.globalBlock, funcMap)
 
 
-module CTLIterator(D: RANKING_FUNCTION) = struct
+module CTLIterator(D: RANKING_FUNCTION): SEMANTIC = struct
 
   (*
      Fixed Point Computation:
@@ -145,12 +146,27 @@ module CTLIterator(D: RANKING_FUNCTION) = struct
   *)
 
   module ForwardIteratorB = ForwardIterator(D.B)
-
+  module D = D
+  module B = D.B
+  (* We use fwdInvMap but not the bwd, necessaray for now to match SEMANTIC module type *)
+  let fwdInvMap = ref InvMap.empty
+  let bwdInvMap = ref InvMap.empty
   (* 
      Type that represents an invariant/fixed-point.
      An invariant assigns an abstract state to each statement of a program
   *)
   type inv = D.t InvMap.t
+  (* type returned by the bwd analysis function: also necessary to match SEMANTIC module type *)
+  type r = inv
+  (* type of the properties for this iterator *)
+  type 'a p = ctl_property
+  (* dummy_prop to give a default value to optional (due to termination iterator) parameter ?property *)
+  let dummy_prop  = Ctl (atomic_property_of_bexp (A_TRUE))
+  (* Also to match module type: to remove in the future *)
+  let initStm env vars s =
+    ()
+  let	initBlk env vars b =
+    ()
 
   let printInv ?fwdInvOpt fmt (inv:inv) =
     let inv = 
@@ -452,17 +468,7 @@ module CTLIterator(D: RANKING_FUNCTION) = struct
   *)
   let compute (program:program) (property:ctl_property) : inv = 
     let atomic_true_inv = atomic_true program in
-    let fwdInvMap = if !refine then (* Run forward analysis if 'refine' flag is set *)
-        ForwardIteratorB.compute 
-          (program.variables,
-           program.globalBlock,
-          (StringMap.singleton program.mainFunction.funcName program.mainFunction))
-          program.mainFunction.funcName
-          program.environment
-      else
-        InvMap.empty
-    in
-    let fwdInv l = InvMap.find l fwdInvMap in
+    let fwdInv l = InvMap.find l !fwdInvMap in
     let a_until = until UNIVERSAL fwdInv in
     let e_until = until EXISTENTIAL fwdInv in
     let a_global = global UNIVERSAL fwdInv in
@@ -529,9 +535,28 @@ module CTLIterator(D: RANKING_FUNCTION) = struct
       print_inv property result;
       result
     in inv property
+  (* Function called by cda same as analyze *)
+  let bwdRec ?(property = dummy_prop) func env (vars:var list)  _ b  : D.t = 
+    let f = StringMap.find !Config.main func in
+    let p = {environment = env; variables = vars; mainFunction = f; globalBlock = b} in 
+    let i = compute p (Semantics.get_ctl property) in
+    let initialLabel = block_label p.mainFunction.funcBody in
+    let programInvariant = InvMap.find initialLabel i in
+    programInvariant 
 
-  let analyze ?precondition (program:program) (property:ctl_property) =  
-    let inv = compute program property in
+  let analyze ?precondition  ?(property = dummy_prop) program _ =  
+    let program = program_of_prog program !Config.main in 
+    fwdInvMap :=  if !Config.refine then 
+                  (* Run forward analysis if 'refine' flag is set *)
+                    ForwardIteratorB.compute  (program.variables,  program.globalBlock,
+                                              (StringMap.singleton program.mainFunction.funcName program.mainFunction))
+                                              (D.B.top program.environment program.variables)
+                                              program.mainFunction.funcName
+                                              program.environment
+                  else
+                    InvMap.empty
+    ; 
+    let inv = compute program (Semantics.get_ctl property) in 
     let initialLabel = block_label program.mainFunction.funcBody in
     let programInvariant = InvMap.find initialLabel inv in
     D.defined ?condition:precondition programInvariant

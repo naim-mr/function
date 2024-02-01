@@ -5,9 +5,9 @@ open Apron
 open Domain
 open Partition
 open Functions
-open Iterator
+open Semantics
 open ForwardIterator
-
+open Config
 
 (* type for CTL properties, instantiated with Cfg.bool_expr for atomic propositions *)
 type ctl_property = Cfg.bool_expr CTLProperty.generic_property

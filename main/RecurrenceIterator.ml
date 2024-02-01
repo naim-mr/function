@@ -7,24 +7,30 @@ open AbstractSyntax
 open ForwardIterator
 open InvMap
 open Apron
+open Config
 open Domain
 open Functions
-open Iterator
+open Semantics
+
 
 module RecurrenceIterator (D: RANKING_FUNCTION) =
 struct
+
+  type r = D.t
 
   module D = D
 
   module B = D.B
 
-  module ForwardIteratorB = ForwardIterator(D.B)
-
+  module ForwardIteratorB = ForwardIterator(B)
+  type 'a p = (bExp*'a) StringMap.t
+  let dummy_prop = Exp (StringMap.empty)
   let fwdInvMap = ref InvMap.empty
 
   let fwdMap_print fmt m = InvMap.iter (fun l a -> Format.fprintf fmt "%a: %a\n" label_print l B.print a) m
 
   let bwdInvMap = ref InvMap.empty
+
 
   let addBwdInv l (a:D.t) = bwdInvMap := InvMap.add l a !bwdInvMap
 
@@ -33,25 +39,39 @@ struct
       InvMap.iter (fun l a -> Format.fprintf fmt "%a:\n%a\n" label_print l D.print (D.compress a)) m
     else
       InvMap.iter (fun l a -> Format.fprintf fmt "%a:\n%a\n" label_print l D.print a) m
+  
+  let rec initStm env vars s =
+    match s with
+    | A_if (_,s1,s2) -> initBlk env vars s1; initBlk env vars s2
+    | A_while (l,_,s) -> 
+      addBwdInv l (D.bot env vars); initBlk env vars s
+    | _ -> ()
+
+  and	initBlk env vars b =
+    match b with
+    | A_empty l -> addBwdInv l (D.bot env vars)
+    | A_block (l,(s,_),b) -> addBwdInv l (D.bot env vars); 
+      initStm env vars s; initBlk env vars b
+    
 
   (* Backward Iterator *)
 
-  let rec bwdStm property funcs env vars p s =
+  let rec bwdStm ?(property = dummy_prop) ?domain funcs env vars p s =
     match s with
     | A_label (l,_) ->
-      let p = try D.reset p (fst (StringMap.find l property)) with Not_found -> p in p (* TODO: is this OK? *)
+      let p = try D.reset p (fst (StringMap.find l (Semantics.get_bexp property))) with Not_found -> p in p (* TODO: is this OK? *)
     | A_return -> D.bot env vars
     | A_assign ((l,_),(e,_)) -> D.bwdAssign p (l,e)
     | A_assert (b,_) -> D.filter p b
     | A_if ((b,ba),s1,s2) ->
-      let p1 = D.filter (bwdBlk property funcs env vars p s1) b in
-      let p2 = D.filter (bwdBlk property funcs env vars p s2) (fst (negBExp (b,ba))) in
+      let p1 = D.filter (bwdBlk ~property:property funcs env vars p s1) b in
+      let p2 = D.filter (bwdBlk ~property:property funcs env vars p s2) (fst (negBExp (b,ba))) in
       D.join APPROXIMATION p1 p2
     | A_while (l,(b,ba),s) ->
       let p1 = D.filter p (fst (negBExp (b,ba))) in
       let rec aux m o =
         let rec auxaux i p2 n =
-          let i' = D.reset ~mask:m (D.join APPROXIMATION p1 p2) (fst (StringMap.find "" property)) in
+          let i' = D.reset ~mask:m (D.join APPROXIMATION p1 p2) (fst (StringMap.find "" (Semantics.get_bexp property))) in
           if !tracebwd && not !minimal then begin
             Format.fprintf !fmt "### %a-INNER:%i ###:\n" label_print l n;
             Format.fprintf !fmt "p1: %a\n" D.print p1;
@@ -73,12 +93,12 @@ struct
               let i'' = if n <= !joinbwd then i' else D.widen i i' in
               if !tracebwd && not !minimal then
                 Format.fprintf !fmt "i'': %a\n" D.print i'';
-              auxaux i'' (D.filter (bwdBlk property funcs env vars i'' s) b) (n+1)
+              auxaux i'' (D.filter (bwdBlk ~property:property funcs env vars i'' s) b) (n+1)
           else
             let i'' = if n <= !joinbwd then i' else D.widen i (D.join COMPUTATIONAL i i') in
             if !tracebwd && not !minimal then
               Format.fprintf !fmt "i'': %a\n" D.print i'';
-            auxaux i'' (D.filter (bwdBlk property funcs env vars i'' s) b) (n+1)
+            auxaux i'' (D.filter (bwdBlk ~property:property funcs env vars i'' s) b) (n+1)
         in
 
         if !tracebwd && not !minimal then
@@ -88,7 +108,7 @@ struct
 
         let p2 = D.filter (D.bot env vars) b in
         let p = auxaux (D.bot env vars) p2 1 in					
-        let p = D.join APPROXIMATION p1 (D.filter (bwdBlk property funcs env vars p s) b) in
+        let p = D.join APPROXIMATION p1 (D.filter (bwdBlk ~property:property funcs env vars p s) b) in
 
         if !tracebwd && not !minimal then
           Format.fprintf !fmt "p: %a\n" D.print p;
@@ -117,13 +137,13 @@ struct
     | A_call (f,ss) -> raise (Invalid_argument "bwdStm:A_call")
     | A_recall (f,ss) -> raise (Invalid_argument "bwdStm:A_recall")
 
-  and bwdBlk property funcs env vars (p:D.t) (b:block) : D.t =
+  and bwdBlk ?(property = dummy_prop)  funcs env vars (p:r) (b:block) : r =
     match b with
     | A_empty l ->
       let a = InvMap.find l !fwdInvMap in
       let p = if !refine then D.refine p a else p in
       let m = if !refine then D.meet APPROXIMATION (D.refine (D.top env vars) a) p else D.meet APPROXIMATION (D.top env vars) p in
-      let p = D.reset ~mask:m p (fst (StringMap.find "" property)) in
+      let p = D.reset ~mask:m p (fst (StringMap.find "" (Semantics.get_bexp property))) in
       if !tracebwd && not !minimal then
         Format.fprintf !fmt "### %a ###:\n%a\n" label_print l D.print p;
       addBwdInv l p; p			  
@@ -132,19 +152,20 @@ struct
       if ((!stop -. !start) > !timeout)
       then raise Timeout
       else
-        let b = bwdBlk property funcs env vars p b in
-        let p = bwdStm property funcs env vars b s in
+        let b = bwdBlk ~property:property funcs env vars p b in
+        let p = bwdStm ~property:property funcs env vars b s in
         let a = InvMap.find l !fwdInvMap in
         let p = if !refine then D.refine p a else p in
         let m = if !refine then D.meet APPROXIMATION (D.refine (D.top env vars) a) p else D.meet APPROXIMATION (D.top env vars) p in
-        let p = D.reset ~mask:m p (fst (StringMap.find "" property)) in
+        let p = D.reset ~mask:m p (fst (StringMap.find "" (Semantics.get_bexp property))) in
         if !tracebwd && not !minimal then
           Format.fprintf !fmt "### %a ###:\n%a\n" label_print l D.print p;
         addBwdInv l p; p
 
+  let bwdRec = bwdBlk
   (* Analyzer *)
 
-  let analyze property (vars,stmts,funcs) main =
+  let analyze ?(precondition  = A_TRUE ) ?(property=dummy_prop) (vars,stmts,funcs) main =
     let rec aux xs env =
       match xs with
       | [] -> env
@@ -160,7 +181,7 @@ struct
     if !tracefwd && not !minimal then
       Format.fprintf !fmt "\nForward Analysis Trace:\n";
     let startfwd = Sys.time () in
-    fwdInvMap := ForwardIteratorB.compute (vars, stmts, funcs) main env;
+    fwdInvMap := ForwardIteratorB.compute (vars, stmts, funcs) (B.top env vars) main env;
     let stopfwd = Sys.time () in
     if not !minimal then
       begin
@@ -175,7 +196,7 @@ struct
       Format.fprintf !fmt "\nBackward Analysis Trace:\n";
     start := Sys.time ();
     let startbwd = Sys.time () in
-    let i = bwdBlk property funcs env vars (bwdBlk property funcs env vars (D.bot env vars) s) stmts in
+    let i = bwdBlk ~property:property funcs env vars (bwdBlk ~property:property funcs env vars (D.bot env vars) s) stmts in
     let stopbwd = Sys.time () in
     if not !minimal then
       begin

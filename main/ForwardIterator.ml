@@ -7,16 +7,15 @@ open AbstractSyntax
 open InvMap
 open Apron
 open Functions
-open Iterator
+open Config
+open Semantics
 open Domain
 open Partition
 
-
 module ForwardIterator (B: PARTITION) =
 struct
-
   (* compute invariant map based on forward analysis *)
-  let compute (vars, stmts, funcs) main env = 
+  let compute (vars, stmts, funcs) p  main env = 
     let fwdInvMap = ref InvMap.empty in
     let addFwdInv l (a:B.t) = fwdInvMap := InvMap.add l a !fwdInvMap in
     let rec fwdStm p s =
@@ -68,7 +67,7 @@ struct
     in 
     let f = StringMap.find main funcs in
     let s = f.funcBody in
-    let _ = fwdBlk (fwdBlk (B.top env vars) stmts) s in
+    let _ = fwdBlk  (fwdBlk p stmts) s in
     !fwdInvMap
 
 end

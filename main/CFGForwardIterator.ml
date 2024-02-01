@@ -9,8 +9,8 @@
 open Cfg
 open CFGInterpreter
 open Partition
-open Iterator
-
+open Semantics
+open Config
 module CFGForwardIterator (B: PARTITION) = struct
 
   let process_inst (in_state, inst: (B.t * inst)) =

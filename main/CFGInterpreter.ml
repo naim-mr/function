@@ -9,9 +9,8 @@
 (***************************************************)
 
 open Cfg
-open Iterator
-
-
+open Semantics
+open Config
 (* log worklist algorithm *)
 let trace = ref false
 (* log worklist algorithm and show how states change *)
