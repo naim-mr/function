@@ -19,11 +19,10 @@ open AbstractSyntax
 open Affines
 open Apron
 open Domain
+open Config
 open Functions
 open Ordinals
 
-let tracebwd = ref false
-let retrybwd = ref 5
 
 (** The ranking functions abstract domain is an abstract domain functor T. 
     It is parameterized by an auxiliary abstract domain for linear constraints 
@@ -1524,7 +1523,7 @@ struct
       match ls with 
     | [] -> t2.tree
     | _ ->  add t2.tree domain2 ls in
-    if true then
+    if !tracebwd && not(!minimal) then
       begin
         Format.fprintf Format.std_formatter "t0: DOMAIN = {%a}%a\n\n" print_domain domain2 (print_tree vars) t2.tree;
         Format.fprintf Format.std_formatter "t2: DOMAIN = {%a}%a\n\n" print_domain domain2 (print_tree vars) tree2;
@@ -1660,7 +1659,7 @@ struct
       | Node (c,l,r) -> Node (c, aux l, aux r)
     in {domain = domain; tree = aux t.tree; env = env; vars = vars}
     
-
+    
 end
 
 module TSAB = DecisionTree(AB)
