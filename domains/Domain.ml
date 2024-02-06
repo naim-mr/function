@@ -44,7 +44,7 @@ sig
   val conflict : t -> B.t list
   val reinit: t -> t
   val compress : t -> t
+  val vulnerable : t  -> ( var list  * var list  * Polka.strict Polka.t Abstract1.t array   )  list
   val print : Format.formatter -> t -> unit
   val print_graphviz_dot : Format.formatter -> t -> unit
-
 end

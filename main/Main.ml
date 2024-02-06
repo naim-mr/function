@@ -486,8 +486,7 @@ let ctl_cfg () =
 
 let doit () =  
   parse_args ();
-  if !Config.cda then 
-      let semantic = 
+  let semantic = 
       match !analysis with
       | "termination" -> termination_iterator ()
       | "guarantee"   -> guarantee_iterator ()
@@ -496,44 +495,48 @@ let doit () =
       | "ctl-ast"  
       | "ctl-cfg" ->  ctl_iterator ()
       | _ -> raise (Invalid_argument "Unknown Analysis") 
-      in
-      if !filename = "" then raise (Invalid_argument "No Source File Specified");
-      if !property = "" then 
-        begin
-        match !analysis with
-        | "termination" -> ()
-        | _ ->  raise (Invalid_argument "No Property File Specified")
-        end;
-      let sources = parseFile !filename in
-      (* 
+  in
+  if !filename = "" then raise (Invalid_argument "No Source File Specified");
+  if !property = "" 
+  then 
+    begin
+      match !analysis with
+      | "termination" -> ()
+      | _ ->  raise (Invalid_argument "No Property File Specified")
+    end;
+  let sources = parseFile !filename in
+  (* 
         #TODO
         let alert_prop =
           function
         | None -> raise (Invalid_argument "Unknown Property")
-        | Some property -> property 
-      in*)
-      let program,property = match !analysis with  
-                            | "termination" ->  let s = Lexing.dummy_pos in 
-                                                let p =  ((IntermediateSyntax.I_universal (IntermediateSyntax.I_TRUE,(s,s))),(s,s)) in 
-                                                let program , property =  ItoA.prog_itoa ~property:(!main,p) sources in
-                                                program, (Semantics.Exp (Option.get property))
-                                                
-
-                            | "guarantee"  
-                            | "recurrence" ->  let program,property  = ItoA.prog_itoa ~property:(!main,parseProperty !property ) sources in program ,(Semantics.Exp (Option.get property))
-                            | "ctl" 
-                            | "ctl-ast"  
-                            | "ctl-cfg" ->  let parsedProperty = parseCTLPropertyString !property in
-                                            let program, property = ItoA.ctl_prog_itoa parsedProperty !main (parseFile !filename) in
-                                            program,(Semantics.Ctl property) 
-      | _ -> raise (Invalid_argument "Unknown Analysis") 
-      in
-      if not !minimal then (
-        Format.fprintf !fmt "\nAbstract Syntax:\n" ;
-        AbstractSyntax.prog_print !fmt program ) ;
-      let (vars,b,func)  = program  in
-      let module C = (val (cda_run semantic): CDA_ITERATOR) in
-      C.analyze ~property:property func vars b !main 
+       | Some property -> property 
+  in*)
+  let program,property = match !analysis with  
+                          | "termination" ->  let s = Lexing.dummy_pos in 
+                                              let p =  ((IntermediateSyntax.I_universal (IntermediateSyntax.I_TRUE,(s,s))),(s,s)) in 
+                                              let program , property =  ItoA.prog_itoa ~property:(!main,p) sources in
+                                              program, (Semantics.Exp (Option.get property))
+                                              
+                          | "guarantee"  
+                          | "recurrence" ->  let program,property  = ItoA.prog_itoa ~property:(!main,parseProperty !property ) sources in program ,(Semantics.Exp (Option.get property))
+                          | "ctl" 
+                          | "ctl-ast"  
+                          | "ctl-cfg" ->  let parsedProperty = parseCTLPropertyString !property in
+                                          let program, property = ItoA.ctl_prog_itoa parsedProperty !main (parseFile !filename) in
+                                          program,(Semantics.Ctl property) 
+                          | _ -> raise (Invalid_argument "Unknown Analysis") 
+  in
+  if not !minimal then (
+      Format.fprintf !fmt "\nAbstract Syntax:\n" ;
+      AbstractSyntax.prog_print !fmt program ) ;
+  let (vars,b,func)  = program  in
+  let f = AbstractSyntax.StringMap.find !main func in
+  let varlist = AbstractSyntax.StringMap.to_seq vars |> List.of_seq |> List.map snd  in
+  let ret =
+    if !Config.cda then
+    let module C = (val (cda_run semantic): CDA_ITERATOR) in
+    C.analyze ~property:property func vars b !main 
     else
       match !analysis with
       | "termination" -> termination ()
@@ -543,5 +546,11 @@ let doit () =
       | "ctl-ast" -> ctl_ast ()
       | "ctl-cfg" -> ctl_ast ()
       | _ -> raise (Invalid_argument "Unknown Analysis")   
-    
+  in
+  let ()  =
+    if !Config.vulnerability then
+    let module S = (val semantic: SEMANTIC) in
+    Vulnerability.bwdMap_robust S.D.vulnerable !Config.fmt varlist f !S.bwdInvMap;
+  in
+  ret
 let _ = doit () 

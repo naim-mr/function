@@ -542,6 +542,7 @@ module CTLIterator(D: RANKING_FUNCTION): SEMANTIC = struct
     let i = compute p (Semantics.get_ctl property) in
     let initialLabel = block_label p.mainFunction.funcBody in
     let programInvariant = InvMap.find initialLabel i in
+    bwdInvMap := i;
     programInvariant 
 
   let analyze ?precondition  ?(property = dummy_prop) program _ =  
@@ -559,6 +560,7 @@ module CTLIterator(D: RANKING_FUNCTION): SEMANTIC = struct
     let inv = compute program (Semantics.get_ctl property) in 
     let initialLabel = block_label program.mainFunction.funcBody in
     let programInvariant = InvMap.find initialLabel inv in
+    bwdInvMap := inv;
     D.defined ?condition:precondition programInvariant
 
 

@@ -1658,7 +1658,82 @@ struct
       | Leaf f -> botLeaf (* everything else goes to bottom *)
       | Node (c,l,r) -> Node (c, aux l, aux r)
     in {domain = domain; tree = aux t.tree; env = env; vars = vars}
+
+  let manager = Polka.manager_alloc_strict ()
+  let vulnerable  t  =   
+    (* print_tree t.vars Format.std_formatter (compress t).tree ;
+    Format.print_newline () ;  *)
+    let forget x =  (AbstractSyntax.A_var  x, A_RANDOM ) in
+    let rec unconstraint t cns   = match t with 
+      | Bot -> false,[cns]
+      | Leaf f when F.isBot f -> false,[cns]
+      | Leaf f when F.isTop f -> false,[cns]
+      | Leaf f -> true,[cns]
+      | Node ((c,nc),l,r) -> let b,cns1 = unconstraint l (c::cns) in
+                             let b2,cns2= unconstraint r (nc::cns) in
+                             match b,b2 with 
+                             | true,true -> true,(cns1@cns2)
+                             | true,false -> true,cns1
+                             | false,true -> true ,cns2
+                             | false,false -> false,[]
+    in  
+    let v =  t.vars in
+    let rec aux vars acc t   = 
+      match vars with 
+      | [] ->        
+        []
+      | x::[] ->        
+        let t' = (bwdAssign t (forget x)) in 
+        (*Format.printf "\n Remove last %s \n" x.varName; 
+        print_tree t.vars Format.std_formatter t'.tree ; *)
+        let b,cons = unconstraint t'.tree [] in 
+        let left_sub = if b then               
+          [(x::acc),cons]
+        else
+         []
+        in
+        (*Format.printf "\n Reste last %s \n" x.varName;
+        print_tree t.vars Format.std_formatter t.tree ; *)
+        let b,cons = unconstraint t.tree [] in 
+        let right_sub = 
+          if b then               
+            [acc,cons]
+          else
+            []
+        in 
+        left_sub@right_sub
+      | x::q -> 
+        let t' = (bwdAssign t (forget x)) in 
+        (*Format.printf "\nRemove %s \n" x.varName; 
+        print_tree t.vars Format.std_formatter t'.tree ; *)
+        let l1 = (aux q (x::acc) t') in 
+        (*Format.printf "\n Reste %s \n" x.varName;
+          =   print_tree t.vars Format.std_formatter t.tree ;*)
+        let l2 = (aux q acc t) 
+        in l1 @ l2 
+    in
+    let module BanalApron = Banal_apron_domain.PolkaDomain  in
+    let transform  clist arr = List.iteri (fun i c -> Lincons1.array_set arr i c)  clist in
+    aux v [] t 
+    |>
+    fun uncontrolled -> List.map  (fun (l,c) ->(l,Array.of_list (List.map (fun c ->  Lincons1.array_make t.env (List.length c)) c) )) uncontrolled
+    |> 
+    fun arr ->  List.iteri  (fun i (l,ar) -> let cons = snd (List.nth uncontrolled i ) in  List.iteri (fun k c ->transform (c) ar.(k)) cons) arr  
+    |> 
+    fun () -> List.map (fun (l,a) -> (l,Array.map (fun a -> (Abstract1.of_lincons_array manager t.env a)) a)) arr 
+    |>
+    (* 
+     TODO: underapproximation join for constraints
+     fun arr -> List.map (fun (l,(a:Polka.strict Polka.t Abstract1.t array)) -> (l, a, if Array.length a > 0 then let vset = Banal.Banal_typed_syntax.VSet.of_list (List.map Banal.Function_banal_converter.var_to_banal t.vars) in Array.fold_left (fun acc b ->  BanalApron.bwd_join (acc,vset) (b ,vset) (BanalApron.top_apron t.env, vset) |> fst )  (BanalApron.bot_apron  t.env)  a  else (BanalApron.top_apron t.env) )) arr 
+     |>       
+    *)
+    fun j -> List.fold_left (fun (a:(var list * Polka.strict Polka.t Abstract1.t array) list ) (b,arr)-> 
+                                  if List.exists (fun (l,_) -> List.compare_lengths l b > 0 && (List.for_all (fun el -> List.mem  el l ) b) )  a then a else (b,arr)::a ) 
+                                  [] j
+    |> 
+    fun j -> List.map (fun (b,arr) ->  let nb =(List.filter (fun x ->  (not (List.mem x  b))) t.vars  )  in (b,nb,arr))   j
     
+
     
 end
 
