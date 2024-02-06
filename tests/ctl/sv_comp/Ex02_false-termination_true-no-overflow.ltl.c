@@ -10,7 +10,7 @@ int exit;
 
 int main() {
 
-    //i = __VERIFIER_nondet_int();
+    i = __VERIFIER_nondet_int();
     
     while (i > 0) {
         if (i != 5) {

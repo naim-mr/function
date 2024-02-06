@@ -9,21 +9,27 @@ suggested parameters:
 */
 
 int get_step(int x) {
-  if (x > 10) {
-    return 2;
-  }
-  return 1;
+ 
 }
 
 int main()  {
   int y, step;
   if (y > 0) {
-    step = -get_step(y);
+    if (y > 10) {
+      step = -2;
+    }else {
+      step = -1;
+    }    
   } else {
-    step = get_step(-y);
+    if (y < -10) {
+      step = 2;
+    }else {
+      step = 1;
+    }
   }
   while(y < -2 || y > 2) {
     y = y + step;
   }
+  exit:
   return 0;
 }

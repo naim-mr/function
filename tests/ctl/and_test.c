@@ -9,7 +9,7 @@ void main() {
         n--;
     }
 
-    while (n == 0) {
+    while (true) {
         n++;
         n--;
     }

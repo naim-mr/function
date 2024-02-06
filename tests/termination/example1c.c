@@ -27,5 +27,6 @@ int main()  {
   while(y < -3 || y > 3) {
     y = y + step;
   }
+  exit:
   return 0;
 }

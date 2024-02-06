@@ -24,7 +24,7 @@ int get_step(int x) {
 int main()  {
   int y, x, step;
   x = y;
-  while(y < -5 || y > 5) {
+  while( x <= -4 || x >= 4) {
     if (x > 0) {
       y = y - get_step(x);
     } else {
