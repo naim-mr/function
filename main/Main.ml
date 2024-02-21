@@ -329,7 +329,7 @@ let ctl_iterator (): (module SEMANTIC)=
   in 
   (module S)
 
-let termination ()  =
+let termination (module S: SEMANTIC) =
   if !filename = "" then raise (Invalid_argument "No Source File Specified") ;
   let sources = parseFile !filename in
   let program, _ = ItoA.prog_itoa sources in
@@ -337,23 +337,11 @@ let termination ()  =
     Format.fprintf !fmt "\nAbstract Syntax:\n" ;
     AbstractSyntax.prog_print !fmt program ) ;
   let open AbstractSyntax in 
-  let analysis_function =
-    match !domain with
-    | "boxes" ->
-        if !ordinals then TerminationBoxesOrdinals.analyze ~property: TerminationBoxesOrdinals.dummy_prop
-        else TerminationBoxes.analyze  ~property: TerminationBoxes.dummy_prop
-    | "octagons" ->
-        if !ordinals then TerminationOctagonsOrdinals.analyze ~property:TerminationOctagonsOrdinals.dummy_prop
-        else TerminationOctagons.analyze ~property:TerminationOctagons.dummy_prop
-    | "polyhedra" ->
-        if !ordinals then TerminationPolyhedraOrdinals.analyze ~property:TerminationPolyhedraOrdinals.dummy_prop
-        else TerminationPolyhedra.analyze ~property:TerminationPolyhedra.dummy_prop
-    | _ -> raise (Invalid_argument "Unknown Abstract Domain")
-  in
+  let analysis_function = S.analyze ~property:S.dummy_prop in
   run_analysis  analysis_function program ()
 
 
-let guarantee () =
+let guarantee (module S: SEMANTIC) =
   if !filename = "" then raise (Invalid_argument "No Source File Specified");
   if !property = "" then raise (Invalid_argument "No Property File Specified");
   let sources = parseFile !filename in
@@ -372,15 +360,10 @@ let guarantee () =
       Format.fprintf !fmt "\nProperty: ";
       AbstractSyntax.property_print !fmt property;
     end;
-  let analysis_function  =
-    match !domain with
-    | "boxes" -> if !ordinals then GuaranteeBoxesOrdinals.analyze else GuaranteeBoxes.analyze
-    | "octagons" -> if !ordinals then GuaranteeOctagonsOrdinals.analyze else GuaranteeOctagons.analyze
-    | "polyhedra" -> if !ordinals then GuaranteePolyhedraOrdinals.analyze else GuaranteePolyhedra.analyze
-    | _ -> raise (Invalid_argument "Unknown Abstract Domain")
-  in run_analysis (analysis_function ~property:(Exp property)) program ()
+  let analysis_function  = S.analyze in
+  run_analysis (analysis_function ~property:(Exp property)) program ()
 
-let recurrence () =
+let recurrence (module S: SEMANTIC) =
   if !filename = "" then raise (Invalid_argument "No Source File Specified");
   if !property = "" then raise (Invalid_argument "No Property File Specified");
   let sources = parseFile !filename in
@@ -399,15 +382,10 @@ let recurrence () =
       Format.fprintf !fmt "\nProperty: ";
       AbstractSyntax.property_print !fmt property;
     end;
-  let analysis_function =
-    match !domain with
-    | "boxes" -> if !ordinals then RecurrenceBoxesOrdinals.analyze else RecurrenceBoxes.analyze
-    | "octagons" -> if !ordinals then RecurrenceOctagonsOrdinals.analyze else RecurrenceOctagons.analyze
-    | "polyhedra" -> if !ordinals then RecurrencePolyhedraOrdinals.analyze else RecurrencePolyhedra.analyze
-    | _ -> raise (Invalid_argument "Unknown Abstract Domain")
-  in run_analysis (analysis_function ~property:(Exp property)) program ()
+  let analysis_function  = S.analyze in
+    run_analysis (analysis_function ~property:(Exp property)) program ()
 
-let ctl_ast () =
+let ctl_ast (module S: SEMANTIC) =
   if !filename = "" then raise (Invalid_argument "No Source File Specified");
   if !property = "" then raise (Invalid_argument "No Property Specified");
   let starttime = Sys.time () in
@@ -421,12 +399,7 @@ let ctl_ast () =
       AbstractSyntax.prog_print !fmt prog;
       Format.fprintf !fmt "\n";
     end;
-  let analyze =
-    match !domain with
-    | "boxes" -> if !ordinals then CTLBoxesOrdinals.analyze else CTLBoxes.analyze
-    | "octagons" -> if !ordinals then CTLOctagonsOrdinals.analyze else CTLOctagons.analyze
-    | "polyhedra" -> if !ordinals then CTLPolyhedraOrdinals.analyze else CTLPolyhedra.analyze
-    | _ -> raise (Invalid_argument "Unknown Abstract Domain")
+  let analyze = S.analyze
   in
   let result = analyze ~precondition:precondition  ~property:(Ctl property) prog "" in
   if !time then begin
@@ -485,7 +458,9 @@ let ctl_cfg () =
   result
 
 let doit () =  
+  (* Parsing cli args -> into Config ref variables *)
   parse_args ();
+  (* Get the right iterator *) 
   let semantic = 
       match !analysis with
       | "termination" -> termination_iterator ()
@@ -496,6 +471,7 @@ let doit () =
       | "ctl-cfg" ->  ctl_iterator ()
       | _ -> raise (Invalid_argument "Unknown Analysis") 
   in
+  (* Property and filename must be given (except for termination property) *)
   if !filename = "" then raise (Invalid_argument "No Source File Specified");
   if !property = "" 
   then 
@@ -504,17 +480,11 @@ let doit () =
       | "termination" -> ()
       | _ ->  raise (Invalid_argument "No Property File Specified")
     end;
+  (* Parsing the property and the file to an ast *)
   let sources = parseFile !filename in
-  (* 
-        #TODO
-        let alert_prop =
-          function
-        | None -> raise (Invalid_argument "Unknown Property")
-       | Some property -> property 
-  in*)
   let program,property = match !analysis with  
                           | "termination" ->  let s = Lexing.dummy_pos in 
-                                              let p =  ((IntermediateSyntax.I_universal (IntermediateSyntax.I_TRUE,(s,s))),(s,s)) in 
+                                              let p = ((IntermediateSyntax.I_universal (IntermediateSyntax.I_TRUE,(s,s))),(s,s)) in 
                                               let program , property =  ItoA.prog_itoa ~property:(!main,p) sources in
                                               program, (Semantics.Exp (Option.get property))
                                               
@@ -530,27 +500,31 @@ let doit () =
   if not !minimal then (
       Format.fprintf !fmt "\nAbstract Syntax:\n" ;
       AbstractSyntax.prog_print !fmt program ) ;
+  (* A program is a map of variable, a bock (see: AbstractSyntax.ml) and a map of functions *)
   let (vars,b,func)  = program  in
+  (* Get the main function and the variables as a list *)
   let f = AbstractSyntax.StringMap.find !main func in
   let varlist = AbstractSyntax.StringMap.to_seq vars |> List.of_seq |> List.map snd  in
+  let module S = (val semantic: SEMANTIC) in 
+  (* Launch the analysis and get the returned output "true" or "unknow" *)
   let ret =
     if !Config.cda then
     let module C = (val (cda_run semantic): CDA_ITERATOR) in
     C.analyze ~property:property func vars b !main 
     else
       match !analysis with
-      | "termination" -> termination ()
-      | "guarantee"   -> guarantee  ()
-      | "recurrence" -> recurrence ()   
-      | "ctl" -> ctl_ast  ()  (* default CTL analysis is CTL-AST *)
-      | "ctl-ast" -> ctl_ast ()
-      | "ctl-cfg" -> ctl_ast ()
+      | "termination" -> termination (module S)
+      | "guarantee"   -> guarantee (module S) 
+      | "recurrence" -> recurrence (module S)
+      | "ctl" -> ctl_ast  (module S)  (* default CTL analysis is CTL-AST *)
+      | "ctl-ast" -> ctl_ast (module S)
+      | "ctl-cfg" -> ctl_ast (module S)
       | _ -> raise (Invalid_argument "Unknown Analysis")   
   in
   let ()  =
     if !Config.vulnerability then
-    let module S = (val semantic: SEMANTIC) in
-    Vulnerability.bwdMap_robust S.D.vulnerable !Config.fmt varlist f !S.bwdInvMap;
+      (* Launch the vulnerability analysis and output the infered variables *)
+      Vulnerability.analyse S.D.vulnerable  varlist f !S.bwdInvMap  
   in
   ret
 let _ = doit () 
