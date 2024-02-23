@@ -1,0 +1,1 @@
+AF{asset1:a != b}

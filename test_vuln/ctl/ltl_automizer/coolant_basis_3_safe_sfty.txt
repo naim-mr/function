@@ -1,0 +1,1 @@
+AG{OR{init != 3}{AG{AF{time > otime}}}}
