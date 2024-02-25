@@ -545,8 +545,8 @@ module CTLIterator(D: RANKING_FUNCTION): SEMANTIC = struct
     bwdInvMap := i;
     programInvariant 
 
-  let analyze ?precondition  ?(property = dummy_prop) program _ =  
-    let program = program_of_prog program !Config.main in 
+  let analyze ?precondition  ?(property = dummy_prop) (vars,block,func) _ =  
+    let program = program_of_prog (vars,block,func) !Config.main in 
     fwdInvMap :=  if !Config.refine then 
                   (* Run forward analysis if 'refine' flag is set *)
                     ForwardIteratorB.compute  (program.variables,  program.globalBlock,
@@ -565,4 +565,5 @@ module CTLIterator(D: RANKING_FUNCTION): SEMANTIC = struct
 
 
 end
+
 
