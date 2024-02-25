@@ -11,7 +11,7 @@ int main()
 		} else {
 			t = 0;
 		}
-		i++;
+		i = i + 1;
 	}
 }
 

@@ -1,1 +1,1 @@
-AND{EF{x == 2}}{EF{x==3}}
+AND{AG{AF{n==1}}}{AF{n==0}}

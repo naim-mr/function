@@ -4,11 +4,11 @@
 #include "assert.h"
 
 int main() {
-    unsigned int i,j,a,b;
-    int flag = __VERIFIER_nondet_int();
-    a = 0;
-    b = 0;
-    j = 1;
+    int i,j,a,b;
+    int flag;
+    // a = 0;
+    // b = 0;
+    // j = 1;
     if (flag) {
         i = 0;
     } else {
@@ -16,13 +16,13 @@ int main() {
     }
 
     while (__VERIFIER_nondet_int()) {
-        a++;
-        b += (j - i);
-        i += 2;
+        a = a + 1;
+        b = b  + (j - i);
+        i = i + 2;
         if (i%2 == 0) {
-            j += 2;
+            j = j + 2;
         } else {
-            j++;
+            j = j + 1;
         }
     }
     if (flag) {

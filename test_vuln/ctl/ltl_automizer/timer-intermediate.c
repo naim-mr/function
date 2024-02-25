@@ -12,11 +12,11 @@ int output_1;
 int aux = 0;
 	
 void run_timer(){
-	timer_1++;
+	timer_1= timer_1 + 1;
 	if(timer_1>=2){
 		timer_1=0;
 		
-		timer_2++;
+		timer_2 = timer_2 + 1;
 		if(timer_2>=2){
 			timer_2=0;
 		}
@@ -43,7 +43,7 @@ void main()
 		if(timer_1==0){
 			if(read_input_1() < 1000){
 				if(timer_2==0){
-					aux++;
+					aux = aux + 1;
 				}
 				output_1 = 1;
 			}

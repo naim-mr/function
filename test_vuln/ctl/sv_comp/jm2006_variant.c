@@ -9,7 +9,7 @@ int main() {
     // i = __VERIFIER_nondet_int();
     // j = __VERIFIER_nondet_int();
 
-    if (!(i >= 0 && i <= LARGE_INT)) return 0;
+    if (!(i >= 0 && i <= 1000000)) return 0;
     if (!(j >= 0)) return 0;
     int x = i;
     int y = j;

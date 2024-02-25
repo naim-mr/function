@@ -8,9 +8,6 @@ suggested parameters:
 - backward widening delay = 2 [default]
 */
 
-int get_step(int x) {
- 
-}
 
 int main()  {
   int y, step;
