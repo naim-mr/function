@@ -155,4 +155,5 @@ The following additional command-line options exist for the CTL analysis:
                                         note that in that case function calls and goto/break/continue are not supported
      -dot                               print out control-flow-graph and decision trees in graphviz dot format
 
-
+## Benchmark:
+To launch the benchmarks of the analysis you can check `script/README.md`
