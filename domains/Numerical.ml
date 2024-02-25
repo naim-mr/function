@@ -76,6 +76,28 @@ module Numerical(N: NUMERICAL)(C: CONSTRAINT): PARTITION = struct
     vars = vs
   }
 
+
+  let print fmt b =
+    let vars = b.vars in
+    let a = Lincons1.array_make b.env (List.length b.constraints) in
+    let i = ref 0 in
+    List.iter (fun c -> Lincons1.array_set a !i c; i := !i + 1) b.constraints;
+    let b = Abstract1.of_lincons_array manager b.env a in
+    let a = Abstract1.to_lincons_array manager b in
+    let cs = ref [] in
+    for i=0 to (Lincons1.array_length a)-1 do
+      cs := (Lincons1.array_get a i)::!cs;
+    done;
+    match !cs with
+    | [] -> Format.fprintf fmt "top"
+    | x::_ ->
+      if (C.isBot x) then Format.fprintf fmt "bottom" else
+        let i = ref 1 and l = List.length !cs in
+        List.iter (fun c ->
+            C.print vars fmt c;
+            if (!i = l) then () else Format.fprintf fmt " && ";
+            i := !i + 1
+          ) !cs
   (**)
 
   let isBot b =
@@ -113,7 +135,7 @@ module Numerical(N: NUMERICAL)(C: CONSTRAINT): PARTITION = struct
     for i=0 to (Lincons1.array_length a)-1 do
       cs := (Lincons1.array_get a i)::!cs; (*TODO: normalization *)
     done; { constraints = !cs; env = env; vars = vars }
-  let assume ?(pow = 5.) b =
+  let rec assume ?(pow = 5.) b =
     let addScalar c1 c2 =
       match (c1, c2) with
       | Scalar.Float c1, Scalar.Float c2 -> Scalar.Float (c1 +. c2)
@@ -174,13 +196,21 @@ module Numerical(N: NUMERICAL)(C: CONSTRAINT): PARTITION = struct
     let env = b.env in
     let vars = b.vars in
     (* count occurrences of variables within the polyhedral constraints *)
+    let blookup = 
+        let filter_equality = List.filter (fun c -> not (Lincons1.get_typ c = Lincons1.EQ)) b.constraints in
+        match filter_equality with  
+        | []  -> b 
+        | _  ->  {b with constraints = filter_equality }
+    in
     let occ =
       List.map
         (fun x ->
           let o =
             List.fold_left
-              (fun ao c -> if C.var x c then ao + 1 else ao)
-              0 b.constraints
+              (fun ao c -> 
+                  
+                  if C.var x c then ao + 1 else ao)
+              0 blookup.constraints
           in
           (x, o) )
         vars
@@ -222,71 +252,99 @@ module Numerical(N: NUMERICAL)(C: CONSTRAINT): PARTITION = struct
         Linexpr1.set_cst e (Coeff.s_of_int (-1)) ;
         let c = Lincons1.make e Lincons1.SUPEQ in
         (* split on : c = v >= -1 *)
+        assert(not (isBot({constraints= c :: b.constraints; env; vars})));
+        assert(not (isBot({constraints= C.negate c :: b.constraints; env; vars})));
         ( {constraints= c :: b.constraints; env; vars}
         , {constraints= C.negate c :: b.constraints; env; vars} ) )
       else
         (*  m <= v <= +oo *)
-        let mid = int_of_float (2. ** pow) in
-        let e = Linexpr1.make env in
-        Linexpr1.set_coeff e v (Coeff.s_of_int 1) ;
-        Linexpr1.set_cst e (Coeff.Scalar (mulScalar (Scalar.of_int (-1)) inf));
-        let c = Lincons1.make e Lincons1.SUPEQ in
-        (*  c =  v  >= m  *)
-        let e1 = Linexpr1.make env in
-        Linexpr1.set_coeff e1 v (Coeff.s_of_int (-1)) ;
-        Linexpr1.set_cst e1 (Coeff.s_of_int (mid)) ;
-        let c1 = Lincons1.make e1 Lincons1.SUPEQ in
-        let e3 = Linexpr1.make env in
-        Linexpr1.set_coeff e3 v (Coeff.s_of_int 1) ;
-        Linexpr1.set_cst e3 (Coeff.s_of_int (-mid)) ;
-        let c3 = Lincons1.make e3 Lincons1.SUPEQ in
-        (* c3 =  v >= 2 ^ n *)
-        (* split on: 
-           a- c && c1 ==  m <= v <= 2^n
-           b- c3      ==  2^n <= v <= +oo
-        *)
-        ( {constraints= c :: c1 :: b.constraints; env; vars}
-        , {constraints= c3 :: b.constraints; env; vars} ) )
+        if pow > 30. then 
+            begin
+            Printf.printf "ou la\n";
+            assert(not (isBot({constraints=  b.constraints; env; vars})));
+          ( {constraints= b.constraints; env; vars}
+          , {constraints=  b.constraints; env; vars} ) 
+            end
+        else 
+          let p2 =  (2. ** pow) in
+          if Scalar.cmp inf (Scalar.of_float p2) > 0 then 
+            assume ~pow:(2. ** (pow +. 1.)) b
+          else
+            let mid =  int_of_float p2 in
+            let e = Linexpr1.make env in
+            Linexpr1.set_coeff e v (Coeff.s_of_int 1) ;
+            Linexpr1.set_cst e (Coeff.Scalar (mulScalar (Scalar.of_int (-1)) inf));
+            let c = Lincons1.make e Lincons1.SUPEQ in
+            (*  c =  v  >= m  *)
+            let e1 = Linexpr1.make env in
+            Linexpr1.set_coeff e1 v (Coeff.s_of_int (-1)) ;
+            Linexpr1.set_cst e1 (Coeff.s_of_int (mid)) ;
+            let c1 = Lincons1.make e1 Lincons1.SUPEQ in
+            let e3 = Linexpr1.make env in
+            Linexpr1.set_coeff e3 v (Coeff.s_of_int 1) ;
+            Linexpr1.set_cst e3 (Coeff.s_of_int (-mid)) ;
+            let c3 = Lincons1.make e3 Lincons1.SUPEQ in
+            (* c3 =  v >= 2 ^ n *)
+            (* split on: 
+              a- c && c1 ==  m <= v <= 2^n
+              b- c3      ==  2^n <= v <= +oo
+            
+            *)
+            assert(not (isBot({constraints= c :: c1 :: b.constraints; env; vars})));
+            assert(not (isBot({constraints= c3 :: b.constraints; env; vars})));
+            ( {constraints= c :: c1 :: b.constraints; env; vars}
+            , {constraints= c3 :: b.constraints; env; vars} ) )
     else if -1 = Scalar.is_infty inf then (
       (* -oo <= v <= M*)
+      let mid = if Scalar.cmp sup (Scalar.of_int 0 ) >= 0 
+                then
+                   divScalar sup (Scalar.of_int 2) 
+                else 
+                   mulScalar sup (Scalar.of_int 2) 
+      in 
       let e = Linexpr1.make env in
       Linexpr1.set_coeff e v (Coeff.s_of_int (-1)) ;
-      Linexpr1.set_cst e (Coeff.Scalar (addScalar sup (Scalar.of_int (-1)))) ;
+      Linexpr1.set_cst e (Coeff.Scalar sup ) ;
       let c = Lincons1.make e Lincons1.SUPEQ in
-      (* c ==  v <= (M - 1) *)
+      (* c ==  v <= (M ) *)
       let e1 = Linexpr1.make env in
       Linexpr1.set_coeff e1 v (Coeff.s_of_int 1) ;
-      Linexpr1.set_cst e1 (Coeff.Scalar (Scalar.neg sup)) ;
+      Linexpr1.set_cst e1 (Coeff.Scalar (Scalar.neg  mid)) ;
       let c1 = Lincons1.make e1 Lincons1.SUPEQ in
-      (* c1 ==  v >= -M *)
+      (* c1 ==  v >= M/2 *)
       let e2 = Linexpr1.make env in
       Linexpr1.set_coeff e2 v (Coeff.s_of_int (-1)) ;
-      Linexpr1.set_cst e2 (Coeff.Scalar (Scalar.neg  (sup)));
+      Linexpr1.set_cst e2 (Coeff.Scalar mid);
       let c2 = Lincons1.make e2 Lincons1.SUPEQ in
-      (* c2 ==   -M >= v   *)
+      (* c2 ==   M/2 >= v   *)
       (* split on: 
-           a- c1 && c2 ==  -M <= v <= M -1 
-           b- c        ==  -oo<= v <= -M
+           a- c1 && c2 ==  M/2 <= v <= M -1 
+           b- c        ==  -oo<= v <= M/2
       *)
-      ( {constraints= c1 :: c2 :: b.constraints; env; vars}
-      , {constraints= c :: b.constraints; env; vars} ) )
+      assert(not (isBot({constraints= c :: c1 :: b.constraints; env; vars})));
+      assert(not (isBot({constraints= c2 :: b.constraints; env; vars})));
+      ( {constraints= c :: c1 :: b.constraints; env; vars}
+      , {constraints= c2 :: b.constraints; env; vars} ) )
     else if Scalar.equal inf sup then (
       (* -m <= v <= m : v == m *)
-      let e = Linexpr1.make env in
+      (* let e = Linexpr1.make env in
       Linexpr1.set_coeff e v (Coeff.s_of_int 1) ;
-      Linexpr1.set_cst e (Coeff.Scalar inf) ;
-      let c = Lincons1.make e Lincons1.SUPEQ in
+      Linexpr1.set_cst e (Coeff.Scalar (mulScalar (Scalar.of_int (-1)) inf));
+      let c = Lincons1.make e Lincons1.SUPEQ in *)
       (* split on: 
            c == v >= m && v<=m
       *)
-      ( {constraints= c :: b.constraints; env; vars}
-      , {constraints= C.negate c :: b.constraints; env; vars} ) )
+      assert(not (isBot({constraints= b.constraints; env; vars})));
+      assert(not (isBot({constraints= b.constraints; env; vars}))); 
+      ( {constraints= b.constraints; env; vars}
+      , {constraints= b.constraints; env; vars} ) )
     else
       (* m <= v <= M *)
       let e = Linexpr1.make env in
       Linexpr1.set_coeff e v (Coeff.s_of_int 1) ;
-      let s = addScalar sup inf |> divScalar (Scalar.of_int 2) in
-      (* s = ((m + M) / 2 *)
+      let s = addScalar sup inf in
+      let s = divScalar s (Scalar.of_int 2) in
+     (* s = ((m + M) / 2 *)
       Linexpr1.set_cst e (Coeff.Scalar (Scalar.neg s)) ;
       let c = Lincons1.make e Lincons1.SUPEQ in
       (* c = x >= ((m + M) / 2)   *)
@@ -309,6 +367,8 @@ module Numerical(N: NUMERICAL)(C: CONSTRAINT): PARTITION = struct
            a- c && c2   == ((m + M / 2) + 1) <= v <= M 
            b- c3 && c4  ==  m <= v <= ((m + M / 2) ) 
       *)
+      assert(not (isBot({constraints= c :: c2 :: b.constraints; env; vars})));
+      assert(not (isBot({constraints= c3 :: c4 :: b.constraints; env; vars})));
       ( {constraints= c :: c2 :: b.constraints; env; vars}
       , {constraints= c3 :: c4 :: b.constraints; env; vars} )
 
@@ -503,27 +563,6 @@ module Numerical(N: NUMERICAL)(C: CONSTRAINT): PARTITION = struct
 
   (**)
 
-  let print fmt b =
-    let vars = b.vars in
-    let a = Lincons1.array_make b.env (List.length b.constraints) in
-    let i = ref 0 in
-    List.iter (fun c -> Lincons1.array_set a !i c; i := !i + 1) b.constraints;
-    let b = Abstract1.of_lincons_array manager b.env a in
-    let a = Abstract1.to_lincons_array manager b in
-    let cs = ref [] in
-    for i=0 to (Lincons1.array_length a)-1 do
-      cs := (Lincons1.array_get a i)::!cs;
-    done;
-    match !cs with
-    | [] -> Format.fprintf fmt "top"
-    | x::_ ->
-      if (C.isBot x) then Format.fprintf fmt "bottom" else
-        let i = ref 1 and l = List.length !cs in
-        List.iter (fun c ->
-            C.print vars fmt c;
-            if (!i = l) then () else Format.fprintf fmt " && ";
-            i := !i + 1
-          ) !cs
 
 end
 
