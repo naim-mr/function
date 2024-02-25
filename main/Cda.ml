@@ -50,13 +50,20 @@ struct
     let env = init_env vars (Environment.make [||] [||]) in 
     (* Conflict driven analysis result *)
     let i = cda_recursive  ~property:property funcs env vars  stmts main  f in
-      if not !minimal then
-        Format.fprintf !fmt "\n Conflict Driven Analysis Result: %a@." D.print
-          i ;
+    
+    let block_label block = 
+    match block with
+      | A_empty l -> l
+      | A_block (l,_,_) -> l
+    in
+    if not !minimal then
+      Format.fprintf !fmt "\n Conflict Driven Analysis Result: %a@." D.print
+        i ;
     let ret = D.defined i in
     Format.fprintf !fmt "Final Analysis Result: ";
     let result = if ret then "TRUE" else "UNKNOWN" in
     Format.fprintf !fmt "%s\n" result;
+    S.bwdInvMap:= InvMap.update (block_label f.funcBody) (fun _ -> Some i) !S.bwdInvMap;
     ret
   and cda_recursive  ?(property = S.dummy_prop) funcs  env vars  stmts  main f =
     let open S in   
@@ -111,10 +118,10 @@ struct
         else Format.fprintf !fmt "Analysis[%i] Result: UNKNOWN\n" n ;
       if D.defined i || n > !size then
         (* 
-          Return if we can already infer termination or if the maximum number of
+          Return if we can already infer the property or if the maximum number of
           iteration is reached 
         *)
-        D.learn p (D.compress i)
+         D.learn p (D.compress i)
       else (
         learn := true ;
         (* 
@@ -143,10 +150,13 @@ struct
                 (**
                   [b1] \cup [b2] == ab
                 *)
+                
                 let b1, b2 = B.assume ~pow:(float_of_int n) ab  in
                 (* We reinit the leaf that are at top *)
-                assert (b1 <> B.bot env vars);
-                assert (b2 <> B.bot env vars);
+                assert (B.isLeq ab (B.join b1 b2 ));
+                assert (B.isLeq (B.join b1 b2 ) ab);
+                assert (not (B.isBot b1));
+                assert (not (B.isBot b2));
                 reinit () ;
                 compress () ;
                 if not !minimal then
