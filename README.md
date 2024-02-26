@@ -158,4 +158,4 @@ The following additional command-line options exist for the CTL analysis:
 ## Benchmark:
 To reproduce the benchmarks of the analysis you have to call : 
 	`./script/runstest.sh .` 
-It generates then a table in a html file and in csv. See  script/README.md, for more details.
+It generates then a table in a html file and in csv in result/ folder. See  script/README.md, for more details.
