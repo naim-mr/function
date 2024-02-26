@@ -8,7 +8,7 @@ int main() {
     int res;
     int restmp;
    // x = __VERIFIER_nondet_int();
-    res = 0;
+    //res = 0;
     
     while (x > 1) {
         xtmp = x;

@@ -4,8 +4,8 @@ extern int __VERIFIER_nondet_int(void);
 
 int main() {
     int c, flag, x, y, z;
-    c = 0;
-    flag = 1;
+    //c = 0;
+    //flag = 1;
     // x = __VERIFIER_nondet_int();
     // y = __VERIFIER_nondet_int();
     // z = __VERIFIER_nondet_int();

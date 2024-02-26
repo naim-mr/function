@@ -7,7 +7,7 @@ int main() {
     int y;
     int res;
     //x = __VERIFIER_nondet_int();
-    y = 2;
+    //y = 2;
     res = 1;
     
     if (x < 0 || y < 1) { }

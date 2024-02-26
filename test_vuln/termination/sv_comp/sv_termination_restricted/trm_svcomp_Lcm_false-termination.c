@@ -7,8 +7,8 @@ int main() {
     int b;
     int am;
     int bm;
-    am = a;
-    bm = b;
+    // am = a;
+    // bm = b;
     
     while (am != bm) {
         if (am > bm) {

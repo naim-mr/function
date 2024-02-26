@@ -18,7 +18,7 @@ int main()
     int x, d1, d2, d1old;
 	d1 = 73;
 	d2 = 74;
-	x = __VERIFIER_nondet_int();
+	//x = __VERIFIER_nondet_int();
 	while (x >= 0) {
 		x = x - d1;
 		d1old = d1;

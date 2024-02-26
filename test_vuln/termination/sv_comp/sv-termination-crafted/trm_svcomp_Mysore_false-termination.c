@@ -12,8 +12,8 @@ int main()
 {
 	int x;
 	int c;
-    x = __VERIFIER_nondet_int();
-    c = __VERIFIER_nondet_int();
+    //x = __VERIFIER_nondet_int();
+    //c = __VERIFIER_nondet_int();
 	if (c < 0) {
     	while (x + c >= 0) {
 	    	x = x - c;

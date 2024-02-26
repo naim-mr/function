@@ -10,8 +10,8 @@ extern int __VERIFIER_nondet_int(void);
 int main()
 {
 	int c, x;
-    c = 5;
-    x = __VERIFIER_nondet_int();
+    //c = 5;
+    //x = __VERIFIER_nondet_int();
 	while (x >= 0) {
 		x = x + c;
 	}

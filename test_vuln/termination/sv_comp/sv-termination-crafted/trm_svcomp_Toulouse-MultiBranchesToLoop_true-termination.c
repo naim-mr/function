@@ -14,8 +14,8 @@ int main() {
     int x;
 	int y;
 	int z;
-	y = __VERIFIER_nondet_int();
-	z = __VERIFIER_nondet_int();
+	//y = __VERIFIER_nondet_int();
+	//z = __VERIFIER_nondet_int();
     if (__VERIFIER_nondet_int() != 0) {
         x = 1;
     } else {

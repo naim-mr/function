@@ -6,7 +6,7 @@ int main() {
     int flag;
     int c, x, y;
     flag = 1;
-    c = 0;
+    //c = 0;
     // x = __VERIFIER_nondet_int();
     // y = __VERIFIER_nondet_int();
     while (flag != 0) {

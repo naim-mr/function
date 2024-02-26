@@ -5,8 +5,8 @@ extern int __VERIFIER_nondet_int(void);
 int main() {
     int i;
     int up;
-  //  i = __VERIFIER_nondet_int();
-    up = 0;
+    //  i = __VERIFIER_nondet_int();
+    //up = 0;
     
     while (0 <= i && i <= 10) {
         if (i >= 10) {

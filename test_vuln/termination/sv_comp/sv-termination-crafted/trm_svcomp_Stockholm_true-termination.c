@@ -15,9 +15,9 @@ int main()
     int x;
     int a;
     int b;
-    x = __VERIFIER_nondet_int();
-    a = __VERIFIER_nondet_int();
-    b = __VERIFIER_nondet_int();
+    //x = __VERIFIER_nondet_int();
+    //a = __VERIFIER_nondet_int();
+    //b = __VERIFIER_nondet_int();
     if (a == b) {
         while (x >= 0) {
             x = x + a - b - 1;

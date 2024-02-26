@@ -8,7 +8,7 @@ int main() {
     int t;
     //i = __VERIFIER_nondet_int();
     //j = __VERIFIER_nondet_int();
-    t = 0;
+    //t = 0;
     
     while (i != 0 && j != 0) {
         t = i;

@@ -5,8 +5,8 @@ extern int __VERIFIER_nondet_int(void);
 int main() {
     int i;
     int range;
-  //  i = __VERIFIER_nondet_int();
-    range = 20;
+    //  i = __VERIFIER_nondet_int();
+    //range = 20;
     
     while (-range <= i && i <= range) {
         if (range-i < 5 || range+i < 5) {

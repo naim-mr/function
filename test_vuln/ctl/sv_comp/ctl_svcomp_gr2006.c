@@ -17,5 +17,6 @@ int main() {
     }
     assert1:
     //__VERIFIER_assert(x == 100);
+    exit:
     return 0;
 }

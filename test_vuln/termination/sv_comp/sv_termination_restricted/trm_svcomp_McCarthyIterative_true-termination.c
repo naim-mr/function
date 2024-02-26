@@ -5,8 +5,8 @@ extern int __VERIFIER_nondet_int(void);
 int main() {
     int x;
     int c;
-   // x = __VERIFIER_nondet_int();
-    c = 1;
+    // x = __VERIFIER_nondet_int();
+    //c = 1;
     
     while (c > 0) {
         if (x > 100) {

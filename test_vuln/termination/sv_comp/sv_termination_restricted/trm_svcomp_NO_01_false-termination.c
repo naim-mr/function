@@ -5,7 +5,7 @@ extern int __VERIFIER_nondet_int(void);
 int main() {
     int c;
     int i;
-    c = (24*6)*6;
+    //c = (24*6)*6;
     
     if (c <= 10) {
         i = 0;

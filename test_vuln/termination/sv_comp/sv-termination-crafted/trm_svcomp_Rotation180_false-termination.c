@@ -15,8 +15,8 @@ int main ()
     int oldx;
 	int x;
 	int y;
-	x = __VERIFIER_nondet_int();
-	y = __VERIFIER_nondet_int();
+	//x = __VERIFIER_nondet_int();
+	//y = __VERIFIER_nondet_int();
 	while (true) {
         oldx = x;
 		x = -y;

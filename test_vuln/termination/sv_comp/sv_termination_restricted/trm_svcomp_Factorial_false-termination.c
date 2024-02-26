@@ -7,8 +7,8 @@ int main() {
     int i;
     int fac;
     //j = __VERIFIER_nondet_int();
-    i = 1;
-    fac = 1;
+    //i = 1;
+    //fac = 1;
     
     while (fac != j) {
         fac = fac * i;

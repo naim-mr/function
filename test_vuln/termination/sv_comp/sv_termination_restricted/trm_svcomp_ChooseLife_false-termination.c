@@ -7,9 +7,9 @@ int main() {
     int life;
     int death;
     int temp;
-    choose = 2;
-    life = 13;
-    death = 17;
+    //choose = 2;
+    //life = 13;
+    //death = 17;
 
     while (life < death) {
         temp = death;

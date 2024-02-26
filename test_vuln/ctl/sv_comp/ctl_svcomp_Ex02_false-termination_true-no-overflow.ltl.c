@@ -18,6 +18,7 @@ int main() {
         }
     }
     exit = 1;
+    exit:
     return 0;
 }
 

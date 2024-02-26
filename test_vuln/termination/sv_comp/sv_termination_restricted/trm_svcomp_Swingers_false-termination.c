@@ -6,8 +6,8 @@ int main() {
     int bob;
     int samantha;
     int temp;
-    bob = 13;
-    samantha = 17;
+    //bob = 13;
+    //samantha = 17;
     
     while (bob + samantha < 100) {
         temp = bob;

@@ -16,9 +16,9 @@ extern int __VERIFIER_nondet_int(void);
 int main()
 {
     int a, b, q, olda;
-	q = __VERIFIER_nondet_int();
-	a = __VERIFIER_nondet_int();
-	b = __VERIFIER_nondet_int();
+	//Sq = __VERIFIER_nondet_int();
+	//a = __VERIFIER_nondet_int();
+	//b = __VERIFIER_nondet_int();
 	while (q > 0) {
 		q = q + a - 1;
 		olda = a;

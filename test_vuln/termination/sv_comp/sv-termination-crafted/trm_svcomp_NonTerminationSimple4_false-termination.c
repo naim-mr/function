@@ -12,8 +12,8 @@ extern int __VERIFIER_nondet_int(void);
 int main()
 {
     int x, y;
-	x = __VERIFIER_nondet_int();
-	y = __VERIFIER_nondet_int();
+	//x = __VERIFIER_nondet_int();
+	//y = __VERIFIER_nondet_int();
 	if (y >= 5) {
 	    while (x >= 0) {
 		    y = y - 1;

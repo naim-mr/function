@@ -23,5 +23,6 @@ int main() {
       }
     }
   }
+  exit:
   return 0;
 }

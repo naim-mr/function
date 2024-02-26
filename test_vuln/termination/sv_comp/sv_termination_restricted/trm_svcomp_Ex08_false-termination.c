@@ -6,7 +6,7 @@ int main() {
     int i;
     int up;
     //i = __VERIFIER_nondet_int();
-    up = 0;
+    //up = 0;
     
     while (i > 0) {
         if (i == 1) {

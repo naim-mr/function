@@ -8,9 +8,9 @@ int main() {
     int j;
     int t;
    // n = __VERIFIER_nondet_int();
-    i = 0;
-    j = 1;
-    t = 0;
+    // i = 0;
+    // j = 1;
+    // t = 0;
     
     while (j != n) {
         t = j+i;

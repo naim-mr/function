@@ -10,7 +10,7 @@ int main() {
     int m;
     int a;
     int b;
-    i = 0;
+    //i = 0;
     
     while (i < 100) {
         a = i+2;

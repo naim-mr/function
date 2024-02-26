@@ -7,8 +7,8 @@ int main() {
     int x;
     int y;
     //i = __VERIFIER_nondet_int();
-    x = 0;
-    y = 0;
+    //x = 0;
+    //y = 0;
     
     if (i > 10) {
         x = 1;

@@ -13,8 +13,8 @@ extern int __VERIFIER_nondet_int(void);
 int main ()
 {
     int x, b;
-	x = __VERIFIER_nondet_int();
-	b = __VERIFIER_nondet_int();
+	//x = __VERIFIER_nondet_int();
+	//b = __VERIFIER_nondet_int();
 	while (b != 0) {
 		b = __VERIFIER_nondet_int();
 		x = x - 1;

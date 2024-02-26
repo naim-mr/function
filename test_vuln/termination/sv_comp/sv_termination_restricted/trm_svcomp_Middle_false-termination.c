@@ -6,7 +6,7 @@ int main() {
     int i;
     int j;
    //i = __VERIFIER_nondet_int();
-    //j = __VERIFIER_nondet_int();
+   //j = __VERIFIER_nondet_int();
     
     while (i != j) {
         i = i-1;

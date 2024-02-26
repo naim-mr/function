@@ -6,9 +6,9 @@ int main() {
     int i;
     int range;
     int up;
-  //  i = __VERIFIER_nondet_int();
-    range = 20;
-    up = 0;
+    //  i = __VERIFIER_nondet_int();
+    //range = 20;
+    //up = 0;
     
     while (0 <= i && i <= range) {
         if (i == 0) {

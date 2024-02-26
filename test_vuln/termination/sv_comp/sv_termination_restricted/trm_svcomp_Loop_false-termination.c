@@ -6,9 +6,9 @@ int main() {
     int a;
     int b;
     int i;
-    a = 5;
-    b = 3;
-    i = 0;
+    // a = 5;
+    // b = 3;
+    // i = 0;
     
     while (i < 10) { i = i + 0; }
     
