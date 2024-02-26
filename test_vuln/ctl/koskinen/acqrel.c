@@ -18,17 +18,17 @@
 
 void main() {
   int n;
-  int A ;
-  int R ;
+  int r ;
+  int a ;
   while(?) {
-    A = 1;
-    A = 0;
+    r = 1;
+    a = 0;
     n = ?;
     while(n>0) {
       n--;
     }
-    R = 1;
-    R = 0;
+    r = 1;
+    r = 0;
   }
   while(1) { int x; x=x; }
 }

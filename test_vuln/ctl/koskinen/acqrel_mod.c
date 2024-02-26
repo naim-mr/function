@@ -23,7 +23,7 @@ int main() {
     int a; //assume a != 1
     int r;
 
-    r = 0;
+    int r = 0;
 
     m = m_init;
     while(m > 0) {

@@ -7,6 +7,7 @@ extern int __VERIFIER_nondet_int() __attribute__ ((__noreturn__));
 void main() {
   int a;
   int b;
+  int r;
   int n;
   while(__VERIFIER_nondet_int()) {
     a = 1;

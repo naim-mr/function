@@ -1,18 +1,16 @@
 //#Safe
 //@ ltl invariant positive: [](AP(a == 1) ==> <>AP(r == 1) );
 
-int a = 0;
-int r = 0;
+
 
 int main() {
-
+    int a = 0;
     int n;
     int n_init;
-    
     int m;
     int m_init;
-
-    int r = 0;
+    int r ;
+    r = 0;
 
     m = m_init;
     while(m > 0) {
