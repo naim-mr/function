@@ -1,5 +1,5 @@
 #!/bin/bash
-declare -A optmap=( ["ctl"]="-ctl " ["termination"]="-termination"  ["guarantee"]="-guarantee"   ["recurrence"]="-recurrence")
+declare -A optmap=( ["ctl"]="-ctl " ["termination"]="-termination"  ["robust_reachability"]="-ctl")
 RED="\e[91m"
 GREEN="\e[92m"
 BOLD="\e[1m"
@@ -339,7 +339,7 @@ treat_examples() {
     echo -n "${filename} & " >> $index_tex
     solvopt=0
     index=0
-    if [[ ${1} == "ctl" ]]
+    if [[ ${1} == "ctl" ]] || [[ ${1} == "robust_reachability" ]]
       then  
         ctl=$(cat $prop_name)        
         prop="$ctl"
@@ -350,25 +350,10 @@ treat_examples() {
         then 
           precond="true"
         fi
-      else
-        if [[ ${1} == "guarantee" ]]
-          then  
-            prop=$(cat $prop_name)        
-            proptex="AF\{$prop\}"
-            prop="AF{$prop}"
-            
-          else
-            if [[ ${1} == "recurrence" ]]
-            then
-              prop=$(cat $prop_name)     
-              proptex="AG\{AF\{$prop\}\}"
-            else
-              prop="termination"
-              proptex="termination"
-            fi
-        fi
-      fi
-
+    else
+        prop="termination"
+        proptex="termination"
+    fi
     echo -n "$filename & $proptex \\\\
             "  >> $prop_tex
     # Iterate on analysis options
@@ -383,21 +368,11 @@ treat_examples() {
       log="${result_folder}/${filename}.${opt_replaced}.txt"
       echo "<h2><a href=\"../${log}\">${opt}</a></h2>" >> $file_html
       start_time=$(date +%s.%3N)
-      if [[ ${1} == "ctl" ]]
+      if [[ ${1} == "ctl" ]] ||[[ ${1} == "robust_reachability" ]]
       then  
         timeout $max_time $analyzer $file $opt ${optmap[$1]} "$ctl"  > $log 2>&1
       else
-        if [[ ${1} == "guarantee" ]]
-        then
-            timeout $max_time $analyzer $file $opt  ${optmap[$1]} $prop_name> $log 2>&1
-        else
-            if [[ ${1} == "recurrence" ]]
-            then
-              timeout $max_time $analyzer $file $opt  ${optmap[$1]} $prop_name> $log 2>&1
-            else
-              timeout $max_time $analyzer $file $opt  ${optmap[$1]} > $log 2>&1              
-            fi
-        fi
+        timeout $max_time $analyzer $file $opt  ${optmap[$1]} > $log 2>&1              
       fi
       out=$?
       end_time=$(date +%s.%3N)
@@ -538,10 +513,9 @@ echo "filename,property,options,result,loc,time,maxinfer,nb_vulns" > $stats_csv
 total=$(find $bench -iname "*.c" | wc -l)
 solved=0
 
-treat_examples "ctl" "CTL tests"  ""
-treat_examples "termination" "Termination"  ""
-treat_examples  "recurrence" "Recurrence"  ""
-treat_examples  "guarantee" "Guarantee"  ""
+# treat_examples "ctl" "CTL tests"  ""
+# treat_examples "termination" "Termination"  ""
+treat_examples  "robust_reachability" "Robust Rechability"  ""
 
 
 echo "\end{longtblr}" >> $index_tex 
