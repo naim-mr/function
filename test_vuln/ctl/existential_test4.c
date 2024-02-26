@@ -3,6 +3,7 @@
 int main() {
     int i;
     //int temp = 0;
+    int temp;
     int tmp;
     int r;
     //i = [0,1];

@@ -85,7 +85,7 @@ create_file() {
   opt_replaced=$2
   filename=$(basename $file)
   file_html="${result_folder}/${filename}.${opt_replaced}.html"
-  cat "scripts/header.html" > $file_html
+  cat "script/header.html" > $file_html
   sed -i "s@TITLE@${filename}@" $file_html
   echo "<h1>${filename}</h1>" >> $file_html
   echo "<div class=\"c\">" >> $file_html
@@ -98,7 +98,7 @@ create_file() {
 end_file() {
   # After the analysis the cfg.dot should correspond to the current test
   dot -Tsvg cfg.dot -o ${result_folder}/${filename}.svg
-  cat "scripts/footer.html" >> $file_html
+  cat "script/footer.html" >> $file_html
 }
 
 get_nth_line() {
@@ -301,6 +301,8 @@ treat_examples() {
   file_arr=$(find "${folder}" -iname "*.c" | sort)
   # Max number of different vulnerabilities inferred per file 
   nb_of_vuln=("${file_arr[@]/*/0}")
+  echo "vuln"
+  echo $nb_of_vuln
   nb_test=$(( nb_test + nb_file ))
   
   echo "Input C file,Analysis t"
@@ -455,6 +457,9 @@ treat_examples() {
       # create csv files with the result
       echo "$file,$prop,$opt,$res,$loc,$subst,$total,${nb_of_vuln[$fileidx]}">> $stats_csv
    done   
+   echo "ici "
+   echo $fileidx
+   echo  ${nb_of_vuln[$fileidx]}
    echo "<td> ${nb_of_vuln[$fileidx]} </td>" >> $index_html$
    fileidx=$(($fileidx + 1))
    
@@ -504,7 +509,7 @@ print_end() {
 }
 
 mkdir ${result_folder}
-cat "scripts/header_main.html"                    > $index_html
+cat "script/header_main.html"                    > $index_html
 echo "<h1>Overview</h1>"                          >> $index_html
 echo "<table>"                                    >> $index_html
 echo -n "  \begin{longtblr}{colspec={|X[4]" > $index_tex
@@ -534,9 +539,9 @@ total=$(find $bench -iname "*.c" | wc -l)
 solved=0
 
 treat_examples "ctl" "CTL tests"  ""
-# treat_examples "termination" "Termination"  ""
-# treat_examples  "recurrence" "Recurrence"  ""
-# treat_examples  "guarantee" "Guarantee"  ""
+treat_examples "termination" "Termination"  ""
+treat_examples  "recurrence" "Recurrence"  ""
+treat_examples  "guarantee" "Guarantee"  ""
 
 
 echo "\end{longtblr}" >> $index_tex 

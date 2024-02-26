@@ -24,8 +24,8 @@ void run_timer(){
 }
 
 int read_input_1(){
-	input_1 = __VERIFIER_nondet_int();
-	__VERIFIER_assume(input_1 < 65535); 
+	input_1 =[0,65535];
+	//__VERIFIER_assume(input_1 < 65535); 
 	return input_1;
 }
 

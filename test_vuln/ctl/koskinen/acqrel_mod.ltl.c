@@ -8,11 +8,11 @@ int main() {
 
     int n;
     int n_init;
-
+    
     int m;
     int m_init;
 
-    r = 0;
+    int r = 0;
 
     m = m_init;
     while(m > 0) {
