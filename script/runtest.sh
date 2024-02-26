@@ -71,7 +71,7 @@ completness=0
 soundness=0
 
 # max time allowed
-max_time="1s"
+max_time="120s"
 
 # Pattern for failure in log
 patt_robust="Potentially vulnerable:"
@@ -229,6 +229,7 @@ treat_file() {
     echo "UNKNOWN"
   else
     # Property has been inferred !!
+    echo "TRUE"
     echo -n "<span style=\"color: ${col_sound};\">TRUE</span>" >> $index_html
     
   fi
@@ -299,10 +300,10 @@ treat_examples() {
 
   nb_file=$(find $folder -iname "*.c" | wc -l)
   file_arr=$(find "${folder}" -iname "*.c" | sort)
+  file_arr=(${file_arr//' '/})
   # Max number of different vulnerabilities inferred per file 
   nb_of_vuln=("${file_arr[@]/*/0}")
-  echo "vuln"
-  echo $nb_of_vuln
+  
   nb_test=$(( nb_test + nb_file ))
   
   echo "Input C file,Analysis t"
@@ -426,16 +427,11 @@ treat_examples() {
           echo -n  " & " >> $index_tex
       fi
       index=$(($index+1))
-      echo "ok idx"
-      echo $index
       solvopt=$(($solvopt + 1))
       # create csv files with the result
-      echo "$file,$prop,$opt,$res,$loc,$subst,$total,${nb_of_vuln[$fileidx]}">> $stats_csv
+      echo "$filename,$prop,$opt,$res,$loc,$subst,$total,${nb_of_vuln[$fileidx]}">> $stats_csv
    done   
-   echo "ici "
-   echo $fileidx
-   echo  ${nb_of_vuln[$fileidx]}
-   echo "<td> ${nb_of_vuln[$fileidx]} </td>" >> $index_html$
+   echo "<td> ${nb_of_vuln[$fileidx]} </td>" >> $index_html
    fileidx=$(($fileidx + 1))
    
 	done
@@ -513,8 +509,8 @@ echo "filename,property,options,result,loc,time,maxinfer,nb_vulns" > $stats_csv
 total=$(find $bench -iname "*.c" | wc -l)
 solved=0
 
-# treat_examples "ctl" "CTL tests"  ""
-# treat_examples "termination" "Termination"  ""
+treat_examples "ctl" "CTL tests"  ""
+treat_examples "termination" "Termination"  ""
 treat_examples  "robust_reachability" "Robust Rechability"  ""
 
 

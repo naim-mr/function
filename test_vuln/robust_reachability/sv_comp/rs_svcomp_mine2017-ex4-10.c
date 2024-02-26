@@ -7,6 +7,7 @@
 // void __VERIFIER_assert(int cond) { if(!(cond)) { ERROR: {reach_error();abort();} } }
 
 int main() {
+  int v;
   //int v = 1; // Not explicitly stated in Miné's example
   while (v <= 50) {
     assert0:
