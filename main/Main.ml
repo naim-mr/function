@@ -487,7 +487,6 @@ let doit () =
                                               let p = ((IntermediateSyntax.I_universal (IntermediateSyntax.I_TRUE,(s,s))),(s,s)) in 
                                               let program , property =  ItoA.prog_itoa ~property:(!main,p) sources in
                                               program, (Semantics.Exp (Option.get property))
-                                              
                           | "guarantee"  
                           | "recurrence" ->  let program,property  = ItoA.prog_itoa ~property:(!main,parseProperty !property ) sources in program ,(Semantics.Exp (Option.get property))
                           | "ctl" 
@@ -497,9 +496,6 @@ let doit () =
                                           program,(Semantics.Ctl property) 
                           | _ -> raise (Invalid_argument "Unknown Analysis") 
   in
-  if not !minimal then (
-      Format.fprintf !fmt "\nAbstract Syntax:\n" ;
-      AbstractSyntax.prog_print !fmt program ) ;
   (* A program is a map of variable, a bock (see: AbstractSyntax.ml) and a map of functions *)
   let (vars,b,func)  = program  in
   (* Get the main function and the variables as a list *)
