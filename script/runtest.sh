@@ -541,4 +541,5 @@ echo "\end{longtblr}" >> $prop_tex
 cat $prop_tex >> $index_tex
 echo "</body>"                                    >> $index_html
 echo "</html>"                                    >> $index_html
+cp stats.ipynb results/
 print_end
