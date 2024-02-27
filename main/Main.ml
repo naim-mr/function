@@ -500,7 +500,7 @@ let doit () =
   let (vars,b,func)  = program  in
   (* Get the main function and the variables as a list *)
   let f = AbstractSyntax.StringMap.find !main func in
-  let varlist = AbstractSyntax.StringMap.to_seq vars |> List.of_seq |> List.map snd  in
+  let varlist = AbstractSyntax.StringMap.to_seq vars |> List.of_seq |> List.map snd  in 
   let module S = (val semantic: SEMANTIC) in 
   (* Launch the analysis and get the returned output "true" or "unknow" *)
   let ret =
