@@ -2,67 +2,35 @@
 
 FuncTion is a research prototype static analyzer designed for proving conditional termination and conditional guarantee and recurrence properties of C programs. The tool automatically infers piecewise-defined ranking functions and sufficient preconditions for termination, guarantee and recurrence properties by means of abstract interpretation.
 
-FuncTion was developed to implement and test the analysis method and abstract domains described in the articles:
-
-	N. Courant, C. Urban. Precise Widening Operators for Proving Termination by Abstract Interpretation.
-	
-	C. Urban, A. Miné. Proving Guarantee and Recurrence Temporal Properties by Abstract Interpretation.
-	In Proc. 16th International Conference on Verification, Model Checking, and Abstract Interpretation (VMCAI 2015). 
-	
-	C. Urban, A. Miné. A Decision Tree Abstract Domain for Proving Conditional Termination.
-	In Proc. 21st International Static Analysis Symposium (SAS 2014).
-
-	C. Urban, A. Miné. An Abstract Domain to Infer Ordinal-Valued Ranking Functions.
-	In Proc. 23rd European Symposium on Programming (ESOP 2014).
-
-	C. Urban. The Abstract Domain of Segmented Ranking Functions.
-	In Proc. 20th International Static Analysis Symposium (SAS 2013).
-
 FuncTion's main website is: http://www.di.ens.fr/~urban/FuncTion.html
 
-## Author
-
-	Caterina Urban, ETH Zurich, caterina.urban@inf.ethz.ch 
-	
-## Contributors
-
-	Samuel Ueltschi, ETH Zurich
-	Nathanaël Courant, École Normale Supérieure
-	
 # Installation
 
 FuncTion requires the following applications and libraries:
 
-* OCaml 
-
+* OCaml:
 	```
-	(sudo) apt-get install ocaml-interp
-	```
-
-* Findlib
-
-	```
-	(sudo) apt-get install ocaml-findlib
+		https://ocaml.org/docs/installing-ocaml
 	```
 
-* Menhir: LR(1) parser generator
-
-	```
-	(sudo) apt-get install menhir
-	```
-  
 * Opam: https://opam.ocaml.org/doc/Install.html
 
 	```
 	(sudo) apt-get install opam
 	```
-  
-* OUnit
+* Ounit:
 
 	```
-	opam install ounit
-	```
+	(sudo) opam install ounit
+* Menhir: LR(1) parser generator (v.3.0.0)
 
+	```
+	 opam install menhir
+	```
+* Dune: Ocaml build system (v.3.12)
+	```
+	(sudo) opam install dune
+	```		
 * APRON: numerical abstract domain library
 
 	```
@@ -74,29 +42,32 @@ FuncTion requires the following applications and libraries:
 	```
 	opam install zarith
 	```
-
+If you have a former version of dune and menhir you can update the dune-project file. You can check the version of your packages 
+with 
+```
+opam list
+```
 
 # Compiling FuncTion
 
-Once all required libraries are installed, FuncTion can be compiled with 'make':
+Once all required libraries are installed, FuncTion can be compiled with 'dune':
 
 ```
-make
+dune build
 ```
 
-This will generate the command line program 'function' in the project directory. 
+You can clean the genereted files with:
 
-Alternatively, 'ocamlbuild' can be used to build FuncTion with the following command:
 
 ```
-ocamlbuild ml_float.o Main.native -use-ocamlfind -use-menhir -pkgs 'apron,gmp,oUnit,zarith' -I utils -I banal -I domains -I frontend -I cfgfrontend -I main -libs boxMPQ,octD,polkaMPQ,str,zarith -lflags banal/ml_float.o
+dune clean
 ```
 
 # Usage
 
 The command-line analyzer can be invoked using the following call pattern:
 
-	./function <file> <analysis> [options] 
+	./main.exe <file> <analysis> [options] 
 
 where "file" is the path to the C file to be analyzed and "analysis" the type of the analysis to perform. 
 
@@ -127,14 +98,14 @@ FuncTion can analyze the following properties:
 
 To check for termination, call the analyzer with the following call pattern:
 
-	./function <file> -termination [options]
+	./main.exe <file> -termination [options]
 
 ## Guarantee / Recurrence
 
 The following call pattern can be used for guarantee properties or recurrence properties:
 
-	./function <file> -guarantee <property_file> [options]
-	./function <file> -recurrence <property_file> [options] 
+	./main.exe <file> -guarantee <property_file> [options]
+	./main.exe <file> -recurrence <property_file> [options] 
 
 where "property\_file" is the path to the file containing the guarantee or recurrence property.
 
@@ -142,7 +113,7 @@ where "property\_file" is the path to the file containing the guarantee or recur
 
 CTL properties can be analyzed using the following call pattern:
 
-	./function <file> -ctl <property> [options]
+	./main.exe <file> -ctl <property> [options]
 
 where "property" is the CTL property to be analyzed. 
 

@@ -271,7 +271,7 @@ treat_file() {
 
 min(){
   arg1=$1
-  arg2=$2
+  arg2=$2z
   if ((arg1 < 1 ))
   then 
     echo $arg2
@@ -393,6 +393,7 @@ treat_examples() {
       # inferred -> max number of safe var in the current test
       # inferred -> min number of potentially vulnerable var in the current test
       # nb_vulns -> number of potentially vulnerable set in the current test
+      allb="False"
       if [[ "$allpot" == "" ]] 
       then
         # Defined part in the dtree
@@ -404,6 +405,7 @@ treat_examples() {
         vulns=${vulns#*:}
       else 
         # all varaible vulnerable
+        allb="True"
         mininf=0
         vulns=1
         inferred=0
@@ -451,7 +453,7 @@ treat_examples() {
       index=$(($index+1))
       solvopt=$(($solvopt + 1))
       # create csv files with the result
-      echo "$filename,$prop,$opt,$res,$loc,$subst,$mininf,$inferred,$total,${nb_of_vuln[$fileidx]}">> $stats_csv
+      echo "$filename,$prop,$opt,$res,$loc,$subst,$mininf,$inferred,$total,${nb_of_vuln[$fileidx]},$allb">> $stats_csv
    done   
    echo "<td> ${nb_of_vuln[$fileidx]} </td>" >> $index_html
    fileidx=$(($fileidx + 1))
@@ -527,7 +529,7 @@ do
     fi
 done
 # Create a csv file
-echo "filename,property,options,result,loc,time,mininfer,maxinfer,total,nb_vulns" > $stats_csv
+echo "filename,property,options,result,loc,time,mininfer,maxinfer,total,nb_vulns,allpot" > $stats_csv
 total=$(find $bench -iname "*.c" | wc -l)
 solved=0
 
