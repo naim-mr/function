@@ -363,7 +363,8 @@ treat_examples() {
       opt_replaced=$(echo "${opt}" | sed "s/ /_/g")
       echo "<td>" >> $index_html
       solved=$(($solved+1))
-      echo -ne "\r\t$file $opt $fill"
+      echo -ne "\r$fill$fill\r\t$file $opt"
+
 
       # Create log files
       log="${result_folder}/${filename}.${opt_replaced}.txt"
@@ -541,5 +542,4 @@ echo "\end{longtblr}" >> $prop_tex
 cat $prop_tex >> $index_tex
 echo "</body>"                                    >> $index_html
 echo "</html>"                                    >> $index_html
-cp stats.ipynb results/
 print_end
