@@ -158,8 +158,6 @@ module CTLIterator(D: RANKING_FUNCTION): SEMANTIC = struct
   type inv = D.t InvMap.t
   (* type returned by the bwd analysis function: also necessary to match SEMANTIC module type *)
   type r = inv
-  (* type of the properties for this iterator *)
-  type 'a p = ctl_property
   (* dummy_prop to give a default value to optional (due to termination iterator) parameter ?property *)
   let dummy_prop  = Ctl (atomic_property_of_bexp (A_TRUE))
   (* Also to match module type: to remove in the future *)
