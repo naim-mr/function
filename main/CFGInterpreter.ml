@@ -104,13 +104,13 @@ let execute
     | FORWARD -> getIncomingStates
     | BACKWARD -> getOutgoingStates
   in
-  (** 
+  (*
      array that counts the number of times a node as heen processed
      NOTE: this assumes that nodes have ids numbered from 1...n and that the 
      array is accessed through this id e.g. processed.(i) where 'i' is the node id
   *)
   let processed = Array.make (nodeCount + 1) 0 in 
-  (** 
+  (*
      auxiliary function that implements the worklist algorithm expressed in tail-recursive form.
      Takes an inital 'nodeMap' as argument that assigns an abstract state to each node and returns a final 'nodeMap'
      containing the result of the analysis.

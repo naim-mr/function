@@ -136,7 +136,7 @@ struct
         let i =
           List.fold_left
             (fun (ai:D.t) (ab:B.t) ->
-              (** 
+              (* 
                 [ai] is a tree,
                 [ab] is a contraint toward an undefined leaf the tree
               *)
@@ -147,7 +147,7 @@ struct
                    Needed to divide the domain if after one iteration we cannot infer the property
                 *)
               then (
-                (**
+                (*
                   [b1] \cup [b2] == ab
                 *)
                 

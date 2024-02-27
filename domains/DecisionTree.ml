@@ -1356,59 +1356,22 @@ struct
 				let r = aux (r1,r2) (nc1::cs) in
 				Node ((c1,nc1),l,r)
 			| Node ((c1,nc1),l1,r1),Node((c2,_),_,_) when (C.isLeq c1 c2) (* c1 < c2 *) ->
-				let bcs = B.inner env vars cs in
-				let bc1 = B.inner env vars [c1] in
-				if (B.isLeq bcs bc1)
-				then (* c1 is redundant *) aux (l1,t2) cs
-				else (* c1 is not redundant *)
-					let bnc1 = B.inner env vars [nc1] in
-					if (B.isLeq bcs bnc1)
-				then (* nc1 is redundant *) aux (r1,t2) cs
-				else (* nc1 is not redundant *)
-					let l = aux (l1,t2) (c1::cs) in
-					let r = aux (r1,t2) (nc1::cs) in
-					Node ((c1,nc1),l,r)
+			  let l = aux (l1,t2) (c1::cs) in
+			  let r = aux (r1,t2) (nc1::cs) in
+			  Node ((c1,nc1),l,r)
 			| Node ((c1,_),_,_),Node((c2,nc2),l2,r2) when (C.isLeq c2 c1) (* c1 > c2 *) ->
-				let bcs = B.inner env vars cs in
-				let bc2 = B.inner env vars [c2] in
-				if (B.isLeq bcs bc2)
-				then (* c2 is redundant *) aux (t1,l2) cs
-				else (* c2 is not redundant *)
-					let bnc2 = B.inner env vars [nc2] in
-					if (B.isLeq bcs bnc2)
-					then (* nc2 is redundant *) aux (t1,r2) cs
-					else (* nc2 is not redundant *)
-						let l = aux (t1,l2) (c2::cs) in
-						let r = aux (t1,r2) (nc2::cs) in
-						Node ((c2,nc2),l,r)
+				let l = aux (t1,l2) (c2::cs) in
+  			let r = aux (t1,r2) (nc2::cs) in
+				Node ((c2,nc2),l,r)
 			| Node ((c1,nc1),l1,r1),_ ->
-				let bcs = B.inner env vars cs in
-				let bc1 = B.inner env vars [c1] in
-				if (B.isLeq bcs bc1)
-				then (* c1 is redundant *) aux (l1,t2) cs
-				else (* c1 is not redundant *)
-					let bnc1 = B.inner env vars [nc1] in
-					if (B.isLeq bcs bnc1)
-					then (* nc1 is redundant *) aux (r1,t2) cs
-					else (* nc1 is not redundant *)
-						let l = aux (l1,t2) (c1::cs) in
-						let r = aux (r1,t2) (nc1::cs) in
-						Node ((c1,nc1),l,r)
+				let l = aux (l1,t2) (c1::cs) in
+				let r = aux (r1,t2) (nc1::cs) in
+				Node ((c1,nc1),l,r)
 			| _,Node((c2,nc2),l2,r2) ->
-				let bcs = B.inner env vars cs in
-				let bc2 = B.inner env vars [c2] in
-				if (B.isLeq bcs bc2)
-				then (* c2 is redundant *) aux (t1,l2) cs
-				else (* c2 is not redundant *)
-					let bnc2 = B.inner env vars [nc2] in
-					if (B.isLeq bcs bnc2)
-					then (* nc2 is redundant *) aux (t1,r2) cs
-					else (* nc2 is not redundant *)
-						let l = aux (t1,l2) (c2::cs) in
-						let r = aux (t1,r2) (nc2::cs) in
-						Node ((c2,nc2),l,r)
+				let l = aux (t1,l2) (c2::cs) in
+  			let r = aux (t1,r2) (nc2::cs) in
+				Node ((c2,nc2),l,r)
 		in
-    let (t1,t2) =  (tree_unification t1.tree t2.tree t1.env t1.vars) |> fun (tree1,tree2) -> {t1 with tree = tree1 } , {t2 with tree = tree2}  in
     (* handling the case when t2.domain is defined by constraints not present in the tree(s) *)
     let ls1 = match domain1 with | None -> LSet.empty | Some domain1 ->
       List.fold_left (fun s c ->
@@ -1453,10 +1416,7 @@ struct
           if B.isLeq b bx
           then (* x is wanted *)
             let bcs = B.inner env vars cs in
-            if B.isLeq bcs bx
-            then (* x is redundant *) aux t xs cs
-            else (* x is not redundant *)
-              if B.isBot (B.meet bx bcs)
+            if B.isBot (B.meet bx bcs)
               then (* x is conflicting *) Bot
               else (* x is neither redundant nor conflicting *)
                 (match t with
@@ -1467,10 +1427,7 @@ struct
                   | _ -> Node((c,nc),l,Bot))
                 | Node((c,nc),l,r) when (C.isLeq c x) (* c < x *) ->
                   let bc = B.inner env vars [c] in
-                  if B.isLeq bcs bc
-                  then (* c is redundant *) aux l bs cs
-                  else (* c is not redundant *)
-                    if B.isBot (B.meet bc bcs)
+                  if B.isBot (B.meet bc bcs)
                     then (* c is conflicting *) aux r bs cs
                     else (* c is neither redundant nor conflicting *)
                       let l = aux l bs (c::cs) in
@@ -1486,10 +1443,7 @@ struct
                   | _ -> Node((x,nx),l,Bot)))
           else (* nx is wanted *)
             let bcs = B.inner env vars cs in
-            if B.isLeq bcs bx
-            then (* x is redundant *) Bot
-            else (* x is not redundant *)
-              if B.isBot (B.meet bx bcs)
+            if B.isBot (B.meet bx bcs)
               then (* x is conflicting *) aux t xs cs
               else (* x is neither redundant nor conflicting *)
                 (match t with
@@ -1500,10 +1454,7 @@ struct
                   | _ -> Node((c,nc),Bot,r))
                 | Node((c,nc),l,r) when (C.isLeq c x) (* c < x *) ->
                   let bc = B.inner env vars [c] in
-                  if B.isLeq bcs bc
-                  then (* c is redundant *) aux l bs cs
-                  else (* c is not redundant *)
-                    if B.isBot (B.meet bc bcs)
+                  if B.isBot (B.meet bc bcs)
                     then (* c is conflicting *) aux r bs cs
                     else (* c is neither redundant nor conflicting *)
                       let l = aux l bs (c::cs) in
@@ -1547,15 +1498,15 @@ struct
     in 
     aux t.tree []
   
-  let rec print fmt t =
+  let print fmt t =
     let domain = t.domain in
     let env = t.env in
     let vars = t.vars in
-    let print_domain fmt domain =
+    (* let print_domain fmt domain =
       match domain with
       | None -> ()
       | Some domain -> B.print fmt domain
-    in
+    in *)
     let rec aux t cs =
       match t with
       | Bot ->
@@ -1662,9 +1613,8 @@ struct
   let manager = Polka.manager_alloc_strict ()
   (* Compute the vulnerability analysis, right now the algorithm is naif doesnot implement the dynamic programming *)
   let vulnerable  t  =   
-    (* 
     print_tree t.vars Format.std_formatter (compress t).tree ;
-    Format.print_newline () ;  *)
+    Format.print_newline () ;  
     let forget x =  (AbstractSyntax.A_var  x, A_RANDOM ) in
     let rec unconstraint t cns   = match t with 
       | Bot -> false,[cns]
@@ -1686,18 +1636,18 @@ struct
         []
       | x::[] ->        
         let t' = (bwdAssign t (forget x)) in 
-        (*
+        
         Format.printf "\n Remove last %s \n" x.varName; 
-        print_tree t.vars Format.std_formatter t'.tree ; *)
+        print_tree t.vars Format.std_formatter t'.tree ; 
         let b,cons = unconstraint t'.tree [] in 
         let left_sub = if b then               
           [(x::acc),cons]
         else
          []
         in
-        (*
+        
         Format.printf "\n Reste last %s \n" x.varName;
-        print_tree t.vars Format.std_formatter t.tree ; *)
+        print_tree t.vars Format.std_formatter t.tree ; 
         let b,cons = unconstraint t.tree [] in 
         let right_sub = 
           if b then               
@@ -1708,13 +1658,12 @@ struct
         left_sub@right_sub
       | x::q -> 
         let t' = (bwdAssign t (forget x)) in 
-        (*
+        
         Format.printf "\nRemove %s \n" x.varName; 
-        print_tree t.vars Format.std_formatter t'.tree ; *)
+        print_tree t.vars Format.std_formatter t'.tree ; 
         let l1 = (aux q (x::acc) t') in 
-        (*
         Format.printf "\n Reste %s \n" x.varName;
-        print_tree t.vars Format.std_formatter t.tree ;*)
+        print_tree t.vars Format.std_formatter t.tree ;
         let l2 = (aux q acc t) 
         in l1 @ l2 
     in
