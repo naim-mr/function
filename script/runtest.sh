@@ -265,13 +265,11 @@ treat_file() {
     fi
   fi
   echo "</a>" >> $index_html
-  
-  
 }
 
 min(){
   arg1=$1
-  arg2=$2z
+  arg2=$2
   if ((arg1 < 1 ))
   then 
     echo $arg2
