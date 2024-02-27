@@ -31,6 +31,3 @@ The variable in blue are potentially vulnerable and the ones in red a definitely
 A csv file is also generated with data on the analysis. 
 You can use it in  a jupyter notebook the file `stats.ipynb`, already defined cells are proposed. Feel free to create your own statistics.
 
---------------
-
-A tex file with the benchs is also avalaible: `index.tex`.
