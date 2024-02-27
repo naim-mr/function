@@ -288,6 +288,8 @@ min(){
 treat_examples() {
   # Number of non-vulnerable inferred per analysis and per options
   inferred_glob=("${list[@]/*/0}")
+  # Average of min vulnerable inferred per analysis and per options
+  average_glob=("${list[@]/*/0}")
   # Total number of variables per analysis and per options
   total_glob=("${list[@]/*/0}")
   # Time global per analysis and per options
@@ -377,22 +379,41 @@ treat_examples() {
       fi
       out=$?
       end_time=$(date +%s.%3N)
-
+      # time for the current file
       subst=$(echo "scale=3; $end_time - $start_time" | bc)
+      # last total time
       last_time=${elapsed_glob[$index]}
+      # new  total time
       elapsed_glob[$index]=$(echo "scale=3; $last_time + $subst" | bc)
-
+      # total number of variable
       total=$(grep  "Total: " ${log})
-      inferred=$(grep "MaxInf: " ${log})
-      inferred=${inferred#*:}
-
-      vulns=$(grep  "Nb vuln: " ${log})
-      vulns=${vulns#*:}
-     
       total=${total#*:}
+      # allpot = "" if there are some defined part in the domain the decision tree, otherwise all variables are potentially vulnerable.
+      allpot=$(grep "All potentially vulnerables" ${log})   
+      # inferred -> max number of safe var in the current test
+      # inferred -> min number of potentially vulnerable var in the current test
+      # nb_vulns -> number of potentially vulnerable set in the current test
+      if [[ "$allpot" == "" ]] 
+      then
+        # Defined part in the dtree
+        inferred=$(grep "MaxInf: " ${log})
+        inferred=${inferred#*:}
+        mininf=$(grep "MinInf: " ${log})
+        mininf=${mininf#*:}
+        vulns=$(grep  "Nb vuln: " ${log})
+        vulns=${vulns#*:}
+      else 
+        # all varaible vulnerable
+        mininf=0
+        vulns=1
+        inferred=0
+      fi
+      # inferred_glob-> max number of safe var for each test for all options
+      # inferred_glob-> max number of var for each test for all optionstest
+      # nb_vulns -> number of potentially vulnerable set in the current test
       inferred_glob[$index]=$(($inferred + ${inferred_glob[$index]}))
       total_glob[$index]=$(($total + ${total_glob[$index]}))
-
+      # Lines of code in file
       loc=$(cat $file | wc -l)
       if [[ $out -eq 124 ]]
       then
@@ -420,6 +441,7 @@ treat_examples() {
         echo "</pre>" >> $file_html
       else
         nb_of_vuln[$fileidx]=$(min ${nb_of_vuln[$fileidx]}  $vulns)
+        # res = TRUE OR UNKNOWN i.e. result of the CTL analysis 
         res=$(treat_file $file $log $expected_folder)
       fi
       if (($solvopt + 1 < ${#list[@]})) 
@@ -429,7 +451,7 @@ treat_examples() {
       index=$(($index+1))
       solvopt=$(($solvopt + 1))
       # create csv files with the result
-      echo "$filename,$prop,$opt,$res,$loc,$subst,$total,${nb_of_vuln[$fileidx]}">> $stats_csv
+      echo "$filename,$prop,$opt,$res,$loc,$subst,$mininf,$inferred,$total,${nb_of_vuln[$fileidx]}">> $stats_csv
    done   
    echo "<td> ${nb_of_vuln[$fileidx]} </td>" >> $index_html
    fileidx=$(($fileidx + 1))
@@ -440,7 +462,7 @@ treat_examples() {
   for i in "${!total_glob[@]}";
   do
     pr=$(echo "scale=3; 100*(${inferred_glob[$i]} /${total_glob[$i]})" |bc -l )
-    echo "<th class=\"bench\"> Inferred ${inferred_glob[$i]} out of  ${total_glob[$i]} : ${pr} </th>" >> $index_html
+    echo "<th class=\"bench\"> Max of safe variable: ${inferred_glob[$i]} out of  ${total_glob[$i]} : ${pr} </th>" >> $index_html
   done
   echo "</tr>" >> $index_html
   echo "<tr><th></th>" >> $index_html
@@ -505,7 +527,7 @@ do
     fi
 done
 # Create a csv file
-echo "filename,property,options,result,loc,time,maxinfer,nb_vulns" > $stats_csv
+echo "filename,property,options,result,loc,time,mininfer,maxinfer,total,nb_vulns" > $stats_csv
 total=$(find $bench -iname "*.c" | wc -l)
 solved=0
 
