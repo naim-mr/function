@@ -8,7 +8,7 @@ FuncTion's main website is: http://www.di.ens.fr/~urban/FuncTion.html
 
 FuncTion requires the following applications and libraries:
 
-* OCaml:
+* OCaml: compiler version >= 4.14
 	```
 		https://ocaml.org/docs/installing-ocaml
 	```
