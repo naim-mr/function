@@ -260,7 +260,6 @@ module Numerical(N: NUMERICAL)(C: CONSTRAINT): PARTITION = struct
         (*  m <= v <= +oo *)
         if pow > 30. then 
             begin
-            Printf.printf "ou la\n";
             assert(not (isBot({constraints=  b.constraints; env; vars})));
           ( {constraints= b.constraints; env; vars}
           , {constraints=  b.constraints; env; vars} ) 

@@ -1611,7 +1611,7 @@ struct
     in {domain = domain; tree = aux t.tree; env = env; vars = vars}
 
   let manager = Polka.manager_alloc_strict ()
-  (* Compute the vulnerability analysis, right now the algorithm is naif doesnot implement the dynamic programming *)
+  (* Compute the vulnerability analysis, right now the algorithm is naif and doesnot implement the dynamic programming *)
   let vulnerable  t  =   
     print_tree t.vars Format.std_formatter (compress t).tree ;
     Format.print_newline () ;  
@@ -1636,18 +1636,16 @@ struct
         []
       | x::[] ->        
         let t' = (bwdAssign t (forget x)) in 
-        
-        Format.printf "\n Remove last %s \n" x.varName; 
-        print_tree t.vars Format.std_formatter t'.tree ; 
+       (* Format.printf "\n Remove last %s \n" x.varName; 
+        print_tree t.vars Format.std_formatter t'.tree ;  *)
         let b,cons = unconstraint t'.tree [] in 
         let left_sub = if b then               
           [(x::acc),cons]
         else
          []
         in
-        
-        Format.printf "\n Reste last %s \n" x.varName;
-        print_tree t.vars Format.std_formatter t.tree ; 
+        (* Format.printf "\n Reste last %s \n" x.varName;
+        print_tree t.vars Format.std_formatter t.tree ;  *)
         let b,cons = unconstraint t.tree [] in 
         let right_sub = 
           if b then               
@@ -1657,13 +1655,12 @@ struct
         in 
         left_sub@right_sub
       | x::q -> 
-        let t' = (bwdAssign t (forget x)) in 
-        
-        Format.printf "\nRemove %s \n" x.varName; 
-        print_tree t.vars Format.std_formatter t'.tree ; 
+        let t' = (bwdAssign t (forget x)) in      
+        (* Format.printf "\nRemove %s \n" x.varName; 
+        print_tree t.vars Format.std_formatter t'.tree ;  *)
         let l1 = (aux q (x::acc) t') in 
-        Format.printf "\n Reste %s \n" x.varName;
-        print_tree t.vars Format.std_formatter t.tree ;
+        (* Format.printf "\n Reste %s \n" x.varName;
+        print_tree t.vars Format.std_formatter t.tree ; *)
         let l2 = (aux q acc t) 
         in l1 @ l2 
     in

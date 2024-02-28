@@ -1,6 +1,8 @@
 # FuncTion
 
-FuncTion is a research prototype static analyzer designed for proving conditional termination and conditional guarantee and recurrence properties of C programs. The tool automatically infers piecewise-defined ranking functions and sufficient preconditions for termination, guarantee and recurrence properties by means of abstract interpretation.
+FuncTion is a research prototype static analyzer designed for proving conditional termination and conditional CTL properties of C programs, and the presence of vulnerabilities in C program.
+
+The tool automatically infers piecewise-defined ranking functions and sufficient preconditions for termination, guarantee and recurrence properties by means of abstract interpretation.
 
 FuncTion's main website is: http://www.di.ens.fr/~urban/FuncTion.html
 
@@ -156,7 +158,14 @@ The following additional command-line options exist for the CTL analysis:
      -ast                               run the analysis on the abstract-syntax-tree instead of the control-flow-graph,
                                         note that in that case function calls and goto/break/continue are not supported
      -dot                               print out control-flow-graph and decision trees in graphviz dot format
-
+# Vulnerability 
+Automatic detection of potentially vulnerable variables that
+could be controlled to violate a CTL property of programs can be done using the option: 
+	 
+	 -vulnerability
+	
+This analyzes output sets of potentially vulnerable variable, sets
+of definitely non-vulnerable variables. It also provides sufficient constraints on the vulnerable variables that "protect" the program and ensure the property.
 ## Benchmark:
 To reproduce the benchmarks of the analysis you have to call : 
 	`./script/runtest.sh .` 
