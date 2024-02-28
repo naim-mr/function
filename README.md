@@ -48,7 +48,38 @@ with
 opam list
 ```
 
-# Compiling FuncTion
+# Docker installation 
+## To create the image
+> docker build -t function. 
+
+## To run the analysis
+> docker run -it function
+
+It will open an interactive shell as:
+root@id$
+
+The id, is the id of the container.
+
+You can then use the analysis with the commands explained in this README.
+Or run the benchmark (see also the README in script/)
+
+## Open the HTML files and the Jupyter notebook
+
+As you can see the script 'script/runtest.sh' generate an HTML file and a CSV that we can manipulate through 'script/stats.ipynb'.
+
+One way to open them is to copy the content of container in you local repo with 
+> docker cp id:home/function/  copy-path/
+
+Where copy-path is the path to the location where the files will be copied. 
+id is the id of the container (root@id). You can obtain it with 
+> docker ps -a 
+
+Then after that you can open with your navigator results/index.html and launch the jupyter notebook. 
+
+There exist other way to do it. We propose this one to be sure that you can access to the results. Feel free to use your own way to do it.
+
+
+## Compiling FuncTion
 
 Once all required libraries are installed, FuncTion can be compiled with 'dune':
 
@@ -56,7 +87,7 @@ Once all required libraries are installed, FuncTion can be compiled with 'dune':
 dune build
 ```
 
-You can clean the genereted files with:
+You can clean the generated files with:
 
 
 ```
@@ -129,4 +160,4 @@ The following additional command-line options exist for the CTL analysis:
 ## Benchmark:
 To reproduce the benchmarks of the analysis you have to call : 
 	`./script/runtest.sh .` 
-It generates then a table in a html file and in csv in result/ folder. See  script/README.md, for more details.
+It generates then a table in a HTML file and in CSV in result/ folder. See script/README.md, for more details.
