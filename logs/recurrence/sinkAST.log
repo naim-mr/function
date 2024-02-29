@@ -221,4 +221,4 @@ $1{x} >= 1 ?  (1)⍵ + 8
 top ? bottom
 
 
-Analysis Result: TRUE
+Final Analysis Result: TRUE

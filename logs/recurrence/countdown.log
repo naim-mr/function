@@ -426,6 +426,6 @@ $1{x} >= 1 && $2{c} >= 7 ? 3$2{c}+1
 [12:]:
 top ? bottom
 
-Analysis Result: TRUE
+Final Analysis Result: TRUE
 
 Done.

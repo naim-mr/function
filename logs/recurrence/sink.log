@@ -101,6 +101,6 @@ $1{x} >= 1 ?  (1)⍵ + 8
 [14:]:
 top ? bottom
 
-Analysis Result: TRUE
+Final Analysis Result: TRUE
 
 Done.
