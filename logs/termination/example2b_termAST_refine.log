@@ -301,6 +301,6 @@ $5{x} >= 11 && $4{y} >= 4 && -$2{x} >= -10 && $2{x} >= 0 && $1{$1} == 1 ? 5
 [34:]: -$4{y} >= -2 && $4{y} >= -2 && $3{$3} == 0 ? 0.
 
 [35:]: 
-Analysis Result: TRUE
+Final Analysis Result: TRUE
 
 Done.

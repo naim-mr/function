@@ -227,6 +227,6 @@ $2{x} >= 101 ? 2
 
 [13:]: top ? 0.
 
-Analysis Result: TRUE
+Final Analysis Result: TRUE
 
 Done.

@@ -329,19 +329,18 @@ let ctl_iterator (): (module SEMANTIC)=
   in 
   (module S)
 
-let termination (module S: SEMANTIC) =
-  if !filename = "" then raise (Invalid_argument "No Source File Specified") ;
-  let sources = parseFile !filename in
-  let program, _ = ItoA.prog_itoa sources in
+let termination (module S: SEMANTIC) program =
   if not !minimal then (
     Format.fprintf !fmt "\nAbstract Syntax:\n" ;
     AbstractSyntax.prog_print !fmt program ) ;
-  let open AbstractSyntax in 
   let analysis_function = S.analyze ~property:S.dummy_prop in
   run_analysis  analysis_function program ()
 
 
-let guarantee (module S: SEMANTIC) =
+let guarantee (module S: SEMANTIC) program =
+  if not !minimal then (
+    Format.fprintf !fmt "\nAbstract Syntax:\n" ;
+    AbstractSyntax.prog_print !fmt program ) ;
   if !filename = "" then raise (Invalid_argument "No Source File Specified");
   if !property = "" then raise (Invalid_argument "No Property File Specified");
   let sources = parseFile !filename in
@@ -363,7 +362,10 @@ let guarantee (module S: SEMANTIC) =
   let analysis_function  = S.analyze in
   run_analysis (analysis_function ~property:(Exp property)) program ()
 
-let recurrence (module S: SEMANTIC) =
+let recurrence (module S: SEMANTIC) program =
+  if not !minimal then (
+    Format.fprintf !fmt "\nAbstract Syntax:\n" ;
+    AbstractSyntax.prog_print !fmt program ) ;
   if !filename = "" then raise (Invalid_argument "No Source File Specified");
   if !property = "" then raise (Invalid_argument "No Property File Specified");
   let sources = parseFile !filename in
@@ -385,7 +387,10 @@ let recurrence (module S: SEMANTIC) =
   let analysis_function  = S.analyze in
     run_analysis (analysis_function ~property:(Exp property)) program ()
 
-let ctl_ast (module S: SEMANTIC) =
+let ctl_ast (module S: SEMANTIC) program =
+  if not !minimal then (
+    Format.fprintf !fmt "\nAbstract Syntax:\n" ;
+    AbstractSyntax.prog_print !fmt program ) ;
   if !filename = "" then raise (Invalid_argument "No Source File Specified");
   if !property = "" then raise (Invalid_argument "No Property Specified");
   let starttime = Sys.time () in
@@ -490,10 +495,11 @@ let doit () =
                           | "guarantee"  
                           | "recurrence" ->  let program,property  = ItoA.prog_itoa ~property:(!main,parseProperty !property ) sources in program ,(Semantics.Exp (Option.get property))
                           | "ctl" 
-                          | "ctl-ast"  
-                          | "ctl-cfg" ->  let parsedProperty = parseCTLPropertyString !property in
-                                          let program, property = ItoA.ctl_prog_itoa parsedProperty !main (parseFile !filename) in
-                                          program,(Semantics.Ctl property) 
+                          | "ctl-ast"
+                          | "ctl-cfg"  -> let parsedProperty = parseCTLPropertyString !property in
+                                           let program, property = ItoA.ctl_prog_itoa parsedProperty !main (parseFile !filename) in
+                                           program,(Semantics.Ctl property)   
+                          
                           | _ -> raise (Invalid_argument "Unknown Analysis") 
   in
   (* A program is a map of variable, a bock (see: AbstractSyntax.ml) and a map of functions *)
@@ -509,12 +515,12 @@ let doit () =
     C.analyze ~property:property func vars b !main 
     else
       match !analysis with
-      | "termination" -> termination (module S)
-      | "guarantee"   -> guarantee (module S) 
-      | "recurrence" -> recurrence (module S)
-      | "ctl" -> ctl_ast  (module S)  (* default CTL analysis is CTL-AST *)
-      | "ctl-ast" -> ctl_ast (module S)
-      | "ctl-cfg" -> ctl_ast (module S)
+      | "termination" -> termination (module S) program
+      | "guarantee"   -> guarantee (module S) program
+      | "recurrence" -> recurrence (module S) program
+      | "ctl"  (* default CTL analysis is CTL-AST *)
+      | "ctl-ast" -> ctl_ast (module S) program
+      | "ctl-cfg" -> ctl_cfg ()
       | _ -> raise (Invalid_argument "Unknown Analysis")   
   in
   let ()  =

@@ -122,6 +122,6 @@ $2{y} >= 2 && $1{x} >= 2 ?  ($1{x}-1)⍵ + 4$1{x}+3$2{y}-2
 
 [11:]: top ? 0.
 
-Analysis Result: TRUE
+Final Analysis Result: TRUE
 
 Done.

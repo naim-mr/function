@@ -95,6 +95,6 @@ $1{x} >= 3 ? 6$1{x}-8
 
 [10:]: top ? 0.
 
-Analysis Result: TRUE
+Final Analysis Result: TRUE
 
 Done.

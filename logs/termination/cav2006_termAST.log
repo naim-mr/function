@@ -114,6 +114,6 @@ $2{y} >= 51 && $1{x} >= 1 ? 4$1{x}+5
 
 [11:]: top ? 0.
 
-Analysis Result: TRUE
+Final Analysis Result: TRUE
 
 Done.

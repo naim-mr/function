@@ -15,9 +15,8 @@ sig
   val  analyze : ?property: 'a Semantics.p-> func StringMap.t  -> var StringMap.t  -> block -> string -> bool
 end 
 
-module  type  Make  = functor (S:SEMANTIC) -> CDA_ITERATOR
 
-module Make (S:SEMANTIC) :
+module Make (S:SEMANTIC) : 
 sig 
   include CDA_ITERATOR
 end = 

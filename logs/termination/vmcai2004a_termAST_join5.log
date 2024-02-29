@@ -48,6 +48,6 @@ $1{x} >= 6 ? 3
 
 [ 6:]: top ? 0.
 
-Analysis Result: TRUE
+Final Analysis Result: TRUE
 
 Done.
