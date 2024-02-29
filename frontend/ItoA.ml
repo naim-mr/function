@@ -602,8 +602,8 @@ let prog_itoa ?property (decls (* Isyntax.decl list *),_) =
 (* CTL *)
 
 let ctl_prog_itoa ctl_property main (decls, _) =
-  zeroId();
   let (env,stmts) = List.fold_left (fun (aenv ,astmts) adecl -> decl_itoa aenv astmts adecl) (emptyEnv,[]) decls in
+  zeroId();
   let block = label_block (block_itoa stmts) in
   let aux f = { f with funcBody = label_block f.funcBody; } in
   let program = (env.globals, block, StringMap.map aux env.funcs) in

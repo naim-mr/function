@@ -170,6 +170,6 @@ $4{enable} >= 1 ? bottom
 $4{enable} == 0 ? 0.
 $4{enable} >= 1 ? bottom
 
-Analysis Result: TRUE
+Final Analysis Result: TRUE
 
 Done.

@@ -130,6 +130,6 @@ $1{x} >= 10 ? 3$1{x}+12
 $1{x} == 3 ? 0.
 $1{x} >= 4 ? bottom
 
-Analysis Result: UNKNOWN
+Final Analysis Result: UNKNOWN
 
 Done.

@@ -207,6 +207,6 @@ $1{x} >= 1 && $2{c} >= 3 ? 3$2{c}+1
 $1{x} == 0 ? 0.
 $1{x} >= 1 ? bottom
 
-Analysis Result: TRUE
+Final Analysis Result: TRUE
 
 Done.

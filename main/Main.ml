@@ -337,16 +337,7 @@ let termination (module S: SEMANTIC) program =
   run_analysis  analysis_function program ()
 
 
-let guarantee (module S: SEMANTIC) program =
-  if not !minimal then (
-    Format.fprintf !fmt "\nAbstract Syntax:\n" ;
-    AbstractSyntax.prog_print !fmt program ) ;
-  if !filename = "" then raise (Invalid_argument "No Source File Specified");
-  if !property = "" then raise (Invalid_argument "No Property File Specified");
-  let sources = parseFile !filename in
-  let property = parseProperty !property in
-  let (program, property) =
-    ItoA.prog_itoa ~property:(!main,property) sources in
+let guarantee (module S: SEMANTIC) program  property =
   let property =
     match property with
     | None -> raise (Invalid_argument "Unknown Property")
@@ -362,16 +353,7 @@ let guarantee (module S: SEMANTIC) program =
   let analysis_function  = S.analyze in
   run_analysis (analysis_function ~property:(Exp property)) program ()
 
-let recurrence (module S: SEMANTIC) program =
-  if not !minimal then (
-    Format.fprintf !fmt "\nAbstract Syntax:\n" ;
-    AbstractSyntax.prog_print !fmt program ) ;
-  if !filename = "" then raise (Invalid_argument "No Source File Specified");
-  if !property = "" then raise (Invalid_argument "No Property File Specified");
-  let sources = parseFile !filename in
-  let property = parseProperty !property in
-  let (program,property) =
-    ItoA.prog_itoa ~property:(!main,property) sources in
+let recurrence (module S: SEMANTIC) program property =
   let property =
     match property with
     | None -> raise (Invalid_argument "Unknown Property")
@@ -387,16 +369,9 @@ let recurrence (module S: SEMANTIC) program =
   let analysis_function  = S.analyze in
     run_analysis (analysis_function ~property:(Exp property)) program ()
 
-let ctl_ast (module S: SEMANTIC) program =
-  if not !minimal then (
-    Format.fprintf !fmt "\nAbstract Syntax:\n" ;
-    AbstractSyntax.prog_print !fmt program ) ;
-  if !filename = "" then raise (Invalid_argument "No Source File Specified");
-  if !property = "" then raise (Invalid_argument "No Property Specified");
+let ctl_ast (module S: SEMANTIC) prog property=
   let starttime = Sys.time () in
   let parsedPrecondition = parsePropertyString !precondition in
-  let parsedProperty = parseCTLPropertyString !property in
-  let (prog, property) = ItoA.ctl_prog_itoa parsedProperty !main (parseFile !filename) in
   let precondition = fst @@ AbstractSyntax.StringMap.find "" @@ ItoA.property_itoa_of_prog prog !main parsedPrecondition in
   if not !minimal then
     begin
@@ -487,18 +462,18 @@ let doit () =
     end;
   (* Parsing the property and the file to an ast *)
   let sources = parseFile !filename in
-  let program,property = match !analysis with  
+  let program,property,prop = match !analysis with  
                           | "termination" ->  let s = Lexing.dummy_pos in 
                                               let p = ((IntermediateSyntax.I_universal (IntermediateSyntax.I_TRUE,(s,s))),(s,s)) in 
                                               let program , property =  ItoA.prog_itoa ~property:(!main,p) sources in
-                                              program, (Semantics.Exp (Option.get property))
+                                              program, (Semantics.Exp (Option.get property)),None
                           | "guarantee"  
-                          | "recurrence" ->  let program,property  = ItoA.prog_itoa ~property:(!main,parseProperty !property ) sources in program ,(Semantics.Exp (Option.get property))
+                          | "recurrence" ->  let program,property  = ItoA.prog_itoa ~property:(!main,parseProperty !property ) sources in program ,(Semantics.Exp (Option.get property)),property
                           | "ctl" 
                           | "ctl-ast"
                           | "ctl-cfg"  -> let parsedProperty = parseCTLPropertyString !property in
                                            let program, property = ItoA.ctl_prog_itoa parsedProperty !main (parseFile !filename) in
-                                           program,(Semantics.Ctl property)   
+                                           program,(Semantics.Ctl property), None
                           
                           | _ -> raise (Invalid_argument "Unknown Analysis") 
   in
@@ -516,10 +491,10 @@ let doit () =
     else
       match !analysis with
       | "termination" -> termination (module S) program
-      | "guarantee"   -> guarantee (module S) program
-      | "recurrence" -> recurrence (module S) program
+      | "guarantee"   -> guarantee (module S) program prop
+      | "recurrence" -> recurrence (module S) program prop
       | "ctl"  (* default CTL analysis is CTL-AST *)
-      | "ctl-ast" -> ctl_ast (module S) program
+      | "ctl-ast" -> ctl_ast (module S) program  (match property with Semantics.Ctl p -> p |_ ->  raise (Invalid_argument("Impossible to reach")))
       | "ctl-cfg" -> ctl_cfg ()
       | _ -> raise (Invalid_argument "Unknown Analysis")   
   in
