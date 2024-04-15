@@ -10,9 +10,14 @@ homepage: "https://github.com/username/reponame"
 doc: "https://url/to/documentation"
 bug-reports: "https://github.com/username/reponame/issues"
 depends: [
-  "ocaml"
+  "ocaml" {>= "4.12.0"}
   "dune" {>= "3.6"}
-  "odoc" {with-doc}
+  "ocamlfind"
+  "apron"
+  "menhir"
+  "ounit"
+  "mlgmpidl"
+  "zarith"
 ]
 build: [
   ["dune" "subst"] {dev}

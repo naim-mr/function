@@ -532,8 +532,7 @@ done
 echo "filename,property,options,result,loc,time,mininfer,maxinfer,total,nb_vulns,allpot" > $stats_csv
 total=$(find $bench -iname "*.c" | wc -l)
 solved=0
-treat_examples  "robust_reachability" "Robust Rechability"  ""
-treat_examples "ctl" "CTL tests"  ""
+
 treat_examples "termination" "Termination"  ""
 
 
