@@ -12,7 +12,7 @@ open Config
 
 module type CDA_ITERATOR = 
 sig 
-  val  analyze : ?property: 'a Semantics.p-> func StringMap.t  -> var StringMap.t  -> block -> string -> bool
+  val  analyze : ?precondition:bExp option -> ?property: 'a Semantics.p-> func StringMap.t  -> var StringMap.t  -> block -> string -> bool
 end 
 
 
@@ -33,7 +33,7 @@ struct
     else
       InvMap.iter (fun l a -> Format.fprintf fmt "%a:\n%a\n" label_print l D.print a) m
   
-  let rec analyze ?(property= S.dummy_prop) funcs vars stmts  main= 
+  let rec analyze ?(precondition=Some A_TRUE) ?(property= S.dummy_prop) funcs vars stmts  main= 
     (* f =  main function *)
     let f = StringMap.find main funcs in
     (* We collect the vars defined in the program and by the function *)
@@ -58,7 +58,7 @@ struct
     if not !minimal then
       Format.fprintf !fmt "\n Conflict Driven Analysis Result: %a@." D.print
         i ;
-    let ret = D.defined i in
+    let ret = D.defined ~condition:(Option.get precondition) i in
     Format.fprintf !fmt "Final Analysis Result: ";
     let result = if ret then "TRUE" else "UNKNOWN" in
     Format.fprintf !fmt "%s\n" result;

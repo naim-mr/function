@@ -58,6 +58,6 @@ sig
    val initBlk: Environment.t -> var list -> block -> unit
    (*
       [analyze]: iterating function that run the analysis for the given semantic  *)
-   val analyze: ?precondition:bExp -> ?property:'a p -> AbstractSyntax.prog ->  string -> bool
+   val analyze: ?precondition:bExp option -> ?property:'a p -> AbstractSyntax.prog ->  string -> bool
 
 end

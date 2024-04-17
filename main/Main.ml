@@ -333,7 +333,9 @@ let termination (module S: SEMANTIC) program =
   if not !minimal then (
     Format.fprintf !fmt "\nAbstract Syntax:\n" ;
     AbstractSyntax.prog_print !fmt program ) ;
-  let analysis_function = S.analyze ~property:S.dummy_prop in
+  let parsedPrecondition = parsePropertyString !precondition in
+  let precondition = fst @@ AbstractSyntax.StringMap.find "" @@ ItoA.property_itoa_of_prog program !main parsedPrecondition in
+  let analysis_function = S.analyze  ~precondition:(Some precondition) ~property:S.dummy_prop in
   run_analysis  analysis_function program ()
 
 
@@ -350,8 +352,10 @@ let guarantee (module S: SEMANTIC) program  property =
       Format.fprintf !fmt "\nProperty: ";
       AbstractSyntax.property_print !fmt property;
     end;
+  let parsedPrecondition = parsePropertyString !precondition in
+  let precondition = fst @@ AbstractSyntax.StringMap.find "" @@ ItoA.property_itoa_of_prog program !main parsedPrecondition in
   let analysis_function  = S.analyze in
-  run_analysis (analysis_function ~property:(Exp property)) program ()
+  run_analysis (analysis_function ~precondition:(Some precondition) ~property:(Exp property)) program ()
 
 let recurrence (module S: SEMANTIC) program property =
   let property =
@@ -366,8 +370,10 @@ let recurrence (module S: SEMANTIC) program property =
       Format.fprintf !fmt "\nProperty: ";
       AbstractSyntax.property_print !fmt property;
     end;
+  let parsedPrecondition = parsePropertyString !precondition in
+  let precondition = fst @@ AbstractSyntax.StringMap.find "" @@ ItoA.property_itoa_of_prog program !main parsedPrecondition in
   let analysis_function  = S.analyze in
-    run_analysis (analysis_function ~property:(Exp property)) program ()
+    run_analysis (analysis_function ~precondition:(Some precondition) ~property:(Exp property)) program ()
 
 let ctl_ast (module S: SEMANTIC) prog property=
   let starttime = Sys.time () in
@@ -381,7 +387,7 @@ let ctl_ast (module S: SEMANTIC) prog property=
     end;
   let analyze = S.analyze
   in
-  let result = analyze ~precondition:precondition  ~property:(Ctl property) prog "" in
+  let result = analyze ~precondition:(Some precondition)  ~property:(Ctl property) prog "" in
   if !time then begin
     let stoptime = Sys.time () in
     Format.fprintf !fmt "\nTime: %f" (stoptime-.starttime)
@@ -462,6 +468,7 @@ let doit () =
     end;
   (* Parsing the property and the file to an ast *)
   let sources = parseFile !filename in
+  
   let program,property,prop = match !analysis with  
                           | "termination" ->  let s = Lexing.dummy_pos in 
                                               let p = ((IntermediateSyntax.I_universal (IntermediateSyntax.I_TRUE,(s,s))),(s,s)) in 
@@ -487,7 +494,9 @@ let doit () =
   let ret =
     if !Config.cda then
     let module C = (val (cda_run semantic): CDA_ITERATOR) in
-    C.analyze ~property:property func vars b !main 
+    let parsedPrecondition = parsePropertyString !precondition in
+    let precondition = fst @@ AbstractSyntax.StringMap.find "" @@ ItoA.property_itoa_of_prog program !main parsedPrecondition in
+    C.analyze ~property:property ~precondition:(Some precondition) func vars b !main 
     else
       match !analysis with
       | "termination" -> termination (module S) program

@@ -264,7 +264,7 @@ struct
     | A_block (l,(s,_),b) -> addBwdInv l (D.bot env vars); 
       initStm env vars s; initBlk env vars b
 
-  let analyze ?(precondition = A_TRUE) ?property (vars,stmts,funcs) main =
+  let analyze ?(precondition = Some A_TRUE) ?property (vars,stmts,funcs) main =
     let rec aux xs env = match xs with
       | [] -> env
       | x::xs -> 
@@ -306,6 +306,6 @@ struct
         Format.fprintf !fmt "\nBackward Analysis:\n";
       bwdMap_print !fmt !bwdInvMap;
     end;
-    D.defined i
+    D.defined  ?condition:precondition i
 
 end

@@ -124,7 +124,7 @@ struct
   let bwdRec ?(property =  dummy_prop) = bwdBlk ~property: (Semantics.get_bexp property)
   (* Analyzer *)
 
-  let analyze ?(precondition = A_TRUE) ?(property = dummy_prop) (vars,stmts,funcs) main =
+  let analyze ?(precondition = Some A_TRUE) ?(property = dummy_prop) (vars,stmts,funcs) main =
     let property = Semantics.get_bexp property in 
     let rec aux xs env =
       match xs with
@@ -165,6 +165,6 @@ struct
           Format.fprintf !fmt "\nBackward Analysis:\n";
         bwdMap_print !fmt !bwdInvMap;
       end;
-    D.defined i
+    D.defined  ?condition:precondition i
 
 end
