@@ -210,6 +210,7 @@ module CTLIterator(D: RANKING_FUNCTION): SEMANTIC = struct
         if !tracebwd && not !minimal then Format.fprintf !fmt "### %a ###:\n%a\n" label_print blockLabel D.print in_state;
         addInv blockLabel in_state
       | A_block (blockLabel,(stmt,_),nextBlock) ->
+        let pre_dom = if !refine then Some (fwdInv blockLabel) else None in 
         let invBlockKeep = InvMap.find blockLabel inv_keep in 
         let invBlockReset = InvMap.find blockLabel inv_reset in
         let d_until = fun t -> D.until t invBlockKeep invBlockReset in
@@ -218,21 +219,22 @@ module CTLIterator(D: RANKING_FUNCTION): SEMANTIC = struct
         let in_state = match stmt with 
           | A_label (l,_) -> out_state
           | A_return -> bot
-          | A_assign ((l,_),(e,_)) -> bwd_assign out_state (l,e)
-          | A_assert (b,_) -> bwd_filter out_state b
+          | A_assign ((l,_),(e,_)) -> bwd_assign  ?domain: pre_dom out_state (l,e)
+          | A_assert (b,_) -> bwd_filter ?domain: pre_dom out_state b
           | A_if ((b,ba),s1,s2) ->
             let in_if = bwd out_state s1 in (* compute 'in state for if-block*)
             let in_else = bwd out_state s2 in (* compute 'in state for else-block *)
-            let in_if_filtered = bwd_filter in_if b in (* filter *)
-            let in_else_filtered = bwd_filter in_else (fst (negBExp (b,ba))) in (* filter *)
+            let in_if_filtered = bwd_filter ?domain:pre_dom in_if b in (* filter *)
+            let in_else_filtered = bwd_filter ?domain:pre_dom in_else (fst (negBExp (b,ba))) in (* filter *)
             branch_join in_if_filtered in_else_filtered (* join the two branches *)
           | A_while (l,(b,ba),loop_body) ->
-            let out_exit = bwd_filter out_state (fst (negBExp (b,ba))) in (* 'out' state when not entering the loop body *)
+            let pre_dom = if !refine then Some (fwdInv l) else None in 
+            let out_exit = bwd_filter ?domain:pre_dom out_state (fst (negBExp (b,ba))) in (* 'out' state when not entering the loop body *)
             let rec aux (* recursive function that iteratively computes fixed point for 'in' state at loop head *)
                 in_state (* 'in' state of the previous iteration *)
                 out_enter (* current 'out' state when entering the loop body *)
                 n = (* iteration counter *)
-              let in_state' = d_until (D.join APPROXIMATION out_exit out_enter) in (* 'in' state for this iteration *)
+              let in_state' = d_until (branch_join out_exit out_enter) in (* 'in' state for this iteration *)
               if !tracebwd && not !minimal then begin
                 Format.fprintf !fmt "### %a:%i ###:\n" label_print l n;
                 Format.fprintf !fmt "out_exit: %a\n" D.print out_exit;
@@ -242,7 +244,9 @@ module CTLIterator(D: RANKING_FUNCTION): SEMANTIC = struct
               end;
               let isLeqComp = D.isLeq COMPUTATIONAL in_state' in_state in
               let isLeqApprox = D.isLeq APPROXIMATION in_state' in_state in
-              if isLeqComp && isLeqApprox then
+              let jokers = max 0 (!retrybwd * (!Ordinals.max + 1) - n + !joinbwd) in
+              if isLeqComp then
+                if isLeqApprox then begin
                 (* fixed-point reached *)
                 let fixed_point = in_state in
                 if !tracebwd && not !minimal then begin
@@ -250,25 +254,44 @@ module CTLIterator(D: RANKING_FUNCTION): SEMANTIC = struct
                   Format.fprintf !fmt "in_state: %a\n" D.print fixed_point;
                 end;
                 fixed_point
-              else
-                (*fixed-point not yet reached, continue with next iteration*)
+                end
+              else begin
+               (*fixed-point not yet reached, continue with next iteration*)
                 let in_state'' = 
                   if n <= !joinbwd then 
                     in_state' (* iteration count below widening threshold *)
-                  else if (not isLeqComp) then 
-                    D.widen in_state (D.join COMPUTATIONAL in_state in_state') (* widening threshold reached, apply widening *)
-                      (* NOTE: the join might be necessary to ensure termination because of a bug (???) *)
-                  else 
-                    D.widen in_state in_state' (* widening threshold reached, apply widening *)
+                else
+                    D.widen ~jokers:jokers in_state in_state' (* widening threshold reached, apply widening *)
+                      
                 in
                 if !tracebwd && not !minimal then Format.fprintf !fmt "in'': %a\n" D.print in_state'';
-                let out_enter' = bwd_filter (bwd in_state'' loop_body) b in (* process loop body again with updated 'in' state *)
+                let out_enter' = bwd_filter  ?domain: pre_dom (bwd in_state'' loop_body) b in (* process loop body again with updated 'in' state *)
                 aux in_state'' out_enter' (n+1) (* run next iteration *)
+              end
+              else
+                let in_state'' =
+                  if n <= !joinbwd then
+                  in_state'
+                  else
+                    D.widen ~jokers:jokers in_state
+                      (D.join COMPUTATIONAL in_state in_state')
+                      (* NOTE: the join might be necessary to ensure termination because of a bug (???) *)
+                in
+                if !tracebwd && not !minimal then
+                  Format.fprintf !fmt "in'': %a\n" D.print in_state'';
+                let out_enter' = 
+                  (bwd in_state'' loop_body) in
+                let out_enter' = D.filter ?domain:pre_dom out_enter' b in
+                aux in_state'' out_enter' (n + 1)
             in
-            let initial_in = bot in (* start with bottom as initial 'in' state *)
-            let initial_out_enter = bwd_filter (bwd initial_in loop_body) b in (* process loop body with initial 'in' state *)
+            let initial_in = D.bot ?domain:pre_dom program.environment program.variables  in (* start with bottom as initial 'in' state *)
+            let initial_out_enter = D.filter ?domain:pre_dom (bwd initial_in loop_body) b in (* process loop body with initial 'in' state *)
             let final_in_state = aux initial_in initial_out_enter 1 in (* compute fixed point for loop-head *)
-            addInv l final_in_state 
+            let ret = addInv l final_in_state in 
+            if !refine then
+              D.refine ret (Option.get pre_dom)
+            else
+              ret
           | A_call (f,ss) -> raise (Invalid_argument "bwdStm:A_call")
           | A_recall (f,ss) -> raise (Invalid_argument "bwdStm:A_recall")
         in
@@ -313,18 +336,20 @@ module CTLIterator(D: RANKING_FUNCTION): SEMANTIC = struct
         let out = if !refine then D.refine out (fwdInv blockLabel) else out in
         addInv blockLabel (D.mask current_in out) 
       | A_block (blockLabel, (stmt,_), nextBlock) ->
+        let pre_dom = if !refine then Some (fwdInv blockLabel) else None in 
         let out_state = bwd out nextBlock in (* recursively process the rest of the program, this gives us the 'out' state for this statement *)
         let new_in = match stmt with 
           | A_label (l,_) -> out_state
           | A_return -> if use_sink_state then zero else bot 
-          | A_assign ((l,_),(e,_)) -> D.mask current_in (bwd_assign out_state (l,e))
-          | A_assert (b,_) -> D.mask current_in (bwd_filter out_state b)
+          | A_assign ((l,_),(e,_)) -> D.mask current_in (bwd_assign ?domain:pre_dom out_state (l,e))
+          | A_assert (b,_) -> D.mask current_in (bwd_filter ?domain:pre_dom out_state b)
           | A_if ((b,ba),s1,s2) ->
-            let out_if = bwd_filter (bwd out_state s1) b in (* compute 'out' state for if-block*)
-            let out_else = bwd_filter (bwd out_state s2) (fst (negBExp (b,ba))) in (* compute 'out' state for else-block *)
+            let out_if = bwd_filter ?domain:pre_dom (bwd out_state s1) b in (* compute 'out' state for if-block*)
+            let out_else = bwd_filter ?domain:pre_dom (bwd out_state s2) (fst (negBExp (b,ba))) in (* compute 'out' state for else-block *)
             D.mask current_in (branch_join out_if out_else) (* join the two branches and combine with current 'in' state using mask *)
           | A_while (l,(b,ba),loop_body) ->
-            let out_exit = bwd_filter out_state (fst (negBExp (b,ba))) in (* 'out' state when not entering the loop body *)
+            let pre_dom = if !refine then Some (fwdInv l) else None in 
+            let out_exit = bwd_filter ?domain:pre_dom  out_state (fst (negBExp (b,ba))) in (* 'out' state when not entering the loop body *)
             let rec aux (* recursive function that iteratively computes fixed point for 'in' state at loop head *)
                 (current_in:D.t) (* 'in' state of the previous iteration *)
                 (out_enter:D.t) (* current 'out' state when entering the loop body *)
@@ -351,11 +376,11 @@ module CTLIterator(D: RANKING_FUNCTION): SEMANTIC = struct
                   if n <= !joinbwd then updated_in (* widening threshold not yet reached *)
                   else D.dual_widen current_in updated_in (* use dual_widen after widening threshold reached *)
                 in
-                let out_enter' = bwd_filter (bwd updated_in' loop_body) b in (* process loop body again with updated 'in' state *)
+                let out_enter' = bwd_filter ?domain:pre_dom (bwd updated_in' loop_body) b in (* process loop body again with updated 'in' state *)
                 (* next iteration *)
                 aux updated_in' out_enter' (n+1)
             in
-            let initial_out_enter = bwd_filter (bwd current_in loop_body) b in (* process loop body with current 'in' state at loop-head *)
+            let initial_out_enter = bwd_filter ?domain:pre_dom (bwd current_in loop_body) b in (* process loop body with current 'in' state at loop-head *)
             let final_in_state = aux current_in initial_out_enter 1 in (* compute fixed point for while-loop starting with current 'in' state at loop-head *)
             addInv l final_in_state 
           | A_call (f,ss) -> raise (Invalid_argument "bwdStm:A_call")
@@ -411,8 +436,6 @@ module CTLIterator(D: RANKING_FUNCTION): SEMANTIC = struct
     aux program.mainFunction.funcBody bot ();
     let zero_leafs t = D.until t top t in (* set all defined leafs of the decision trees to zero *)
     InvMap.map zero_leafs !invMap 
-
-
   (* 
     Assign atomic state to those blocks that match the label and bot to all others
   *)
