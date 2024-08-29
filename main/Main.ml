@@ -183,11 +183,10 @@ let parse_args () =
       noinline := true; doit r
     | "-output_std"::r -> 
       output_std := true; doit r
-    | "-json_output"::x::r -> 
+    | "-json_output"::x::r when x <> "-output_std"-> 
       json_output := true; output_dir :=x; output_dir :=x; time:=true; doit r
     | "-json_output"::r -> (* guarantee analysis *)
       json_output := true; time:=true; doit r
-  
     | x::r -> filename := x; doit r
     | [] -> ()
   in
@@ -430,11 +429,13 @@ let ctl_cfg () =
 let doit () =
   parse_args ();
   if !json_output then 
+    begin
     Regression.create_logfile_name ();
     (* Open the log file *)
     f_log := Out_channel.open_bin !logfile;
     (* Set the formatter to logfile*)
     fmt := Format.formatter_of_out_channel !f_log
+    end
   ;
   let _ =  
   match !analysis with
@@ -446,15 +447,14 @@ let doit () =
   | "ctl-cfg" when !ctltype = "CFG" -> ctl_cfg (); (* default CTL analysis is CTL-AST *)
   | _ -> raise (Invalid_argument "Unknown Analysis")
   in
-  Out_channel.close !f_log;
   if !json_output then 
+    Out_channel.close !f_log;
     Regression.output_json ()
   ;
   (* Get the log to ouput them on std output *)
-  if !output_std then
+  if !output_std && !json_output then
     let f_log = In_channel.open_bin !logfile in
-    let s = In_channel.input_all f_log  in 
-    Format.printf "%s\n" s
+    let s = In_channel.input_all f_log  in
+    Printf.printf "%s" s
   
-
 let _ = doit () 
