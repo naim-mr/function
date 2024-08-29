@@ -178,11 +178,13 @@ let parse_args () =
       precondition := c; doit r 
     | "-ctl_existential_equivalence"::r -> (* use CTL equivalence relations to 
                                               convert existential to universal CTL properties *)
-        ctl_existential_equivalence := true; doit r
+      ctl_existential_equivalence := true; doit r
     | "-noinline"::r -> (* don't inline function calls, only for CFG based analysis *)
       noinline := true; doit r
-    | "-json_output"::x::r -> (* guarantee analysis *)
-     json_output := true; output_dir :=x; output_dir :=x; time:=true; doit r
+    | "-output_std"::r -> 
+      output_std := true; doit r
+    | "-json_output"::x::r -> 
+      json_output := true; output_dir :=x; output_dir :=x; time:=true; doit r
     | "-json_output"::r -> (* guarantee analysis *)
       json_output := true; time:=true; doit r
   
