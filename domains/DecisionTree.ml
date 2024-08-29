@@ -86,7 +86,15 @@ struct
       | Node ((c,_),l,r) -> Format.fprintf fmt "\n%sNODE %a%a%a" ind 
                               (C.print vars) c (aux (ind ^ "  ")) l (aux (ind ^ "  ")) r
     in aux "" fmt t
-
+  let output_json vars t:Yojson.Safe.t= 
+    
+    let rec aux  t = 
+      match t with
+      | Bot -> `String "BOT"
+      | Leaf f -> `Assoc [("Leaf", `String (Format.asprintf "%a"  (F.print) f))]
+      | Node ((c,_),l,r) -> 
+            `Assoc [("Node",`Assoc [("constraint",`String (Format.asprintf "%a" (C.print vars) c  ));("left", aux l );("right", aux r)] )]
+     in aux t.tree
   (**
      Prints a tree in graphviz 'dot' format for visualization. 
      http://www.graphviz.org/content/dot-language
