@@ -193,12 +193,12 @@ let parse_args () =
       Config.noinline := true; doit r
     | "-vulnerability"::r -> 
       Config.vulnerability := true; doit r
-    | "-json_output"::x::r -> (* guarantee analysis *)
-      Config.json_output := true; Config.output_dir :=x; time:=true; doit r
     | "-output_std"::r -> 
       Config.output_std := true; doit r
-    | "-json_output"::r -> (* guarantee analysis *)
-      Config.json_output := true; time:=true; doit r
+    | "-json_output"::x::r when x <> "-output_std"-> 
+      Config.json_output := true; output_dir :=x; output_dir :=x; time:=true; doit r
+    | "-json_output"::x::r -> (* guarantee analysis *)
+      Config.json_output := true; Config.output_dir :=x; time:=true; doit r
     | x::r -> filename := x; doit r
     | [] -> ()
   in
@@ -454,12 +454,14 @@ let ctl_cfg () =
 let doit () =  
   (* Parsing cli args -> into Config ref variables *)
   parse_args ();
-  if !Config.json_output then 
+  if !jConfig.json_output then 
+    begin
     Regression.create_logfile_name ();
     (* Open the log file *)
     Config.f_log := Out_channel.open_bin !Config.logfile;
     (* Set the formatter to logfile*)
     fmt := Format.formatter_of_out_channel !Config.f_log
+    end
   ;
   (* Get the right iterator *) 
   let semantic = 
@@ -528,15 +530,17 @@ let doit () =
 
   
   in
-  Out_channel.close !Config.f_log;
-  if !Config.json_output then 
+  if !Config.json_output then
+    begin
+    Out_channel.close !Config.f_log; 
     Regression.output_json ()
+    end
   ;
   (* Get the log to ouput them on std output *)
-  if !Config.output_std then
-    let f_log = In_channel.open_bin !Config.logfile in
-    let s = In_channel.input_all f_log  in 
-    Format.printf "%s\n" s
-  
-
+  if !Config.output_std && !Config.json_output then
+    begin
+    let f_log = In_channel.open_bin !logfile in
+    let s = In_channel.input_all f_log  in
+    Printf.printf "%s" s
+    end
 let _ = doit () 
