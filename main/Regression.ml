@@ -18,7 +18,6 @@ let json_string filename time analysis property  domain    =
 let output_json () =   
   let replace =  Str.regexp ("tests/[A-Za-z]+/") in
   let basefile = Str.replace_first (replace) ((!output_dir)^(!analysis)^"/") (!filename) in
-  Printf.printf "ici %s " basefile;
   let basefile = basefile^"-domain"^(!domain)^(if !ordinals then "-ordinals"^(string_of_int !Ordinals.max) else "")^(if !refine then "-refine" else "") in 
   let jsonfile = basefile^".json" in
   let output =  json_string !filename time !analysis !property !domain  in

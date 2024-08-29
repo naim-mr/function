@@ -430,12 +430,9 @@ let ctl_cfg () =
 let doit () =
   parse_args ();
   if !json_output then 
-    Printf.printf "ici wsh\n";
     Regression.create_logfile_name ();
     (* Open the log file *)
-    Printf.printf "ici %s \n" !logfile;
     f_log := Out_channel.open_bin !logfile;
-    
     (* Set the formatter to logfile*)
     fmt := Format.formatter_of_out_channel !f_log
   ;
