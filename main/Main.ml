@@ -455,12 +455,9 @@ let doit () =
   (* Parsing cli args -> into Config ref variables *)
   parse_args ();
   if !Config.json_output then 
-    Printf.printf "ici wsh\n";
     Regression.create_logfile_name ();
     (* Open the log file *)
-    Printf.printf "ici %s \n" !Config.logfile;
     Config.f_log := Out_channel.open_bin !Config.logfile;
-    
     (* Set the formatter to logfile*)
     fmt := Format.formatter_of_out_channel !Config.f_log
   ;
