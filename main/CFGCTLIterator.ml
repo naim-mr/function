@@ -6,6 +6,7 @@ open Domain
 open Partition
 open Functions
 open Semantics
+open Config
 open ForwardIterator
 open Config
 
@@ -334,6 +335,7 @@ module CFGCTLIterator(D: RANKING_FUNCTION) = struct
     let inv = compute cfg main loop_heads domSets property in
     let programInvariant = NodeMap.find main.func_entry inv in
     let precondition = Conversion.of_bool_expr precondition in
+    tree := (D.output_json  (List.map (Cfgfrontend.Conversion.of_var) cfg.cfg_vars) programInvariant);
     D.defined ~condition:precondition programInvariant
 
 end

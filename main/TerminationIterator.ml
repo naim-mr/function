@@ -17,6 +17,7 @@ open Functions
 open Semantics
 open DecisionTree
 open ForwardIterator
+open AbstractSyntax
 
 module TerminationIterator (D: RANKING_FUNCTION): SEMANTIC  =
 struct
@@ -306,6 +307,6 @@ struct
         Format.fprintf !fmt "\nBackward Analysis:\n";
       bwdMap_print !fmt !bwdInvMap;
     end;
+    tree := (D.output_json vars i);
     D.defined  ?condition:precondition i
-
 end

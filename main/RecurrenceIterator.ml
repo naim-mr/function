@@ -206,6 +206,7 @@ struct
           Format.fprintf !fmt "\nBackward Analysis:\n";
         bwdMap_print !fmt !bwdInvMap;
       end;
+    tree := (D.output_json vars i);
     D.defined  ?condition:precondition i
 
 end

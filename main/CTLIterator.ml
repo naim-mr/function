@@ -6,6 +6,7 @@ open Domain
 open Partition
 open Functions
 open Semantics
+open Config
 open ForwardIterator
 open Config
 
@@ -582,6 +583,7 @@ module CTLIterator(D: RANKING_FUNCTION): SEMANTIC = struct
     let initialLabel = block_label program.mainFunction.funcBody in
     let programInvariant = InvMap.find initialLabel inv in
     bwdInvMap := inv;
+    tree := (D.output_json  program.variables programInvariant);
     D.defined ?condition:precondition programInvariant
 
 

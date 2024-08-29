@@ -17,7 +17,6 @@ open Semantics
 (* parsing *)
 
 
-
 let parseFile filename =
   let f = open_in filename in
   let lex = Lexing.from_channel f in
@@ -179,11 +178,11 @@ let parse_args () =
     | "-ctl"::x::r -> (* CTL analysis *)
       Config.analysis := "ctl"; Config.property := x; doit r
     | "-ctl-ast"::x::r -> (* CTL analysis *)
-      Config.analysis := "ctl-ast"; Config.property := x; doit r
+      Config.analysis := "ctl"; Config.ctltype:="AST"; property := x; doit r
     | "-ctl-cfg"::x::r -> (* CTL analysis *)
-      Config.analysis := "ctl-cfg"; Config.property := x; doit r
+      Config.analysis := "ctl"; Config.ctltype:="CFG"; property := x; doit r
     | "-dot"::r -> (* print CFG and decision trees in 'dot' format *)
-      Config.dot := true; doit r
+      dot := true; doit r
     | "-precondition"::c::r -> (* optional precondition that holds 
                                   at the start of the program, default = true *)
       Config.precondition := c; doit r 
@@ -194,7 +193,11 @@ let parse_args () =
       Config.noinline := true; doit r
     | "-vulnerability"::r -> 
       Config.vulnerability := true; doit r
-    | x::r -> Config.filename := x; doit r
+    | "-json_output"::x::r -> (* guarantee analysis *)
+      Config.json_output := true; Config.output_dir :=x; time:=true; doit r
+    | "-json_output"::r -> (* guarantee analysis *)
+      Config.json_output := true; time:=true; doit r
+    | x::r -> filename := x; doit r
     | [] -> ()
   in
   doit (List.tl (Array.to_list Sys.argv))
@@ -268,6 +271,7 @@ let run_analysis analysis_function program () =
     let result = if terminating then "TRUE" else "UNKNOWN" in
     Format.fprintf !fmt "%s\n" result;
     if !time then
+      exectime := string_of_float (stop -. start);
       Format.fprintf !fmt "Time: %f s\n" (stop-.start);
     Format.fprintf !fmt "\nDone.\n";
     terminating
@@ -390,6 +394,7 @@ let ctl_ast (module S: SEMANTIC) prog property=
   let result = analyze ~precondition:(Some precondition)  ~property:(Ctl property) prog "" in
   if !time then begin
     let stoptime = Sys.time () in
+    exectime := string_of_float (stoptime-.starttime);
     Format.fprintf !fmt "\nTime: %f" (stoptime-.starttime)
   end;
   if result then 
@@ -434,6 +439,7 @@ let ctl_cfg () =
   let result = analyze ~precondition:precondition cfg mainFunc possibleLoopHeads domSets ctlProperty in
   if !time then begin
     let stoptime = Sys.time () in
+    Config.exectime := string_of_float (stoptime-.starttime);
     Format.fprintf !fmt "\nTime: %f" (stoptime-.starttime)
   end;
   if result then 
@@ -446,6 +452,16 @@ let ctl_cfg () =
 let doit () =  
   (* Parsing cli args -> into Config ref variables *)
   parse_args ();
+  if !Config.json_output then 
+    Printf.printf "ici wsh\n";
+    Regression.create_logfile_name ();
+    (* Open the log file *)
+    Printf.printf "ici %s \n" !Config.logfile;
+    Config.f_log := Out_channel.open_bin !Config.logfile;
+    
+    (* Set the formatter to logfile*)
+    fmt := Format.formatter_of_out_channel !Config.f_log
+  ;
   (* Get the right iterator *) 
   let semantic = 
       match !analysis with
@@ -468,7 +484,6 @@ let doit () =
     end;
   (* Parsing the property and the file to an ast *)
   let sources = parseFile !filename in
-  
   let program,property,prop = match !analysis with  
                           | "termination" ->  let s = Lexing.dummy_pos in 
                                               let p = ((IntermediateSyntax.I_universal (IntermediateSyntax.I_TRUE,(s,s))),(s,s)) in 
@@ -503,14 +518,26 @@ let doit () =
       | "guarantee"   -> guarantee (module S) program prop
       | "recurrence" -> recurrence (module S) program prop
       | "ctl"  (* default CTL analysis is CTL-AST *)
-      | "ctl-ast" -> ctl_ast (module S) program  (match property with Semantics.Ctl p -> p |_ ->  raise (Invalid_argument("Impossible to reach")))
-      | "ctl-cfg" -> ctl_cfg ()
+      | "ctl-ast" when !ctltype = "AST" -> ctl_ast (module S) program  (match property with Semantics.Ctl p -> p |_ ->  raise (Invalid_argument("Impossible to reach")))
+      | "ctl-cfg" when !ctltype = "CFG" -> ctl_cfg ()
       | _ -> raise (Invalid_argument "Unknown Analysis")   
   in
   let ()  =
     if !Config.vulnerability then
       (* Launch the vulnerability analysis and output the infered variables *)
       Vulnerability.analyse S.D.vulnerable  varlist f !S.bwdInvMap  
+
+  
   in
-  ret
+  Out_channel.close !Config.f_log;
+  if !Config.json_output then 
+    Regression.output_json ()
+  ;
+  (* Get the log to ouput them on std output *)
+  if !Config.output_std then
+    let f_log = In_channel.open_bin !Config.logfile in
+    let s = In_channel.input_all f_log  in 
+    Format.printf "%s\n" s
+  
+
 let _ = doit () 
