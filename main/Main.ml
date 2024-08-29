@@ -195,6 +195,8 @@ let parse_args () =
       Config.vulnerability := true; doit r
     | "-json_output"::x::r -> (* guarantee analysis *)
       Config.json_output := true; Config.output_dir :=x; time:=true; doit r
+    | "-output_std"::r -> 
+      Config.output_std := true; doit r
     | "-json_output"::r -> (* guarantee analysis *)
       Config.json_output := true; time:=true; doit r
     | x::r -> filename := x; doit r
