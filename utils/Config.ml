@@ -29,6 +29,7 @@ let timeout = ref 300.0
 let ctl_existential_equivalence = ref false 
 let tracefwd = ref false
 let tracebwd = ref false
+let tree: Yojson.Safe.t ref  = ref `Null
 let dot = ref false (* output trees in graphviz dot format *)
 let abort = ref false
 let vulnerability = ref false
