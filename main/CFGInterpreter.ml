@@ -9,7 +9,7 @@
 (***************************************************)
 
 open Cfg
-open Iterator
+open Config
 
 
 (* log worklist algorithm *)

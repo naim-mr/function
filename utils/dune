@@ -1,6 +1,6 @@
 (library
  (name utils)
- (libraries frontend)
+ (libraries frontend yojson)
  (flags
   (:standard -open Frontend)))
 

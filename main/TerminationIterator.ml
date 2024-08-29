@@ -13,7 +13,7 @@ open InvMap
 open Apron
 open Domain
 open Functions
-open Iterator
+open Config
 open AbstractSyntax
 
 module TerminationIterator (D: RANKING_FUNCTION) =
@@ -307,6 +307,7 @@ struct
         Format.fprintf !fmt "\nBackward Analysis:\n";
       bwdMap_print !fmt !bwdInvMap;
     end;
+    tree := (D.output_json vars i);
     D.defined ~condition:precondition i
 
 end

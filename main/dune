@@ -6,7 +6,7 @@
   (into ..))
  (flags
   (:standard -open Frontend -open Domains -open Cfgfrontend -open Utils))
- (libraries frontend cfgfrontend utils domains))
+ (libraries yojson frontend cfgfrontend utils domains str))
 
 (env
  (dev

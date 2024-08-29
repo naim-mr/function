@@ -5,7 +5,7 @@ open Apron
 open Domain
 open Partition
 open Functions
-open Iterator
+open Config
 open ForwardIterator
 
 (* type for CTL properties, instantiated with bExp for atomic propositions *)
@@ -557,6 +557,7 @@ module CTLIterator(D: RANKING_FUNCTION) = struct
     let inv = compute program property in
     let initialLabel = block_label program.mainFunction.funcBody in
     let programInvariant = InvMap.find initialLabel inv in
+    tree := (D.output_json  program.variables programInvariant);
     D.defined ?condition:precondition programInvariant
 
 

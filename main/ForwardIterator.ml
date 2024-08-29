@@ -7,7 +7,7 @@ open AbstractSyntax
 open InvMap
 open Apron
 open Functions
-open Iterator
+open Config
 open Domain
 open Partition
 

@@ -9,7 +9,7 @@ open ForwardIterator
 open Apron
 open Domain
 open Functions
-open Iterator
+open Config
 
 module GuaranteeIterator (D: RANKING_FUNCTION) =
 struct
@@ -149,6 +149,7 @@ struct
           Format.fprintf !fmt "\nBackward Analysis:\n";
         bwdMap_print !fmt !bwdInvMap;
       end;
+    tree := (D.output_json  vars i);
     D.defined ~condition:precondition i
 
 end

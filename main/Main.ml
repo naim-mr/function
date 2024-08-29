@@ -10,17 +10,7 @@
 
 (* parsing *)
 
-let analysis = ref "termination"
-let domain = ref "boxes"
-let filename = ref ""
-let fmt = ref Format.std_formatter
-let main = ref "main"
-let minimal = ref false
-let ordinals = ref false
-let property = ref ""
-let precondition = ref "true"
-let time = ref false
-let noinline = ref false
+open Config
 
 let parseFile filename =
   let f = open_in filename in
@@ -134,28 +124,28 @@ let parse_args () =
     | "-domain"::x::r -> (* abstract domain: boxes|octagons|polyhedra *)
       domain := x; doit r
     | "-timeout"::x::r -> (* analysis timeout *)
-      Iterator.timeout := float_of_string x; doit r
+      timeout := float_of_string x; doit r
     | "-joinfwd"::x::r -> (* widening delay in forward analysis *)
-      Iterator.joinfwd := int_of_string x; doit r
+      joinfwd := int_of_string x; doit r
     | "-joinbwd"::x::r -> (* widening delay in backward analysis *)
-      Iterator.joinbwd := int_of_string x; doit r
+      joinbwd := int_of_string x; doit r
     | "-main"::x::r -> (* analyzer entry point *) main := x; doit r
     | "-meetbwd"::x::r -> (* dual widening delay in backward analysis *)
-      Iterator.meetbwd := int_of_string x; doit r
+      meetbwd := int_of_string x; doit r
     | "-minimal"::r -> (* analysis result only *)
-      minimal := true; Iterator.minimal := true; doit r
+      minimal := true; minimal := true; doit r
     | "-ordinals"::x::r -> (* ordinal-valued ranking functions *)
       ordinals := true; Ordinals.max := int_of_string x; doit r
     | "-refine"::r -> (* refine in backward analysis *)
-      Iterator.refine := true; doit r
+      refine := true; doit r
     | "-retrybwd"::x::r ->
-      Iterator.retrybwd := int_of_string x;
+      retrybwd := int_of_string x;
       DecisionTree.retrybwd := int_of_string x;
       doit r
     | "-tracefwd"::r -> (* forward analysis trace *)
-      Iterator.tracefwd := true; doit r
+      tracefwd := true; doit r
     | "-tracebwd"::r -> (* backward analysis trace *)
-      Iterator.tracebwd := true;
+      tracebwd := true;
       DecisionTree.tracebwd := true;
       CFGInterpreter.trace := true;
       CFGInterpreter.trace_states := true;
@@ -171,26 +161,31 @@ let parse_args () =
     | "-time"::r -> (* track analysis time *)
       time := true; doit r
     | "-timefwd"::r -> (* track forward analysis time *)
-      Iterator.timefwd := true; doit r
+      timefwd := true; doit r
     | "-timebwd"::r -> (* track backward analysis time *)
-      Iterator.timebwd := true; doit r
+      timebwd := true; doit r
     (* CTL arguments ---------------------------------------------------------*)
     | "-ctl"::x::r -> (* CTL analysis *)
       analysis := "ctl"; property := x; doit r
     | "-ctl-ast"::x::r -> (* CTL analysis *)
-      analysis := "ctl-ast"; property := x; doit r
+      analysis := "ctl"; ctltype:="AST"; property := x; doit r
     | "-ctl-cfg"::x::r -> (* CTL analysis *)
-      analysis := "ctl-cfg"; property := x; doit r
+      analysis := "ctl"; ctltype:="CFG"; property := x; doit r
     | "-dot"::r -> (* print CFG and decision trees in 'dot' format *)
-      Iterator.dot := true; doit r
+      dot := true; doit r
     | "-precondition"::c::r -> (* optional precondition that holds 
                                   at the start of the program, default = true *)
       precondition := c; doit r 
     | "-ctl_existential_equivalence"::r -> (* use CTL equivalence relations to 
                                               convert existential to universal CTL properties *)
-        Iterator.ctl_existential_equivalence := true; doit r
+        ctl_existential_equivalence := true; doit r
     | "-noinline"::r -> (* don't inline function calls, only for CFG based analysis *)
       noinline := true; doit r
+    | "-json_output"::x::r -> (* guarantee analysis *)
+     json_output := true; output_dir :=x; output_dir :=x; time:=true; doit r
+    | "-json_output"::r -> (* guarantee analysis *)
+      json_output := true; time:=true; doit r
+  
     | x::r -> filename := x; doit r
     | [] -> ()
   in
@@ -262,10 +257,11 @@ let run_analysis analysis_function program () =
     let result = if terminating then "TRUE" else "UNKNOWN" in
     Format.fprintf !fmt "%s\n" result;
     if !time then
+      exectime := string_of_float (stop -. start);
       Format.fprintf !fmt "Time: %f s\n" (stop-.start);
     Format.fprintf !fmt "\nDone.\n"
   with
-  | Iterator.Timeout ->
+  | Timeout ->
     Format.fprintf !fmt "\nThe Analysis Timed Out!\n";
     Format.fprintf !fmt "\nDone.\n"
 
@@ -377,6 +373,7 @@ let ctl_ast () =
   let result = analyze ~precondition:precondition program property in
   if !time then begin
     let stoptime = Sys.time () in
+    exectime := string_of_float (stoptime-.starttime);
     Format.fprintf !fmt "\nTime: %f" (stoptime-.starttime)
   end;
   if result then 
@@ -409,7 +406,7 @@ let ctl_cfg () =
       Printf.printf "%a" Cfg_printer.print_cfg cfg;
       Printf.printf "\n";
     end;
-  if not !minimal && !Iterator.dot then
+  if not !minimal && !dot then
     begin
       Printf.printf "CFG_DOT:\n %a" Cfg_printer.output_dot cfg;
       Printf.printf "\n";
@@ -420,6 +417,7 @@ let ctl_cfg () =
   let result = analyze ~precondition:precondition cfg mainFunc possibleLoopHeads domSets ctlProperty in
   if !time then begin
     let stoptime = Sys.time () in
+    exectime := string_of_float (stoptime-.starttime);
     Format.fprintf !fmt "\nTime: %f" (stoptime-.starttime)
   end;
   if result then 
@@ -429,13 +427,35 @@ let ctl_cfg () =
 
 let doit () =
   parse_args ();
+  if !json_output then 
+    Printf.printf "ici wsh\n";
+    Regression.create_logfile_name ();
+    (* Open the log file *)
+    Printf.printf "ici %s \n" !logfile;
+    f_log := Out_channel.open_bin !logfile;
+    
+    (* Set the formatter to logfile*)
+    fmt := Format.formatter_of_out_channel !f_log
+  ;
+  let _ =  
   match !analysis with
   | "termination" -> termination ()
   | "guarantee" -> guarantee ()
   | "recurrence" -> recurrence ()
-  | "ctl" -> ctl_ast ()     (* default CTL analysis is CTL-AST *)
-  | "ctl-ast" -> ctl_ast ()
-  | "ctl-cfg" -> ctl_cfg ()
+  | "ctl" -> ctl_ast (); analysis:= "ctl"    (* default CTL analysis is CTL-AST *)
+  | "ctl-ast" when !ctltype = "AST" -> ctl_ast (); (* default CTL analysis is CTL-AST *)
+  | "ctl-cfg" when !ctltype = "CFG" -> ctl_cfg (); (* default CTL analysis is CTL-AST *)
   | _ -> raise (Invalid_argument "Unknown Analysis")
+  in
+  Out_channel.close !f_log;
+  if !json_output then 
+    Regression.output_json ()
+  ;
+  (* Get the log to ouput them on std output *)
+  if !output_std then
+    let f_log = In_channel.open_bin !logfile in
+    let s = In_channel.input_all f_log  in 
+    Format.printf "%s\n" s
+  
 
 let _ = doit () 

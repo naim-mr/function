@@ -9,7 +9,7 @@
 open Cfg
 open CFGInterpreter
 open Partition
-open Iterator
+open Config
 
 module CFGForwardIterator (B: PARTITION) = struct
 
