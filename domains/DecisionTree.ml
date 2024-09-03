@@ -774,7 +774,7 @@ struct
     (* TODO: domain widening *)
 
     (* let t2 = left_unification t2 [] in *)
-    (* Format.fprintf Format.std_formatter "\nt2[left_unification]: %a\n" (print_tree vars) t2;
+    (* Format.fprintf !Config.fmt "\nt2[left_unification]: %a\n" (print_tree vars) t2;
        domain_widen t1 *) t2
 
   let widen ?(jokers=0) t1 t2 =
@@ -890,18 +890,18 @@ struct
       let rec adjacent p1 p2 =
         match p2 with
         | [] -> leaves p1 prev lbl []
-        (* List.iter (fun p -> Format.fprintf Format.std_formatter "%s " (string_of_int p)) p1;
-           Format.fprintf Format.std_formatter "\n";
+        (* List.iter (fun p -> Format.fprintf !Config.fmt "%s " (string_of_int p)) p1;
+           Format.fprintf !Config.fmt "\n";
            leaves p1 prev lbl [] *)
         | h::ps ->
           (match h with
            | 1 -> (leaves (p1@[2]@ps) prev lbl []) @ (adjacent (p1@[1]) ps)
-           (* List.iter (fun p -> Format.fprintf Format.std_formatter "%s " (string_of_int p)) (p1@[2]@ps);
-              Format.fprintf Format.std_formatter "\n";
+           (* List.iter (fun p -> Format.fprintf !Config.fmt "%s " (string_of_int p)) (p1@[2]@ps);
+              Format.fprintf !Config.fmt "\n";
               (leaves (p1@[2]@ps) prev lbl []) @ (adjacent (p1@[1]) ps) *)
            | 2 -> (leaves (p1@[1]@ps) prev lbl []) @ (adjacent (p1@[2]) ps)
-           (* List.iter (fun p -> Format.fprintf Format.std_formatter "%s " (string_of_int p)) (p1@[1]@ps);
-              Format.fprintf Format.std_formatter "\n";
+           (* List.iter (fun p -> Format.fprintf !Config.fmt "%s " (string_of_int p)) (p1@[1]@ps);
+              Format.fprintf !Config.fmt "\n";
               (leaves (p1@[1]@ps) prev lbl []) @ (adjacent (p1@[2]) ps) *)
            | _ -> adjacent (p1@[0]) ps)
       in
@@ -911,10 +911,10 @@ struct
         | (b1,f1)::bfs ->
           if !tracebwd then
             begin
-              Format.fprintf Format.std_formatter "EXTEND\n";
-              Format.fprintf Format.std_formatter "%a? %a\n" B.print b1 F.print f1;
-              Format.fprintf Format.std_formatter "%a? %a\n" B.print b2 F.print f2;
-              Format.fprintf Format.std_formatter "%a? %a\n\n" B.print b2 F.print (F.extend b1 b2 f1 f2)
+              Format.fprintf !Config.fmt "EXTEND\n";
+              Format.fprintf !Config.fmt "%a? %a\n" B.print b1 F.print f1;
+              Format.fprintf !Config.fmt "%a? %a\n" B.print b2 F.print f2;
+              Format.fprintf !Config.fmt "%a? %a\n\n" B.print b2 F.print (F.extend b1 b2 f1 f2)
             end;
           F.join COMPUTATIONAL b2 (F.extend b1 b2 f1 f2) (extend (b2,f2) bfs)
       in
@@ -965,25 +965,25 @@ struct
     in
     if !tracebwd then
       begin
-        Format.fprintf Format.std_formatter "WIDENING\n";
-        Format.fprintf Format.std_formatter "t1: %a\n" (print_tree vars) t1;
-        Format.fprintf Format.std_formatter "\nt2: %a\n" (print_tree vars) t2
+        Format.fprintf !Config.fmt "WIDENING\n";
+        Format.fprintf !Config.fmt "t1: %a\n" (print_tree vars) t1;
+        Format.fprintf !Config.fmt "\nt2: %a\n" (print_tree vars) t2
       end;
     let t2 = widen_right (t1,t2) [] in
     if !tracebwd then
-      Format.fprintf Format.std_formatter "\nt2[widen_right]: %a\n" (print_tree vars) t2;
+      Format.fprintf !Config.fmt "\nt2[widen_right]: %a\n" (print_tree vars) t2;
     let t2 = left_unification t1 t2 domain env vars in
     if !tracebwd then
-      Format.fprintf Format.std_formatter "\nt2[left_unification]: %a\n" (print_tree vars) t2;
+      Format.fprintf !Config.fmt "\nt2[left_unification]: %a\n" (print_tree vars) t2;
     let (t1,t2) = tree_unification t1 t2 env vars in
     if !tracebwd then
       begin
-        Format.fprintf Format.std_formatter "\nt1[tree_unification]: %a\n" (print_tree vars) t1;
-        Format.fprintf Format.std_formatter "\nt2[tree_unification]: %a\n" (print_tree vars) t2
+        Format.fprintf !Config.fmt "\nt1[tree_unification]: %a\n" (print_tree vars) t1;
+        Format.fprintf !Config.fmt "\nt2[tree_unification]: %a\n" (print_tree vars) t2
       end;
     let t2 = widen_up (t1,t2) [] in
     if !tracebwd then
-      Format.fprintf Format.std_formatter "\nt2[widen_up]: %a\n" (print_tree vars) t2;
+      Format.fprintf !Config.fmt "\nt2[widen_up]: %a\n" (print_tree vars) t2;
     { domain = domain; tree = widen (t1, t2); env = env; vars = vars }
 
   let dual_widen t1 t2 =
@@ -1405,14 +1405,14 @@ struct
     in
     if false  then
       begin
-        Format.fprintf Format.std_formatter "\nLEARN :\n";
-        Format.fprintf Format.std_formatter "t1: DOMAIN = {%a}%a\n\n" print_domain domain1 (print_tree vars) t1.tree;
-        Format.fprintf Format.std_formatter "t2: DOMAIN = {%a}%a\n\n" print_domain domain2 (print_tree vars) t2.tree;
+        Format.fprintf !Config.fmt "\nLEARN :\n";
+        Format.fprintf !Config.fmt "t1: DOMAIN = {%a}%a\n\n" print_domain domain1 (print_tree vars) t1.tree;
+        Format.fprintf !Config.fmt "t2: DOMAIN = {%a}%a\n\n" print_domain domain2 (print_tree vars) t2.tree;
         List.iter (fun (c,nc) ->
           C.print vars Format.std_formatter c;
-          Format.fprintf Format.std_formatter "\n"
+          Format.fprintf !Config.fmt "\n"
         ) ls;
-        Format.fprintf Format.std_formatter "\n"
+        Format.fprintf !Config.fmt "\n"
       end;
     let add t domain bs = (* explicitely adding constraints to t *)
       let rec aux t bs cs =
@@ -1484,9 +1484,9 @@ struct
     | _ ->  add t2.tree domain2 ls in
     if !tracebwd && not(!minimal) then
       begin
-        Format.fprintf Format.std_formatter "t0: DOMAIN = {%a}%a\n\n" print_domain domain2 (print_tree vars) t2.tree;
-        Format.fprintf Format.std_formatter "t2: DOMAIN = {%a}%a\n\n" print_domain domain2 (print_tree vars) tree2;
-        Format.fprintf Format.std_formatter "t: DOMAIN = {%a}%a\n" print_domain domain1 (print_tree vars) (aux (t1.tree,tree2) [])
+        Format.fprintf !Config.fmt "t0: DOMAIN = {%a}%a\n\n" print_domain domain2 (print_tree vars) t2.tree;
+        Format.fprintf !Config.fmt "t2: DOMAIN = {%a}%a\n\n" print_domain domain2 (print_tree vars) tree2;
+        Format.fprintf !Config.fmt "t: DOMAIN = {%a}%a\n" print_domain domain1 (print_tree vars) (aux (t1.tree,tree2) [])
       end;
     { domain = domain1; tree = aux ((t1.tree,tree2)) []; env = env; vars = vars }
 

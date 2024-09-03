@@ -28,3 +28,4 @@ _tags
 .idea
 results/*
 *.exe
+logs/*

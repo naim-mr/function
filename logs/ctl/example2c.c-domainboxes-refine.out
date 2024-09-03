@@ -1,0 +1,280 @@
+Forwad Analysis: 
+[1]: bottom
+[2]: bottom
+[3]: bottom
+[4]: bottom
+[5]: bottom
+[6]: bottom
+[7]: top
+[8]: -$4{y} >= -3 && $4{y} >= -3 && $3{__return_main} == 0
+[9]: top
+[10]: top
+[11]: -$4{y} >= -3 && $4{y} >= -3
+[12]: top
+[13]: -$5{x} >= 0
+[14]: $5{x} >= 1
+[15]: $5{x} >= 1 && $1{x} >= 1
+[16]: $5{x} >= 1 && -$2{__return_get_step} >= -3 && $2{__return_get_step} >= 1 && $1{x} >= 1
+[17]: -$7{__ret_get_step} >= -3 && $7{__ret_get_step} >= 1 && $5{x} >= 1 && -$2{__return_get_step} >= -3 && $2{__return_get_step} >= 1 && $1{x} >= 1
+[18]: -$5{x} >= 0 && $1{x} >= 0
+[19]: -$5{x} >= 0 && -$2{__return_get_step} >= -3 && $2{__return_get_step} >= 1 && $1{x} >= 0
+[20]: -$8{__ret_get_step} >= -3 && $8{__ret_get_step} >= 1 && -$5{x} >= 0 && -$2{__return_get_step} >= -3 && $2{__return_get_step} >= 1 && $1{x} >= 0
+[21]: top
+[22]: top
+[23]: -$4{y} >= -3 && $4{y} >= -3 && $3{__return_main} == 0
+[24]: top
+[25]: $5{x} >= 1 && $1{x} >= 1
+[26]: $5{x} >= 1 && -$2{__return_get_step} >= -3 && $2{__return_get_step} >= 1 && $1{x} >= 1
+[27]: $5{x} >= 1 && -$1{x} >= -10 && $1{x} >= 1
+[28]: $5{x} >= 1 && -$1{x} >= -20 && $1{x} >= 1
+[29]: $5{x} >= 1 && $1{x} >= 21
+[30]: $5{x} >= 1 && -$1{x} >= -20 && $1{x} >= 11
+[31]: -$5{x} >= 0 && $1{x} >= 0
+[32]: -$5{x} >= 0 && -$2{__return_get_step} >= -3 && $2{__return_get_step} >= 1 && $1{x} >= 0
+[33]: -$5{x} >= 0 && -$1{x} >= -10 && $1{x} >= 0
+[34]: -$5{x} >= 0 && -$1{x} >= -20 && $1{x} >= 0
+[35]: -$5{x} >= 0 && $1{x} >= 21
+[36]: -$5{x} >= 0 && -$1{x} >= -20 && $1{x} >= 11
+ 
+[1:]:
+top ? bottom
+
+[2:]:
+top ? bottom
+
+[3:]:
+top ? bottom
+
+[4:]:
+top ? bottom
+
+[5:]:
+top ? bottom
+
+[6:]:
+top ? bottom
+
+[7:]:
+top ? bottom
+
+[8:]:
+top ? bottom
+
+[9:]:
+top ? bottom
+
+[10:]:
+top ? bottom
+
+[11:]:
+top ? bottom
+
+[12:]:
+top ? bottom
+
+[13:]:
+top ? bottom
+
+[14:]:
+top ? bottom
+
+[15:]:
+top ? bottom
+
+[16:]:
+top ? bottom
+
+[17:]:
+top ? bottom
+
+[18:]:
+top ? bottom
+
+[19:]:
+top ? bottom
+
+[20:]:
+top ? bottom
+
+[21:]:
+top ? bottom
+
+[22:]:
+top ? bottom
+
+[23:]:
+top ? 0.
+
+[24:]:
+top ? bottom
+
+[25:]:
+top ? bottom
+
+[26:]:
+top ? bottom
+
+[27:]:
+top ? bottom
+
+[28:]:
+top ? bottom
+
+[29:]:
+top ? bottom
+
+[30:]:
+top ? bottom
+
+[31:]:
+top ? bottom
+
+[32:]:
+top ? bottom
+
+[33:]:
+top ? bottom
+
+[34:]:
+top ? bottom
+
+[35:]:
+top ? bottom
+
+[36:]:
+top ? bottom
+
+[1:]:
+top ? bottom
+
+[2:]:
+top ? bottom
+
+[3:]:
+top ? bottom
+
+[4:]:
+top ? bottom
+
+[5:]:
+top ? bottom
+
+[6:]:
+top ? bottom
+
+[7:]:
+-$4{y} >= 4 ? bottom
+-$4{y} >= -3 && $4{y} >= -3 ? 3
+$4{y} >= 4 ? bottom
+
+[8:]:
+-$4{y} >= -3 && $4{y} >= -3 && $3{__return_main} == 0 ? 0.
+
+[9:]:
+-$4{y} >= 4 ? bottom
+-$4{y} >= -3 && $4{y} >= -3 ? 3
+$4{y} >= 4 ? bottom
+
+[10:]:
+-$5{x} >= 21 && -$4{y} >= 4 ? bottom
+-$5{x} >= 21 && -$4{y} >= -3 && $4{y} >= -3 ? 2
+-$5{x} >= 21 && $4{y} >= 4 ? bottom
+-$5{x} >= 11 && $5{x} >= -20 && -$4{y} >= 4 ? bottom
+-$5{x} >= 11 && $5{x} >= -20 && -$4{y} >= -3 && $4{y} >= -3 ? 2
+-$5{x} >= 11 && $5{x} >= -20 && $4{y} >= 4 ? bottom
+-$5{x} >= 0 && $5{x} >= -10 && -$4{y} >= 4 ? bottom
+-$5{x} >= 0 && $5{x} >= -10 && -$4{y} >= -3 && $4{y} >= -3 ? 2
+-$5{x} >= 0 && $5{x} >= -10 && $4{y} >= 4 ? bottom
+-$5{x} >= -10 && $5{x} >= 1 && -$4{y} >= 4 ? bottom
+-$5{x} >= -10 && $5{x} >= 1 && -$4{y} >= -3 && $4{y} >= -3 ? 2
+-$5{x} >= -10 && $5{x} >= 1 && $4{y} >= 4 ? bottom
+-$5{x} >= -20 && $5{x} >= 11 && -$4{y} >= 4 ? bottom
+-$5{x} >= -20 && $5{x} >= 11 && -$4{y} >= -3 && $4{y} >= -3 ? 2
+-$5{x} >= -20 && $5{x} >= 11 && $4{y} >= 4 ? bottom
+$5{x} >= 21 && -$4{y} >= 4 ? bottom
+$5{x} >= 21 && -$4{y} >= -3 && $4{y} >= -3 ? 2
+$5{x} >= 21 && $4{y} >= 4 ? bottom
+
+[11:]:
+-$4{y} >= -3 && $4{y} >= -3 ? 1
+
+[12:]:
+top ? bottom
+
+[13:]:
+-$5{x} >= 0 ? bottom
+
+[14:]:
+$5{x} >= 1 ? bottom
+
+[15:]:
+$5{x} >= 1 && $1{x} >= 1 ? bottom
+
+[16:]:
+$5{x} >= 1 && -$2{__return_get_step} >= -3 && $2{__return_get_step} >= 1 && $1{x} >= 1 ? bottom
+
+[17:]:
+-$7{__ret_get_step} >= -3 && $7{__ret_get_step} >= 1 && $5{x} >= 1 && -$2{__return_get_step} >= -3 && $2{__return_get_step} >= 1 && $1{x} >= 1 ? bottom
+
+[18:]:
+-$5{x} >= 0 && $1{x} >= 0 ? bottom
+
+[19:]:
+-$5{x} >= 0 && -$2{__return_get_step} >= -3 && $2{__return_get_step} >= 1 && $1{x} >= 0 ? bottom
+
+[20:]:
+-$8{__ret_get_step} >= -3 && $8{__ret_get_step} >= 1 && -$5{x} >= 0 && -$2{__return_get_step} >= -3 && $2{__return_get_step} >= 1 && $1{x} >= 0 ? bottom
+
+[21:]:
+top ? bottom
+
+[22:]:
+top ? bottom
+
+[23:]:
+-$4{y} >= -3 && $4{y} >= -3 && $3{__return_main} == 0 ? 0.
+
+[24:]:
+-$4{y} >= 4 ? bottom
+-$4{y} >= -3 && $4{y} >= -3 ? 3
+$4{y} >= 4 ? bottom
+
+[25:]:
+$5{x} >= 1 && $1{x} >= 1 ? bottom
+
+[26:]:
+$5{x} >= 1 && -$2{__return_get_step} >= -3 && $2{__return_get_step} >= 1 && $1{x} >= 1 ? bottom
+
+[27:]:
+$5{x} >= 1 && -$1{x} >= -10 && $1{x} >= 1 ? bottom
+
+[28:]:
+$5{x} >= 1 && -$1{x} >= -20 && $1{x} >= 1 ? bottom
+
+[29:]:
+$5{x} >= 1 && $1{x} >= 21 ? bottom
+
+[30:]:
+$5{x} >= 1 && -$1{x} >= -20 && $1{x} >= 11 ? bottom
+
+[31:]:
+-$5{x} >= 0 && $1{x} >= 0 ? bottom
+
+[32:]:
+-$5{x} >= 0 && -$2{__return_get_step} >= -3 && $2{__return_get_step} >= 1 && $1{x} >= 0 ? bottom
+
+[33:]:
+-$5{x} >= 0 && -$1{x} >= -10 && $1{x} >= 0 ? bottom
+
+[34:]:
+-$5{x} >= 0 && -$1{x} >= -20 && $1{x} >= 0 ? bottom
+
+[35:]:
+-$5{x} >= 0 && $1{x} >= 21 ? bottom
+
+[36:]:
+-$5{x} >= 0 && -$1{x} >= -20 && $1{x} >= 11 ? bottom
+
+
+Time: 0.014494
+Analysis Result: UNKNOWN

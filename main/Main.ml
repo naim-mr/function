@@ -196,9 +196,9 @@ let parse_args () =
     | "-output_std"::r -> 
       Config.output_std := true; doit r
     | "-json_output"::x::r when x <> "-output_std"-> 
-      Config.json_output := true; output_dir :=x; output_dir :=x; time:=true; doit r
-    | "-json_output"::x::r -> (* guarantee analysis *)
-      Config.json_output := true; Config.output_dir :=x; time:=true; doit r
+      Config.json_output := true; output_dir :=x; time:=true; doit r
+    | "-json_output"::r -> (* guarantee analysis *)
+      Config.json_output := true; time:=true; doit r
     | x::r -> filename := x; doit r
     | [] -> ()
   in
@@ -497,8 +497,8 @@ let doit () =
                           | "ctl" 
                           | "ctl-ast"
                           | "ctl-cfg"  -> let parsedProperty = parseCTLPropertyString !property in
-                                           let program, property = ItoA.ctl_prog_itoa parsedProperty !main (parseFile !filename) in
-                                           program,(Semantics.Ctl property), None
+                                          let program, property = ItoA.ctl_prog_itoa parsedProperty !main (parseFile !filename) in
+                                          program,(Semantics.Ctl property), None
                           
                           | _ -> raise (Invalid_argument "Unknown Analysis") 
   in
@@ -520,9 +520,10 @@ let doit () =
       | "termination" -> termination (module S) program
       | "guarantee"   -> guarantee (module S) program prop
       | "recurrence" -> recurrence (module S) program prop
+
+      | "ctl" when !ctltype = "CFG" -> ctl_cfg ()
       | "ctl"  (* default CTL analysis is CTL-AST *)
-      | "ctl-ast" when !ctltype = "AST" -> ctl_ast (module S) program  (match property with Semantics.Ctl p -> p |_ ->  raise (Invalid_argument("Impossible to reach")))
-      | "ctl-cfg" when !ctltype = "CFG" -> ctl_cfg ()
+        -> ctl_ast (module S) program  (match property with Semantics.Ctl p -> p |_ ->  raise (Invalid_argument("Impossible to reach")))
       | _ -> raise (Invalid_argument "Unknown Analysis")   
   in
   let ()  =

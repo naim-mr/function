@@ -1,0 +1,34 @@
+{
+  "Config": {
+    "filename": "tests/ctl/multi_branch_choice.c",
+    "analysis_type": "ctl",
+    "property": "AND{EF{x==4}}{EF{x==-4}}",
+    "result": "UKNOWN",
+    "domain": "polyhedra"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 5",
+      "left": { "Leaf": "8" },
+      "right": {
+        "Node": {
+          "constraint": "$2{x} >= 4",
+          "left": { "Leaf": "8" },
+          "right": {
+            "Node": {
+              "constraint": "$2{x} >= -3",
+              "left": { "Leaf": "8" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x} >= -4",
+                  "left": { "Leaf": "8" },
+                  "right": { "Leaf": "8" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

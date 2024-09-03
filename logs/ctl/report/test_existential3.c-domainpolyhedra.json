@@ -1,0 +1,40 @@
+{
+  "Config": {
+    "filename": "tests/ctl/report/test_existential3.c",
+    "analysis_type": "ctl",
+    "property": "EF{r==1}",
+    "result": "UKNOWN",
+    "domain": "polyhedra"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$3{x} >= 1",
+      "left": {
+        "Node": {
+          "constraint": "$2{r} >= 2",
+          "left": { "Leaf": "0." },
+          "right": {
+            "Node": {
+              "constraint": "$2{r} >= 1",
+              "left": { "Leaf": "0." },
+              "right": { "Leaf": "0." }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$2{r} >= 2",
+          "left": { "Leaf": "bottom" },
+          "right": {
+            "Node": {
+              "constraint": "$2{r} >= 1",
+              "left": { "Leaf": "0." },
+              "right": { "Leaf": "bottom" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "Config": {
+    "filename": "tests/termination/widening1.c",
+    "analysis_type": "ctl",
+    "property": "AF{exit: true}",
+    "result": "TRUE",
+    "domain": "boxes"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{z} >= 2",
+      "left": {
+        "Node": {
+          "constraint": "$1{y} >= 2",
+          "left": { "Leaf": " ($1{y}+$2{z}-3)⍵ + 3$1{y}+3$2{z}-2" },
+          "right": {
+            "Node": {
+              "constraint": "$1{y} >= 1",
+              "left": { "Leaf": "3$2{z}+4" },
+              "right": {
+                "Node": {
+                  "constraint": "$1{y} >= 0",
+                  "left": { "Leaf": "3$2{z}+4" },
+                  "right": { "Leaf": "3$2{z}+4" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$2{z} >= 1",
+          "left": {
+            "Node": {
+              "constraint": "$1{y} >= 2",
+              "left": { "Leaf": "3$1{y}+4" },
+              "right": {
+                "Node": {
+                  "constraint": "$1{y} >= 1",
+                  "left": { "Leaf": "7" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$1{y} >= 0",
+                      "left": { "Leaf": "7" },
+                      "right": { "Leaf": "7" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$2{z} >= 0",
+              "left": {
+                "Node": {
+                  "constraint": "$1{y} >= 2",
+                  "left": { "Leaf": "3$1{y}+4" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$1{y} >= 1",
+                      "left": { "Leaf": "7" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$1{y} >= 0",
+                          "left": { "Leaf": "4" },
+                          "right": { "Leaf": "4" }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$1{y} >= 2",
+                  "left": { "Leaf": "3$1{y}+4" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$1{y} >= 1",
+                      "left": { "Leaf": "7" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$1{y} >= 0",
+                          "left": { "Leaf": "4" },
+                          "right": { "Leaf": "1" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

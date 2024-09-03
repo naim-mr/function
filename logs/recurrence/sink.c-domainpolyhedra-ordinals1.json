@@ -1,0 +1,22 @@
+{
+  "Config": {
+    "filename": "tests/recurrence/sink.c",
+    "analysis_type": "recurrence",
+    "property": "tests/recurrence/sink.txt",
+    "result": "UKNOWN",
+    "domain": "polyhedra"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$1{x} >= 1",
+      "left": { "Leaf": "top" },
+      "right": {
+        "Node": {
+          "constraint": "$1{x} >= 0",
+          "left": { "Leaf": "0." },
+          "right": { "Leaf": "top" }
+        }
+      }
+    }
+  }
+}

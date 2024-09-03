@@ -1,0 +1,40 @@
+{
+  "Config": {
+    "filename": "tests/ctl/sv_comp/Ex02_false-termination_true-no-overflow.c",
+    "analysis_type": "ctl",
+    "property": "OR{i >= 5}{AF{exit: true}}",
+    "result": "TRUE",
+    "domain": "polyhedra"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{i} >= 7",
+      "left": { "Leaf": "0." },
+      "right": {
+        "Node": {
+          "constraint": "$2{i} >= 6",
+          "left": { "Leaf": "0." },
+          "right": {
+            "Node": {
+              "constraint": "$2{i} >= 5",
+              "left": { "Leaf": "0." },
+              "right": {
+                "Node": {
+                  "constraint": "$2{i} >= 2",
+                  "left": { "Leaf": "3$2{i}+2" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{i} >= 1",
+                      "left": { "Leaf": "5" },
+                      "right": { "Leaf": "2" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

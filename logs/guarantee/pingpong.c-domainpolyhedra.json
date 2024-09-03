@@ -1,0 +1,22 @@
+{
+  "Config": {
+    "filename": "tests/guarantee/pingpong.c",
+    "analysis_type": "guarantee",
+    "property": "tests/guarantee/pingpong.txt",
+    "result": "TRUE",
+    "domain": "polyhedra"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$3{z} >= 2",
+      "left": { "Leaf": "11" },
+      "right": {
+        "Node": {
+          "constraint": "$3{z} >= 1",
+          "left": { "Leaf": "0." },
+          "right": { "Leaf": "11" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "Config": {
+    "filename": "tests/ctl/ltl_automizer/simple-1.c",
+    "analysis_type": "ctl",
+    "property": "AF{x > 10000}",
+    "result": "TRUE",
+    "domain": "polyhedra"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$1{x} >= 10001",
+      "left": { "Leaf": "0." },
+      "right": {
+        "Node": {
+          "constraint": "$1{x} >= 2001",
+          "left": { "Leaf": "3" },
+          "right": {
+            "Node": {
+              "constraint": "$1{x} >= 2000",
+              "left": { "Leaf": "4" },
+              "right": {
+                "Node": {
+                  "constraint": "$1{x} >= 400",
+                  "left": { "Leaf": "7" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$1{x} >= 10",
+                      "left": { "Leaf": "-$1{x}+4799" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$1{x} >= 8",
+                          "left": { "Leaf": "-196$1{x}+936204" },
+                          "right": { "Leaf": "-196$1{x}+936204" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

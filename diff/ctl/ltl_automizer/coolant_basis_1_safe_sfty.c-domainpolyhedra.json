@@ -1,0 +1,22 @@
+{
+  "Config": {
+    "filename": "tests/ctl/ltl_automizer/coolant_basis_1_safe_sfty.c",
+    "analysis_type": "ctl",
+    "property": "AG{OR{chainBroken != 1}{AG{chainBroken == 1}}}",
+    "result": "UKNOWN",
+    "domain": "polyhedra"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$5{chainBroken} >= 2",
+      "left": { "Leaf": "bottom" },
+      "right": {
+        "Node": {
+          "constraint": "$5{chainBroken} >= 1",
+          "left": { "Leaf": "bottom" },
+          "right": { "Leaf": "bottom" }
+        }
+      }
+    }
+  }
+}

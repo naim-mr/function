@@ -1,0 +1,67 @@
+Forwad Analysis: 
+[1]: top
+[2]: top
+[3]: top
+[4]: $2{y} >= 1 && $1{x} >= 1
+[5]: top
+[6]: top
+[7]: top
+[8]: top
+ 
+[1:]:
+top ? bottom
+
+[2:]:
+top ? bottom
+
+[3:]:
+top ? bottom
+
+[4:]:
+top ? bottom
+
+[5:]:
+top ? bottom
+
+[6:]:
+top ? bottom
+
+[7:]:
+top ? 0.
+
+[8:]:
+top ? bottom
+
+[1:]:
+-$2{y} >= 0 ? 1
+$2{y} >= 1 && -$1{x} >= 0 ? 1.
+$2{y} >= 1 && $1{x} >= 1 ? bottom
+
+[2:]:
+top ? 0.
+
+[3:]:
+-$2{y} >= 0 ? 1
+$2{y} >= 1 && -$1{x} >= 0 ? 1.
+$2{y} >= 1 && $1{x} >= 1 ? bottom
+
+[4:]:
+$2{y} >= 1 && $1{x} >= 1 ? bottom
+
+[5:]:
+top ? bottom
+
+[6:]:
+top ? bottom
+
+[7:]:
+top ? 0.
+
+[8:]:
+-$2{y} >= 0 ? 1
+$2{y} >= 1 && -$1{x} >= 0 ? 1.
+$2{y} >= 1 && $1{x} >= 1 ? bottom
+
+
+Time: 0.002376
+Analysis Result: UNKNOWN

@@ -1,0 +1,40 @@
+{
+  "Config": {
+    "filename": "tests/termination/example5.c",
+    "analysis_type": "ctl",
+    "property": "AF{exit: true}",
+    "result": "UKNOWN",
+    "domain": "polyhedra"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 10",
+      "left": { "Leaf": "2" },
+      "right": {
+        "Node": {
+          "constraint": "$2{x} >= 5",
+          "left": { "Leaf": "4" },
+          "right": {
+            "Node": {
+              "constraint": "$2{x} >= 3",
+              "left": { "Leaf": "6" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x} >= 2",
+                  "left": { "Leaf": "8" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{x} >= 1",
+                      "left": { "Leaf": "10" },
+                      "right": { "Leaf": "bottom" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

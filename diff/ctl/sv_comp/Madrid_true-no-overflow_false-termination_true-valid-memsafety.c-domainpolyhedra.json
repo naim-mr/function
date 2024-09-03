@@ -1,0 +1,34 @@
+{
+  "Config": {
+    "filename": "tests/ctl/sv_comp/Madrid_true-no-overflow_false-termination_true-valid-memsafety.c",
+    "analysis_type": "ctl",
+    "property": "AF{AND{x==7}{EF{EG{x==2}}}}",
+    "result": "TRUE",
+    "domain": "polyhedra"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 8",
+      "left": { "Leaf": "1" },
+      "right": {
+        "Node": {
+          "constraint": "$2{x} >= 7",
+          "left": { "Leaf": "0." },
+          "right": {
+            "Node": {
+              "constraint": "$2{x} >= 3",
+              "left": { "Leaf": "1" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x} >= 2",
+                  "left": { "Leaf": "1" },
+                  "right": { "Leaf": "1" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

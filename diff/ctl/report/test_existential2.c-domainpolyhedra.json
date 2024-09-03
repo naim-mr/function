@@ -1,0 +1,76 @@
+{
+  "Config": {
+    "filename": "tests/ctl/report/test_existential2.c",
+    "analysis_type": "ctl",
+    "property": "EF{r==1}",
+    "result": "TRUE",
+    "domain": "polyhedra"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$4{r} >= 2",
+      "left": {
+        "Node": {
+          "constraint": "$2{x} >= 200",
+          "left": { "Leaf": "bottom" },
+          "right": {
+            "Node": {
+              "constraint": "$2{x} >= 199",
+              "left": { "Leaf": "5" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x} >= 198",
+                  "left": { "Leaf": "8" },
+                  "right": { "Leaf": "-3$2{x}+602" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$4{r} >= 1",
+          "left": {
+            "Node": {
+              "constraint": "$2{x} >= 200",
+              "left": { "Leaf": "0." },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x} >= 199",
+                  "left": { "Leaf": "0." },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{x} >= 198",
+                      "left": { "Leaf": "0." },
+                      "right": { "Leaf": "0." }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$2{x} >= 200",
+              "left": { "Leaf": "bottom" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x} >= 199",
+                  "left": { "Leaf": "5" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{x} >= 198",
+                      "left": { "Leaf": "8" },
+                      "right": { "Leaf": "-3$2{x}+602" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

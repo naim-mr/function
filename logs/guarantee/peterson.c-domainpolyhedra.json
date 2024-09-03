@@ -1,0 +1,10 @@
+{
+  "Config": {
+    "filename": "tests/guarantee/peterson.c",
+    "analysis_type": "guarantee",
+    "property": "tests/guarantee/peterson.txt",
+    "result": "TRUE",
+    "domain": "polyhedra"
+  },
+  "tree": { "Leaf": "16" }
+}

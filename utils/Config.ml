@@ -8,7 +8,6 @@ let retrybwd = ref 5
 let analysis = ref "termination"
 let domain = ref "boxes"
 let filename = ref ""
-let fmt = ref Format.std_formatter
 let main = ref "main"
 let minimal = ref false
 let compress = ref true (* false *)

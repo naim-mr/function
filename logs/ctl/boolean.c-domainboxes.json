@@ -1,0 +1,46 @@
+{
+  "Config": {
+    "filename": "tests/termination/boolean.c",
+    "analysis_type": "ctl",
+    "property": "AF{exit: true}",
+    "result": "TRUE",
+    "domain": "boxes"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 3",
+      "left": { "Leaf": "3$2{x}+2" },
+      "right": {
+        "Node": {
+          "constraint": "$2{x} >= 2",
+          "left": { "Leaf": "8" },
+          "right": {
+            "Node": {
+              "constraint": "$2{x} >= 1",
+              "left": { "Leaf": "5" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x} >= 0",
+                  "left": { "Leaf": "2" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{x} >= -1",
+                      "left": { "Leaf": "5" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$2{x} >= -2",
+                          "left": { "Leaf": "8" },
+                          "right": { "Leaf": "-3$2{x}+2" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

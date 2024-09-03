@@ -1,0 +1,10 @@
+{
+  "Config": {
+    "filename": "tests/termination/example8.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "TRUE",
+    "domain": "boxes"
+  },
+  "tree": { "Leaf": "36" }
+}

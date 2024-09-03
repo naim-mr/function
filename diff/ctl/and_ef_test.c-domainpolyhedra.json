@@ -1,0 +1,28 @@
+{
+  "Config": {
+    "filename": "tests/ctl/and_ef_test.c",
+    "analysis_type": "ctl",
+    "property": "AND{EF{x == 2}}{EF{x==3}}",
+    "result": "TRUE",
+    "domain": "polyhedra"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 4",
+      "left": { "Leaf": "2" },
+      "right": {
+        "Node": {
+          "constraint": "$2{x} >= 3",
+          "left": { "Leaf": "2" },
+          "right": {
+            "Node": {
+              "constraint": "$2{x} >= 2",
+              "left": { "Leaf": "2" },
+              "right": { "Leaf": "2" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
