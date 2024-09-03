@@ -95,7 +95,7 @@ struct
       | Node ((c,_),l,r) -> 
             `Assoc [("Node",`Assoc [("constraint",`String (Format.asprintf "%a" (C.print vars) c  ));("left", aux l );("right", aux r)] )]
      in aux t.tree
-  (**
+  (*
      Prints a tree in graphviz 'dot' format for visualization. 
      http://www.graphviz.org/content/dot-language
   *)
@@ -1324,15 +1324,15 @@ struct
         | _ -> Node((c,nc),l,r)
     in { domain = domain; tree = aux t.tree []; env = env; vars = vars }
 
-  let rec print fmt t =
+  let print fmt t =
     let domain = t.domain in
     let env = t.env in
     let vars = t.vars in
-    let print_domain fmt domain =
-      match domain with
-      | None -> ()
-      | Some domain -> B.print fmt domain
-    in
+    (* let print_domain fmt domain = *)
+      (* match domain with *)
+      (* | None -> () *)
+      (* | Some domain -> B.print fmt domain *)
+    (* in *)
     let rec aux t cs =
       match t with
       | Bot ->
