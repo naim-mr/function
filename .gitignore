@@ -27,3 +27,4 @@ ocamlbuild_opt.sh
 _tags
 .idea
 results/*
+*.exe
