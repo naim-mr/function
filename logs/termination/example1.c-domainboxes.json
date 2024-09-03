@@ -1,0 +1,22 @@
+{
+  "Config": {
+    "filename": "tests/termination/example1.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "TRUE",
+    "domain": "boxes"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 11",
+      "left": { "Leaf": "2" },
+      "right": {
+        "Node": {
+          "constraint": "$2{x} >= 10",
+          "left": { "Leaf": "4" },
+          "right": { "Leaf": "-2$2{x}+24" }
+        }
+      }
+    }
+  }
+}

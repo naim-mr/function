@@ -1,0 +1,10 @@
+{
+  "Config": {
+    "filename": "tests/termination/example8.c",
+    "analysis_type": "ctl",
+    "property": "AF{exit: true}",
+    "result": "TRUE",
+    "domain": "boxes"
+  },
+  "tree": { "Leaf": "36" }
+}

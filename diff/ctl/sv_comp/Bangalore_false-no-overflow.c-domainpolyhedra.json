@@ -1,0 +1,16 @@
+{
+  "Config": {
+    "filename": "tests/ctl/sv_comp/Bangalore_false-no-overflow.c",
+    "analysis_type": "ctl",
+    "property": "EF{x < 0}",
+    "result": "TRUE",
+    "domain": "polyhedra"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 0",
+      "left": { "Leaf": "0." },
+      "right": { "Leaf": "0." }
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "Config": {
+    "filename": "tests/ctl/ltl_automizer/toggletoggle_true-valid-ltl.c",
+    "analysis_type": "ctl",
+    "property": "AG{AND{AF{t==1}}{AF{t==0}}}",
+    "result": "TRUE",
+    "domain": "polyhedra"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$1{t} >= 2",
+      "left": { "Leaf": "6" },
+      "right": {
+        "Node": {
+          "constraint": "$1{t} >= 1",
+          "left": { "Leaf": "3" },
+          "right": {
+            "Node": {
+              "constraint": "$1{t} >= 0",
+              "left": { "Leaf": "3" },
+              "right": { "Leaf": "6" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
