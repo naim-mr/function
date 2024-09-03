@@ -268,6 +268,7 @@ let run_analysis analysis_function program () =
     
     let start = Sys.time () in
     let terminating = analysis_function program !main in
+    Config.result := terminating;
     let stop = Sys.time () in
     Format.fprintf !fmt "Final Analysis Result: ";
     let result = if terminating then "TRUE" else "UNKNOWN" in
@@ -439,6 +440,7 @@ let ctl_cfg () =
   let possibleLoopHeads = Loop_detection.possible_loop_heads cfg mainFunc in
   let domSets = Loop_detection.dominator cfg mainFunc in
   let result = analyze ~precondition:precondition cfg mainFunc possibleLoopHeads domSets ctlProperty in
+  Config.result := result;
   if !time then begin
     let stoptime = Sys.time () in
     Config.exectime := string_of_float (stoptime-.starttime);
@@ -454,7 +456,7 @@ let ctl_cfg () =
 let doit () =  
   (* Parsing cli args -> into Config ref variables *)
   parse_args ();
-  if !jConfig.json_output then 
+  if !Config.json_output then 
     begin
     Regression.create_logfile_name ();
     (* Open the log file *)

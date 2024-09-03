@@ -11,6 +11,7 @@ let json_string filename time analysis property  domain    =
   {"filename" : "%s",
    "analysis_type": "%s",
    "property": "%s",
+   "result": "%s",
    "domain": "%s"
     }|} 
     filename analysis property domain  
@@ -20,7 +21,7 @@ let output_json () =
   let basefile = Str.replace_first (replace) ((!output_dir)^(!analysis)^"/") (!filename) in
   let basefile = basefile^"-domain"^(!domain)^(if !ordinals then "-ordinals"^(string_of_int !Ordinals.max) else "")^(if !refine then "-refine" else "") in 
   let jsonfile = basefile^".json" in
-  let output =  json_string !filename time !analysis !property !domain  in
+  let output =  json_string !filename time !analysis !property (if !Config.result then "TRUE" else "UKNOWN") !domain  in
   let json : Yojson.Safe.t =  `Assoc(("Config",Yojson.Safe.from_string output)::[("tree", !tree)]) in 
   let f = Out_channel.open_bin (jsonfile) in
   Yojson.Safe.pretty_to_channel f json;
