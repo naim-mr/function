@@ -1,0 +1,22 @@
+{
+  "Config": {
+    "filename": "tests/termination/postdecrement.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "TRUE",
+    "domain": "boxes"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 1",
+      "left": { "Leaf": "3$2{x}+5" },
+      "right": {
+        "Node": {
+          "constraint": "$2{x} >= 0",
+          "left": { "Leaf": "5" },
+          "right": { "Leaf": "2" }
+        }
+      }
+    }
+  }
+}

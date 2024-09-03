@@ -1,0 +1,46 @@
+{
+  "Config": {
+    "filename": "tests/ctl/or_test.c",
+    "analysis_type": "ctl",
+    "property": "OR{EF{EG{x < -100}}}{AF{x==20}}",
+    "result": "TRUE",
+    "domain": "polyhedra"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 21",
+      "left": { "Leaf": "2" },
+      "right": {
+        "Node": {
+          "constraint": "$2{x} >= 20",
+          "left": { "Leaf": "0." },
+          "right": {
+            "Node": {
+              "constraint": "$2{x} >= 1",
+              "left": { "Leaf": "2" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x} >= -98",
+                  "left": { "Leaf": "2$2{x}+203" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{x} >= -99",
+                      "left": { "Leaf": "5" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$2{x} >= -100",
+                          "left": { "Leaf": "3" },
+                          "right": { "Leaf": "0." }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

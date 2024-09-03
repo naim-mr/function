@@ -1,0 +1,76 @@
+{
+  "Config": {
+    "filename": "tests/termination/cacm2009a.c",
+    "analysis_type": "ctl",
+    "property": "AF{exit: true}",
+    "result": "TRUE",
+    "domain": "boxes"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{y} >= 2",
+      "left": {
+        "Node": {
+          "constraint": "$1{x} >= 2",
+          "left": { "Leaf": "7$1{x}+3$2{y}-5" },
+          "right": {
+            "Node": {
+              "constraint": "$1{x} >= 1",
+              "left": { "Leaf": "3$2{y}+2" },
+              "right": { "Leaf": "1" }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$2{y} >= 1",
+          "left": {
+            "Node": {
+              "constraint": "$1{x} >= 2",
+              "left": { "Leaf": "7$1{x}-2" },
+              "right": {
+                "Node": {
+                  "constraint": "$1{x} >= 1",
+                  "left": { "Leaf": "5" },
+                  "right": { "Leaf": "1" }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$2{y} >= 0",
+              "left": {
+                "Node": {
+                  "constraint": "$1{x} >= 2",
+                  "left": { "Leaf": "1" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$1{x} >= 1",
+                      "left": { "Leaf": "1" },
+                      "right": { "Leaf": "1" }
+                    }
+                  }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$1{x} >= 2",
+                  "left": { "Leaf": "1" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$1{x} >= 1",
+                      "left": { "Leaf": "1" },
+                      "right": { "Leaf": "1" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

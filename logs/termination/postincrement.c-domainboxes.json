@@ -1,0 +1,22 @@
+{
+  "Config": {
+    "filename": "tests/termination/postincrement.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "TRUE",
+    "domain": "boxes"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 11",
+      "left": { "Leaf": "2" },
+      "right": {
+        "Node": {
+          "constraint": "$2{x} >= 10",
+          "left": { "Leaf": "5" },
+          "right": { "Leaf": "-3$2{x}+35" }
+        }
+      }
+    }
+  }
+}
