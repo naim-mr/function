@@ -253,6 +253,7 @@ let run_analysis analysis_function program () =
   try
     let start = Sys.time () in
     let terminating = analysis_function program !main in
+    Config.result := terminating;
     let stop = Sys.time () in
     Format.fprintf !fmt "Analysis Result: ";
     let result = if terminating then "TRUE" else "UNKNOWN" in
@@ -372,6 +373,7 @@ let ctl_ast () =
     | _ -> raise (Invalid_argument "Unknown Abstract Domain")
   in
   let result = analyze ~precondition:precondition program property in
+  Config.result := result;
   if !time then begin
     let stoptime = Sys.time () in
     exectime := string_of_float (stoptime-.starttime);
@@ -416,6 +418,7 @@ let ctl_cfg () =
   let possibleLoopHeads = Loop_detection.possible_loop_heads cfg mainFunc in
   let domSets = Loop_detection.dominator cfg mainFunc in
   let result = analyze ~precondition:precondition cfg mainFunc possibleLoopHeads domSets ctlProperty in
+  Config.result := result;
   if !time then begin
     let stoptime = Sys.time () in
     exectime := string_of_float (stoptime-.starttime);
@@ -448,8 +451,10 @@ let doit () =
   | _ -> raise (Invalid_argument "Unknown Analysis")
   in
   if !json_output then 
+    begin
     Out_channel.close !f_log;
     Regression.output_json ()
+    end
   ;
   (* Get the log to ouput them on std output *)
   if !output_std && !json_output then
