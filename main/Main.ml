@@ -509,7 +509,7 @@ let doit () =
   let varlist = AbstractSyntax.StringMap.to_seq vars |> List.of_seq |> List.map snd  in 
   let module S = (val semantic: SEMANTIC) in 
   (* Launch the analysis and get the returned output "true" or "unknow" *)
-  let ret =
+  let _ =
     if !Config.cda then
     let module C = (val (cda_run semantic): CDA_ITERATOR) in
     let parsedPrecondition = parsePropertyString !precondition in
@@ -526,12 +526,10 @@ let doit () =
         -> ctl_ast (module S) program  (match property with Semantics.Ctl p -> p |_ ->  raise (Invalid_argument("Impossible to reach")))
       | _ -> raise (Invalid_argument "Unknown Analysis")   
   in
-  let ()  =
+  let _ =
     if !Config.vulnerability then
       (* Launch the vulnerability analysis and output the infered variables *)
       Vulnerability.analyse S.D.vulnerable  varlist f !S.bwdInvMap  
-
-  
   in
   if !Config.json_output then
     begin

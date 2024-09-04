@@ -95,7 +95,7 @@ struct
       | Node ((c,_),l,r) -> 
             `Assoc [("Node",`Assoc [("constraint",`String (Format.asprintf "%a" (C.print vars) c  ));("left", aux l );("right", aux r)] )]
      in aux t.tree
-  (**
+  (*
      Prints a tree in graphviz 'dot' format for visualization. 
      http://www.graphviz.org/content/dot-language
   *)
