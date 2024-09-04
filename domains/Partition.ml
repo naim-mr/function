@@ -24,7 +24,6 @@ module type PARTITION = sig
   val bot : Environment.t -> var list -> t
   val inner : Environment.t -> var list -> C.t list -> t
   val top : Environment.t -> var list -> t
-
   val isBot : t -> bool
   val isLeq : t -> t -> bool
   val assume : ?pow:float -> t -> t * t
@@ -37,7 +36,9 @@ module type PARTITION = sig
   val bwdAssign_underapprox : t -> aExp * aExp -> t
   val filter : t -> bExp -> t
   val filter_underapprox : t -> bExp -> t
-
+  val taint: aExp -> t -> var list -> Environment.t -> bool
+  val taint_b: bExp -> t -> var list -> Environment.t -> bool
+  val refine: var list -> t -> Environment.t -> var list
   val print : Format.formatter -> t -> unit
 
 end

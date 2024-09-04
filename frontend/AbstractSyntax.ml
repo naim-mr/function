@@ -29,6 +29,7 @@ module VarMap = Map.Make(
     type t = var
     let compare x1 x2 = compare x1.varId x2.varId
   end)
+let annotate e = (e, (Lexing.dummy_pos, Lexing.dummy_pos))
 
 (* arithmetic binary operators *)
 type aBinOp =
@@ -129,6 +130,7 @@ let rBinOp_print fmt = function
 
 (* arithmetic expressions *)
 type aExp =
+  | A_INPUT
   | A_RANDOM	(* ? *)
   | A_var of var
   | A_const of int
@@ -150,6 +152,7 @@ let aExp_prec = function
 
 let rec aExp_to_apron e =
   match e with
+  | A_INPUT 
   | A_RANDOM -> Texpr1.Cst (Coeff.Interval Interval.top)
   | A_var x -> Texpr1.Var (Var.of_string x.varId)
   | A_const i -> Texpr1.Cst (Coeff.s_of_int i)
@@ -170,6 +173,7 @@ let rec aExp_to_apron e =
 
 let rec aExp_print fmt (e,_) =
   match e with
+  | A_INPUT -> Format.fprintf fmt "input()"
   | A_RANDOM -> Format.fprintf fmt "?"
   | A_var v -> var_print fmt v
   | A_const i -> Format.fprintf fmt "%i" i
@@ -192,6 +196,7 @@ let rec aExp_print fmt (e,_) =
 type bExp =
   | A_TRUE
   | A_MAYBE	(* ? *)
+  | A_MAYBE_I (*input*)
   | A_FALSE
   | A_bunary of bUnOp * (bExp annotated)
   | A_bbinary of bBinOp * (bExp annotated) * (bExp annotated)
@@ -205,7 +210,8 @@ let bExp_prec = function
 
 let rec negBExp (b,a) =
   match b with
-  | A_TRUE -> (A_FALSE,a)
+  | A_TRUE 
+  | A_MAYBE_I 
   | A_MAYBE -> (A_MAYBE,a)
   | A_FALSE -> (A_TRUE,a)
   | A_bunary (o,b) ->
@@ -219,6 +225,7 @@ let rec bExp_print_aux fmt e =
   match e with
   | A_TRUE -> Format.fprintf fmt "true"
   | A_MAYBE -> Format.fprintf fmt "?"
+  | A_MAYBE_I -> Format.fprintf fmt "input"
   | A_FALSE -> Format.fprintf fmt "false"
   | A_bunary (o,e1) ->
     Format.fprintf fmt "%a" bUnOp_print o;
@@ -241,6 +248,31 @@ let rec bExp_print_aux fmt e =
     if aExp_prec (fst e2) <= bExp_prec e
     then Format.fprintf fmt " (%a)" aExp_print e2
     else Format.fprintf fmt " %a" aExp_print e2
+let rec bExp_to_apron e =
+  match e with
+  | A_TRUE -> Texpr1.Cst (Coeff.i_of_int 1 1)
+  | A_MAYBE_I 
+  | A_MAYBE -> Texpr1.Cst (Coeff.Interval Interval.top)
+  | A_FALSE -> Texpr1.Cst (Coeff.i_of_int 0 0)
+  | A_bunary (o,(e,_)) ->
+    let e = bExp_to_apron e in 
+    (match o with
+     | A_NOT -> Texpr1.Unop (Texpr1.Neg,e,Texpr1.Int,Texpr1.Zero))
+  | A_rbinary (o,a1,a2) -> 
+    begin
+    match o with 
+    | A_LESS -> aExp_to_apron (A_abinary (A_MINUS,a2, annotate (A_abinary (A_PLUS, a1,(annotate (A_const 1))))))
+    | A_LESS_EQUAL -> aExp_to_apron (A_abinary (A_MINUS,a2, a1))
+    | A_GREATER	-> aExp_to_apron (A_abinary (A_MINUS,a1, annotate (A_abinary (A_PLUS, a2,(annotate (A_const 1))))))		(* > *)
+    | A_GREATER_EQUAL	-> aExp_to_apron (A_abinary (A_MINUS,a1, a2))
+    end
+  | A_bbinary (o,e1,e2) -> 
+    let t1 = bExp_to_apron (fst e1) in 
+    let t2 = bExp_to_apron (fst e2) in 
+    match o with  
+    | A_AND -> Texpr1.Binop (Texpr1.Add,t1,t2,Texpr1.Int,Texpr1.Zero)
+    | A_OR -> Texpr1.Binop (Texpr1.Mul,t1,t2,Texpr1.Int,Texpr1.Zero)
+
 
 let bExp_print fmt b = bExp_print_aux fmt (fst b)
 
@@ -352,4 +384,4 @@ let prog_print fmt (_,b,fs) = block_print "" fmt b; StringMap.iter (fun _ f -> f
 
 (* utility *)
 
-let annotate e = (e, (Lexing.dummy_pos, Lexing.dummy_pos))
+

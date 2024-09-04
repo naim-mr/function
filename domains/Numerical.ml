@@ -121,13 +121,95 @@ module Numerical(N: NUMERICAL)(C: CONSTRAINT): PARTITION = struct
 
   (**)
 
-
   let to_apron_t (t:t) : apron_t = 
     let env = t.env in
     let a = Lincons1.array_make env (List.length t.constraints) in
     let i = ref 0 in
     List.iter (fun c -> Lincons1.array_set a !i c; i := !i + 1) t.constraints;
     Abstract1.of_lincons_array manager env a 
+
+  let rec taint (exp: aExp) (b:t) (dpl: var list) (env: Environment.t)  =
+    if isBot b then
+      false
+    else
+      match exp with
+      | A_INPUT -> true
+      | A_RANDOM -> false
+      | A_var x -> 
+        let texp = (Texpr1.of_expr env (aExp_to_apron exp)) in 
+        if  Texpr1.is_interval_cst texp  then 
+          false
+        else 
+          List.mem x dpl
+      | A_const _ -> false
+      | A_interval (i1,i2) -> false
+      | A_aunary (o,(e,_)) ->
+        let texp = (Texpr1.of_expr env (aExp_to_apron exp)) in 
+        let itv = Abstract1.bound_texpr manager (to_apron_t b) texp in
+        let inf = itv.Interval.inf in
+        let sup = itv.Interval.sup in
+        if Scalar.equal inf sup  then 
+          false
+        else 
+          taint e b dpl env
+      | A_abinary (o,(e1,_),(e2,_)) ->
+        let texp = (Texpr1.of_expr env (aExp_to_apron exp)) in 
+        let itv = Abstract1.bound_texpr manager (to_apron_t b) texp in
+        let inf = itv.Interval.inf in
+        let sup = itv.Interval.sup in
+        if Scalar.equal inf sup then 
+          false
+        else
+          (taint e1 b dpl env) || (taint e2 b dpl env)
+  let rec taint_b (exp: bExp) (b:t) (dpl: var list) (env: Environment.t)  =
+    if isBot b then 
+      false 
+    else  
+      match exp with 
+      | A_TRUE 
+      | A_MAYBE
+      | A_FALSE -> false
+      | A_MAYBE_I -> true
+      | A_bunary (o,(e,_)) ->        
+        let texp = (Texpr1.of_expr env (bExp_to_apron e)) in 
+        let itv = Abstract1.bound_texpr manager (to_apron_t b) texp in
+        let inf = itv.Interval.inf in
+        let sup = itv.Interval.sup in
+        if Scalar.equal inf sup then 
+          false
+        else
+        (taint_b e b dpl env)
+      | A_bbinary (o,(e1,_),(e2,_)) ->        
+        let texp = (Texpr1.of_expr env (bExp_to_apron exp)) in 
+        let itv = Abstract1.bound_texpr manager (to_apron_t b) texp in
+        let inf = itv.Interval.inf in
+        let sup = itv.Interval.sup in
+        if Scalar.equal inf sup then 
+          false
+        else
+        (taint_b e1 b dpl env) || (taint_b e2 b dpl env) 
+      | A_rbinary (o,(e1,_),(e2,_)) ->        
+          let texp = (Texpr1.of_expr env (bExp_to_apron exp)) in 
+          let itv = Abstract1.bound_texpr manager (to_apron_t b) texp in
+          let inf = itv.Interval.inf in
+          let sup = itv.Interval.sup in
+          if Scalar.equal inf sup then 
+            false
+          else
+          (taint e1 b dpl env) || (taint e2 b dpl env) 
+      | _ -> assert false
+      (* | A_bbinary of bBinOp * (bExp annotated) * (bExp annotated)
+      | A_rbinary of rBinOp * (aExp annotated) * *)
+
+  let var_is_const x b env = 
+    let v = Texpr1.var env (Var.of_string x.varId) in 
+    let itv = Abstract1.bound_texpr manager (to_apron_t b) v in
+    let inf = itv.Interval.inf in
+    let sup = itv.Interval.sup in
+    Scalar.equal inf sup
+  
+  let refine dpl t env = 
+    List.fold_left (fun acc x -> if var_is_const x t env then acc else x::acc) [] dpl
 
   let of_apron_t env vars (a:apron_t) : t = 
     let a = Abstract1.to_lincons_array manager a in
@@ -496,8 +578,9 @@ module Numerical(N: NUMERICAL)(C: CONSTRAINT): PARTITION = struct
 
   let rec filter b e =
     match e with
-    | A_TRUE -> b
-    | A_MAYBE -> b
+    | A_TRUE 
+    | A_MAYBE 
+    | A_MAYBE_I -> b
     | A_FALSE -> bot b.env b.vars
     | A_bunary (o,e) ->
       (match o with

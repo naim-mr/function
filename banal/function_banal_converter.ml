@@ -48,7 +48,8 @@ let rec of_aExp_aux (aExp:FAS.aExp) : expr =
       | FAS.A_MULTIPLY -> A_MULTIPLY
       | FAS.A_DIVIDE -> A_DIVIDE
     in T_binary (binOp, expr1, expr2) 
-  | FAS.A_RANDOM -> T_int_const (Banal_intinf.minus_inf, Banal_intinf.inf) 
+  | FAS.A_INPUT | FAS.A_RANDOM -> T_int_const (Banal_intinf.minus_inf, Banal_intinf.inf) 
+  
     
 let of_aExp (aExp:FAS.aExp) : expr typed = (of_aExp_aux aExp, int_type, dummy_extent)
     
@@ -56,6 +57,7 @@ let rec of_bExp_aux (bExp:FAS.bExp) : expr =
   match bExp with 
   | FAS.A_TRUE -> T_bool_const True
   | FAS.A_MAYBE	-> T_bool_const Maybe
+  | FAS.A_MAYBE_I	-> T_bool_const Maybe
   | FAS.A_FALSE -> T_bool_const False
   | FAS.A_bunary (op, (e,_)) ->
     let expr = (of_bExp_aux e, A_BOOL, dummy_extent) in

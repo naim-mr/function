@@ -79,6 +79,7 @@ let rec exp_itoa
     match exp with
     | I_TRUE -> (A_boolean (A_TRUE, a), env, pre, post)
     | I_RANDOM -> (A_arithmetic (A_RANDOM, a), env, pre, post)
+    | I_INPUT -> (A_arithmetic (A_INPUT, a), env, pre, post)
     | I_FALSE -> (A_boolean (A_FALSE, a), env, pre, post)
     | I_id x -> (A_arithmetic (A_var (getVar env x a), a), env, pre, post)
     | I_const i -> (A_arithmetic (A_const (int_of_string i), a),env,pre,post)

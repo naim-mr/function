@@ -51,6 +51,7 @@ open IntermediateSyntax
 %token TOK_MULTIPLY_EQUAL;
 %token TOK_DIVIDE_EQUAL;
 %token TOK_MODULO_EQUAL;
+%token TOK_INPUT;
 %token TOK_RANDOM;
 
 %token <string> TOK_const
@@ -189,6 +190,7 @@ postfix_exp:
 primary_exp:
 	| TOK_TRUE																										{ I_TRUE }
 	| TOK_RANDOM																									{ I_RANDOM }
+	| TOK_INPUT																										{ I_INPUT }
 	| TOK_FALSE																										{ I_FALSE }
 	| e = TOK_id																									{ I_id e }
 	| TOK_MULTIPLY e = TOK_id																						{ I_id e }

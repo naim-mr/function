@@ -1202,7 +1202,7 @@ struct
               | _ -> Node((nx,x),Bot,r)))
     in
     match e with
-    | A_TRUE | A_MAYBE -> { domain = pre; tree = aux t.tree [] []; env = env; vars = vars }
+    | A_TRUE | A_MAYBE | A_MAYBE_I -> { domain = pre; tree = aux t.tree [] []; env = env; vars = vars }
     | A_FALSE -> { domain = pre; tree = Bot; env = env; vars = vars }
     | A_bunary (o,e) ->
       (match o with

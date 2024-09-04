@@ -79,7 +79,7 @@ struct
         Format.fprintf !fmt "\nForward Analysis[%i] Trace:\n" n ;
       let startfwd = Sys.time () in
       (* Compute the forward analysis starting from the environment b (top at the begining) *)
-      S.fwdInvMap := ForwardIteratorB.compute   (vars,stmts,funcs)  b main env;
+      S.fwdInvMap := ForwardIteratorB.compute  (vars,stmts,funcs)  b main env;
        (* fwdBlk funcs env vars (fwdBlk funcs env vars b stmts) s in *)
       let stopfwd = Sys.time () in
       if not !minimal then (

@@ -18,6 +18,7 @@ let _ = List.iter (fun (a,b) -> Hashtbl.add keyword a b)
 		"int", TOK_INT;
 		"for", TOK_FOR;
 		"return", TOK_RETURN;
+		"input", TOK_INPUT;
 		"true", TOK_TRUE;
 		"void", TOK_VOID;
 		"while", TOK_WHILE;
@@ -100,3 +101,4 @@ and comment = parse
 	| "*/"			{ () }
 	| [^ '\n' '\r']	{ comment lexbuf }
 	| newline		{ new_line lexbuf; comment lexbuf }
+

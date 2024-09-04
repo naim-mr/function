@@ -280,6 +280,7 @@ struct
     initBlk env vars stmts; initBlk env vars s; 
     (* TODO: handle functions calls *)
     (* Forward Analysis *)
+    let _ = ForwardIteratorB.dep (vars,stmts,funcs) main env (ForwardIteratorB.compute (vars,stmts,funcs)(B.top env vars) main env) in
     if !tracefwd && not !minimal then
       Format.fprintf !fmt "\nForward Analysis Trace:\n";
     let startfwd = Sys.time () in

@@ -15,6 +15,99 @@ open Partition
 module ForwardIterator (B: PARTITION) =
 struct
   (* compute invariant map based on forward analysis *)
+  
+  
+  let rec assignedStmt stmt b fwdInvMap=
+    match stmt with
+      | A_label _ -> []
+      | A_return -> []
+      | A_assign ((A_var (x),(l,_)),(A_INPUT,_)) 
+      | A_assign ((A_var (x),(l,_)),(A_RANDOM,_)) -> [x]
+      | A_assign ((A_var (x),(l,_)),(exp,_)) -> [x]
+      | A_assign _ -> []
+      | A_assert _ -> []
+      | A_if ((b,ba),s1,s2) ->
+        let a1 = assignedBlk s1 b fwdInvMap in
+        let a2 = assignedBlk s2 (fst (negBExp (b,ba))) fwdInvMap in
+        a1@a2
+      | A_while (l,(b,ba),s) ->
+        assert false
+      | A_call (f,ss) ->
+        raise (Invalid_argument "fwdStm:A_call")
+      | A_recall (f,ss) -> raise (Invalid_argument "fwdStm:A_recall")
+    and assignedBlk block bnum fwdInvMap =
+      match block with
+      | A_empty l ->
+        []
+      | A_block (l,(s,_),b) ->
+        (assignedStmt s (InvMap.find l fwdInvMap) fwdInvMap) @ (assignedBlk b bnum fwdInvMap)
+      
+
+  let dep (vars, stmts, funcs) main env fwdInvMap =
+    let fwdTaintMap = ref InvMap.empty in
+    let addFwdInv l (a: var list) = fwdTaintMap := InvMap.add l a !fwdTaintMap in
+    let rec fwdStm dpl s num_env =
+      match s with
+      | A_label _ -> dpl
+      | A_return -> dpl
+      (* Random sequence read is controlled or not ? *)
+      | A_assign ((A_var (x),(l,_)),(exp,_)) ->
+        let dpl = List.filter (fun v -> v.varName <> x.varName ) dpl in 
+        if B.taint exp num_env dpl env then
+          x::dpl
+        else 
+          dpl
+      | A_assign ((l, _),(e,_)) -> 
+        dpl
+      | A_assert (b,_) -> dpl
+      | A_if ((b,ba),s1,s2) ->
+        let num_env1 = B.filter num_env b in
+        let num_env2 = B.filter num_env (fst (negBExp (b,ba))) in
+        let diff = 
+          if B.taint_b b num_env dpl env then 
+            assignedStmt s num_env fwdInvMap
+          else
+            []
+        in 
+        let dpl1 = B.refine dpl num_env1 env in 
+        let dpl2 = B.refine dpl num_env2 env in 
+        let dpl1 = fwdBlk dpl1 s1 in
+        let dpl2 = fwdBlk dpl2 s2 in
+        List.sort_uniq (fun v1 v2 -> String.compare v1.varName v2.varName) (dpl@dpl1@dpl2@diff)
+      | A_while (l,(b,ba),s) ->
+        (* attention *)
+        let rec aux dpl_1 = 
+          let dpl_2 = fwdStm dpl_1 (A_if ((b,ba),s, A_empty l)) num_env in
+          let res = List.sort_uniq (fun v1 v2 -> String.compare v1.varName v2.varName) (dpl_2@dpl_1@dpl) in 
+          let cmp =  (List.for_all  (fun x -> List.mem x res) dpl_1) in 
+          if cmp then
+             let num_env = B.filter num_env (fst (AbstractSyntax.negBExp (b,ba))) in
+             B.refine res num_env env
+          else
+            aux res 
+          in 
+          aux []
+      | A_call (f,ss) ->
+        raise (Invalid_argument "fwdStm:A_recall")
+      | A_recall (f,ss) -> raise (Invalid_argument "fwdStm:A_recall")
+    and fwdBlk (dpl: var list) (b:block) =
+      match b with
+      | A_empty l ->
+        (* if !tracefwd && not !minimal then *)
+        if true then
+          Format.fprintf !fmt "Taint at %a ###: %a\n" label_print l (fun fmt dpl -> List.iter (fun v -> Format.fprintf fmt "%s" v.varName) dpl)  dpl ;
+        addFwdInv l dpl; dpl
+      | A_block (l,(s,_),b) ->
+        (* if !tracefwd && not !minimal then *)
+        if true then
+          Format.fprintf !fmt "Taint at %a ###: %a\n" label_print l (fun fmt dpl -> List.iter (fun v -> Format.fprintf fmt "%s" v.varName) dpl) dpl;
+        addFwdInv l dpl; fwdBlk (fwdStm dpl s (InvMap.find l fwdInvMap)) b
+    in 
+    let f = StringMap.find main funcs in
+    let s = f.funcBody in
+    let _ = fwdBlk (fwdBlk [] stmts) s in
+    !fwdTaintMap
+
   let compute (vars, stmts, funcs) p  main env = 
     let fwdInvMap = ref InvMap.empty in
     let addFwdInv l (a:B.t) = fwdInvMap := InvMap.add l a !fwdInvMap in

@@ -8,13 +8,11 @@ suggested parameters:
 */
 
 int main() {
-  int x;
-  while (x) {
-    if (x > 0) {
-      x = x - 1;
-    } else {
-      x = x + 1;
-    }
+  int z;
+  if (input){
+    z = 0 ;
+  }else{
+    z = 0 ;
   }
   return 0;
 }

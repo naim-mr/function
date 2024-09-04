@@ -37,13 +37,13 @@ module IdMap = Mapext.Make(struct type t=id let compare=compare_id end)
 (* 3-valued logic *)
 (* ************** *)
 
-type tbool = True | False | Maybe
+type tbool = True | False | Maybe 
 
 let tnot = function
   | True -> False 
   | False -> True
   | Maybe -> Maybe
-
+  
 let tor a b = 
   match a,b with
   | True,_ | _,True -> True
