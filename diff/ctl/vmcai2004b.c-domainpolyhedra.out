@@ -64,5 +64,5 @@ $1{x} >= 5 ? 3
 top ? bottom
 
 
-Time: 0.006642
-Analysis Result: TRUE
+Time: 0.005938
+Final Analysis Result: TRUE

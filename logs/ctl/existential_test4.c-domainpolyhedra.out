@@ -101,5 +101,5 @@ $4{r} == 1 ? 0.
 $4{r} >= 2 ? bottom
 
 
-Time: 0.007181
+Time: 0.006650
 Final Analysis Result: TRUE

@@ -445,7 +445,7 @@ $4{x3} >= 2 && $3{x2} >= 2 && $2{x1} >= 2 ?  ($3{x2}-1)⍵^2 +  ($3{x2}+$4{x3}-2
 
 [18:]: top ? 0.
 
-Analysis Result: TRUE
-Time: 0.426031 s
+Final Analysis Result: TRUE
+Time: 0.364503 s
 
 Done.

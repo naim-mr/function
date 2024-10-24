@@ -174,6 +174,6 @@ $2{y} >= 2 && $1{x} >= 2 ? 7$1{x}+3$2{y}-5
 [11:]: top ? 0.
 
 Final Analysis Result: TRUE
-Time: 0.054549 s
+Time: 0.042749 s
 
 Done.

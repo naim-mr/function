@@ -4,7 +4,8 @@
     "analysis_type": "ctl",
     "property": "AND{EF{x==4}}{EF{x==-4}}",
     "result": "UKNOWN",
-    "domain": "polyhedra"
+    "domain": "polyhedra",
+    "time": "0.0354490000001"
   },
   "tree": {
     "Node": {

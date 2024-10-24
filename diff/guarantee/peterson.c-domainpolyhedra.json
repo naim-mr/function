@@ -4,7 +4,8 @@
     "analysis_type": "guarantee",
     "property": "tests/guarantee/peterson.txt",
     "result": "TRUE",
-    "domain": "polyhedra"
+    "domain": "polyhedra",
+    "time": "1.43835700001"
   },
   "tree": { "Leaf": "16" }
 }

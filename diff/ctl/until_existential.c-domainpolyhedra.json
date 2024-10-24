@@ -3,8 +3,9 @@
     "filename": "tests/ctl/until_existential.c",
     "analysis_type": "ctl",
     "property": "EF{AG{x == y}}",
-    "result": "TRUE",
-    "domain": "polyhedra"
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": "0.0209650000001"
   },
   "tree": {
     "Node": {

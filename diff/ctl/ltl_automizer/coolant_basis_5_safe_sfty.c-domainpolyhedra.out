@@ -2627,5 +2627,5 @@ $11{init} >= 4 && $7{temp} >= 0 ? bottom
 top ? bottom
 
 
-Time: 1.145206
-Analysis Result: UNKNOWN
+Time: 1.019259
+Final Analysis Result: UNKNOWN

@@ -259,5 +259,5 @@ $2{x} >= -9 ? bottom
 top ? bottom
 
 
-Time: 0.441524
-Analysis Result: TRUE
+Time: 0.263689
+Final Analysis Result: TRUE

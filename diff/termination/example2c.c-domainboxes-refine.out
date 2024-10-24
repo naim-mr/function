@@ -534,7 +534,7 @@ $5{x} >= 21 && $4{y} >= 5 && -$2{x} >= -10 && $2{x} >= 0 && $1{$1} == 1 ? 5
 [49:]: -$4{y} >= -3 && $4{y} >= -3 && $3{$3} == 0 ? 0.
 
 [50:]: 
-Analysis Result: TRUE
-Time: 0.123548 s
+Final Analysis Result: TRUE
+Time: 0.101214 s
 
 Done.

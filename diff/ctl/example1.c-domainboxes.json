@@ -4,7 +4,8 @@
     "analysis_type": "ctl",
     "property": "AF{exit: true}",
     "result": "TRUE",
-    "domain": "boxes"
+    "domain": "boxes",
+    "time": "0.00485600000001"
   },
   "tree": {
     "Node": {
@@ -14,7 +15,13 @@
         "Node": {
           "constraint": "$2{x} >= 10",
           "left": { "Leaf": "4" },
-          "right": { "Leaf": "-2$2{x}+24" }
+          "right": {
+            "Node": {
+              "constraint": "$2{x} >= 9",
+              "left": { "Leaf": "6" },
+              "right": { "Leaf": "-2$2{x}+24" }
+            }
+          }
         }
       }
     }

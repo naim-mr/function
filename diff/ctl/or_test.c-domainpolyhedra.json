@@ -3,8 +3,9 @@
     "filename": "tests/ctl/or_test.c",
     "analysis_type": "ctl",
     "property": "OR{EF{EG{x < -100}}}{AF{x==20}}",
-    "result": "TRUE",
-    "domain": "polyhedra"
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": "0.0326420000001"
   },
   "tree": {
     "Node": {

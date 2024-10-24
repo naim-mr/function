@@ -3,8 +3,9 @@
     "filename": "tests/ctl/ltl_automizer/simple-2.c",
     "analysis_type": "ctl",
     "property": "AF{x > 100}",
-    "result": "TRUE",
-    "domain": "polyhedra"
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": "0.0368780000001"
   },
   "tree": {
     "Node": {

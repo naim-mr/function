@@ -93,7 +93,7 @@ $2{x}-$3{K} >= 2 ? 3$2{x}-3$3{K}+2
 
 [12:]: top ? 0.
 
-Analysis Result: TRUE
-Time: 0.016028 s
+Final Analysis Result: TRUE
+Time: 0.019310 s
 
 Done.

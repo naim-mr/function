@@ -1225,5 +1225,5 @@ $6{a} >= 2 && $7{r} >= 2 ? 0.
 top ? bottom
 
 
-Time: 3.510427
-Analysis Result: TRUE
+Time: 2.496705
+Final Analysis Result: TRUE

@@ -4,67 +4,120 @@
     "analysis_type": "ctl",
     "property": "AF{exit: true}",
     "result": "TRUE",
-    "domain": "boxes"
+    "domain": "boxes",
+    "time": "0.326400000001"
   },
   "tree": {
     "Node": {
-      "constraint": "$3{y} >= 5",
+      "constraint": "$3{y} >= 7",
       "left": {
         "Node": {
           "constraint": "$2{x} >= 11",
-          "left": { "Leaf": "10$3{y}-33" },
-          "right": { "Leaf": "6$3{y}-10" }
+          "left": { "Leaf": " ($3{y}-6)⍵^2 +  ($3{y}-6)⍵ + 5$3{y}-18" },
+          "right": { "Leaf": " ($3{y}-6)⍵ + 6$3{y}-10" }
         }
       },
       "right": {
         "Node": {
-          "constraint": "$3{y} >= 4",
+          "constraint": "$3{y} >= 6",
           "left": {
             "Node": {
               "constraint": "$2{x} >= 11",
-              "left": { "Leaf": "7" },
-              "right": { "Leaf": "14" }
+              "left": { "Leaf": "12" },
+              "right": { "Leaf": "26" }
             }
           },
           "right": {
             "Node": {
-              "constraint": "$3{y} >= 3",
+              "constraint": "$3{y} >= 5",
               "left": {
                 "Node": {
                   "constraint": "$2{x} >= 11",
-                  "left": { "Leaf": "7" },
-                  "right": { "Leaf": "8" }
+                  "left": { "Leaf": "12" },
+                  "right": { "Leaf": "20" }
                 }
               },
               "right": {
                 "Node": {
-                  "constraint": "$3{y} >= -2",
-                  "left": { "Leaf": "2" },
+                  "constraint": "$3{y} >= 4",
+                  "left": {
+                    "Node": {
+                      "constraint": "$2{x} >= 11",
+                      "left": { "Leaf": "7" },
+                      "right": { "Leaf": "14" }
+                    }
+                  },
                   "right": {
                     "Node": {
-                      "constraint": "$3{y} >= -3",
+                      "constraint": "$3{y} >= 3",
                       "left": {
                         "Node": {
                           "constraint": "$2{x} >= 11",
-                          "left": { "Leaf": "5" },
-                          "right": { "Leaf": "6" }
+                          "left": { "Leaf": "7" },
+                          "right": { "Leaf": "8" }
                         }
                       },
                       "right": {
                         "Node": {
-                          "constraint": "$3{y} >= -4",
-                          "left": {
-                            "Node": {
-                              "constraint": "$2{x} >= 11",
-                              "left": { "Leaf": "5" },
-                              "right": { "Leaf": "10" }
-                            }
-                          },
+                          "constraint": "$3{y} >= -2",
+                          "left": { "Leaf": "2" },
                           "right": {
                             "Node": {
-                              "constraint": "$2{x} >= 11",
-                              "left": { "Leaf": "-3$3{y}-7" },
-                              "right": { "Leaf": "-4$3{y}-6" }
+                              "constraint": "$3{y} >= -3",
+                              "left": {
+                                "Node": {
+                                  "constraint": "$2{x} >= 11",
+                                  "left": { "Leaf": "5" },
+                                  "right": { "Leaf": "6" }
+                                }
+                              },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$3{y} >= -4",
+                                  "left": {
+                                    "Node": {
+                                      "constraint": "$2{x} >= 11",
+                                      "left": { "Leaf": "5" },
+                                      "right": { "Leaf": "10" }
+                                    }
+                                  },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$3{y} >= -5",
+                                      "left": {
+                                        "Node": {
+                                          "constraint": "$2{x} >= 11",
+                                          "left": { "Leaf": "8" },
+                                          "right": { "Leaf": "14" }
+                                        }
+                                      },
+                                      "right": {
+                                        "Node": {
+                                          "constraint": "$3{y} >= -6",
+                                          "left": {
+                                            "Node": {
+                                              "constraint": "$2{x} >= 11",
+                                              "left": { "Leaf": "8" },
+                                              "right": { "Leaf": "18" }
+                                            }
+                                          },
+                                          "right": {
+                                            "Node": {
+                                              "constraint": "$2{x} >= 11",
+                                              "left": {
+                                                "Leaf": "-3$3{y}-10"
+                                              },
+                                              "right": {
+                                                "Leaf": "-4$3{y}-6"
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
                             }
                           }
                         }

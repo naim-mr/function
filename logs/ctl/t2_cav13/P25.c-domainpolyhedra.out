@@ -1291,5 +1291,5 @@ $1{varC} >= 6 && -$2{varR} >= -5 ? bottom
 $2{varR} >= 6 ? 0
 
 
-Time: 1.508181
+Time: 1.151494
 Final Analysis Result: TRUE

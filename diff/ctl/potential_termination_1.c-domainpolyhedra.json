@@ -4,7 +4,8 @@
     "analysis_type": "ctl",
     "property": "EF{exit: true}",
     "result": "UKNOWN",
-    "domain": "polyhedra"
+    "domain": "polyhedra",
+    "time": "0.00871300000001"
   },
   "tree": { "Leaf": "bottom" }
 }

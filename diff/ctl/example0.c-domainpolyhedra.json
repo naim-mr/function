@@ -3,8 +3,9 @@
     "filename": "tests/termination/example0.c",
     "analysis_type": "ctl",
     "property": "AF{exit: true}",
-    "result": "TRUE",
-    "domain": "polyhedra"
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": "0.0180430000001"
   },
   "tree": {
     "Node": {

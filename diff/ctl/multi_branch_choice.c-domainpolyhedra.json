@@ -3,8 +3,9 @@
     "filename": "tests/ctl/multi_branch_choice.c",
     "analysis_type": "ctl",
     "property": "AND{EF{x==4}}{EF{x==-4}}",
-    "result": "TRUE",
-    "domain": "polyhedra"
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": "0.0544690000001"
   },
   "tree": {
     "Node": {

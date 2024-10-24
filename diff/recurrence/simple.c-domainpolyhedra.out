@@ -115,7 +115,7 @@ $1{x} >= 10 ? 3$1{x}+12
 [14:]:
 top ? bottom
 
-Analysis Result: UNKNOWN
-Time: 0.099199 s
+Final Analysis Result: UNKNOWN
+Time: 0.096987 s
 
 Done.

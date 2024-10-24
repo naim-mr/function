@@ -234,7 +234,7 @@ $2{x1}-$3{x2} >= 1 && $3{x2}-$4{x3} >= 1 && $4{x3}-$5{x4} >= 1 ? 4$2{x1}+5$3{x2}
 
 [22:]: top ? 0.
 
-Analysis Result: TRUE
-Time: 0.065503 s
+Final Analysis Result: TRUE
+Time: 0.073482 s
 
 Done.

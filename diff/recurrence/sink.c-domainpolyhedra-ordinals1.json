@@ -3,18 +3,19 @@
     "filename": "tests/recurrence/sink.c",
     "analysis_type": "recurrence",
     "property": "tests/recurrence/sink.txt",
-    "result": "TRUE",
-    "domain": "polyhedra"
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": "0.0763950000001"
   },
   "tree": {
     "Node": {
       "constraint": "$1{x} >= 1",
-      "left": { "Leaf": " (1)⍵ + 8" },
+      "left": { "Leaf": "top" },
       "right": {
         "Node": {
           "constraint": "$1{x} >= 0",
           "left": { "Leaf": "0." },
-          "right": { "Leaf": " (1)⍵ + 8" }
+          "right": { "Leaf": "top" }
         }
       }
     }

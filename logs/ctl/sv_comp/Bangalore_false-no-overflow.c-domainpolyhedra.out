@@ -178,5 +178,5 @@ top ? bottom
 $2{x} >= 0 ? bottom
 
 
-Time: 0.016403
+Time: 0.012470
 Final Analysis Result: TRUE

@@ -4,7 +4,8 @@
     "analysis_type": "ctl",
     "property": "OR{varC <= 5}{AF{varR > 5}}",
     "result": "UKNOWN",
-    "domain": "polyhedra"
+    "domain": "polyhedra",
+    "time": "1.15149300001"
   },
   "tree": {
     "Node": {

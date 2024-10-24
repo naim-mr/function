@@ -4,7 +4,8 @@
     "analysis_type": "ctl",
     "property": "EF{AND{EF{j >= 21}}{i==100}}",
     "result": "UKNOWN",
-    "domain": "polyhedra"
+    "domain": "polyhedra",
+    "time": "0.122547000001"
   },
   "tree": {
     "Node": {

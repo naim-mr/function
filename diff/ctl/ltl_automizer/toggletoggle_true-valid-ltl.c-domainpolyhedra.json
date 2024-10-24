@@ -3,8 +3,9 @@
     "filename": "tests/ctl/ltl_automizer/toggletoggle_true-valid-ltl.c",
     "analysis_type": "ctl",
     "property": "AG{AND{AF{t==1}}{AF{t==0}}}",
-    "result": "TRUE",
-    "domain": "polyhedra"
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": "0.0274370000001"
   },
   "tree": {
     "Node": {

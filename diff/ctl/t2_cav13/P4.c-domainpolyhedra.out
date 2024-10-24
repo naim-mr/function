@@ -558,5 +558,5 @@ $1{varN} >= 1 && $2{varA} >= 2 && $3{varR} >= 2 ? 2
 top ? bottom
 
 
-Time: 0.088613
-Analysis Result: TRUE
+Time: 0.120182
+Final Analysis Result: TRUE

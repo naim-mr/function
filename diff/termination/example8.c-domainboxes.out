@@ -227,7 +227,7 @@ $2{x} >= 101 ? 2
 
 [13:]: top ? 0.
 
-Analysis Result: TRUE
-Time: 0.190355 s
+Final Analysis Result: TRUE
+Time: 0.174203 s
 
 Done.

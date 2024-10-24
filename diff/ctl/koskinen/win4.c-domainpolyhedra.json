@@ -3,8 +3,9 @@
     "filename": "tests/ctl/koskinen/win4.c",
     "analysis_type": "ctl",
     "property": "AF{AG{WItemsNum >= 1}}",
-    "result": "TRUE",
-    "domain": "polyhedra"
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": "0.0916910000001"
   },
   "tree": {
     "Node": {

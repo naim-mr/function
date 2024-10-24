@@ -3,8 +3,9 @@
     "filename": "tests/recurrence/countdown.c",
     "analysis_type": "ctl",
     "property": "AG{AF{x == 0}}",
-    "result": "TRUE",
-    "domain": "polyhedra"
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": "0.537267000001"
   },
   "tree": {
     "Node": {

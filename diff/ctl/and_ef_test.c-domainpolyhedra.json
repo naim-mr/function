@@ -3,8 +3,9 @@
     "filename": "tests/ctl/and_ef_test.c",
     "analysis_type": "ctl",
     "property": "AND{EF{x == 2}}{EF{x==3}}",
-    "result": "TRUE",
-    "domain": "polyhedra"
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": "0.00870000000001"
   },
   "tree": {
     "Node": {

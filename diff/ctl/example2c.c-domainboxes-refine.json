@@ -4,59 +4,18 @@
     "analysis_type": "ctl",
     "property": "AF{exit: true}",
     "result": "UKNOWN",
-    "domain": "boxes"
+    "domain": "boxes",
+    "time": "0.0124200000001"
   },
   "tree": {
     "Node": {
-      "constraint": "$4{y} >= 21",
+      "constraint": "$4{y} >= 4",
       "left": { "Leaf": "bottom" },
       "right": {
         "Node": {
-          "constraint": "$4{y} >= 11",
-          "left": { "Leaf": "bottom" },
-          "right": {
-            "Node": {
-              "constraint": "$4{y} >= 5",
-              "left": { "Leaf": "7$4{y}-18" },
-              "right": {
-                "Node": {
-                  "constraint": "$4{y} >= 4",
-                  "left": { "Leaf": "10" },
-                  "right": {
-                    "Node": {
-                      "constraint": "$4{y} >= 1",
-                      "left": { "Leaf": "3" },
-                      "right": {
-                        "Node": {
-                          "constraint": "$4{y} >= -3",
-                          "left": { "Leaf": "3" },
-                          "right": {
-                            "Node": {
-                              "constraint": "$4{y} >= -4",
-                              "left": { "Leaf": "10" },
-                              "right": {
-                                "Node": {
-                                  "constraint": "$4{y} >= -10",
-                                  "left": { "Leaf": "-7$4{y}-18" },
-                                  "right": {
-                                    "Node": {
-                                      "constraint": "$4{y} >= -20",
-                                      "left": { "Leaf": "bottom" },
-                                      "right": { "Leaf": "bottom" }
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
+          "constraint": "$4{y} >= -3",
+          "left": { "Leaf": "3" },
+          "right": { "Leaf": "bottom" }
         }
       }
     }

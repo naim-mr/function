@@ -3,8 +3,9 @@
     "filename": "tests/ctl/sv_comp/java_Sequence_true-termination_true-no-overflow.c",
     "analysis_type": "ctl",
     "property": "EF{AND{EF{j >= 21}}{i==100}}",
-    "result": "TRUE",
-    "domain": "polyhedra"
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": "0.162774000001"
   },
   "tree": {
     "Node": {

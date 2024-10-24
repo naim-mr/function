@@ -130,7 +130,7 @@ $1{x} >= 10 ? 3$1{x}+12
 $1{x} == 3 ? 0.
 $1{x} >= 4 ? bottom
 
-Analysis Result: UNKNOWN
-Time: 0.072411 s
+Final Analysis Result: UNKNOWN
+Time: 0.065272 s
 
 Done.

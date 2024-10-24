@@ -290,5 +290,5 @@ $2{varR} >= 2 && $1{varA} == 1 ? bottom
 $1{varA} >= 2 && $2{varR} >= 2 ? 0.
 
 
-Time: 0.020303
-Analysis Result: UNKNOWN
+Time: 0.019359
+Final Analysis Result: UNKNOWN

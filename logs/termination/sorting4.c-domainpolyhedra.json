@@ -4,7 +4,8 @@
     "analysis_type": "termination",
     "property": "",
     "result": "TRUE",
-    "domain": "polyhedra"
+    "domain": "polyhedra",
+    "time": "0.0594710000001"
   },
   "tree": {
     "Node": {

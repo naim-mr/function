@@ -696,6 +696,6 @@ $4{x3} >= 3 && $3{x2} >= 3 && $2{x1} >= 3 ?  ($3{x2}-1)⍵ + 4$2{x1}+9$3{x2}-6
 [15:]: top ? 0.
 
 Final Analysis Result: TRUE
-Time: 0.883276 s
+Time: 0.962224 s
 
 Done.

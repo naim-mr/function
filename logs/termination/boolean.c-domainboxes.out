@@ -94,6 +94,6 @@ $2{x} >= 2 ? 3$2{x}+2
 [12:]: top ? 0.
 
 Final Analysis Result: TRUE
-Time: 0.009162 s
+Time: 0.007047 s
 
 Done.

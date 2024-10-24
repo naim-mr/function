@@ -1027,5 +1027,5 @@ $3{z} == 1 ? 0.
 $3{z} >= 2 ? bottom
 
 
-Time: 0.064572
-Analysis Result: TRUE
+Time: 0.058813
+Final Analysis Result: TRUE

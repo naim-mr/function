@@ -3,8 +3,9 @@
     "filename": "tests/ctl/koskinen/acqrel_mod.c",
     "analysis_type": "ctl",
     "property": "AG{OR{a!=1}{AF{r==1}}}",
-    "result": "TRUE",
-    "domain": "polyhedra"
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": "2.49670400001"
   },
   "tree": {
     "Node": {

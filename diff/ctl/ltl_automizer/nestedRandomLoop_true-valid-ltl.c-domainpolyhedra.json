@@ -3,14 +3,27 @@
     "filename": "tests/ctl/ltl_automizer/nestedRandomLoop_true-valid-ltl.c",
     "analysis_type": "ctl",
     "property": "AG{i >= n}",
-    "result": "TRUE",
-    "domain": "polyhedra"
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": "0.00522200000001"
   },
   "tree": {
     "Node": {
-      "constraint": "$1{n}-$2{i} >= 1",
-      "left": { "Leaf": "bottom" },
-      "right": { "Leaf": "0." }
+      "constraint": "$2{n}-$3{i} >= 1",
+      "left": {
+        "Node": {
+          "constraint": "$2{n} >= 2",
+          "left": { "Leaf": "bottom" },
+          "right": { "Leaf": "bottom" }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$2{n} >= 2",
+          "left": { "Leaf": "bottom" },
+          "right": { "Leaf": "0." }
+        }
+      }
     }
   }
 }

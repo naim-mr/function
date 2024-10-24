@@ -46,6 +46,6 @@ $2{y} >= 1 && $1{x} >= 2 ? 2$1{x}+1
 [ 6:]: top ? 0.
 
 Final Analysis Result: TRUE
-Time: 0.005747 s
+Time: 0.006682 s
 
 Done.

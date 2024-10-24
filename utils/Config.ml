@@ -16,7 +16,7 @@ let cda = ref false
 let cdamax = ref 0
 let property = ref ""
 let precondition = ref "true"
-let time = ref false
+let time = ref true
 let noinline = ref false
 let size = ref 2 (* conflict-driven conditional termination *)
 let start = ref 0.0
@@ -34,7 +34,7 @@ let vulnerability = ref false
 exception Abort
 exception Timeout
 let json_output = ref false
-let output_dir = ref "logs/"
+let output_dir = ref "diff/"
 let exectime = ref "0"
 let ctltype = ref ""
 let logfile = ref ""

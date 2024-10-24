@@ -3,8 +3,9 @@
     "filename": "tests/ctl/sv_comp/NO_02_false-termination_true-no-overflow.c",
     "analysis_type": "ctl",
     "property": "EF{EG{j==0}}",
-    "result": "TRUE",
-    "domain": "polyhedra"
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": "0.0304760000001"
   },
   "tree": {
     "Node": {

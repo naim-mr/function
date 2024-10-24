@@ -104,5 +104,5 @@ $2{n}-$3{i} >= 1 ? bottom
 top ? bottom
 
 
-Time: 0.004957
+Time: 0.004799
 Final Analysis Result: TRUE

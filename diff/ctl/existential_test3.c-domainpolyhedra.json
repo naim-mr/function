@@ -3,8 +3,9 @@
     "filename": "tests/ctl/existential_test3.c",
     "analysis_type": "ctl",
     "property": "EF{r==1}",
-    "result": "TRUE",
-    "domain": "polyhedra"
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": "0.0530280000001"
   },
   "tree": {
     "Node": {

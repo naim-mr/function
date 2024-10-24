@@ -3,8 +3,9 @@
     "filename": "tests/ctl/ltl_automizer/Bug_NoLoopAtEndForTerminatingPrograms_safe.c",
     "analysis_type": "ctl",
     "property": "NOT{AF{ap > 2}}",
-    "result": "TRUE",
-    "domain": "polyhedra"
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": "0.0571080000001"
   },
   "tree": {
     "Node": {

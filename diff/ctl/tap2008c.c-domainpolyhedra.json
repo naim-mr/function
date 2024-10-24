@@ -3,8 +3,9 @@
     "filename": "tests/termination/tap2008c.c",
     "analysis_type": "ctl",
     "property": "AF{exit: true}",
-    "result": "TRUE",
-    "domain": "polyhedra"
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": "0.253900000001"
   },
   "tree": {
     "Node": {

@@ -764,5 +764,5 @@ $1{A} >= 2 && $2{R} >= 2 ? 0.
 top ? bottom
 
 
-Time: 0.257958
+Time: 0.228979
 Final Analysis Result: TRUE

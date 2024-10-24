@@ -179,5 +179,5 @@ $2{ap} >= 3 ? bottom
 $2{ap} >= 3 ? bottom
 
 
-Time: 0.059156
-Analysis Result: TRUE
+Time: 0.057109
+Final Analysis Result: TRUE
