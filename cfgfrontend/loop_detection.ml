@@ -94,7 +94,7 @@ let is_reducible (cfg:cfg) (mainFunc:func) (dom: NodeSet.t NodeMap.t) (reverse_p
     let v = arc.arc_dst in
     if (NodeMap.mem u reverse_postorder) && (NodeMap.mem v reverse_postorder) then 
       let res = not (is_retreating_edge reverse_postorder arc) || dominates dom arc.arc_dst arc.arc_src in
-      if not res then Printf.printf "Edge (%d, %d) invalid\n" u.node_id v.node_id;
+      if not res then Format.printf "Edge (%d, %d) invalid\n" u.node_id v.node_id;
       res
     else
       (* arc is not part of mainFunc, therefore we ignore it*)

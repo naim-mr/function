@@ -13,20 +13,20 @@ open Config
 (* type for CTL properties, instantiated with Cfg.bool_expr for atomic propositions *)
 type ctl_property = Cfg.bool_expr CTLProperty.generic_property
 
-let rec print_ctl_property ch (property:ctl_property) = match property with 
-  | Atomic (p, None) -> Printf.printf "%a" print_bool_expr p
-  | Atomic (p, Some l) -> Printf.printf "%s: %a" l print_bool_expr p
-  | AX p ->  Printf.printf "AX{%a}" print_ctl_property p
-  | AF p ->  Printf.printf "AF{%a}" print_ctl_property p
-  | AG p ->  Printf.printf "AG{%a}" print_ctl_property p
-  | AU (p1,p2) ->  Printf.printf "AU{%a}{%a}" print_ctl_property p1 print_ctl_property p2;
-  | EX p ->  Printf.printf "EX{%a}" print_ctl_property p
-  | EF p ->  Printf.printf "EF{%a}" print_ctl_property p
-  | EG p ->  Printf.printf "EG{%a}" print_ctl_property p
-  | EU (p1,p2) ->  Printf.printf "EU{%a}{%a}" print_ctl_property p1 print_ctl_property p2;
-  | AND (p1,p2) ->  Printf.printf "AND{%a}{%a}" print_ctl_property p1 print_ctl_property p2;
-  | OR (p1,p2) ->  Printf.printf "OR{%a}{%a}" print_ctl_property p1 print_ctl_property p2;
-  | NOT p ->  Printf.printf "NOT{%a}" print_ctl_property p;
+let rec print_ctl_property fmt (property:ctl_property) = match property with 
+  | Atomic (p, None) -> Format.fprintf fmt "%a" print_bool_expr p
+  | Atomic (p, Some l) -> Format.fprintf fmt "%s: %a" l print_bool_expr p
+  | AX p ->  Format.fprintf fmt "AX{%a}" print_ctl_property p
+  | AF p ->  Format.fprintf fmt "AF{%a}" print_ctl_property p
+  | AG p ->  Format.fprintf fmt "AG{%a}" print_ctl_property p
+  | AU (p1,p2) ->  Format.fprintf fmt "AU{%a}{%a}" print_ctl_property p1 print_ctl_property p2;
+  | EX p ->  Format.fprintf fmt "EX{%a}" print_ctl_property p
+  | EF p ->  Format.fprintf fmt "EF{%a}" print_ctl_property p
+  | EG p ->  Format.fprintf fmt "EG{%a}" print_ctl_property p
+  | EU (p1,p2) ->  Format.fprintf fmt "EU{%a}{%a}" print_ctl_property p1 print_ctl_property p2;
+  | AND (p1,p2) ->  Format.fprintf fmt "AND{%a}{%a}" print_ctl_property p1 print_ctl_property p2;
+  | OR (p1,p2) ->  Format.fprintf fmt "OR{%a}{%a}" print_ctl_property p1 print_ctl_property p2;
+  | NOT p ->  Format.fprintf fmt "NOT{%a}" print_ctl_property p;
 
 type quantifier = UNIVERSAL | EXISTENTIAL
 
@@ -248,7 +248,7 @@ module CFGCTLIterator(D: RANKING_FUNCTION) = struct
     let print_inv property inv = 
       if not !minimal then
         begin
-          Printf.printf "Property: %a\n\n" print_ctl_property property;
+          Format.fprintf !fmt "Property: %a\n\n" print_ctl_property property;
           printInv !fmt inv;
         end;
     in
