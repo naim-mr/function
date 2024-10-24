@@ -427,14 +427,14 @@ let ctl_cfg () =
   in
   if not !minimal then
     begin
-      Printf.printf "\nCFG:\n";
-      Printf.printf "%a" Cfg_printer.print_cfg cfg;
-      Printf.printf "\n";
+      Format.fprintf !fmt "\nCFG:\n";
+      Format.fprintf !fmt "%a" Cfg_printer.print_cfg cfg ;
+      Format.fprintf !fmt "\n";
     end;
   if not !minimal && !Config.dot then
     begin
-      Printf.printf "CFG_DOT:\n %a" Cfg_printer.output_dot cfg;
-      Printf.printf "\n";
+      Format.fprintf !fmt "CFG_DOT:\n %a" Cfg_printer.output_dot cfg;
+      Format.fprintf !fmt "\n";
     end;
   let mainFunc = Cfg.find_func !main cfg in
   let possibleLoopHeads = Loop_detection.possible_loop_heads cfg mainFunc in
@@ -542,6 +542,6 @@ let doit () =
     begin
     let f_log = In_channel.open_bin !logfile in
     let s = In_channel.input_all f_log  in
-    Printf.printf "%s" s
+    Format.printf "%s" s
     end
 let _ = doit () 
