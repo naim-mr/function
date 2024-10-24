@@ -3,8 +3,9 @@
     "filename": "tests/ctl/next.c",
     "analysis_type": "ctl",
     "property": "AX{x==0}",
-    "result": "TRUE",
-    "domain": "polyhedra"
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": "0.00174700000001"
   },
   "tree": {
     "Node": {

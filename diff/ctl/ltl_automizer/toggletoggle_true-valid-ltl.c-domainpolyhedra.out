@@ -325,5 +325,5 @@ $1{t} >= 2 ? 6
 top ? bottom
 
 
-Time: 0.024030
-Analysis Result: TRUE
+Time: 0.027438
+Final Analysis Result: TRUE

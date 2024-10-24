@@ -342,7 +342,7 @@ $3{x2} >= 2 && $2{x1} >= 2 ?  ($2{x1}-1)⍵ + 5$2{x1}+4$3{x2}-2
 
 [22:]: top ? 0.
 
-Analysis Result: TRUE
-Time: 0.116350 s
+Final Analysis Result: TRUE
+Time: 0.103689 s
 
 Done.

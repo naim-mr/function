@@ -278,5 +278,5 @@ $1{x} >= 10 ? 3$1{x}+12
 top ? bottom
 
 
-Time: 0.142043
-Analysis Result: TRUE
+Time: 0.109843
+Final Analysis Result: TRUE

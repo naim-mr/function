@@ -95,7 +95,7 @@ $1{x} >= 3 ? 6$1{x}-8
 
 [10:]: top ? 0.
 
-Analysis Result: TRUE
-Time: 0.013894 s
+Final Analysis Result: TRUE
+Time: 0.012253 s
 
 Done.

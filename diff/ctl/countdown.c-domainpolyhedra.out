@@ -431,5 +431,5 @@ $1{x} >= 1 && $2{c} >= 3 ? 3$2{c}+1
 top ? bottom
 
 
-Time: 0.589239
-Analysis Result: TRUE
+Time: 0.537268
+Final Analysis Result: TRUE

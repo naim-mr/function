@@ -3,8 +3,9 @@
     "filename": "tests/recurrence/peterson.c",
     "analysis_type": "ctl",
     "property": "AG{AF{C1: true}}",
-    "result": "TRUE",
-    "domain": "polyhedra"
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": "3.55511700001"
   },
   "tree": { "Leaf": "16" }
 }

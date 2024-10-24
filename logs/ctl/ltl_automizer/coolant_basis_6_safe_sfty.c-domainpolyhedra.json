@@ -4,7 +4,8 @@
     "analysis_type": "ctl",
     "property": "AG{OR{limit <= -273 && limit >= 10}{OR{tempIn >= 0}{AF{ warnLED == 1}}}}",
     "result": "UKNOWN",
-    "domain": "polyhedra"
+    "domain": "polyhedra",
+    "time": "3.46091800001"
   },
   "tree": {
     "Node": {

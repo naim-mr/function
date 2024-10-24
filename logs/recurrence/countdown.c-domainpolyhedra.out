@@ -427,6 +427,6 @@ $1{x} >= 1 && $2{c} >= 7 ? 3$2{c}+1
 top ? bottom
 
 Final Analysis Result: TRUE
-Time: 79.749870 s
+Time: 77.351955 s
 
 Done.

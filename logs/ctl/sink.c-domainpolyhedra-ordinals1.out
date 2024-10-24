@@ -221,5 +221,5 @@ $1{x} >= 1 ?  (1)⍵ + 8
 top ? bottom
 
 
-Time: 0.054782
+Time: 0.052220
 Final Analysis Result: TRUE

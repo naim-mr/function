@@ -4,47 +4,18 @@
     "analysis_type": "ctl",
     "property": "AF{exit: true}",
     "result": "UKNOWN",
-    "domain": "boxes"
+    "domain": "boxes",
+    "time": "0.0100800000001"
   },
   "tree": {
     "Node": {
-      "constraint": "$4{y} >= 11",
+      "constraint": "$4{y} >= 3",
       "left": { "Leaf": "bottom" },
       "right": {
         "Node": {
-          "constraint": "$4{y} >= 4",
-          "left": { "Leaf": "6$4{y}-9" },
-          "right": {
-            "Node": {
-              "constraint": "$4{y} >= 3",
-              "left": { "Leaf": "9" },
-              "right": {
-                "Node": {
-                  "constraint": "$4{y} >= 1",
-                  "left": { "Leaf": "3" },
-                  "right": {
-                    "Node": {
-                      "constraint": "$4{y} >= -2",
-                      "left": { "Leaf": "3" },
-                      "right": {
-                        "Node": {
-                          "constraint": "$4{y} >= -3",
-                          "left": { "Leaf": "9" },
-                          "right": {
-                            "Node": {
-                              "constraint": "$4{y} >= -10",
-                              "left": { "Leaf": "-6$4{y}-9" },
-                              "right": { "Leaf": "bottom" }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
+          "constraint": "$4{y} >= -2",
+          "left": { "Leaf": "3" },
+          "right": { "Leaf": "bottom" }
         }
       }
     }

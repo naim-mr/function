@@ -4,7 +4,8 @@
     "analysis_type": "guarantee",
     "property": "tests/guarantee/mnav.txt",
     "result": "TRUE",
-    "domain": "polyhedra"
+    "domain": "polyhedra",
+    "time": "0.0523450000001"
   },
   "tree": {
     "Node": {

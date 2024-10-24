@@ -3,8 +3,9 @@
     "filename": "tests/ctl/t2_cav13/P3_cheat.c",
     "analysis_type": "ctl",
     "property": "OR{varA != 1}{EF{varR==1}}",
-    "result": "TRUE",
-    "domain": "polyhedra"
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": "0.830778000001"
   },
   "tree": {
     "Node": {

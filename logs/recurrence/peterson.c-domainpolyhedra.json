@@ -4,7 +4,8 @@
     "analysis_type": "recurrence",
     "property": "tests/recurrence/peterson.txt",
     "result": "TRUE",
-    "domain": "polyhedra"
+    "domain": "polyhedra",
+    "time": "0.923192000001"
   },
   "tree": { "Leaf": "16" }
 }

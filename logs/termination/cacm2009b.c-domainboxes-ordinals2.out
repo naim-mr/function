@@ -123,6 +123,6 @@ $2{y} >= 2 && $1{x} >= 2 ?  ($1{x}-1)⍵ + 4$1{x}+3$2{y}-2
 [11:]: top ? 0.
 
 Final Analysis Result: TRUE
-Time: 0.029286 s
+Time: 0.028425 s
 
 Done.

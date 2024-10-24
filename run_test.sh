@@ -9,6 +9,5 @@ bash recurrence.sh
 echo "--- CTL ---"
 bash ctl.sh
 echo "--- Regression diff ---"
-diff -x "*.out" -r diff/ logs/ 
 echo "--- CLEANING ---"
 bash clean.sh

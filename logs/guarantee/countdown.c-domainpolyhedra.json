@@ -4,7 +4,8 @@
     "analysis_type": "guarantee",
     "property": "tests/guarantee/countdown.txt",
     "result": "TRUE",
-    "domain": "polyhedra"
+    "domain": "polyhedra",
+    "time": "0.158718000001"
   },
   "tree": {
     "Node": {

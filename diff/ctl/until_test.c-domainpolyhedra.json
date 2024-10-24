@@ -3,8 +3,9 @@
     "filename": "tests/ctl/until_test.c",
     "analysis_type": "ctl",
     "property": "AU{x >= y}{x==y}",
-    "result": "TRUE",
-    "domain": "polyhedra"
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": "0.0167190000001"
   },
   "tree": {
     "Node": {

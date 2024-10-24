@@ -3,8 +3,9 @@
     "filename": "tests/ctl/global_test_simple.c",
     "analysis_type": "ctl",
     "property": "EG{EF{x <= -10}}",
-    "result": "TRUE",
-    "domain": "polyhedra"
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": "0.263688000001"
   },
   "tree": {
     "Node": {

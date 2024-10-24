@@ -170,7 +170,7 @@ $4{enable} >= 1 ? bottom
 $4{enable} == 0 ? 0.
 $4{enable} >= 1 ? bottom
 
-Analysis Result: TRUE
-Time: 0.058379 s
+Final Analysis Result: TRUE
+Time: 0.052346 s
 
 Done.

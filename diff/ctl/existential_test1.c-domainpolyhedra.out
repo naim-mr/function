@@ -127,5 +127,5 @@ $2{r} == 1 ? 0.
 $2{r} >= 2 ? bottom
 
 
-Time: 0.008441
-Analysis Result: TRUE
+Time: 0.006506
+Final Analysis Result: TRUE

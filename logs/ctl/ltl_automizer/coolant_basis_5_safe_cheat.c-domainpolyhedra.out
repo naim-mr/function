@@ -4416,5 +4416,5 @@ $11{init} >= 4 && $12{tempInRand} >= 273 && $7{temp} >= 0 ? bottom
 top ? bottom
 
 
-Time: 6.387624
+Time: 5.787028
 Final Analysis Result: UNKNOWN

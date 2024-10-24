@@ -630,5 +630,5 @@ $3{j} >= 21 && $2{i} == 100 ? 0.
 $2{i} >= 101 && $3{j} >= 21 ? bottom
 
 
-Time: 0.176541
+Time: 0.122548
 Final Analysis Result: TRUE

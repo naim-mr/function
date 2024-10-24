@@ -4,7 +4,8 @@
     "analysis_type": "termination",
     "property": "",
     "result": "TRUE",
-    "domain": "boxes"
+    "domain": "boxes",
+    "time": "0.101213000001"
   },
   "tree": {
     "Node": {

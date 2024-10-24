@@ -93,7 +93,7 @@ $2{x} >= 2 ? 3$2{x}+2
 
 [12:]: top ? 0.
 
-Analysis Result: TRUE
-Time: 0.008984 s
+Final Analysis Result: TRUE
+Time: 0.006742 s
 
 Done.

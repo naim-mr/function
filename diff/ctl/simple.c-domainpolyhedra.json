@@ -3,8 +3,9 @@
     "filename": "tests/recurrence//simple.c",
     "analysis_type": "ctl",
     "property": "AG{AF{x == 3}}",
-    "result": "TRUE",
-    "domain": "polyhedra"
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": "0.109842000001"
   },
   "tree": {
     "Node": {

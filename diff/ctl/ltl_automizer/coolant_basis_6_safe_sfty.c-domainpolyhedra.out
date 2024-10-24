@@ -5068,5 +5068,5 @@ $4{tempIn} >= 0 && $6{temp} >= 0 ? 0.
 top ? bottom
 
 
-Time: 4.432428
-Analysis Result: UNKNOWN
+Time: 4.099791
+Final Analysis Result: UNKNOWN

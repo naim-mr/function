@@ -3,8 +3,9 @@
     "filename": "tests/termination/sas2014c.c",
     "analysis_type": "ctl",
     "property": "AF{exit: true}",
-    "result": "TRUE",
-    "domain": "polyhedra"
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": "0.0107220000001"
   },
   "tree": {
     "Node": {

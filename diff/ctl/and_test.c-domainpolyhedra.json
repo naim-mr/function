@@ -3,8 +3,9 @@
     "filename": "tests/ctl/and_test.c",
     "analysis_type": "ctl",
     "property": "EG{EF{n==1}}",
-    "result": "TRUE",
-    "domain": "polyhedra"
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": "0.0271040000001"
   },
   "tree": {
     "Node": {

@@ -4,7 +4,8 @@
     "analysis_type": "guarantee",
     "property": "tests/guarantee/pingpong.txt",
     "result": "TRUE",
-    "domain": "polyhedra"
+    "domain": "polyhedra",
+    "time": "0.0757690000001"
   },
   "tree": {
     "Node": {

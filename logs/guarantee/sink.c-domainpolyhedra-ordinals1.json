@@ -4,7 +4,8 @@
     "analysis_type": "guarantee",
     "property": "tests/guarantee/sink.txt",
     "result": "TRUE",
-    "domain": "polyhedra"
+    "domain": "polyhedra",
+    "time": "0.0597030000001"
   },
   "tree": {
     "Node": {

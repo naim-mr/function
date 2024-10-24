@@ -4,7 +4,8 @@
     "analysis_type": "ctl",
     "property": "AG{OR{A!=1}{AF{R==1}}}",
     "result": "UKNOWN",
-    "domain": "polyhedra"
+    "domain": "polyhedra",
+    "time": "0.228978000001"
   },
   "tree": {
     "Node": {

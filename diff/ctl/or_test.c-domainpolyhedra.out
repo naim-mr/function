@@ -305,5 +305,5 @@ $2{x} == 20 ? 0.
 $2{x} >= 21 ? bottom
 
 
-Time: 0.040750
-Analysis Result: TRUE
+Time: 0.032643
+Final Analysis Result: TRUE

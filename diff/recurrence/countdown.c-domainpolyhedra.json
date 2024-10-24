@@ -4,7 +4,8 @@
     "analysis_type": "recurrence",
     "property": "tests/recurrence/countdown.txt",
     "result": "TRUE",
-    "domain": "polyhedra"
+    "domain": "polyhedra",
+    "time": "87.4095750001"
   },
   "tree": {
     "Node": {

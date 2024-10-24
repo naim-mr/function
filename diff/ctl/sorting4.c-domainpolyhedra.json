@@ -4,7 +4,8 @@
     "analysis_type": "ctl",
     "property": "AF{exit: true}",
     "result": "TRUE",
-    "domain": "polyhedra"
+    "domain": "polyhedra",
+    "time": "0.108935000001"
   },
   "tree": {
     "Node": {
@@ -15,12 +16,12 @@
           "left": {
             "Node": {
               "constraint": "$2{x1}-$3{x2} >= 1",
-              "left": { "Leaf": "4$2{x1}+5$3{x2}-9$4{x3}+8" },
+              "left": { "Leaf": "4$2{x1}-4$4{x3}+13" },
               "right": {
                 "Node": {
                   "constraint": "$2{x1}-$4{x3} >= 1",
-                  "left": { "Leaf": "-5$2{x1}+5$3{x2}+17" },
-                  "right": { "Leaf": "-5$2{x1}+5$3{x2}+8" }
+                  "left": { "Leaf": "17" },
+                  "right": { "Leaf": "13" }
                 }
               }
             }

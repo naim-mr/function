@@ -102,7 +102,7 @@ $1{x} >= 1 ?  (1)⍵ + 8
 $1{x} == 0 ? 0.
 $1{x} >= 1 ? bottom
 
-Analysis Result: TRUE
-Time: 0.065322 s
+Final Analysis Result: TRUE
+Time: 0.060412 s
 
 Done.

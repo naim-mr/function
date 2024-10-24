@@ -4674,5 +4674,5 @@ $11{init} >= 4 && $17{limit}-$7{temp} >= 0 && $5{chainBroken} >= 2 && $7{temp} >
 top ? bottom
 
 
-Time: 4.449377
+Time: 3.912242
 Final Analysis Result: UNKNOWN

@@ -490,5 +490,5 @@ $1{x} >= 1 && $2{y} >= 1 ? bottom
 top ? bottom
 
 
-Time: 0.177710
-Analysis Result: TRUE
+Time: 0.165961
+Final Analysis Result: TRUE

@@ -863,7 +863,7 @@ $5{x} >= 31 && $4{y} >= 6 && -$2{x} >= -10 && $2{x} >= 0 && $1{$1} == 1 ? 5
 [64:]: -$4{y} >= -4 && $4{y} >= -4 && $3{$3} == 0 ? 0.
 
 [65:]: 
-Analysis Result: TRUE
-Time: 0.214362 s
+Final Analysis Result: TRUE
+Time: 0.212245 s
 
 Done.

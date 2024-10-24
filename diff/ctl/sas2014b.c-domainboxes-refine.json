@@ -3,29 +3,24 @@
     "filename": "tests/termination/sas2014b.c",
     "analysis_type": "ctl",
     "property": "AF{exit: true}",
-    "result": "TRUE",
-    "domain": "boxes"
+    "result": "UKNOWN",
+    "domain": "boxes",
+    "time": "0.002374"
   },
   "tree": {
     "Node": {
       "constraint": "$2{y} >= 1",
       "left": {
         "Node": {
-          "constraint": "$1{x} >= 2",
-          "left": { "Leaf": "2$1{x}+1" },
-          "right": {
-            "Node": {
-              "constraint": "$1{x} >= 1",
-              "left": { "Leaf": "3" },
-              "right": { "Leaf": "1" }
-            }
-          }
+          "constraint": "$1{x} >= 1",
+          "left": { "Leaf": "bottom" },
+          "right": { "Leaf": "1." }
         }
       },
       "right": {
         "Node": {
           "constraint": "$1{x} >= 1",
-          "left": { "Leaf": "1" },
+          "left": { "Leaf": "1." },
           "right": { "Leaf": "1" }
         }
       }

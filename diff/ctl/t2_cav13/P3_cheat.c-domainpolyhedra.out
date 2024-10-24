@@ -734,5 +734,5 @@ $6{varR} >= 2 && $5{varA} == 1 ? bottom
 $5{varA} >= 2 && $6{varR} >= 2 ? 0.
 
 
-Time: 0.826933
-Analysis Result: TRUE
+Time: 0.830779
+Final Analysis Result: TRUE

@@ -4,7 +4,8 @@
     "analysis_type": "ctl",
     "property": "AF{exit: true}",
     "result": "UKNOWN",
-    "domain": "boxes"
+    "domain": "boxes",
+    "time": "0.0130440000001"
   },
   "tree": {
     "Node": {

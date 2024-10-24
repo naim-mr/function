@@ -3,8 +3,9 @@
     "filename": "tests/ctl/ltl_automizer/PotentialMinimizeSEVPABug.c",
     "analysis_type": "ctl",
     "property": "AG{OR{x <= 0}{AF{y == 0}}}",
-    "result": "TRUE",
-    "domain": "polyhedra"
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": "0.165666000001"
   },
   "tree": {
     "Node": {
