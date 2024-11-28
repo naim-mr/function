@@ -556,7 +556,7 @@ let doit () =
       | "guarantee"   -> guarantee (module S) program prop
       | "recurrence" -> recurrence (module S) program prop
 
-      | "ctl" when !ctltype = "CFG" -> ctl_cfg ()
+      | "ctl" when !ctltype = "CFG" -> if !vulnerability then raise (Invalid_argument ("Currently vulnerability analysis is not supported with ctl-cfg")) else ctl_cfg ()
       | "ctl"  (* default CTL analysis is CTL-AST *)
         -> ctl_ast (module S) program  (match property with Semantics.Ctl p -> p |_ ->  raise (Invalid_argument("Impossible to reach")))
       | _ -> raise (Invalid_argument "Unknown Analysis")   
