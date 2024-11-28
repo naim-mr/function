@@ -1,10 +1,11 @@
 # FuncTion
 
-FuncTion is a research prototype static analyzer designed for proving conditional termination and conditional CTL properties of C programs, and the presence of vulnerabilities in C program.
+FuncTion is a research prototype static analyzer designed for proving conditional termination and conditional CTL properties of C programs.
+It is also capable of inferring minimal set of variable with an associate sufficient precondition to ensure a CTL property and a maximal set of variable for which a valuation might falsify the CTL property.
 
-The tool automatically infers piecewise-defined ranking functions and sufficient preconditions for termination, guarantee and recurrence properties by means of abstract interpretation.
+The tool automatically infers piecewise-defined ranking functions and sufficient preconditions by means of abstract interpretation.
 
-FuncTion's main website is: http://www.di.ens.fr/~urban/FuncTion.html
+FuncTion's main website is: http://www.di.ens.fr/~urba./main.exe.html
 
 # Installation
 
@@ -49,38 +50,6 @@ with
 ```
 opam list
 ```
-
-# Docker installation 
-## To create the image
-> docker build -t function. 
-
-## To run the analysis
-> docker run -it function
-
-It will open an interactive shell as:
-root@id$
-
-The id, is the id of the container.
-
-You can then use the analysis with the commands explained in this README.
-Or run the benchmark (see also the README in script/)
-
-## Open the HTML files and the Jupyter notebook
-
-As you can see the script 'script/runtest.sh' generate an HTML file and a CSV that we can manipulate through 'script/stats.ipynb'.
-
-One way to open them is to copy the content of container in you local repo with 
-> docker cp id:home/function/  copy-path/
-
-Where copy-path is the path to the location where the files will be copied. 
-id is the id of the container (root@id). You can obtain it with 
-> docker ps -a 
-
-Then after that you can open with your navigator results/index.html and launch the jupyter notebook. 
-
-There exist other way to do it. We propose this one to be sure that you can access to the results. Feel free to use your own way to do it.
-
-
 ## Compiling FuncTion
 
 Once all required libraries are installed, FuncTion can be compiled with 'dune':
@@ -118,6 +87,8 @@ The following general command-line options are recognized
 	 -meetbwd 2			                set the dual widening delay in backward analysis
 	 -ordinals 2                        set the maximum ordinal value for the ranking functions
 	 -refine            			    reduces the backward analysis to the reachabile states
+	 -json_ouput						To output a summary of the analaysis as a  json in a file `filename.json` (it disables the output on std_output)
+	 -output_std						To output on std_output even with json_ouput
 
 The analyzer answers TRUE in case it can successfully prove the property. Otherwise, it answers UNKNOWN.
 
@@ -170,3 +141,19 @@ of definitely non-vulnerable variables. It also provides sufficient constraints 
 To reproduce the benchmarks of the analysis you have to call : 
 	`./script/runtest.sh .` 
 It generates then a table in a HTML file and in CSV in result/ folder. See script/README.md, for more details.
+
+
+# Docker installation 
+## To create the image
+> docker build -t function. 
+
+## To run the analysis
+> docker run -it function
+
+It will open an interactive shell as:
+root@id$
+
+The id, is the id of the container.
+
+You can then use the analysis with the commands explained in this README.
+Or run the benchmark (see also the README in script/)

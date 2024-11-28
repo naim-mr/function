@@ -1,5 +1,5 @@
 echo "--- BUILDING ---"
-bash build.sh
+dune build
 echo "--- Termination ---"
 bash termination.sh
 echo "--- Guarantee ---"
@@ -10,4 +10,4 @@ echo "--- CTL ---"
 bash ctl.sh
 echo "--- Regression diff ---"
 echo "--- CLEANING ---"
-bash clean.sh
+dune clean

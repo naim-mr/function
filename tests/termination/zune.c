@@ -8,8 +8,9 @@ suggested parameters:
 
 int main() {
   int days, year = 1980;
+  int isLeapYear;
   while (days > 365) {
-    if ( isLeapYear(year) ) {
+    if ( isLeapYear ) {
       if (days > 366) {
         days -= 366;
         year += 1;

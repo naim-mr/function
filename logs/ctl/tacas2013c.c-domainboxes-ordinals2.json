@@ -3,9 +3,9 @@
     "filename": "tests/termination/tacas2013c.c",
     "analysis_type": "ctl",
     "property": "AF{exit: true}",
-    "result": "TRUE",
+    "result": "UKNOWN",
     "domain": "boxes",
-    "time": "4.42928400001"
+    "time": 1.9015690000100001
   },
   "tree": {
     "Node": {
@@ -16,19 +16,19 @@
           "left": {
             "Node": {
               "constraint": "$2{x1} >= 4",
-              "left": { "Leaf": " ($3{x2}-1)⍵ + 4$2{x1}+13$3{x2}-10" },
+              "left": { "Leaf": "top" },
               "right": {
                 "Node": {
                   "constraint": "$2{x1} >= 3",
-                  "left": { "Leaf": " ($3{x2}-1)⍵ + 13$3{x2}+2" },
+                  "left": { "Leaf": "top" },
                   "right": {
                     "Node": {
                       "constraint": "$2{x1} >= 2",
-                      "left": { "Leaf": " ($3{x2}-1)⍵ + 13$3{x2}-2" },
+                      "left": { "Leaf": "top" },
                       "right": {
                         "Node": {
                           "constraint": "$2{x1} >= 1",
-                          "left": { "Leaf": " ($3{x2}-1)⍵ + 13$3{x2}-6" },
+                          "left": { "Leaf": "top" },
                           "right": { "Leaf": "2" }
                         }
                       }
@@ -44,19 +44,19 @@
               "left": {
                 "Node": {
                   "constraint": "$2{x1} >= 4",
-                  "left": { "Leaf": " (2)⍵ + 4$2{x1}+29" },
+                  "left": { "Leaf": "top" },
                   "right": {
                     "Node": {
                       "constraint": "$2{x1} >= 3",
-                      "left": { "Leaf": " (2)⍵ + 41" },
+                      "left": { "Leaf": "top" },
                       "right": {
                         "Node": {
                           "constraint": "$2{x1} >= 2",
-                          "left": { "Leaf": " (2)⍵ + 37" },
+                          "left": { "Leaf": "top" },
                           "right": {
                             "Node": {
                               "constraint": "$2{x1} >= 1",
-                              "left": { "Leaf": " (2)⍵ + 33" },
+                              "left": { "Leaf": "top" },
                               "right": { "Leaf": "2" }
                             }
                           }
@@ -72,19 +72,19 @@
                   "left": {
                     "Node": {
                       "constraint": "$2{x1} >= 4",
-                      "left": { "Leaf": " (1)⍵ + 4$2{x1}+16" },
+                      "left": { "Leaf": "top" },
                       "right": {
                         "Node": {
                           "constraint": "$2{x1} >= 3",
-                          "left": { "Leaf": " (1)⍵ + 28" },
+                          "left": { "Leaf": "top" },
                           "right": {
                             "Node": {
                               "constraint": "$2{x1} >= 2",
-                              "left": { "Leaf": " (1)⍵ + 24" },
+                              "left": { "Leaf": "top" },
                               "right": {
                                 "Node": {
                                   "constraint": "$2{x1} >= 1",
-                                  "left": { "Leaf": " (1)⍵ + 20" },
+                                  "left": { "Leaf": "top" },
                                   "right": { "Leaf": "2" }
                                 }
                               }
@@ -100,7 +100,7 @@
                       "left": {
                         "Node": {
                           "constraint": "$2{x1} >= 4",
-                          "left": { "Leaf": "4$2{x1}+3" },
+                          "left": { "Leaf": "top" },
                           "right": {
                             "Node": {
                               "constraint": "$2{x1} >= 3",
@@ -164,21 +164,19 @@
               "left": {
                 "Node": {
                   "constraint": "$2{x1} >= 4",
-                  "left": { "Leaf": " ($3{x2}-1)⍵ + 4$2{x1}+13$3{x2}-10" },
+                  "left": { "Leaf": "top" },
                   "right": {
                     "Node": {
                       "constraint": "$2{x1} >= 3",
-                      "left": { "Leaf": " ($3{x2}-1)⍵ + 13$3{x2}+2" },
+                      "left": { "Leaf": "top" },
                       "right": {
                         "Node": {
                           "constraint": "$2{x1} >= 2",
-                          "left": { "Leaf": " ($3{x2}-1)⍵ + 13$3{x2}-2" },
+                          "left": { "Leaf": "top" },
                           "right": {
                             "Node": {
                               "constraint": "$2{x1} >= 1",
-                              "left": {
-                                "Leaf": " ($3{x2}-1)⍵ + 13$3{x2}-6"
-                              },
+                              "left": { "Leaf": "top" },
                               "right": { "Leaf": "2" }
                             }
                           }
@@ -194,19 +192,19 @@
                   "left": {
                     "Node": {
                       "constraint": "$2{x1} >= 4",
-                      "left": { "Leaf": " (2)⍵ + 4$2{x1}+29" },
+                      "left": { "Leaf": "top" },
                       "right": {
                         "Node": {
                           "constraint": "$2{x1} >= 3",
-                          "left": { "Leaf": " (2)⍵ + 41" },
+                          "left": { "Leaf": "top" },
                           "right": {
                             "Node": {
                               "constraint": "$2{x1} >= 2",
-                              "left": { "Leaf": " (2)⍵ + 37" },
+                              "left": { "Leaf": "top" },
                               "right": {
                                 "Node": {
                                   "constraint": "$2{x1} >= 1",
-                                  "left": { "Leaf": " (2)⍵ + 33" },
+                                  "left": { "Leaf": "top" },
                                   "right": { "Leaf": "2" }
                                 }
                               }
@@ -222,19 +220,19 @@
                       "left": {
                         "Node": {
                           "constraint": "$2{x1} >= 4",
-                          "left": { "Leaf": " (1)⍵ + 4$2{x1}+16" },
+                          "left": { "Leaf": "top" },
                           "right": {
                             "Node": {
                               "constraint": "$2{x1} >= 3",
-                              "left": { "Leaf": " (1)⍵ + 28" },
+                              "left": { "Leaf": "top" },
                               "right": {
                                 "Node": {
                                   "constraint": "$2{x1} >= 2",
-                                  "left": { "Leaf": " (1)⍵ + 24" },
+                                  "left": { "Leaf": "top" },
                                   "right": {
                                     "Node": {
                                       "constraint": "$2{x1} >= 1",
-                                      "left": { "Leaf": " (1)⍵ + 20" },
+                                      "left": { "Leaf": "top" },
                                       "right": { "Leaf": "2" }
                                     }
                                   }
@@ -250,7 +248,7 @@
                           "left": {
                             "Node": {
                               "constraint": "$2{x1} >= 4",
-                              "left": { "Leaf": "4$2{x1}+3" },
+                              "left": { "Leaf": "top" },
                               "right": {
                                 "Node": {
                                   "constraint": "$2{x1} >= 3",
@@ -314,25 +312,19 @@
                   "left": {
                     "Node": {
                       "constraint": "$2{x1} >= 4",
-                      "left": {
-                        "Leaf": " ($3{x2}-1)⍵ + 4$2{x1}+13$3{x2}-10"
-                      },
+                      "left": { "Leaf": "top" },
                       "right": {
                         "Node": {
                           "constraint": "$2{x1} >= 3",
-                          "left": { "Leaf": " ($3{x2}-1)⍵ + 13$3{x2}+2" },
+                          "left": { "Leaf": "top" },
                           "right": {
                             "Node": {
                               "constraint": "$2{x1} >= 2",
-                              "left": {
-                                "Leaf": " ($3{x2}-1)⍵ + 13$3{x2}-2"
-                              },
+                              "left": { "Leaf": "top" },
                               "right": {
                                 "Node": {
                                   "constraint": "$2{x1} >= 1",
-                                  "left": {
-                                    "Leaf": " ($3{x2}-1)⍵ + 13$3{x2}-6"
-                                  },
+                                  "left": { "Leaf": "top" },
                                   "right": { "Leaf": "2" }
                                 }
                               }
@@ -348,19 +340,19 @@
                       "left": {
                         "Node": {
                           "constraint": "$2{x1} >= 4",
-                          "left": { "Leaf": " (2)⍵ + 4$2{x1}+29" },
+                          "left": { "Leaf": "top" },
                           "right": {
                             "Node": {
                               "constraint": "$2{x1} >= 3",
-                              "left": { "Leaf": " (2)⍵ + 41" },
+                              "left": { "Leaf": "top" },
                               "right": {
                                 "Node": {
                                   "constraint": "$2{x1} >= 2",
-                                  "left": { "Leaf": " (2)⍵ + 37" },
+                                  "left": { "Leaf": "top" },
                                   "right": {
                                     "Node": {
                                       "constraint": "$2{x1} >= 1",
-                                      "left": { "Leaf": " (2)⍵ + 33" },
+                                      "left": { "Leaf": "top" },
                                       "right": { "Leaf": "2" }
                                     }
                                   }
@@ -376,19 +368,19 @@
                           "left": {
                             "Node": {
                               "constraint": "$2{x1} >= 4",
-                              "left": { "Leaf": " (1)⍵ + 4$2{x1}+16" },
+                              "left": { "Leaf": "top" },
                               "right": {
                                 "Node": {
                                   "constraint": "$2{x1} >= 3",
-                                  "left": { "Leaf": " (1)⍵ + 28" },
+                                  "left": { "Leaf": "top" },
                                   "right": {
                                     "Node": {
                                       "constraint": "$2{x1} >= 2",
-                                      "left": { "Leaf": " (1)⍵ + 24" },
+                                      "left": { "Leaf": "top" },
                                       "right": {
                                         "Node": {
                                           "constraint": "$2{x1} >= 1",
-                                          "left": { "Leaf": " (1)⍵ + 20" },
+                                          "left": { "Leaf": "top" },
                                           "right": { "Leaf": "2" }
                                         }
                                       }
@@ -404,7 +396,7 @@
                               "left": {
                                 "Node": {
                                   "constraint": "$2{x1} >= 4",
-                                  "left": { "Leaf": "4$2{x1}+3" },
+                                  "left": { "Leaf": "top" },
                                   "right": {
                                     "Node": {
                                       "constraint": "$2{x1} >= 3",
@@ -468,21 +460,15 @@
                       "left": {
                         "Node": {
                           "constraint": "$2{x1} >= 4",
-                          "left": {
-                            "Leaf": " ($3{x2}-1)⍵ + 4$2{x1}+13$3{x2}-10"
-                          },
+                          "left": { "Leaf": "top" },
                           "right": {
                             "Node": {
                               "constraint": "$2{x1} >= 3",
-                              "left": {
-                                "Leaf": " ($3{x2}-1)⍵ + 13$3{x2}+2"
-                              },
+                              "left": { "Leaf": "top" },
                               "right": {
                                 "Node": {
                                   "constraint": "$2{x1} >= 2",
-                                  "left": {
-                                    "Leaf": " ($3{x2}-1)⍵ + 13$3{x2}-2"
-                                  },
+                                  "left": { "Leaf": "top" },
                                   "right": {
                                     "Node": {
                                       "constraint": "$2{x1} >= 1",
@@ -502,15 +488,15 @@
                           "left": {
                             "Node": {
                               "constraint": "$2{x1} >= 4",
-                              "left": { "Leaf": " (2)⍵ + 4$2{x1}+29" },
+                              "left": { "Leaf": "top" },
                               "right": {
                                 "Node": {
                                   "constraint": "$2{x1} >= 3",
-                                  "left": { "Leaf": " (2)⍵ + 41" },
+                                  "left": { "Leaf": "top" },
                                   "right": {
                                     "Node": {
                                       "constraint": "$2{x1} >= 2",
-                                      "left": { "Leaf": " (2)⍵ + 37" },
+                                      "left": { "Leaf": "top" },
                                       "right": {
                                         "Node": {
                                           "constraint": "$2{x1} >= 1",
@@ -530,15 +516,15 @@
                               "left": {
                                 "Node": {
                                   "constraint": "$2{x1} >= 4",
-                                  "left": { "Leaf": " (1)⍵ + 4$2{x1}+16" },
+                                  "left": { "Leaf": "top" },
                                   "right": {
                                     "Node": {
                                       "constraint": "$2{x1} >= 3",
-                                      "left": { "Leaf": " (1)⍵ + 28" },
+                                      "left": { "Leaf": "top" },
                                       "right": {
                                         "Node": {
                                           "constraint": "$2{x1} >= 2",
-                                          "left": { "Leaf": " (1)⍵ + 24" },
+                                          "left": { "Leaf": "top" },
                                           "right": {
                                             "Node": {
                                               "constraint": "$2{x1} >= 1",
@@ -558,7 +544,7 @@
                                   "left": {
                                     "Node": {
                                       "constraint": "$2{x1} >= 4",
-                                      "left": { "Leaf": "4$2{x1}+3" },
+                                      "left": { "Leaf": "top" },
                                       "right": {
                                         "Node": {
                                           "constraint": "$2{x1} >= 3",
@@ -765,5 +751,6 @@
         }
       }
     }
-  }
+  },
+  "vulnerability": null
 }

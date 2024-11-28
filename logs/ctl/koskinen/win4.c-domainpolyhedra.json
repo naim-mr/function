@@ -5,7 +5,7 @@
     "property": "AF{AG{WItemsNum >= 1}}",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": "0.0780200000001"
+    "time": 0.094243000000100011
   },
   "tree": {
     "Node": {
@@ -49,5 +49,17 @@
         }
       }
     }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "",
+        "Potentially vulnerable": "WItemsNum",
+        "Constraints": "[|$1-6>=0|],[|$1-5=0|],[|-$1+4>=0; $1-3>=0|],[|$1-2=0|],[|$1-1=0|],[|\n$1=0|],[|\n$1+1=0|],[|\n-$1-2>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 0 }, { "Min vuln": 1 }, { "Nb vuln": 1 }, { "Total": 1 }
+    ]
   }
 }

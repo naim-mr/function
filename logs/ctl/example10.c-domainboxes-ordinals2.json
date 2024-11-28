@@ -3,9 +3,9 @@
     "filename": "tests/termination/example10.c",
     "analysis_type": "ctl",
     "property": "AF{exit: true}",
-    "result": "TRUE",
+    "result": "UKNOWN",
     "domain": "boxes",
-    "time": "0.794888000001"
+    "time": 0.51694200000100011
   },
   "tree": {
     "Node": {
@@ -13,11 +13,11 @@
       "left": {
         "Node": {
           "constraint": "$2{x1} >= 3",
-          "left": { "Leaf": " ($2{x1}-1)⍵ + 9$2{x1}+4$3{x2}-6" },
+          "left": { "Leaf": "top" },
           "right": {
             "Node": {
               "constraint": "$2{x1} >= 2",
-              "left": { "Leaf": " (1)⍵ + 4$3{x2}+12" },
+              "left": { "Leaf": "top" },
               "right": {
                 "Node": {
                   "constraint": "$2{x1} >= 1",
@@ -29,18 +29,12 @@
                       "right": {
                         "Node": {
                           "constraint": "$2{x1} >= -1",
-                          "left": {
-                            "Leaf": " (1)⍵^2 +  ($3{x2}-1)⍵ + 9$3{x2}+3"
-                          },
+                          "left": { "Leaf": "top" },
                           "right": {
                             "Node": {
                               "constraint": "$2{x1} >= -2",
-                              "left": {
-                                "Leaf": " (1)⍵^2 +  ($3{x2}-1)⍵ + 9$3{x2}+7"
-                              },
-                              "right": {
-                                "Leaf": " (1)⍵^2 +  ($3{x2}-1)⍵ + -4$2{x1}+9$3{x2}-1"
-                              }
+                              "left": { "Leaf": "top" },
+                              "right": { "Leaf": "top" }
                             }
                           }
                         }
@@ -59,11 +53,11 @@
           "left": {
             "Node": {
               "constraint": "$2{x1} >= 3",
-              "left": { "Leaf": " ($2{x1}-1)⍵ + 9$2{x1}+2" },
+              "left": { "Leaf": "top" },
               "right": {
                 "Node": {
                   "constraint": "$2{x1} >= 2",
-                  "left": { "Leaf": " (1)⍵ + 20" },
+                  "left": { "Leaf": "top" },
                   "right": {
                     "Node": {
                       "constraint": "$2{x1} >= 1",
@@ -75,16 +69,12 @@
                           "right": {
                             "Node": {
                               "constraint": "$2{x1} >= -1",
-                              "left": { "Leaf": " (1)⍵^2 +  (1)⍵ + 21" },
+                              "left": { "Leaf": "top" },
                               "right": {
                                 "Node": {
                                   "constraint": "$2{x1} >= -2",
-                                  "left": {
-                                    "Leaf": " (1)⍵^2 +  (1)⍵ + 25"
-                                  },
-                                  "right": {
-                                    "Leaf": " (1)⍵^2 +  (1)⍵ + -4$2{x1}+17"
-                                  }
+                                  "left": { "Leaf": "top" },
+                                  "right": { "Leaf": "top" }
                                 }
                               }
                             }
@@ -103,11 +93,11 @@
               "left": {
                 "Node": {
                   "constraint": "$2{x1} >= 3",
-                  "left": { "Leaf": " ($2{x1}-1)⍵ + 9$2{x1}-2" },
+                  "left": { "Leaf": "top" },
                   "right": {
                     "Node": {
                       "constraint": "$2{x1} >= 2",
-                      "left": { "Leaf": " (1)⍵ + 16" },
+                      "left": { "Leaf": "top" },
                       "right": {
                         "Node": {
                           "constraint": "$2{x1} >= 1",
@@ -179,5 +169,6 @@
         }
       }
     }
-  }
+  },
+  "vulnerability": null
 }

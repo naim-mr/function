@@ -5,7 +5,7 @@
     "property": "AG{OR{chainBroken != 1}{AG{chainBroken == 1}}}",
     "result": "TRUE",
     "domain": "polyhedra",
-    "time": "0.624824000001"
+    "time": 0.50102700000100009
   },
   "tree": {
     "Node": {
@@ -19,5 +19,6 @@
         }
       }
     }
-  }
+  },
+  "vulnerability": null
 }

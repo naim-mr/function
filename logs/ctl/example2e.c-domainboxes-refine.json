@@ -5,19 +5,74 @@
     "property": "AF{exit: true}",
     "result": "UKNOWN",
     "domain": "boxes",
-    "time": "0.0243130000001"
+    "time": 0.28463200000100003
   },
   "tree": {
     "Node": {
-      "constraint": "$4{y} >= 6",
-      "left": { "Leaf": "bottom" },
+      "constraint": "$4{y} >= 41",
+      "left": { "Leaf": "top" },
       "right": {
         "Node": {
-          "constraint": "$4{y} >= -5",
-          "left": { "Leaf": "3" },
-          "right": { "Leaf": "bottom" }
+          "constraint": "$4{y} >= 31",
+          "left": { "Leaf": "top" },
+          "right": {
+            "Node": {
+              "constraint": "$4{y} >= 21",
+              "left": { "Leaf": "top" },
+              "right": {
+                "Node": {
+                  "constraint": "$4{y} >= 11",
+                  "left": { "Leaf": "top" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$4{y} >= 6",
+                      "left": { "Leaf": "top" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$4{y} >= 1",
+                          "left": { "Leaf": "3" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$4{y} >= -5",
+                              "left": { "Leaf": "3" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$4{y} >= -10",
+                                  "left": { "Leaf": "top" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$4{y} >= -20",
+                                      "left": { "Leaf": "top" },
+                                      "right": {
+                                        "Node": {
+                                          "constraint": "$4{y} >= -30",
+                                          "left": { "Leaf": "top" },
+                                          "right": {
+                                            "Node": {
+                                              "constraint": "$4{y} >= -40",
+                                              "left": { "Leaf": "top" },
+                                              "right": { "Leaf": "top" }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }
-  }
+  },
+  "vulnerability": null
 }

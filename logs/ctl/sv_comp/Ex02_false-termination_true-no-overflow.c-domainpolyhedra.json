@@ -5,13 +5,19 @@
     "property": "OR{i >= 5}{AF{exit: true}}",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": "0.0238440000001"
+    "time": 0.028162000000100003
   },
   "tree": {
     "Node": {
       "constraint": "$2{i} >= 5",
-      "left": { "Leaf": "0." },
-      "right": { "Leaf": "bottom" }
+      "left": { "Leaf": "top" },
+      "right": { "Leaf": "top" }
     }
+  },
+  "vulnerability": {
+    "res": [],
+    "stats": [
+      { "Max safe": 0 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 0 }
+    ]
   }
 }

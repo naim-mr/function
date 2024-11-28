@@ -3,21 +3,22 @@
     "filename": "tests/ctl/ltl_automizer/coolant_basis_1_safe_sfty.c",
     "analysis_type": "ctl",
     "property": "AG{OR{chainBroken != 1}{AG{chainBroken == 1}}}",
-    "result": "UKNOWN",
+    "result": "TRUE",
     "domain": "polyhedra",
-    "time": "0.264389000001"
+    "time": 0.50491000000100006
   },
   "tree": {
     "Node": {
       "constraint": "$5{chainBroken} >= 2",
-      "left": { "Leaf": "bottom" },
+      "left": { "Leaf": "0." },
       "right": {
         "Node": {
           "constraint": "$5{chainBroken} >= 1",
-          "left": { "Leaf": "bottom" },
-          "right": { "Leaf": "bottom" }
+          "left": { "Leaf": "0." },
+          "right": { "Leaf": "0." }
         }
       }
     }
-  }
+  },
+  "vulnerability": null
 }

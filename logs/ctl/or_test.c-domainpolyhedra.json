@@ -5,7 +5,7 @@
     "property": "OR{EF{EG{x < -100}}}{AF{x==20}}",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": "0.0243070000001"
+    "time": 0.034493000000100007
   },
   "tree": {
     "Node": {
@@ -43,5 +43,17 @@
         }
       }
     }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "$1",
+        "Potentially vulnerable": "x",
+        "Constraints": "[|$2-21>=0|],[|$2-20=0|],[|-$2+19>=0; $2-1>=0|],[|-$2>=0; $2+98>=0|],[|\n$2+99=0|],[|\n$2+100=0|],[|\n-$2-101>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 1 }, { "Min vuln": 1 }, { "Nb vuln": 1 }, { "Total": 2 }
+    ]
   }
 }

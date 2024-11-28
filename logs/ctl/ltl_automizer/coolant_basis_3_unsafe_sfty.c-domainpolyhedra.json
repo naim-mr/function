@@ -5,7 +5,7 @@
     "property": "AG{OR{init != 3}{AG{AF{time > otime}}}}",
     "result": "TRUE",
     "domain": "polyhedra",
-    "time": "0.626540000001"
+    "time": 0.81947000000100001
   },
   "tree": {
     "Node": {
@@ -19,5 +19,6 @@
         }
       }
     }
-  }
+  },
+  "vulnerability": null
 }

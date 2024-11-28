@@ -5,13 +5,8 @@
     "property": "AG{AF{otime < time}}",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": "0.406591000001"
+    "time": 0.53706600000100003
   },
-  "tree": {
-    "Node": {
-      "constraint": "$8{otime}-$9{time} >= 0",
-      "left": { "Leaf": "bottom" },
-      "right": { "Leaf": "bottom" }
-    }
-  }
+  "tree": { "Leaf": "bottom" },
+  "vulnerability": null
 }

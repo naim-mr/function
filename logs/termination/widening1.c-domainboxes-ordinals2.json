@@ -5,7 +5,7 @@
     "property": "",
     "result": "TRUE",
     "domain": "boxes",
-    "time": "0.0179140000001"
+    "time": 0.022906000000100003
   },
   "tree": {
     "Node": {
@@ -55,5 +55,17 @@
         }
       }
     }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "z,y",
+        "Potentially vulnerable": "",
+        "Constraints": "top"
+      }
+    ],
+    "stats": [
+      { "Max safe": 2 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 2 }
+    ]
   }
 }

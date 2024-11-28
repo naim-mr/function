@@ -3,9 +3,9 @@
     "filename": "tests/termination/cacm2009a.c",
     "analysis_type": "termination",
     "property": "",
-    "result": "TRUE",
+    "result": "UKNOWN",
     "domain": "boxes",
-    "time": "0.0427480000001"
+    "time": 0.039479000000100004
   },
   "tree": {
     "Node": {
@@ -13,11 +13,11 @@
       "left": {
         "Node": {
           "constraint": "$1{x} >= 2",
-          "left": { "Leaf": "7$1{x}+3$2{y}-5" },
+          "left": { "Leaf": "top" },
           "right": {
             "Node": {
               "constraint": "$1{x} >= 1",
-              "left": { "Leaf": "3$2{y}+2" },
+              "left": { "Leaf": "top" },
               "right": { "Leaf": "1" }
             }
           }
@@ -29,7 +29,7 @@
           "left": {
             "Node": {
               "constraint": "$1{x} >= 2",
-              "left": { "Leaf": "7$1{x}-2" },
+              "left": { "Leaf": "top" },
               "right": {
                 "Node": {
                   "constraint": "$1{x} >= 1",
@@ -73,5 +73,22 @@
         }
       }
     }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "y",
+        "Potentially vulnerable": "x",
+        "Constraints": "[|-$1>=0|]"
+      },
+      {
+        "Non-vulnerable": "x",
+        "Potentially vulnerable": "y",
+        "Constraints": "[|$2=0|],[|-$2-1>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 1 }, { "Min vuln": 1 }, { "Nb vuln": 2 }, { "Total": 4 }
+    ]
   }
 }

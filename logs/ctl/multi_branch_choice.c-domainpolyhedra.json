@@ -5,7 +5,7 @@
     "property": "AND{EF{x==4}}{EF{x==-4}}",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": "0.0354490000001"
+    "time": 0.042421000000100004
   },
   "tree": {
     "Node": {
@@ -31,5 +31,17 @@
         }
       }
     }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "x,$1",
+        "Potentially vulnerable": "",
+        "Constraints": "top"
+      }
+    ],
+    "stats": [
+      { "Max safe": 2 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 2 }
+    ]
   }
 }

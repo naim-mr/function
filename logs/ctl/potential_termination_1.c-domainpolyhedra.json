@@ -5,7 +5,13 @@
     "property": "EF{exit: true}",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": "0.00736100000001"
+    "time": 0.010445000000100002
   },
-  "tree": { "Leaf": "bottom" }
+  "tree": { "Leaf": "bottom" },
+  "vulnerability": {
+    "res": [],
+    "stats": [
+      { "Max safe": 0 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 0 }
+    ]
+  }
 }

@@ -5,7 +5,7 @@
     "property": "AF{exit: true}",
     "result": "TRUE",
     "domain": "boxes",
-    "time": "0.00499600000001"
+    "time": 0.0050850000000100008
   },
   "tree": {
     "Node": {
@@ -25,5 +25,6 @@
         }
       }
     }
-  }
+  },
+  "vulnerability": null
 }

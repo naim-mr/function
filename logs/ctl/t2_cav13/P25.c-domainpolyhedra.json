@@ -5,7 +5,7 @@
     "property": "OR{varC <= 5}{AF{varR > 5}}",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": "1.15149300001"
+    "time": 1.4146490000100001
   },
   "tree": {
     "Node": {
@@ -37,5 +37,17 @@
         }
       }
     }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "varR,varCS,varC",
+        "Potentially vulnerable": "",
+        "Constraints": "top"
+      }
+    ],
+    "stats": [
+      { "Max safe": 3 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 3 }
+    ]
   }
 }

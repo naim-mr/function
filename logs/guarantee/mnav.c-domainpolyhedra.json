@@ -5,7 +5,7 @@
     "property": "tests/guarantee/mnav.txt",
     "result": "TRUE",
     "domain": "polyhedra",
-    "time": "0.0518970000001"
+    "time": 0.20424400000100002
   },
   "tree": {
     "Node": {
@@ -19,5 +19,17 @@
         }
       }
     }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "enable,count,ch4,$1",
+        "Potentially vulnerable": "",
+        "Constraints": "top"
+      }
+    ],
+    "stats": [
+      { "Max safe": 4 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 4 }
+    ]
   }
 }

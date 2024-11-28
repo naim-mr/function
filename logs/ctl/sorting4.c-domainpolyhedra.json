@@ -5,7 +5,7 @@
     "property": "AF{exit: true}",
     "result": "TRUE",
     "domain": "polyhedra",
-    "time": "0.104638000001"
+    "time": 0.13141000000100001
   },
   "tree": {
     "Node": {
@@ -61,5 +61,6 @@
         }
       }
     }
-  }
+  },
+  "vulnerability": null
 }

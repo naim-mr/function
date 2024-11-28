@@ -3,9 +3,9 @@
     "filename": "tests/termination/sas2010.c",
     "analysis_type": "termination",
     "property": "",
-    "result": "TRUE",
+    "result": "UKNOWN",
     "domain": "boxes",
-    "time": "0.140952000001"
+    "time": 0.06965300000010001
   },
   "tree": {
     "Node": {
@@ -13,11 +13,11 @@
       "left": {
         "Node": {
           "constraint": "$2{x1} >= 1",
-          "left": { "Leaf": "57$2{x1}+3$3{x2}+29" },
+          "left": { "Leaf": "top" },
           "right": {
             "Node": {
               "constraint": "$2{x1} >= 0",
-              "left": { "Leaf": "3$3{x2}+29" },
+              "left": { "Leaf": "top" },
               "right": { "Leaf": "2" }
             }
           }
@@ -29,11 +29,11 @@
           "left": {
             "Node": {
               "constraint": "$2{x1} >= 1",
-              "left": { "Leaf": "57$2{x1}+59" },
+              "left": { "Leaf": "top" },
               "right": {
                 "Node": {
                   "constraint": "$2{x1} >= 0",
-                  "left": { "Leaf": "59" },
+                  "left": { "Leaf": "top" },
                   "right": { "Leaf": "2" }
                 }
               }
@@ -45,11 +45,11 @@
               "left": {
                 "Node": {
                   "constraint": "$2{x1} >= 1",
-                  "left": { "Leaf": "57$2{x1}+3$3{x2}+29" },
+                  "left": { "Leaf": "top" },
                   "right": {
                     "Node": {
                       "constraint": "$2{x1} >= 0",
-                      "left": { "Leaf": "3$3{x2}+29" },
+                      "left": { "Leaf": "top" },
                       "right": { "Leaf": "2" }
                     }
                   }
@@ -61,7 +61,7 @@
                   "left": {
                     "Node": {
                       "constraint": "$2{x1} >= 1",
-                      "left": { "Leaf": "57$2{x1}+29" },
+                      "left": { "Leaf": "top" },
                       "right": {
                         "Node": {
                           "constraint": "$2{x1} >= 0",
@@ -91,5 +91,22 @@
         }
       }
     }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "x2,$1",
+        "Potentially vulnerable": "x1",
+        "Constraints": "[|-$2-1>=0|]"
+      },
+      {
+        "Non-vulnerable": "x1,$1",
+        "Potentially vulnerable": "x2",
+        "Constraints": "[|-$3-1>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 2 }, { "Min vuln": 1 }, { "Nb vuln": 2 }, { "Total": 6 }
+    ]
   }
 }

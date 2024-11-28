@@ -5,7 +5,7 @@
     "property": "AF{exit: true}",
     "result": "UKNOWN",
     "domain": "boxes",
-    "time": "0.00194100000001"
+    "time": 0.0057800000000100003
   },
   "tree": {
     "Node": {
@@ -13,17 +13,18 @@
       "left": {
         "Node": {
           "constraint": "$1{x} >= 1",
-          "left": { "Leaf": "bottom" },
-          "right": { "Leaf": "1." }
+          "left": { "Leaf": "top" },
+          "right": { "Leaf": "1" }
         }
       },
       "right": {
         "Node": {
           "constraint": "$1{x} >= 1",
-          "left": { "Leaf": "1." },
+          "left": { "Leaf": "1" },
           "right": { "Leaf": "1" }
         }
       }
     }
-  }
+  },
+  "vulnerability": null
 }

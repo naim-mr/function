@@ -5,7 +5,7 @@
     "property": "tests/recurrence/simple.txt",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": "0.0860370000001"
+    "time": 0.10605100000100002
   },
   "tree": {
     "Node": {
@@ -37,5 +37,17 @@
         }
       }
     }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "x",
+        "Potentially vulnerable": "",
+        "Constraints": "top"
+      }
+    ],
+    "stats": [
+      { "Max safe": 1 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 1 }
+    ]
   }
 }

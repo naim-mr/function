@@ -3,9 +3,9 @@
     "filename": "tests/termination/sas2014b.c",
     "analysis_type": "termination",
     "property": "",
-    "result": "TRUE",
+    "result": "UKNOWN",
     "domain": "boxes",
-    "time": "0.00668100000001"
+    "time": 0.0070920000000100001
   },
   "tree": {
     "Node": {
@@ -13,7 +13,7 @@
       "left": {
         "Node": {
           "constraint": "$1{x} >= 2",
-          "left": { "Leaf": "2$1{x}+1" },
+          "left": { "Leaf": "top" },
           "right": {
             "Node": {
               "constraint": "$1{x} >= 1",
@@ -31,5 +31,22 @@
         }
       }
     }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "y",
+        "Potentially vulnerable": "x",
+        "Constraints": "[|$1-1=0|],[|-$1>=0|]"
+      },
+      {
+        "Non-vulnerable": "x",
+        "Potentially vulnerable": "y",
+        "Constraints": "[|-$2>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 1 }, { "Min vuln": 1 }, { "Nb vuln": 2 }, { "Total": 4 }
+    ]
   }
 }

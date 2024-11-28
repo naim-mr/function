@@ -5,7 +5,19 @@
     "property": "tests/guarantee/peterson.txt",
     "result": "TRUE",
     "domain": "polyhedra",
-    "time": "1.43165000001"
+    "time": 1.9837540000100001
   },
-  "tree": { "Leaf": "16" }
+  "tree": { "Leaf": "16" },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "turn,flag2,flag1",
+        "Potentially vulnerable": "",
+        "Constraints": "top"
+      }
+    ],
+    "stats": [
+      { "Max safe": 3 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 3 }
+    ]
+  }
 }

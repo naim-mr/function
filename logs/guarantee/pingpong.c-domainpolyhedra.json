@@ -5,7 +5,7 @@
     "property": "tests/guarantee/pingpong.txt",
     "result": "TRUE",
     "domain": "polyhedra",
-    "time": "0.0720340000001"
+    "time": 0.10656100000100001
   },
   "tree": {
     "Node": {
@@ -19,5 +19,17 @@
         }
       }
     }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "z,y,x",
+        "Potentially vulnerable": "",
+        "Constraints": "top"
+      }
+    ],
+    "stats": [
+      { "Max safe": 3 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 3 }
+    ]
   }
 }

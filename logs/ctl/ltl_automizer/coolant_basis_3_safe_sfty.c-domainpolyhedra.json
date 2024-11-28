@@ -3,39 +3,22 @@
     "filename": "tests/ctl/ltl_automizer/coolant_basis_3_safe_sfty.c",
     "analysis_type": "ctl",
     "property": "AG{OR{init != 3}{AG{AF{time > otime}}}}",
-    "result": "UKNOWN",
+    "result": "TRUE",
     "domain": "polyhedra",
-    "time": "0.868070000001"
+    "time": 1.3633830000100001
   },
   "tree": {
     "Node": {
-      "constraint": "$8{otime}-$9{time} >= 0",
-      "left": {
-        "Node": {
-          "constraint": "$11{init} >= 4",
-          "left": { "Leaf": "bottom" },
-          "right": {
-            "Node": {
-              "constraint": "$11{init} >= 3",
-              "left": { "Leaf": "bottom" },
-              "right": { "Leaf": "bottom" }
-            }
-          }
-        }
-      },
+      "constraint": "$11{init} >= 4",
+      "left": { "Leaf": "0." },
       "right": {
         "Node": {
-          "constraint": "$11{init} >= 4",
+          "constraint": "$11{init} >= 3",
           "left": { "Leaf": "bottom" },
-          "right": {
-            "Node": {
-              "constraint": "$11{init} >= 3",
-              "left": { "Leaf": "bottom" },
-              "right": { "Leaf": "bottom" }
-            }
-          }
+          "right": { "Leaf": "0." }
         }
       }
     }
-  }
+  },
+  "vulnerability": null
 }

@@ -35,4 +35,4 @@ let make_analyser common_setup ?(setup=[]) filename expected =
       else
         index := if c = '\n' then 1 else 0) out;
     assert_equal ~printer:string_of_bool ~msg:filename expected !terminate)
-  "timeout" (["120s"; "./function"] @ common_setup @ setup @ [filename])
+  "timeout" (["120s"; "./main.exe"] @ common_setup @ setup @ [filename])

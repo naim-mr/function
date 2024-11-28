@@ -5,7 +5,7 @@
     "property": "AG{i >= n}",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": "0.00479800000001"
+    "time": 0.0053670000000100001
   },
   "tree": {
     "Node": {
@@ -25,5 +25,17 @@
         }
       }
     }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "n,i,$1",
+        "Potentially vulnerable": "",
+        "Constraints": "top"
+      }
+    ],
+    "stats": [
+      { "Max safe": 3 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 3 }
+    ]
   }
 }

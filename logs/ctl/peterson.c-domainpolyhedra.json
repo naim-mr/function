@@ -5,7 +5,19 @@
     "property": "AG{AF{C1: true}}",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": "2.60878500001"
+    "time": 4.1467700000100001
   },
-  "tree": { "Leaf": "16" }
+  "tree": { "Leaf": "16" },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "turn,flag2,flag1",
+        "Potentially vulnerable": "",
+        "Constraints": "top"
+      }
+    ],
+    "stats": [
+      { "Max safe": 3 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 3 }
+    ]
+  }
 }

@@ -5,7 +5,7 @@
     "property": "AF{exit: true}",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": "0.00905800000001"
+    "time": 0.0098650000000100012
   },
   "tree": {
     "Node": {
@@ -37,5 +37,17 @@
         }
       }
     }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "x,$1",
+        "Potentially vulnerable": "",
+        "Constraints": "top"
+      }
+    ],
+    "stats": [
+      { "Max safe": 2 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 2 }
+    ]
   }
 }

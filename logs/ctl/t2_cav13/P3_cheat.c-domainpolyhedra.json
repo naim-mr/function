@@ -5,7 +5,7 @@
     "property": "OR{varA != 1}{EF{varR==1}}",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": "0.651086000001"
+    "time": 0.78810600000100007
   },
   "tree": {
     "Node": {
@@ -325,5 +325,27 @@
         }
       }
     }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "varR,varA,n_init,n,m",
+        "Potentially vulnerable": "m_init",
+        "Constraints": "[|$4-2>=0|],[|$4-1=0|],[|-$4>=0|]"
+      },
+      {
+        "Non-vulnerable": "varR,varA,n,m_init,m",
+        "Potentially vulnerable": "n_init",
+        "Constraints": "[|-$3>=0|]"
+      },
+      {
+        "Non-vulnerable": "varA,n_init,n,m_init,m",
+        "Potentially vulnerable": "varR",
+        "Constraints": "[|$6-1=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 5 }, { "Min vuln": 1 }, { "Nb vuln": 3 }, { "Total": 18 }
+    ]
   }
 }

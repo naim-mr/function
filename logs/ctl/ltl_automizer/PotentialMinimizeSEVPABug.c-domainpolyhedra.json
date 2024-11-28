@@ -3,9 +3,9 @@
     "filename": "tests/ctl/ltl_automizer/PotentialMinimizeSEVPABug.c",
     "analysis_type": "ctl",
     "property": "AG{OR{x <= 0}{AF{y == 0}}}",
-    "result": "TRUE",
+    "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": "0.0950420000001"
+    "time": 0.10909400000100001
   },
   "tree": {
     "Node": {
@@ -14,7 +14,7 @@
         "Node": {
           "constraint": "$1{x} >= 1",
           "left": { "Leaf": "bottom" },
-          "right": { "Leaf": "0." }
+          "right": { "Leaf": "bottom" }
         }
       },
       "right": {
@@ -31,11 +31,12 @@
             "Node": {
               "constraint": "$1{x} >= 1",
               "left": { "Leaf": "bottom" },
-              "right": { "Leaf": "0." }
+              "right": { "Leaf": "bottom" }
             }
           }
         }
       }
     }
-  }
+  },
+  "vulnerability": null
 }

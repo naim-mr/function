@@ -161,6 +161,8 @@ class Report:
         self.path = path
         with open(path,'rt') as f:
             data = json.load(f)
+            print("coucou\n")
+            print(data)
             self.time = float(data["Config"]["time"])
             self.tree = data["tree"]
             if data["Config"]["result"]:

@@ -5,109 +5,38 @@
     "property": "AG{OR{limit <= -273 && limit >= 10}{OR{tempIn >= 0}{AF{ warnLED == 1}}}}",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": "3.46091800001"
+    "time": 5.2350270000100006
   },
   "tree": {
     "Node": {
-      "constraint": "$4{tempIn} >= 0",
+      "constraint": "$9{limit} >= 10",
       "left": {
         "Node": {
-          "constraint": "$3{warnLED} >= 2",
-          "left": {
-            "Node": {
-              "constraint": "$16{limit} >= 10",
-              "left": { "Leaf": "bottom" },
-              "right": {
-                "Node": {
-                  "constraint": "$16{limit} >= -272",
-                  "left": { "Leaf": "bottom" },
-                  "right": { "Leaf": "bottom" }
-                }
-              }
-            }
-          },
-          "right": {
-            "Node": {
-              "constraint": "$3{warnLED} >= 1",
-              "left": {
-                "Node": {
-                  "constraint": "$16{limit} >= 10",
-                  "left": { "Leaf": "bottom" },
-                  "right": {
-                    "Node": {
-                      "constraint": "$16{limit} >= -272",
-                      "left": { "Leaf": "bottom" },
-                      "right": { "Leaf": "bottom" }
-                    }
-                  }
-                }
-              },
-              "right": {
-                "Node": {
-                  "constraint": "$16{limit} >= 10",
-                  "left": { "Leaf": "bottom" },
-                  "right": {
-                    "Node": {
-                      "constraint": "$16{limit} >= -272",
-                      "left": { "Leaf": "bottom" },
-                      "right": { "Leaf": "bottom" }
-                    }
-                  }
-                }
-              }
-            }
-          }
+          "constraint": "$4{tempIn} >= 0",
+          "left": { "Leaf": "0." },
+          "right": { "Leaf": "bottom" }
         }
       },
       "right": {
         "Node": {
-          "constraint": "$3{warnLED} >= 2",
+          "constraint": "$9{limit} >= -272",
           "left": {
             "Node": {
-              "constraint": "$16{limit} >= 10",
-              "left": { "Leaf": "bottom" },
-              "right": {
-                "Node": {
-                  "constraint": "$16{limit} >= -272",
-                  "left": { "Leaf": "bottom" },
-                  "right": { "Leaf": "bottom" }
-                }
-              }
+              "constraint": "$4{tempIn} >= 0",
+              "left": { "Leaf": "0." },
+              "right": { "Leaf": "bottom" }
             }
           },
           "right": {
             "Node": {
-              "constraint": "$3{warnLED} >= 1",
-              "left": {
-                "Node": {
-                  "constraint": "$16{limit} >= 10",
-                  "left": { "Leaf": "bottom" },
-                  "right": {
-                    "Node": {
-                      "constraint": "$16{limit} >= -272",
-                      "left": { "Leaf": "bottom" },
-                      "right": { "Leaf": "bottom" }
-                    }
-                  }
-                }
-              },
-              "right": {
-                "Node": {
-                  "constraint": "$16{limit} >= 10",
-                  "left": { "Leaf": "bottom" },
-                  "right": {
-                    "Node": {
-                      "constraint": "$16{limit} >= -272",
-                      "left": { "Leaf": "bottom" },
-                      "right": { "Leaf": "bottom" }
-                    }
-                  }
-                }
-              }
+              "constraint": "$4{tempIn} >= 0",
+              "left": { "Leaf": "0." },
+              "right": { "Leaf": "bottom" }
             }
           }
         }
       }
     }
-  }
+  },
+  "vulnerability": null
 }

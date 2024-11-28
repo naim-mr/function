@@ -5,7 +5,7 @@
     "property": "EF{r==1}",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": "0.0581250000001"
+    "time": 0.09711400000010001
   },
   "tree": {
     "Node": {
@@ -73,5 +73,22 @@
         }
       }
     }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "y,x,$1",
+        "Potentially vulnerable": "r",
+        "Constraints": "[|$4-1=0|]"
+      },
+      {
+        "Non-vulnerable": "y,r,$1",
+        "Potentially vulnerable": "x",
+        "Constraints": "[|$2-200>=0|],[|$2-199=0|],[|$2-198=0|],[|-$2+197>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 3 }, { "Min vuln": 1 }, { "Nb vuln": 2 }, { "Total": 8 }
+    ]
   }
 }

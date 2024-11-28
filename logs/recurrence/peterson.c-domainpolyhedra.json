@@ -5,7 +5,19 @@
     "property": "tests/recurrence/peterson.txt",
     "result": "TRUE",
     "domain": "polyhedra",
-    "time": "0.923192000001"
+    "time": 1.2618740000100002
   },
-  "tree": { "Leaf": "16" }
+  "tree": { "Leaf": "16" },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "turn,flag2,flag1",
+        "Potentially vulnerable": "",
+        "Constraints": "top"
+      }
+    ],
+    "stats": [
+      { "Max safe": 3 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 3 }
+    ]
+  }
 }
