@@ -5,7 +5,6 @@ It is also capable of inferring minimal set of variable with an associate suffic
 
 The tool automatically infers piecewise-defined ranking functions and sufficient preconditions by means of abstract interpretation.
 
-FuncTion's main website is: http://www.di.ens.fr/~urba./main.exe.html
 
 # Installation
 
