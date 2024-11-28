@@ -122,6 +122,40 @@ let parseCTLPropertyString_plain (property:string) =
 let parseCTLPropertyString (property:string) =
     CTLProperty.map (fun p -> fst (parsePropertyString p)) @@ parseCTLPropertyString_plain property 
 
+    let is_keyword = function
+    | "-domain" 
+    | "-timeout"
+    | "-joinfwd"
+    | "-joinbwd"    
+
+    | "-main"
+    | "-meetbwd"
+    | "-minimal"
+    | "-ordinals"
+    | "-refine"
+    | "-retrybwd"
+    | "-tracefwd"
+    | "-tracebwd"
+    | "-cda"
+    | "-termination"
+    | "-guarantee"
+    | "-recurrence"
+    | "-time"
+    | "-timefwd"
+    | "-timebwd"
+    | "-ctl"
+    | "-ctl-ast"
+    | "-ctl-cfg"
+    | "-dot"
+    | "-precondition"
+    | "-ctl_existential_equivalence"
+    | "-noinline"
+    | "-vulnerability"
+    | "-output_std"
+    | "-json_output" -> true
+    | _ -> false
+    
+
 let parse_args () =
   let rec doit args =
     match args with
@@ -195,8 +229,9 @@ let parse_args () =
       Config.vulnerability := true; doit r
     | "-output_std"::r -> 
       Config.output_std := true; doit r
-    | "-json_output"::x::r when x <> "-output_std"-> 
-      Config.json_output := true; output_dir :=x; time:=true; doit r
+    | "-json_output"::x::r  when not (is_keyword x)-> 
+
+      Config.json_output := true; output_dir :=x; time:=true
     | "-json_output"::r -> (* guarantee analysis *)
       Config.json_output := true; time:=true; doit r
     | x::r -> filename := x; doit r

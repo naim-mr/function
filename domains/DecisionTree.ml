@@ -22,7 +22,7 @@ open Domain
 open Config
 open Functions
 open Ordinals
-
+open Vulnerability
 
 (** The ranking functions abstract domain is an abstract domain functor T. 
     It is parameterized by an auxiliary abstract domain for linear constraints 
@@ -1025,7 +1025,7 @@ struct
         | Leaf f1,Leaf f2 ->
           let b = match pre with | None -> B.inner env vars cs | Some pre -> B.meet (B.inner env vars cs) pre in
           let joinType = if underapprox then COMPUTATIONAL else APPROXIMATION in
-          Leaf (F.join joinType b f1 f2)
+          Leaf (F.join COMPUTATIONAL b f1 f2)
         | Node ((c1,nc1),l1,r1),Node((c2,nc2),l2,r2) when (C.isEq c1 c2) ->
           Node((c1,nc1),aux (l1,l2) (c1::cs),aux (r1,r2) (nc1::cs))
         | _ -> raise (Invalid_argument "bwdAssign:merge:")
@@ -1620,8 +1620,8 @@ struct
 
   let manager = Polka.manager_alloc_strict ()
   (* Compute the vulnerability analysis, right now the algorithm is naif and doesnot implement the dynamic programming *)
-  let vulnerable  t  =   
-    print_tree t.vars Format.std_formatter (compress t).tree ;
+  let vulnerable  t: Polka.strict Polka.t Vulnerability.t list  =   
+    (* print_tree t.vars Format.std_formatter (compress t).tree ; *)
     Format.print_newline () ;  
     let forget x =  (AbstractSyntax.A_var  x, A_RANDOM ) in
     let rec unconstraint t cns   = match t with 
@@ -1685,7 +1685,7 @@ struct
                                   if List.exists (fun (l,_) -> List.compare_lengths l b > 0 && (List.for_all (fun el -> List.mem  el l ) b) )  a then a else (b,arr)::a ) 
                                   [] j
     |> 
-    fun j -> List.map (fun (b,arr) ->  let nb =(List.filter (fun x ->  (not (List.mem x  b))) t.vars  )  in (b,nb,arr))   j
+    fun j -> List.map (fun (b,arr) ->  let nb =(List.filter (fun x ->  (not (List.mem x  b))) t.vars  )  in {safe=b;vulnerables=nb;cons=arr})   j
 end
 
 module TSAB = DecisionTree(AB)

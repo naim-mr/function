@@ -110,7 +110,7 @@ struct
         Format.fprintf !fmt "p1: %a\n" D.print p1;
         Format.fprintf !fmt "p2: %a\n" D.print p2
       end;
-      (D.join APPROXIMATION p1 p2, r, flag1 || flag2)
+      (D.join COMPUTATIONAL p1 p2, r, flag1 || flag2)
     | A_while (l, (b, ba), s) ->
       let a = InvMap.find l !fwdInvMap in
       let dm = if !refine then Some a else None in

@@ -31,10 +31,11 @@ let tracebwd = ref false
 let dot = ref false (* output trees in graphviz dot format *)
 let abort = ref false
 let vulnerability = ref false
+
 exception Abort
 exception Timeout
 let json_output = ref false
-let output_dir = ref "diff/"
+let output_dir = ref "logs/"
 let exectime = ref "0"
 let ctltype = ref ""
 let logfile = ref ""
@@ -42,6 +43,6 @@ let result = ref false
 let output_std = ref false
 let f_log = ref Out_channel.stdout
 let tree: Yojson.Safe.t ref  = ref `Null
-
+let vuln_res: Yojson.Safe.t ref = ref  `Null
 
 
