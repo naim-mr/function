@@ -13,6 +13,8 @@ let _ = List.iter (fun (a,b) -> Hashtbl.add keyword a b)
 	[
 		"assert", TOK_ASSERT;
 		"else", TOK_ELSE;
+		"rand",TOK_RANDOM;
+		"input",TOK_INPUT;
 		"false", TOK_FALSE;
 		"if", TOK_IF;
 		"int", TOK_INT;
@@ -36,6 +38,8 @@ rule start = parse
 	| ""	{ token lexbuf }
 
 and token = parse
+	| "input"									{ TOK_INPUT }
+	| "rand"									{ TOK_RANDOM }
 	| ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']* as id
 		{ try Hashtbl.find keyword id with Not_found -> TOK_id id }
 
@@ -70,7 +74,7 @@ and token = parse
 	| "*="										{ TOK_MULTIPLY_EQUAL }
 	| "/="										{ TOK_DIVIDE_EQUAL }
 	| "%="										{ TOK_MODULO_EQUAL }
-	| "§"									{ TOK_INPUT }
+	
 	| "?"										{ TOK_RANDOM }
 	| "__VERIFIER_nondet_int()"					{ TOK_RANDOM }
 	| "(int*) "? "alloca" [^ ';' '\n' '\r']*	{ TOK_RANDOM }

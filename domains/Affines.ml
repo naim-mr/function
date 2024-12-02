@@ -149,11 +149,23 @@ struct
     | Bot,Fun _ ->
       (match k with
        | APPROXIMATION -> false
-       | COMPUTATIONAL -> true)
+       | COMPUTATIONAL -> true
+       | RESILIENCE -> true)
     | Fun _,Bot ->
       (match k with
        | APPROXIMATION -> true
-       | COMPUTATIONAL -> false)
+       | COMPUTATIONAL -> false
+       | RESILIENCE -> false)
+    | Fun _,Top -> 
+      (match k with
+       | APPROXIMATION -> true
+       | COMPUTATIONAL -> true
+       | RESILIENCE -> false)
+    | Top, Fun _  -> 
+      (match k with
+       | APPROXIMATION -> false
+       | COMPUTATIONAL -> false
+       | RESILIENCE -> true)
     | Bot,_ | _,Top -> true
     | _ -> false
 
@@ -208,11 +220,18 @@ struct
     | Bot,_ ->
       (match k with
        | APPROXIMATION -> Bot
-       | COMPUTATIONAL -> f2)
+       | COMPUTATIONAL -> f2
+       | RESILIENCE -> f2)
     | _,Bot ->
       (match k with
        | APPROXIMATION -> Bot
-       | COMPUTATIONAL -> f1)
+       | COMPUTATIONAL -> f1
+       | RESILIENCE -> f1)
+    | Fun f, Top | Top, Fun f -> 
+      (match k with
+       | APPROXIMATION -> Bot
+       | COMPUTATIONAL -> Fun f
+       | RESILIENCE -> Fun f)
     | _ -> Top
 
   let join k b f1 f2 = { ranking = join_ranking k b f1.ranking f2.ranking; env = f1.env; vars = f1.vars }

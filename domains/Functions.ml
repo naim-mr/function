@@ -10,6 +10,7 @@ open Partition
 type kind =
   | APPROXIMATION
   | COMPUTATIONAL
+  | RESILIENCE
 
 module type FUNCTION =
 sig

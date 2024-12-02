@@ -517,7 +517,7 @@ struct
         if (B.isBot b) then true
         else
           (match k with
-           | APPROXIMATION ->
+           | APPROXIMATION | RESILIENCE ->
              if not (F.defined f2) || (F.defined f1) 
              then (* dom(f1) \supseteq dom(f2) *)
                if (F.defined f1) && (F.defined f2)
@@ -625,6 +625,7 @@ struct
     let botLeaf = Leaf (F.bot env vars) in
     let fBotLeftRight = match k with
       | APPROXIMATION -> fun _ _ -> Bot (* use NIL if at least one leaf is NIL *)
+      | RESILIENCE -> fun _ _ -> Bot (* use NIL if at least one leaf is NIL *)
       | COMPUTATIONAL -> fun _ _ -> botLeaf (* use bottom leaf if at least one leaf is nil*)
     in
     let fLeaf cs f1 f2 = 
@@ -1028,7 +1029,7 @@ struct
                          if not (underapprox) then
                             if taint then 
                               APPROXIMATION 
-                            else COMPUTATIONAL
+                            else RESILIENCE
                           else failwith "underapproximation + taint not handled"
                           in                        
           Leaf (F.join joinType b f1 f2)
