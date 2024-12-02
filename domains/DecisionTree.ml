@@ -1011,7 +1011,7 @@ struct
 
   (**)
 
-  let bwdAssign ?domain ?(underapprox = false) t e = 
+  let bwdAssign ?domain ?(taint = true) ?(underapprox = false) t e = 
     let cache = ref CMap.empty in
     let pre = domain in
     let post = t.domain in
@@ -1024,8 +1024,14 @@ struct
         | Bot,_ -> t2
         | Leaf f1,Leaf f2 ->
           let b = match pre with | None -> B.inner env vars cs | Some pre -> B.meet (B.inner env vars cs) pre in
-          let joinType = if underapprox then COMPUTATIONAL else APPROXIMATION in
-          Leaf (F.join COMPUTATIONAL b f1 f2)
+          let joinType = if underapprox && not (taint) then COMPUTATIONAL else
+                         if not (underapprox) then
+                            if taint then 
+                              APPROXIMATION 
+                            else COMPUTATIONAL
+                          else failwith "underapproximation + taint not handled"
+                          in                        
+          Leaf (F.join joinType b f1 f2)
         | Node ((c1,nc1),l1,r1),Node((c2,nc2),l2,r2) when (C.isEq c1 c2) ->
           Node((c1,nc1),aux (l1,l2) (c1::cs),aux (r1,r2) (nc1::cs))
         | _ -> raise (Invalid_argument "bwdAssign:merge:")
@@ -1202,7 +1208,7 @@ struct
               | _ -> Node((nx,x),Bot,r)))
     in
     match e with
-    | A_TRUE | A_MAYBE -> { domain = pre; tree = aux t.tree [] []; env = env; vars = vars }
+    | A_TRUE | A_MAYBE | A_MAYBE_INP -> { domain = pre; tree = aux t.tree [] []; env = env; vars = vars }
     | A_FALSE -> { domain = pre; tree = Bot; env = env; vars = vars }
     | A_bunary (o,e) ->
       (match o with

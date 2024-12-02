@@ -30,9 +30,12 @@ struct
   module ForwardIteratorB = ForwardIterator(B)
   let dummy_prop = Exp (StringMap.empty)
   let fwdInvMap = ref InvMap.empty
+  let fwdTaintMap = ref InvMap.empty
   let addFwdInv l (a:B.t) = fwdInvMap := InvMap.add l a !fwdInvMap
-  let fwdMap_print fmt m = InvMap.iter (fun l a -> 
-      Format.fprintf fmt "%a: %a\n" label_print l B.print a) m
+  let fwdMap_print fmt m fprint = InvMap.iter (fun l a -> 
+      Format.fprintf fmt "%a: %a\n" label_print l fprint a) m
+  let fwdMap_print fmt m fprint = InvMap.iter (fun l a -> 
+        Format.fprintf fmt "%a: %a\n" label_print l fprint a) m
   let bwdInvMap = ref InvMap.empty
   let addBwdInv l (a:D.t) = bwdInvMap := InvMap.add l a !bwdInvMap
   let bwdMap_print fmt m = InvMap.iter (fun l a -> 
@@ -91,14 +94,116 @@ struct
       addFwdInv l p; 
       fwdBlk funcs env vars (fwdStm funcs env vars p s) b
 
-  (* Backward Iterator + Recursion *)
-
-  let rec bwdStm ?property ?domain funcs env vars (p,r,flag) s =
+  
+  (*  Taint forward analysis *)
+  let addFwdTaint l (a:var list) = fwdTaintMap := InvMap.add l a !fwdTaintMap 
+  (* Join of two list*)
+  let join l1 l2 = 
+    let l = l1 @ l2 in 
+    List.sort_uniq (fun x y -> String.compare x.varId y.varId) l
+  (* List of vars in an expression *)
+  let avars (e,ext) =
+      let rec aux e acc = 
+        match e with
+      | A_var x -> x::acc
+      | A_interval _ |  A_const _ | A_INPUT | A_RANDOM -> acc
+      | A_aunary (_,(a,_)) -> aux a acc 
+      | A_abinary (_,(a1,_), (a2,_)) -> aux a1 acc @ aux a2 acc 
+      in 
+      aux e []
+  (* Test if a boolean expression is taint *)
+  let taint_b (e,ext) tvl =
+      let rec aux e  = 
+        match e with
+      | A_TRUE  | A_MAYBE	 | A_MAYBE_INP	| A_FALSE -> false
+      | A_bunary (_,(b,l)) -> aux b
+      | A_bbinary (_,(b1,_),(b2,l)) -> aux b1 || aux b2
+      | A_rbinary (_,a1,a2) -> let vl1 =  avars a1 in  
+                               let vl2 =  avars a2 in 
+                               if List.exists (fun x -> List.mem x tvl) vl1 || List.exists (fun x -> List.mem x tvl) vl2
+                                then true
+                              else false
+      in 
+      aux e 
+  (* Assgined block: return set of variables assigned in a block (only syntactic) *)
+  let assigned block =
+      let rec aux stmt acc = 
+       match stmt with 
+      | A_assign ((A_var x ,_ ), (_,_))-> x :: acc
+      | A_if ((b,ba),s1,s2) -> aux_block s1 acc @ aux_block s2 acc
+      | A_while (l,(b,ba),s) -> aux_block s acc
+      | _ -> acc
+      and 
+      aux_block s acc =  match s with 
+      | A_empty l ->
+         acc
+      | A_block (l,(s,_),b) ->
+        aux s acc @ aux_block b acc
+      in
+      aux_block block []
+   (* Iterator of taint analysis *)
+   let rec fwdTStm funcs env vars p s =
+      match s with
+      | A_label _ -> p
+      | A_return -> p 
+      | A_assign ((A_var x,_),(A_INPUT,_)) -> x::p
+      | A_assign ((A_var x,_),(A_RANDOM,_)) -> List.filter (fun v -> v <> x ) p
+      | A_assign ((A_var x,_),(e,l)) -> let e_vars = avars (e,l) in 
+                                  if List.exists (fun x -> List.mem x e_vars) p
+                                    then x::p
+                                  else List.filter (fun v -> v <> x ) p
+      | A_assign (_,_) -> p 
+      | A_assert _  -> p
+      | A_if ((b,ba),s1,s2) ->
+        let assigned_vars = assigned s1 @ assigned s2 in 
+        let r1 = fwdTBlk funcs env vars p s1 in
+        let r2 = fwdTBlk funcs env vars p s2 in
+        let iflow = if taint_b (b,ba) p then 
+                    assigned_vars 
+                    else []
+        in
+        join (join r1 r2) iflow
+      | A_while (l,(b,ba),s) ->
+        let rec aux i p2 =
+          if List.for_all (fun x-> List.mem x i) p2 then i
+          else
+            aux p2 (fwdTStm funcs env vars p2 (A_if ((b,ba),s, A_empty l)))
+          in
+        let i = p in
+        let p2 = (fwdTStm funcs env vars i (A_if ((b,ba),s, A_empty l))) in
+        let p = aux i p2 in
+        addFwdTaint l p;
+        p
+      | A_call (f,ss) ->
+        let f = StringMap.find f funcs in
+        let p = List.fold_left (fun ap (s,_) -> fwdTStm funcs env vars p s) p ss in
+        fwdTBlk funcs env vars p f.funcBody
+      | A_recall (f,ss) -> raise (Invalid_argument "fwdStm:A_recall")
+    and fwdTBlk funcs env vars (p:var list) (b:block) : var list =
+      match b with
+      | A_empty l ->
+        addFwdTaint l p; p
+      | A_block (l,(s,_),b) ->
+        if !tracefwd && not !minimal then
+          Format.printf "%a: %s\n" label_print l (List.fold_left (fun  acc x -> acc^"-"^x.varName) "" p);
+        let p' = (fwdTStm funcs env vars p s) in 
+        addFwdTaint l p; 
+        fwdTBlk funcs env vars p' b
+ 
+ (*Backward Iterator + Recursion *)
+let rec bwdStm ?property ?domain funcs env vars (p,r,flag) s tvl =
     match s with
     | A_label _ -> (p,r,flag)
     | A_return -> D.zero ?domain:domain env vars, r, flag
+    | A_assign ((l,_),(A_INPUT,_)) -> D.bwdAssign ?domain:domain ~taint:true p (l, A_INPUT), r, flag
     | A_assign ((l,_),(e,_)) ->
-      D.bwdAssign ?domain:domain p (l, e), r, flag
+      let e_vars = avars (e,l) in 
+      let taint =  if (List.exists (fun x -> List.mem x e_vars) tvl )|| not (!Config.resilience)
+                   then 
+                    true
+                   else false 
+      in
+      D.bwdAssign ?domain:domain ~taint:taint  p (l, e), r, flag
     | A_assert (b,_) ->
       D.filter ?domain:domain p b, r, flag
     | A_if ((b,ba),s1,s2) ->
@@ -110,82 +215,72 @@ struct
         Format.fprintf !fmt "p1: %a\n" D.print p1;
         Format.fprintf !fmt "p2: %a\n" D.print p2
       end;
-      (D.join COMPUTATIONAL p1 p2, r, flag1 || flag2)
-    | A_while (l, (b, ba), s) ->
-      let a = InvMap.find l !fwdInvMap in
-      let dm = if !refine then Some a else None in
-      let p1 = D.filter ?domain:dm p (fst (negBExp (b, ba))) in
-      let rec aux (i, _, _) (p2, _, flag2) n =
-        if !abort then raise Abort else
-          let i' = D.join APPROXIMATION p1 p2 in
-          if !tracebwd && not !minimal then begin
-            Format.fprintf !fmt "### %a:%i ###:\n" label_print l n;
-            Format.fprintf !fmt "p1: %a\n" D.print p1;
-            Format.fprintf !fmt "i: %a\n" D.print i;
-            Format.fprintf !fmt "p2: %a\n" D.print p2;
-            Format.fprintf !fmt "i': %a\n" D.print i'
-          end;
-          let jokers = max 0 (!retrybwd * (!Ordinals.max + 1) - n + !joinbwd) in
-          if (D.isLeq COMPUTATIONAL i' i) then
-            if (D.isLeq APPROXIMATION i' i) then begin
-              if !tracebwd && not !minimal then begin
-                Format.fprintf !fmt "### %a:FIXPOINT ###:\n" label_print l;
-                Format.fprintf !fmt "i: %a\n" D.print i
-              end;
-              (i, r, flag2)
-            end else begin
+      let joinType = if (taint_b (b,ba) tvl && !Config.resilience)  || not !Config.resilience then APPROXIMATION else  COMPUTATIONAL in
+      (D.join joinType p1 p2, r, flag1 || flag2)
+      | A_while (l, (b, ba), s) ->
+        let a = InvMap.find l !fwdInvMap in
+        let dm = if !refine then Some a else None in
+        let p1 = D.filter ?domain:dm p (fst (negBExp (b, ba))) in
+        let rec aux (i, _, _) (p2, _, flag2) n =
+          if !abort then raise Abort
+          else
+            let i' = D.join APPROXIMATION p1 p2 in
+            if !tracebwd && not !minimal then (
+              Format.fprintf !fmt "### %a:%i ###:\n" label_print l n ;
+              Format.fprintf !fmt "p1: %a\n" D.print p1 ;
+              Format.fprintf !fmt "i: %a\n" D.print i ;
+              Format.fprintf !fmt "p2: %a\n" D.print p2 ;
+              Format.fprintf !fmt "i': %a\n" D.print i' ) ;
+            let jokers =
+              max 0 ((!retrybwd * (!Ordinals.max + 1)) - n + !joinbwd)
+            in
+            if D.isLeq COMPUTATIONAL i' i then (
+              if D.isLeq APPROXIMATION i' i then (
+                if !tracebwd && not !minimal then (
+                  Format.fprintf !fmt "### %a:FIXPOINT ###:\n" label_print l ;
+                  Format.fprintf !fmt "i: %a\n" D.print i ) ;
+                (i, r, flag2) )
+              else
+                let i'' =
+                  if n <= !joinbwd then i' else D.widen ~jokers i i'
+                in
+                if !tracebwd && not !minimal then
+                  Format.fprintf !fmt "i'': %a\n" D.print i'' ;
+                let p2, _, flag2 = bwdBlk funcs env vars (i'', r, flag2) s in
+                let p2' = D.filter ?domain:dm p2 b in
+                aux (i'', r, flag2) (p2', r, flag2) (n + 1) )
+            else
               let i'' =
-                if n <= !joinbwd then
-                  i'
-                else
-                  D.widen ~jokers:jokers i i'
+                if n <= !joinbwd then i'
+                else D.widen ~jokers i (D.join COMPUTATIONAL i i')
               in
               if !tracebwd && not !minimal then
-                Format.fprintf !fmt "i'': %a\n" D.print i'';
-              let (p2, _, flag2) = 
-                bwdBlk funcs env vars (i'', r, flag2) s in
+                Format.fprintf !fmt "i'': %a\n" D.print i'' ;
+              let p2, _, flag2 = bwdBlk funcs env vars (i'', r, flag2) s in
               let p2' = D.filter ?domain:dm p2 b in
               aux (i'', r, flag2) (p2', r, flag2) (n + 1)
-            end
-          else
-            let i'' =
-              if n <= !joinbwd then
-                i'
-              else
-                D.widen ~jokers:jokers i
-                  (D.join COMPUTATIONAL i i')
-            in
-            if !tracebwd && not !minimal then
-              Format.fprintf !fmt "i'': %a\n" D.print i'';
-            let (p2, _, flag2) = 
-              bwdBlk funcs env vars (i'', r, flag2) s in
-            let p2' = D.filter ?domain:dm p2 b in
-            aux (i'', r, flag2) (p2', r, flag2) (n + 1)
-      in
-      let i = (D.bot ?domain:dm env vars, r, flag) in
-      let (p2, _, flag2) = bwdBlk funcs env vars i s in
-      let p2' = D.filter ?domain:dm p2 b in
-      let (p, r, flag) = aux i (p2', r, flag2) 1 in
-      addBwdInv l p;
-      if !refine then
-        (D.refine p a, r, flag)
-      else
-        (p, r, flag)
+        in
+        let i = (D.bot ?domain:dm env vars, r, flag) in
+        let p2, _, flag2 = bwdBlk funcs env vars i s in
+        let p2' = D.filter ?domain:dm p2 b in
+        let p, r, flag = aux i (p2', r, flag2) 1 in
+        addBwdInv l p ;
+        if !refine then (D.refine p a, r, flag) else (p, r, flag)
     | A_call (f, ss) ->
       let f = StringMap.find f funcs in
       let p = bwdRec funcs env vars p f.funcBody in
       List.fold_left (fun (ap, ar, aflag) (s, _) ->
-          bwdStm ?domain:domain funcs env vars (ap, ar, aflag) s
+          bwdStm ?domain:domain funcs env vars (ap, ar, aflag) s tvl
         ) (p, r, flag) ss
     | A_recall (f, ss) ->
       (match domain with
        | None ->
          List.fold_left (fun (ap, ar, aflag) (s, _) ->
-             bwdStm funcs env vars (ap, ar, aflag) s
+             bwdStm funcs env vars (ap, ar, aflag) s tvl
            ) (D.join APPROXIMATION p r, r, true) ss
        | Some domain ->
          List.fold_left (fun (ap, ar, aflag) (s, _) ->
-             bwdStm ~domain:domain funcs env vars (ap, ar, aflag) s
+             bwdStm ~domain:domain funcs env vars (ap, ar, aflag) s tvl
            ) (r, r, true) ss)
 
   and bwdBlk ?property funcs env vars (p,r,flag) (b:block) : D.t * D.t * bool =
@@ -205,9 +300,10 @@ struct
       else
         let (b,rb,flagb) = bwdBlk funcs env vars (p,r,flag) b in
         let a = InvMap.find l !fwdInvMap in
+        let tvl = InvMap.find l !fwdTaintMap in
         let (p,r,flag) = if !refine then 
-            bwdStm ~domain:a funcs env vars (b,rb,flagb) s 
-          else bwdStm funcs env vars (b,rb,flagb) s in
+            bwdStm ~domain:a funcs env vars (b,rb,flagb) s tvl
+          else bwdStm funcs env vars (b,rb,flagb) s tvl in
         let p = if !refine then D.refine p a else p in
         if !tracebwd && not !minimal then result_print l p;
         addBwdInv l p; (p,r,flag)
@@ -284,14 +380,18 @@ struct
       Format.fprintf !fmt "\nForward Analysis Trace:\n";
     let startfwd = Sys.time () in
     let _ = fwdBlk funcs env vars (fwdBlk funcs env vars (B.top env vars) stmts) s in
+    let _ =  fwdTBlk  funcs env vars [] s in  
     let stopfwd = Sys.time () in
     if not !minimal then
       begin
         if !timefwd then
           Format.fprintf !fmt "\nForward Analysis (Time: %f s):\n" (stopfwd-.startfwd)
         else
-          Format.fprintf !fmt "\nForward Analysis:\n";
-        fwdMap_print !fmt !fwdInvMap;
+          Format.fprintf !fmt "\nForward Analysis numerical:\n";
+          fwdMap_print !fmt !fwdInvMap (B.print);
+          Format.fprintf !fmt "\nForward Analysis taint: size %d\n" (InvMap.cardinal !fwdTaintMap);
+          InvMap.iter (fun l a -> 
+            Format.printf "%a: %s\n" label_print l (List.fold_left (fun  acc x -> acc^" "^x.varName) "" a)) !fwdTaintMap
       end;
     (* Backward Analysis *)
     if !tracebwd && not !minimal then

@@ -79,6 +79,7 @@ let rec exp_itoa
     match exp with
     | I_TRUE -> (A_boolean (A_TRUE, a), env, pre, post)
     | I_RANDOM -> (A_arithmetic (A_RANDOM, a), env, pre, post)
+    | I_INPUT -> (A_arithmetic (A_INPUT, a), env, pre, post)
     | I_FALSE -> (A_boolean (A_FALSE, a), env, pre, post)
     | I_id x -> (A_arithmetic (A_var (getVar env x a), a), env, pre, post)
     | I_const i -> (A_arithmetic (A_const (int_of_string i), a),env,pre,post)
@@ -149,6 +150,7 @@ let rec exp_itoa
            | I_PLUS -> (A_arithmetic (e,ea), env, pre, post)
            | I_MINUS -> (match e with
                | A_RANDOM -> (A_arithmetic (A_RANDOM,a), env, pre, post)
+               | A_INPUT -> (A_arithmetic (A_INPUT,a), env, pre, post)
                | A_const i -> (A_arithmetic (A_const (-i), a), env, pre, post)
                | _ -> 
                  let one = (A_const (-1), ea) in
@@ -176,6 +178,8 @@ let rec exp_itoa
        | A_arithmetic (e1, ea1), A_arithmetic (e2, ea2) -> (match e1, e2 with
            | A_RANDOM,_ | _,A_RANDOM -> 
              (A_arithmetic (A_RANDOM, a), env, pre, post)
+           | A_INPUT,_ | _,A_INPUT -> 
+              (A_arithmetic (A_INPUT, a), env, pre, post)
            | A_const i1,A_const i2 -> 
              (A_arithmetic (eval exp i1 i2, a), env, pre, post)
            | _ -> 
@@ -204,6 +208,8 @@ let rec exp_itoa
        | A_arithmetic (e1, ea1), A_arithmetic (e2, ea2) -> (match e1, e2 with
            | A_RANDOM,_ | _,A_RANDOM -> 
              (A_boolean (A_MAYBE, a), env, pre, post)
+            | A_INPUT,_ | _,A_INPUT -> 
+              (A_boolean (A_MAYBE_INP, a), env, pre, post)
            | A_const i1,A_const i2 -> 
              (A_boolean (eval exp i1 i2, a), env, pre, post)
            | _ -> 
@@ -217,6 +223,8 @@ let rec exp_itoa
        | A_arithmetic (e1, ea1), A_arithmetic (e2, ea2) -> (match e1, e2 with
            | A_RANDOM,_ | _,A_RANDOM -> 
              (A_boolean (A_MAYBE, a), env, pre, post)
+           | A_INPUT,_ | _,A_INPUT -> 
+              (A_boolean (A_MAYBE_INP, a), env, pre, post)
            | A_const i1,A_const i2 -> 
              let eval = if i1 = i2 then A_TRUE else A_FALSE in
              (A_boolean (eval, a), env, pre, post)
@@ -232,6 +240,8 @@ let rec exp_itoa
        | A_arithmetic (e1,ea1), A_arithmetic (e2,ea2) -> (match e1, e2 with
            | A_RANDOM,_ | _,A_RANDOM -> 
              (A_boolean (A_MAYBE, a), env, pre, post)
+           | A_INPUT,_ | _,A_INPUT -> 
+              (A_boolean (A_MAYBE_INP, a), env, pre, post)
            | A_const i1,A_const i2 -> 
              let eval = if i1 <> i2 then A_TRUE else A_FALSE in
              (A_boolean (eval, a), env, pre, post)
@@ -250,6 +260,12 @@ let rec exp_itoa
          (A_boolean (e2, a), env, pre, post)
        | A_boolean (e1,_), A_arithmetic (A_RANDOM,_) -> 
          (A_boolean (e1, a), env, pre, post)
+       | A_arithmetic (A_INPUT,_), A_arithmetic (A_INPUT,_) -> 
+          (A_boolean (A_MAYBE_INP, a), env, pre, post)
+       | A_arithmetic (A_INPUT,_), A_boolean (e2,_) -> 
+          (A_boolean (e2, a), env, pre, post)
+       | A_boolean (e1,_), A_arithmetic (A_INPUT,_) -> 
+          (A_boolean (e1, a), env, pre, post)
        | A_boolean (e1,ea1), A_boolean (e2,ea2) -> 
          (A_boolean (A_bbinary (A_AND,(e1,ea1),(e2,ea2)), a), env, pre, post)
        | _ -> raise (Invalid_argument "exp_itoa:I_and"))
@@ -259,6 +275,8 @@ let rec exp_itoa
       (match e1,e2 with
        | A_arithmetic (A_RANDOM,_),_ | _,A_arithmetic (A_RANDOM,_) -> 
          (A_boolean (A_MAYBE, a), env, pre, post)
+       | A_arithmetic (A_INPUT,_),_ | _,A_arithmetic (A_INPUT,_)-> 
+          (A_boolean (A_MAYBE_INP, a), env, pre, post)
        | A_boolean (e1,ea1), A_boolean (e2,ea2) -> 
          (A_boolean (A_bbinary (A_OR,(e1,ea1),(e2,ea2)),a), env, pre, post)
        | _ -> raise (Invalid_argument "exp_itoa:I_or"))
@@ -425,6 +443,7 @@ let rec stmt_itoa
     (match exp with
      | A_boolean exp -> (pre@[A_assert exp,a]@post, env)
      | A_arithmetic (A_RANDOM,ea) -> (pre@post, env)
+     | A_arithmetic (A_INPUT,ea) -> (pre@post, env)
      | A_arithmetic (e,ea) -> 
        let lhs = (A_rbinary (A_LESS, (e, ea), (A_const 0, ea)), ea) in
        let rhs = (A_rbinary (A_GREATER, (e, ea), (A_const 0, ea)), ea) in
@@ -442,6 +461,8 @@ let rec stmt_itoa
         | A_boolean exp -> (pre@[A_if (exp, thn, els), a], lenv2)
         | A_arithmetic (A_RANDOM, ea) ->
           (pre@[A_if ((A_MAYBE, ea), thn, els), a], lenv2)
+        | A_arithmetic (A_INPUT, ea) ->
+            (pre@[A_if ((A_MAYBE_INP, ea), thn, els), a], lenv2)
         | A_arithmetic (e, ea) ->
           let lhs = (A_rbinary (A_LESS, (e,ea), (A_const 0,ea)), ea) in
           let rhs = (A_rbinary (A_GREATER, (e,ea), (A_const 0,ea)), ea) in
@@ -454,6 +475,8 @@ let rec stmt_itoa
           (pre@[A_if (exp, thn, els), a], lenv1)
         | A_arithmetic (A_RANDOM, ea) ->
           (pre@[A_if ((A_MAYBE, ea), thn, els), a], lenv1)
+        | A_arithmetic (A_INPUT, ea) ->
+            (pre@[A_if ((A_MAYBE_INP, ea), thn, els), a], lenv1)
         | A_arithmetic (e, ea) ->
           let lhs = (A_rbinary (A_LESS, (e,ea), (A_const 0,ea)), ea) in
           let rhs = (A_rbinary (A_GREATER, (e,ea), (A_const 0,ea)), ea) in
@@ -467,6 +490,8 @@ let rec stmt_itoa
      | A_boolean exp -> (pre@[A_while (dummyId, exp, body), a]@post, lenv)
      | A_arithmetic (A_RANDOM,ea) -> 
        (pre@[A_while (dummyId, (A_MAYBE,ea), body), a]@post, lenv)
+     | A_arithmetic (A_INPUT,ea) -> 
+        (pre@[A_while (dummyId, (A_MAYBE_INP,ea), body), a]@post, lenv)
      | A_arithmetic (e,ea) -> 
        let lhs = (A_rbinary (A_LESS, (e,ea), (A_const 0,ea)), ea) in
        let rhs = (A_rbinary (A_GREATER, (e,ea), (A_const 0,ea)), ea) in
@@ -490,6 +515,10 @@ let rec stmt_itoa
      | A_stmt, A_arithmetic (A_RANDOM,ea2), A_arithmetic (A_var _,_) -> (pre1@post1@pre2@[A_while (dummyId,(A_MAYBE,ea2),block_itoa (post2@s@pre2@pre3@post3)),a]@post2,lenv)
      | A_arithmetic (A_var _,_), A_arithmetic (A_RANDOM,ea2), A_stmt -> (pre1@post1@pre2@[A_while (dummyId,(A_MAYBE,ea2),block_itoa (post2@s@pre2@pre3@post3)),a]@post2,lenv)
      | A_arithmetic (A_var _,_), A_arithmetic (A_RANDOM,ea2), A_arithmetic (A_var _,_) -> (pre1@post1@pre2@[A_while (dummyId,(A_MAYBE,ea2),block_itoa (post2@s@pre2@pre3@post3)),a]@post2,lenv)
+     | A_stmt, A_arithmetic (A_INPUT,ea2), A_stmt -> (pre1@post1@pre2@[A_while (dummyId,(A_MAYBE_INP,ea2),block_itoa (post2@s@pre2@pre3@post3)),a]@post2,lenv)
+     | A_stmt, A_arithmetic (A_INPUT,ea2), A_arithmetic (A_var _,_) -> (pre1@post1@pre2@[A_while (dummyId,(A_MAYBE_INP,ea2),block_itoa (post2@s@pre2@pre3@post3)),a]@post2,lenv)
+     | A_arithmetic (A_var _,_), A_arithmetic (A_INPUT,ea2), A_stmt -> (pre1@post1@pre2@[A_while (dummyId,(A_MAYBE_INP,ea2),block_itoa (post2@s@pre2@pre3@post3)),a]@post2,lenv)
+     | A_arithmetic (A_var _,_), A_arithmetic (A_INPUT,ea2), A_arithmetic (A_var _,_) -> (pre1@post1@pre2@[A_while (dummyId,(A_MAYBE_INP,ea2),block_itoa (post2@s@pre2@pre3@post3)),a]@post2,lenv)
      | _ -> raise (Invalid_argument "stmt_itoa: I_for_simple"))
   | I_for (decl,exp1,exp2,stmt) -> (* TODO: fix scope *)
     let (locals (* var StringMap.t *),constants,stmts) = globalDecl_itoa ctx env true (* local scope *) [] decl in
@@ -502,6 +531,8 @@ let rec stmt_itoa
      | A_boolean e1, A_arithmetic (A_var _,_) -> (stmts@pre1@[A_while (dummyId,e1,block_itoa (post1@stmt@pre1@pre2@post2)),a]@post1,lenv)
      | A_arithmetic (A_RANDOM,ea1), A_stmt -> (stmts@pre1@[A_while (dummyId,(A_MAYBE,ea1),block_itoa (post1@stmt@pre1@pre2@post2)),a]@post1,lenv)
      | A_arithmetic (A_RANDOM,ea1), A_arithmetic (A_var _,_) -> (stmts@pre1@[A_while (dummyId,(A_MAYBE,ea1),block_itoa (post1@stmt@pre1@pre2@post2)),a]@post1,lenv)
+     | A_arithmetic (A_INPUT,ea1), A_stmt -> (stmts@pre1@[A_while (dummyId,(A_MAYBE_INP,ea1),block_itoa (post1@stmt@pre1@pre2@post2)),a]@post1,lenv)
+     | A_arithmetic (A_INPUT,ea1), A_arithmetic (A_var _,_) -> (stmts@pre1@[A_while (dummyId,(A_MAYBE_INP,ea1),block_itoa (post1@stmt@pre1@pre2@post2)),a]@post1,lenv)
      | _ -> raise (Invalid_argument "stmt_itoa: I_for"))
 
   | I_return None -> ([A_return, a], env)

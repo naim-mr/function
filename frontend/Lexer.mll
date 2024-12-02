@@ -70,6 +70,7 @@ and token = parse
 	| "*="										{ TOK_MULTIPLY_EQUAL }
 	| "/="										{ TOK_DIVIDE_EQUAL }
 	| "%="										{ TOK_MODULO_EQUAL }
+	| "§"									{ TOK_INPUT }
 	| "?"										{ TOK_RANDOM }
 	| "__VERIFIER_nondet_int()"					{ TOK_RANDOM }
 	| "(int*) "? "alloca" [^ ';' '\n' '\r']*	{ TOK_RANDOM }

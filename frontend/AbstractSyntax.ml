@@ -130,6 +130,7 @@ let rBinOp_print fmt = function
 (* arithmetic expressions *)
 type aExp =
   | A_RANDOM	(* ? *)
+  | A_INPUT	(* ? *)
   | A_var of var
   | A_const of int
   | A_interval of int * int
@@ -150,7 +151,9 @@ let aExp_prec = function
 
 let rec aExp_to_apron e =
   match e with
-  | A_RANDOM -> Texpr1.Cst (Coeff.Interval Interval.top)
+  | A_RANDOM
+  | A_INPUT -> Texpr1.Cst (Coeff.Interval Interval.top)
+  
   | A_var x -> Texpr1.Var (Var.of_string x.varId)
   | A_const i -> Texpr1.Cst (Coeff.s_of_int i)
   | A_interval (i1,i2) -> Texpr1.Cst (Coeff.i_of_int i1 i2)
@@ -170,7 +173,8 @@ let rec aExp_to_apron e =
 
 let rec aExp_print fmt (e,_) =
   match e with
-  | A_RANDOM -> Format.fprintf fmt "?"
+  | A_RANDOM -> Format.fprintf fmt "rand"
+  | A_INPUT -> Format.fprintf fmt "input"
   | A_var v -> var_print fmt v
   | A_const i -> Format.fprintf fmt "%i" i
   | A_interval (i1,i2) -> Format.fprintf fmt "[%i,%i]" i1 i2
@@ -192,6 +196,7 @@ let rec aExp_print fmt (e,_) =
 type bExp =
   | A_TRUE
   | A_MAYBE	(* ? *)
+  | A_MAYBE_INP	(* ? *)
   | A_FALSE
   | A_bunary of bUnOp * (bExp annotated)
   | A_bbinary of bBinOp * (bExp annotated) * (bExp annotated)
@@ -207,6 +212,7 @@ let rec negBExp (b,a) =
   match b with
   | A_TRUE -> (A_FALSE,a)
   | A_MAYBE -> (A_MAYBE,a)
+  | A_MAYBE_INP -> (A_MAYBE_INP,a)
   | A_FALSE -> (A_TRUE,a)
   | A_bunary (o,b) ->
     (match o with
@@ -219,6 +225,7 @@ let rec bExp_print_aux fmt e =
   match e with
   | A_TRUE -> Format.fprintf fmt "true"
   | A_MAYBE -> Format.fprintf fmt "?"
+  | A_MAYBE_INP -> Format.fprintf fmt "input"
   | A_FALSE -> Format.fprintf fmt "false"
   | A_bunary (o,e1) ->
     Format.fprintf fmt "%a" bUnOp_print o;

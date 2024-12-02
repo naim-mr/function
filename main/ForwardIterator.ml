@@ -14,6 +14,7 @@ open Partition
 
 module ForwardIterator (B: PARTITION) =
 struct
+
   (* compute invariant map based on forward analysis *)
   let compute (vars, stmts, funcs) p  main env = 
     let fwdInvMap = ref InvMap.empty in

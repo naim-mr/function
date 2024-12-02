@@ -31,7 +31,7 @@ let tracebwd = ref false
 let dot = ref false (* output trees in graphviz dot format *)
 let abort = ref false
 let vulnerability = ref false
-
+let resilience = ref false
 exception Abort
 exception Timeout
 let json_output = ref false

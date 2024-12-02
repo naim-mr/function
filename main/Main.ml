@@ -127,7 +127,6 @@ let parseCTLPropertyString (property:string) =
     | "-timeout"
     | "-joinfwd"
     | "-joinbwd"    
-
     | "-main"
     | "-meetbwd"
     | "-minimal"
@@ -152,7 +151,8 @@ let parseCTLPropertyString (property:string) =
     | "-noinline"
     | "-vulnerability"
     | "-output_std"
-    | "-json_output" -> true
+    | "-json_output" 
+    | "-resilience" -> true
     | _ -> false
     
 
@@ -227,12 +227,13 @@ let parse_args () =
       Config.noinline := true; doit r
     | "-vulnerability"::r -> 
       Config.vulnerability := true; doit r
+      | "-resilience"::r -> (* resilience analysis *)
+      Config.resilience := true; doit r
     | "-output_std"::r -> 
       Config.output_std := true; doit r
-    | "-json_output"::x::r  when not (is_keyword x)-> 
-
+    | "-json_output"::x::r  when not (is_keyword x)->
       Config.json_output := true; output_dir :=x; time:=true
-    | "-json_output"::r -> (* guarantee analysis *)
+    | "-json_output"::r -> 
       Config.json_output := true; time:=true; doit r
     | x::r -> filename := x; doit r
     | [] -> ()

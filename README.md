@@ -20,7 +20,8 @@ FuncTion requires the following applications and libraries:
 	```
 	(sudo) apt-get install opam
 	```
-* Ounit:
+* Ounit:og
+
 
 	```
 	(sudo) opam install ounit

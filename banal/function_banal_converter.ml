@@ -48,7 +48,7 @@ let rec of_aExp_aux (aExp:FAS.aExp) : expr =
       | FAS.A_MULTIPLY -> A_MULTIPLY
       | FAS.A_DIVIDE -> A_DIVIDE
     in T_binary (binOp, expr1, expr2) 
-  | FAS.A_RANDOM -> T_int_const (Banal_intinf.minus_inf, Banal_intinf.inf) 
+  | FAS.A_RANDOM | FAS.A_INPUT  -> T_int_const (Banal_intinf.minus_inf, Banal_intinf.inf) 
     
 let of_aExp (aExp:FAS.aExp) : expr typed = (of_aExp_aux aExp, int_type, dummy_extent)
     
@@ -77,6 +77,7 @@ let rec of_bExp_aux (bExp:FAS.bExp) : expr =
       | FAS.A_GREATER -> A_GREATER
       | FAS.A_GREATER_EQUAL	-> A_GREATER_EQUAL in 
     T_binary (bOp, expr1, expr2)
+  | FAS.A_MAYBE_INP	-> failwith "Need to handle input statement in bwd under"
 
 let of_bExp (bExp:FAS.bExp) : expr typed = (of_bExp_aux bExp, A_BOOL, dummy_extent)
 

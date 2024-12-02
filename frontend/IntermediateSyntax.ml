@@ -29,6 +29,7 @@ type assignOp =
 type exp =
   | I_TRUE (* primary_exp *)
   | I_RANDOM (* primary_exp *)
+  | I_INPUT(* primary_exp *)
   | I_FALSE (* primary_exp *)
   | I_id (* primary_exp *) of string
   | I_const (* primary_exp *) of string
