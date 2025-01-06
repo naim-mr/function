@@ -52,66 +52,66 @@ trm_svcomp_Flip_false-termination-inputinput.c: concrete:false abstract:unknow
 trm_svcomp_Flip_false-termination-inputrand.c:  concrete:true abstract:true
 trm_svcomp_Flip_false-termination-randinput.c:  concrete:true abstract:true
 trm_svcomp_Flip_false-termination-randrand.c:   concrete:true abstract:true
-trm_svcomp_Gauss_false-termination-input.c: concrete:true abstract:
-trm_svcomp_Gauss_false-termination-rand.c:
-trm_svcomp_GCD2_false-termination-inputinput.c:
-trm_svcomp_GCD2_false-termination-randinput.c:
-trm_svcomp_GCD2_false-termination-randrand.c:
-trm_svcomp_GCD_false-termination-inputinput.c:
-trm_svcomp_GCD_false-termination-inputrand.c:
-trm_svcomp_GCD_false-termination-randinput.c:
-trm_svcomp_GCD_false-termination-randrand.c:
-trm_svcomp_Hanoi_2vars_false-termination-inputinput.c:
-trm_svcomp_Hanoi_2vars_false-termination-inputrand.c:
-trm_svcomp_Hanoi_2vars_false-termination-randinput.c:
-trm_svcomp_Hanoi_2vars_false-termination-randrand.c:
-trm_svcomp_Hanoi_3vars_false-termination_rii.c:
-trm_svcomp_Hanoi_3vars_false-termination_rir.c:
-trm_svcomp_Hanoi_3vars_false-termination_rrr.c:
-trm_svcomp_Hanoi_plus_false-termination.c:
-trm_svcomp_Lcm_false-termination-inputrand.c:
-trm_svcomp_Lcm_false-termination-randinput.c:
-trm_svcomp_Middle_false-termination-inputinput.c:
-trm_svcomp_Middle_false-termination-inputrand.c:
-trm_svcomp_Middle_false-termination-randinput.c:
-trm_svcomp_Middle_false-termination-randrand.c:
-trm_svcomp_MirrorInterv_false-termination-input.c:
-trm_svcomp_MirrorInterv_false-termination-rand.c:
-trm_svcomp_MirrorIntervSim_false-termination-input.c:
-trm_svcomp_MirrorIntervSim_false-termination-rand.c:
-trm_svcomp_Mysore_false-termination-inputinput.c:
-trm_svcomp_Mysore_false-termination-inputrand.c:
-trm_svcomp_Mysore_false-termination-randinput.c:
-trm_svcomp_Mysore_false-termination-randrand.c:
-trm_svcomp_Narrowing_false-termination-input.c:
-trm_svcomp_Narrowing_false-termination-rand.c:
-trm_svcomp_NarrowKonv_false-termination-input.c:
-trm_svcomp_NarrowKonv_false-termination-rand.c:
-trm_svcomp_NonTermination2_false-termination-inputinput.c:
-trm_svcomp_NonTermination2_false-termination-inputrand.c:
-trm_svcomp_NonTermination2_false-termination-randinput.c:
-trm_svcomp_NonTermination2_false-termination-randrand.c:
-trm_svcomp_NonTerminationSimple3_false-termination-inputinput.c:
-trm_svcomp_NonTerminationSimple3_false-termination-inputrand.c:
-trm_svcomp_NonTerminationSimple3_false-termination-randinput.c:
-trm_svcomp_NonTerminationSimple3_false-termination-randrand.c:
-trm_svcomp_NonTerminationSimple4_false-termination-inputinput.c:
-trm_svcomp_NonTerminationSimple4_false-termination-inputrand.c:
-trm_svcomp_NonTerminationSimple4_false-termination-randinput.c:
-trm_svcomp_NonTerminationSimple4_false-termination-randrand.c:
-trm_svcomp_NonTerminationSimple6_false-termination-input.c:
-trm_svcomp_NonTerminationSimple6_false-termination-rand.c:
-trm_svcomp_NonTerminationSimple7_false-termination-inputinput.c:
-trm_svcomp_NonTerminationSimple7_false-termination-inputrand.c:
-trm_svcomp_NonTerminationSimple7_false-termination-randinput.c:
-trm_svcomp_NonTerminationSimple7_false-termination-randrand.c:
-trm_svcomp_PastaC10_false-termination.c:
-trm_svcomp_Singapore_plus_false-termination.c:
-trm_svcomp_Singapore_v1_false-termination.c:
-trm_svcomp_Singapore_v2_false-termination.c:
-trm_svcomp_UpAndDown_false-termination-input.c:
-trm_svcomp_UpAndDown_false-termination-rand.c:
-trm_svcomp_UpAndDownIneq_false-termination-input.c:
-trm_svcomp_UpAndDownIneq_false-termination-rand.c.c:
-trm_svcomp_WhileNested_false-termination-input.c:
-trm_svcomp_WhileNestedOffset_false-termination-rand.c:
+trm_svcomp_Gauss_false-termination-input.c: concrete:false abstract:unknow
+trm_svcomp_Gauss_false-termination-rand.c: concrete:true abstract:true
+trm_svcomp_GCD2_false-termination-inputinput.c: concrete:false abstract:unknow
+trm_svcomp_GCD2_false-termination-randinput.c:  concrete:true abstract:unknow precision:widening?
+trm_svcomp_GCD2_false-termination-randrand.c:   concrete:true abstract:true 
+trm_svcomp_GCD_false-termination-inputinput.c:  concrete:false abstract:unknow
+trm_svcomp_GCD_false-termination-inputrand.c: concrete:true abstract:true
+trm_svcomp_GCD_false-termination-randinput.c: concrete:true abstract:unknow precision:?
+trm_svcomp_GCD_false-termination-randrand.c: concrete:true abstract:true
+trm_svcomp_Hanoi_2vars_false-termination-inputinput.c: concrete:false abstract:false
+trm_svcomp_Hanoi_2vars_false-termination-inputrand.c:  concrete:true abstract:true
+trm_svcomp_Hanoi_2vars_false-termination-randinput.c: concrete:true abstract:true
+trm_svcomp_Hanoi_2vars_false-termination-randrand.c: concrete:true abstract:true
+trm_svcomp_Hanoi_3vars_false-termination_rii.c: concrete:true abstract:true
+trm_svcomp_Hanoi_3vars_false-termination_rir.c: concrete:true abstract:true
+trm_svcomp_Hanoi_3vars_false-termination_rrr.c: concrete:true abstract:true
+trm_svcomp_Hanoi_3vars_false-termination_irr.c: concrete:true abstract:true
+trm_svcomp_Lcm_false-termination-inputrand.c:  concrete:true abstract:true
+trm_svcomp_Lcm_false-termination-randinput.c:  concrete:false abstract: unknow
+trm_svcomp_Middle_false-termination-inputinput.c:  concrete:false abstract: unknow
+trm_svcomp_Middle_false-termination-inputrand.c:  concrete:true abstract:true
+trm_svcomp_Middle_false-termination-randinput.c: concrete:true abstract:true
+trm_svcomp_Middle_false-termination-randrand.c: concrete:true abstract:true
+trm_svcomp_MirrorInterv_false-termination-input.c: concrete:false abstract:unknow
+trm_svcomp_MirrorInterv_false-termination-rand.c: concrete:true abstract:true
+trm_svcomp_MirrorIntervSim_false-termination-input.c: concrete:false abstract:unknow
+trm_svcomp_MirrorIntervSim_false-termination-rand.c: concrete:true abstract:true
+trm_svcomp_Mysore_false-termination-inputinput.c:  concrete:false abstract:unknow
+trm_svcomp_Mysore_false-termination-inputrand.c: concrete:true abstract:true
+trm_svcomp_Mysore_false-termination-randinput.c: concrete:true abstract:true
+trm_svcomp_Mysore_false-termination-randrand.c: concrete:true abstract:true
+trm_svcomp_Narrowing_false-termination-input.c: concrete:false abstract:unknow
+trm_svcomp_Narrowing_false-termination-rand.c:  concrete:true abstract:true
+trm_svcomp_NarrowKonv_false-termination-input.c:  concrete:false abstract:unknow
+trm_svcomp_NarrowKonv_false-termination-rand.c:   concrete:true abstract:true
+trm_svcomp_NonTermination2_false-termination-inputinput.c: concrete:false abstract:unknow
+trm_svcomp_NonTermination2_false-termination-inputrand.c:  concrete:true abstract:unknow precision:maybe widening with min
+trm_svcomp_NonTermination2_false-termination-randinput.c:  concrete:true abstract:true 
+trm_svcomp_NonTermination2_false-termination-randrand.c: concrete:true abstract:true
+trm_svcomp_NonTerminationSimple3_false-termination-inputinput.c: concrete:false abstract:unknow
+trm_svcomp_NonTerminationSimple3_false-termination-inputrand.c: concrete:true abstract:true
+trm_svcomp_NonTerminationSimple3_false-termination-randinput.c: concrete:true abstract:unknow precision:widening evolve
+trm_svcomp_NonTerminationSimple3_false-termination-randrand.c: concrete:true abstract:true
+trm_svcomp_NonTerminationSimple4_false-termination-inputinput.c: concrete:false abstract:unknow
+trm_svcomp_NonTerminationSimple4_false-termination-inputrand.c:  concrete:true abstract:true
+trm_svcomp_NonTerminationSimple4_false-termination-randinput.c: concrete:true abstract:true
+trm_svcomp_NonTerminationSimple4_false-termination-randrand.c:  concrete:true abstract:true
+trm_svcomp_NonTerminationSimple6_false-termination-input.c: concrete:false abstract:unknow
+trm_svcomp_NonTerminationSimple6_false-termination-rand.c: concrete:true abstract:true
+trm_svcomp_NonTerminationSimple7_false-termination-inputinput.c: concrete:false abstract:unknow 
+trm_svcomp_NonTerminationSimple7_false-termination-inputrand.c: concrete:true abstract:true
+trm_svcomp_NonTerminationSimple7_false-termination-randinput.c: concrete:true abstract:true
+trm_svcomp_NonTerminationSimple7_false-termination-randrand.c: concrete:true abstract:true
+trm_svcomp_PastaC10_false-termination.c:  concrete:false abstract:unknow 
+trm_svcomp_Singapore_plus_false-termination.c: concrete:true abstract:true
+trm_svcomp_Singapore_v1_false-termination.c: concrete:false abstract:unknow
+trm_svcomp_Singapore_v2_false-termination.c: concrete:true abstract:true
+trm_svcomp_UpAndDown_false-termination-input.c: concrete:false abstract:unknow
+trm_svcomp_UpAndDown_false-termination-rand.c:  concrete:true abstract:true
+trm_svcomp_UpAndDownIneq_false-termination-input.c: concrete:false abstract:unknow
+trm_svcomp_UpAndDownIneq_false-termination-rand.c: concrete:true abstract:true
+trm_svcomp_WhileNested_false-termination-input.c: concrete:false abstract:unknow
+trm_svcomp_WhileNestedOffset_false-termination-rand.c:  concrete:true abstract:true
