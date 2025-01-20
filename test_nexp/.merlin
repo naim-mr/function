@@ -1,0 +1,9 @@
+S domains
+S examples
+S frontend
+S cfgfrontend
+S main
+S utils
+S banal
+B _build/**
+PKG apron gmp oUnit zarith
