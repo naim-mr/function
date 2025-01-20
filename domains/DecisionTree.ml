@@ -1029,7 +1029,7 @@ struct
                          if not (underapprox) then
                             if taint then 
                               APPROXIMATION 
-                            else RESILIENCE
+                            else if !Config.domain = "boxes" then RESILIENCE (* resilience *) else COMPUTATIONAL
                           else failwith "underapproximation + taint not handled"
                           in                        
           Leaf (F.join joinType b f1 f2)

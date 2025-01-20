@@ -229,8 +229,8 @@ struct
        | RESILIENCE -> f1)
     | Fun f, Top | Top, Fun f -> 
       (match k with
-       | APPROXIMATION -> Bot
-       | COMPUTATIONAL -> Fun f
+       | APPROXIMATION -> Top
+       | COMPUTATIONAL -> Top
        | RESILIENCE -> Fun f)
     | _ -> Top
 

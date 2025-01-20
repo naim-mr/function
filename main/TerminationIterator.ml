@@ -215,11 +215,17 @@ let rec bwdStm ?property ?domain funcs env vars (p,r,flag) s tvl =
         Format.fprintf !fmt "p1: %a\n" D.print p1;
         Format.fprintf !fmt "p2: %a\n" D.print p2
       end;
-      let joinType = if (taint_b (b,ba) tvl && !Config.resilience)  || not !Config.resilience then APPROXIMATION else  COMPUTATIONAL in
+      let joinType = if (taint_b (b,ba) tvl && !Config.resilience)  || not !Config.resilience 
+                      then APPROXIMATION 
+                      else if !Config.domain = "boxes" 
+                        then RESILIENCE (* resilience *) 
+                        else COMPUTATIONAL 
+      in
       (D.join joinType p1 p2, r, flag1 || flag2)
       | A_while (l, (b, ba), s) ->
         let a = InvMap.find l !fwdInvMap in
         let dm = if !refine then Some a else None in
+        (* Handle loop condition in the case it is tainted *)
         let p1 = D.filter ?domain:dm p (fst (negBExp (b, ba))) in
         let rec aux (i, _, _) (p2, _, flag2) n =
           if !abort then raise Abort
@@ -231,8 +237,8 @@ let rec bwdStm ?property ?domain funcs env vars (p,r,flag) s tvl =
               Format.fprintf !fmt "i: %a\n" D.print i ;
               Format.fprintf !fmt "p2: %a\n" D.print p2 ;
               Format.fprintf !fmt "i': %a\n" D.print i' ) ;
-            let jokers =
-              max 0 ((!retrybwd * (!Ordinals.max + 1)) - n + !joinbwd)
+            let jokers = 0
+              (* max 0 ((!retrybwd * (!Ordinals.max + 1)) - n + !joinbwd) *)
             in
             if D.isLeq COMPUTATIONAL i' i then (
               if D.isLeq APPROXIMATION i' i then (
