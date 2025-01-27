@@ -8,30 +8,30 @@ BLUE="\e[94m"
 fill="                                                     "
 list=( 
   #"-domain polyhedra -refine -vulnerability" 
+  "-domain boxes -refine -resilience" 
+  "-domain boxes -refine"
+  "-domain boxes -ordinals 3  -refine -resilience" 
+  "-domain boxes -ordinals 3 -refine"
   "-domain polyhedra -refine -resilience" 
   "-domain polyhedra -refine"
   "-domain polyhedra -ordinals 3  -refine -resilience" 
   "-domain polyhedra -ordinals 3 -refine"
-  "-domain boxes -ordinals 3  -refine -resilience" 
-  "-domain boxes -ordinals 3 -refine"
-  "-domain boxes -refine -resilience" 
-  "-domain boxes -refine"
-  "-domain polyhedra -joinbwd 5 -refine -resilience" 
-  "-domain polyhedra -joinbwd 5 -refine"
+  #"-domain polyhedra -joinbwd 5 -refine -resilience" 
+  #"-domain polyhedra -joinbwd 5 -refine"
   "-domain polyhedra -joinbwd 5 -ordinals 3  -refine -resilience" 
   "-domain polyhedra -joinbwd 5 -ordinals 3 -refine"
-  "-domain boxes -joinbwd 5 -ordinals 3  -refine -resilience" 
-  "-domain boxes -joinbwd 5 -ordinals 3 -refine"
-  "-domain boxes -joinbwd 5 -refine -resilience" 
-  "-domain boxes -joinbwd 5 -refine"
-  "-domain polyhedra -joinbwd 8 -refine -resilience" 
-  "-domain polyhedra -joinbwd 8 -refine"
+  #"-domain boxes -joinbwd 5 -ordinals 3  -refine -resilience" 
+  #"-domain boxes -joinbwd 5 -ordinals 3 -refine"
+  #"-domain boxes -joinbwd 5 -refine -resilience" 
+  #"-domain boxes -joinbwd 5 -refine"
+  #"-domain polyhedra -joinbwd 8 -refine -resilience" 
+  #"-domain polyhedra -joinbwd 8 -refine"
   "-domain polyhedra -joinbwd 8 -ordinals 3  -refine -resilience" 
   "-domain polyhedra -joinbwd 8 -ordinals 3 -refine"
-  "-domain boxes -joinbwd 8 -ordinals 3  -refine -resilience" 
-  "-domain boxes -joinbwd 8 -ordinals 3 -refine"
-  "-domain boxes -joinbwd 8 -refine -resilience" 
-  "-domain boxes -joinbwd 8 -refine"
+  #"-domain boxes -joinbwd 8 -ordinals 3  -refine -resilience" 
+  #"-domain boxes -joinbwd 8 -ordinals 3 -refine"
+  #"-domain boxes -joinbwd 8 -refine -resilience" 
+  #"-domain boxes -joinbwd 8 -refine"
   # "-domain polyhedra -cda 1  -ordinals 3 -vulnerability" 
   #"-domain polyhedra -ordinals 3 -cda 0 -vulnerability" 
   # "-domain boxes -cda 3 -robust_termination" 
@@ -67,10 +67,11 @@ list=(
  )
 
 listlatex=( 
-    "$\textbf{Polyhedra termination resilience}$"
-    "$\textbf{Polyhedr termination}$"
-    "$\textbf{Interval termination resilience}$"
-    "$\textbf{Interval termination}$"
+    "\tool-Polyhedra-Delay2"
+    "\tool-Polyhedra-Lex-Delay2"
+    "\tool-Boxes-Lex-Delay2"
+    "\tool-Polyhedra-Lex-Delay5"
+    "\tool-Polyhedra-Lex-Delay5"
    # "\$\\triangledown\$"
   )
 
@@ -267,14 +268,14 @@ treat_file() {
       u="{${vulnerabilities[0]}}"
       u=$(echo $u | sed 's/\(.*\)-}/\1}/g' | tr -d '$' )
       echo -n "<span style=\"color: #0000FF\">$u</span>" >> $index_html
-      echo -n "\{\textcolor{red}{$u}\} " >> $index_tex
+      #echo -n "\{\textcolor{red}{$u}\} " >> $index_tex
   else 
     if (($lenu==0)) && (($lenc>0))
     then 
       c="{${safe[0]}}"
       c=$(echo $c | sed 's/\(.*\)-}/\1}/g' | tr -d '$')
       echo -n "<span >$c</span>" >> $index_html
-      echo -n "\{\text{$c}\} " >> $index_tex
+      #echo -n "\{\text{$c}\} " >> $index_tex
     else 
       for i in ${!safe[@]}
       do
@@ -284,8 +285,8 @@ treat_file() {
         u=$(echo $u | sed 's/\(.*\)-}/\1}/g' | tr -d '$' )
         echo -n "<span >$c</span>" >> $index_html
         echo -n "<span style=\"color: #0000FF\">$u</span>" >> $index_html
-        echo -n "\{\textcolor{red}{$u} " >> $index_tex
-        echo -n "\text{$c}\} " >> $index_tex
+        #echo -n "\{\textcolor{red}{$u} " >> $index_tex
+        #echo -n "\text{$c}\} " >> $index_tex
         echo "<br/>" >> $index_html     
       done
     fi
@@ -568,7 +569,7 @@ do
   if (($i + 1 < ${#list[@]})) 
     then
         echo -n  " & " >> $index_tex
-    fi
+  fi
 done
 # Create a csv file
 echo "filename,property,options,result,loc,time,alarms" > $stats_csv

@@ -1041,7 +1041,8 @@ struct
                           if not (underapprox) then
                           if taint then  
                             APPROXIMATION 
-                          else if !Config.domain = "boxes" then RESILIENCE (* resilience *) else RESILIENCE
+                          else 
+                            RESILIENCE
                           else failwith "underapproximation + taint not handled" 
              in                               
           Leaf (F.join joinType b f1 f2)
@@ -1231,7 +1232,8 @@ struct
         if not (underapprox) then
         if taint then  
           APPROXIMATION 
-        else if !Config.domain = "boxes" then RESILIENCE (* resilience *) else RESILIENCE
+        else 
+          RESILIENCE
         else failwith "underapproximation + taint not handled" 
       in          
       let t1 = filter ~taint:taint ?domain:pre ~underapprox:underapprox t e1 and t2 = filter ~taint:taint ?domain:pre ~underapprox:underapprox t e2 in
