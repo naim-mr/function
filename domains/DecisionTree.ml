@@ -590,10 +590,22 @@ struct
       reachable states, the same APRON envorinment and the same list of 
       program variables. *)
 
-  let join k t1 t2 = {
+  let join k t1 t2 = 
+    let tree1 , tree2 = tree_unification t1.tree t2.tree t1.env t1.vars in
+    let _ = Printf.printf "tree join :" in
+    let _ = print_tree t1.vars Format.std_formatter tree1 in
+    let _ = match k with  | APPROXIMATION -> Printf.printf "\n approximation JOIN \n" | RESILIENCE-> Printf.printf "\n resilience JOIN \n" 
+                          | COMPUTATIONAL -> Printf.printf "\n computational JOIN \n"in
+    let _ = print_tree t2.vars Format.std_formatter tree2 in
+    let _ = Printf.printf "\n == \n" in
+    let t =   tree_join k (t1.tree,t2.tree) t1.domain t1.env t1.vars  in 
+    let _ = print_tree t1.vars Format.std_formatter t in
+    let _ = Printf.printf "\n-------------\n" in 
+    
+    {
     domain = t1.domain;	(* assuming t1.domain = t2.domain *)
     (* tree = tree_join k (t1.tree,t2.tree) t1.domain t1.env t1.vars; *) 
-    tree = tree_join k (t1.tree,t2.tree) t1.domain t1.env t1.vars; 
+    tree = t;    
     env = t1.env;	(* assuming t1.env = t2.env *)
     vars = t1.vars	(* assuming t1.vars = t2.vars *)
   }
@@ -632,7 +644,7 @@ struct
       let b = match domain with 
         | None -> B.inner env vars cs 
         | Some domain -> B.meet (B.inner env vars cs) domain in
-      if B.isBot b then Bot else Leaf (F.join APPROXIMATION b f1 f2) (* join leaf values using APPROXIMATION join *)
+      if B.isBot b then Bot else Leaf (F.join k b f1 f2) (* join leaf values using APPROXIMATION join *)
     in { 
       domain = domain; 
       tree = tree_join_helper fBotLeftRight fBotLeftRight fLeaf t1.tree t2.tree env vars; 
@@ -1026,12 +1038,12 @@ struct
         | Leaf f1,Leaf f2 ->
           let b = match pre with | None -> B.inner env vars cs | Some pre -> B.meet (B.inner env vars cs) pre in
           let joinType = if underapprox && not (taint) then COMPUTATIONAL else
-                         if not (underapprox) then
-                            if taint then 
-                              APPROXIMATION 
-                            else if !Config.domain = "boxes" then RESILIENCE (* resilience *) else COMPUTATIONAL
-                          else failwith "underapproximation + taint not handled"
-                          in                        
+                          if not (underapprox) then
+                          if taint then  
+                            APPROXIMATION 
+                          else if !Config.domain = "boxes" then RESILIENCE (* resilience *) else RESILIENCE
+                          else failwith "underapproximation + taint not handled" 
+             in                               
           Leaf (F.join joinType b f1 f2)
         | Node ((c1,nc1),l1,r1),Node((c2,nc2),l2,r2) when (C.isEq c1 c2) ->
           Node((c1,nc1),aux (l1,l2) (c1::cs),aux (r1,r2) (nc1::cs))
@@ -1116,12 +1128,12 @@ struct
       env = env;
       vars = vars }
 
-  let rec filter ?domain ?(underapprox = false) t e =
+  let rec filter ?(taint = true) ?domain ?(underapprox = false) t e =
     let pre = domain in
     let post = t.domain in
     let env = t.env in
     let vars = t.vars in
-    let b_filter = if underapprox then B.filter_underapprox else B.filter in
+    let b_filter = if underapprox then B.filter_underapprox else B.filter in       
     let rec aux t bs cs =
       let bcs = match pre with
         | None -> B.inner env vars cs
@@ -1213,12 +1225,19 @@ struct
     | A_FALSE -> { domain = pre; tree = Bot; env = env; vars = vars }
     | A_bunary (o,e) ->
       (match o with
-       | A_NOT -> let (e, _) = negBExp e in filter ?domain:pre ~underapprox:underapprox t e)
+       | A_NOT -> let (e, _) = negBExp e in filter ~taint:taint ?domain:pre ~underapprox:underapprox t e)
     | A_bbinary (o,(e1,_),(e2,_)) ->
-      let t1 = filter ?domain:pre ~underapprox:underapprox t e1 and t2 = filter ?domain:pre ~underapprox:underapprox t e2 in
+      let joinType = if underapprox && not (taint) then COMPUTATIONAL else
+        if not (underapprox) then
+        if taint then  
+          APPROXIMATION 
+        else if !Config.domain = "boxes" then RESILIENCE (* resilience *) else RESILIENCE
+        else failwith "underapproximation + taint not handled" 
+      in          
+      let t1 = filter ~taint:taint ?domain:pre ~underapprox:underapprox t e1 and t2 = filter ~taint:taint ?domain:pre ~underapprox:underapprox t e2 in
       (match o with
-       | A_AND -> meet APPROXIMATION t1 t2
-       | A_OR -> join APPROXIMATION t1 t2)
+       | A_AND -> Printf.printf "call meet in filter \n"; meet joinType t1 t2
+       | A_OR -> Printf.printf "call join in filter \n"; join joinType t1 t2)
     | A_rbinary (_,_,_) ->
       let bp = match post with
         | None -> B.inner env vars []

@@ -463,19 +463,29 @@ module Numerical(N: NUMERICAL)(C: CONSTRAINT): PARTITION = struct
 
   let bwdAssign b (x,e) = match x with
     | A_var x ->
-      let env = b.env in
-      let vars = b.vars in
-      let e = Texpr1.of_expr env (aExp_to_apron e) in
-      let a = Lincons1.array_make env (List.length b.constraints) in
-      let i = ref 0 in
-      List.iter (fun c -> Lincons1.array_set a !i c; i := !i + 1) b.constraints;
-      let b = Abstract1.of_lincons_array manager env a in
-      let b = Abstract1.substitute_texpr manager b (Var.of_string x.varId) e None in
-      let a = Abstract1.to_lincons_array manager b in
-      let cs = ref [] in
-      for i=0 to (Lincons1.array_length a)-1 do
-        cs := (Lincons1.array_get a i)::!cs; (*TODO: normalization *)
-      done; { constraints = !cs; env = env; vars = vars }
+      let f manager b (x,e) : t = 
+        let env = b.env in
+        let vars = b.vars in
+        let e = Texpr1.of_expr env (aExp_to_apron e) in
+        let a = Lincons1.array_make env (List.length b.constraints) in
+        let i = ref 0 in
+        List.iter (fun c -> Lincons1.array_set a !i c; i := !i + 1) b.constraints;
+        let b = Abstract1.of_lincons_array manager env a in
+        let b = Abstract1.substitute_texpr manager b (Var.of_string x.varId) e None in
+        let a = Abstract1.to_lincons_array manager b in
+        let cs = ref [] in
+        for i=0 to (Lincons1.array_length a)-1 do
+          cs := (Lincons1.array_get a i)::!cs; (*TODO: normalization *)
+        done ;
+        {constraints = !cs; env = env; vars = vars } 
+      in 
+      if (!Config.resilience && !Config.domain = "polyhedra") then
+        f manager b (x,e)
+      else
+        let b1 = f manager b (x,e) in 
+        let b2 = f (Box.manager_alloc ()) b (x,e) in 
+        { b1 with  constraints = b1.constraints @ b2.constraints}
+     
     | _ -> raise (Invalid_argument "bwdAssign: unexpected lvalue")
 
 
@@ -494,72 +504,81 @@ module Numerical(N: NUMERICAL)(C: CONSTRAINT): PARTITION = struct
     result
 
 
-  let rec filter b e =
-    match e with
-    | A_TRUE -> b
-    | A_MAYBE -> b
-    | A_FALSE -> bot b.env b.vars
-    | A_bunary (o,e) ->
-      (match o with
-       | A_NOT -> let (e,_) = negBExp e in filter b e)
-    | A_bbinary (o,(e1,_),(e2,_)) ->
-      let b1 = filter b e1 and b2 = filter b e2 in
-      (match o with
-       | A_AND -> meet b1 b2
-       | A_OR -> join b1 b2)
-    | A_rbinary (o,e1,e2) ->
-      let env = b.env in
-      let vars = b.vars in
-      let a = Lincons1.array_make env (List.length b.constraints) in
-      let i = ref 0 in
-      List.iter (fun c -> Lincons1.array_set a !i c; i := !i + 1) b.constraints;
-      let b = Abstract1.of_lincons_array manager env a in
-      (match o with
-       | A_LESS ->
-         let e = Texpr1.of_expr env (aExp_to_apron (A_abinary (A_MINUS,e2,e1))) in
-         let c = Tcons1.make e Tcons1.SUP in
-         let a = Tcons1.array_make env 1 in
-         Tcons1.array_set a 0 c;
-         let b = Abstract1.meet_tcons_array manager b a in
-         let a = Abstract1.to_lincons_array manager b in
-         let cs = ref [] in
-         for i=0 to (Lincons1.array_length a)-1 do
-           cs := (Lincons1.array_get a i)::!cs; (*TODO: normalization *)
-         done; { constraints = !cs; env = env; vars = vars }
-       | A_LESS_EQUAL ->
-         let e = Texpr1.of_expr env (aExp_to_apron (A_abinary (A_MINUS,e2,e1))) in
-         let c = Tcons1.make e Tcons1.SUPEQ in
-         let a = Tcons1.array_make env 1 in
-         Tcons1.array_set a 0 c;
-         let b = Abstract1.meet_tcons_array manager b a in
-         let a = Abstract1.to_lincons_array manager b in
-         let cs = ref [] in
-         for i=0 to (Lincons1.array_length a)-1 do
-           cs := (Lincons1.array_get a i)::!cs; (*TODO: normalization *)
-         done; { constraints = !cs; env = env; vars = vars }
-       | A_GREATER ->
-         let e = Texpr1.of_expr env (aExp_to_apron (A_abinary (A_MINUS,e1,e2))) in
-         let c = Tcons1.make e Tcons1.SUP in
-         let a = Tcons1.array_make env 1 in
-         Tcons1.array_set a 0 c;
-         let b = Abstract1.meet_tcons_array manager b a in
-         let a = Abstract1.to_lincons_array manager b in
-         let cs = ref [] in
-         for i=0 to (Lincons1.array_length a)-1 do
-           cs := (Lincons1.array_get a i)::!cs; (*TODO: normalization *)
-         done; { constraints = !cs; env = env; vars = vars }
-       | A_GREATER_EQUAL ->
-         let e = Texpr1.of_expr env (aExp_to_apron (A_abinary (A_MINUS,e1,e2))) in
-         let c = Tcons1.make e Tcons1.SUPEQ in
-         let a = Tcons1.array_make env 1 in
-         Tcons1.array_set a 0 c;
-         let b = Abstract1.meet_tcons_array manager b a in
-         let a = Abstract1.to_lincons_array manager b in
-         let cs = ref [] in
-         for i=0 to (Lincons1.array_length a)-1 do
-           cs := (Lincons1.array_get a i)::!cs; (*TODO: normalization *)
-         done; { constraints = !cs; env = env; vars = vars })
-
+  let rec filter b e  =
+    let rec f manager b e = 
+     match e with
+     | A_TRUE -> b
+     | A_MAYBE -> b
+     | A_MAYBE_INP -> b
+     | A_FALSE -> bot b.env b.vars
+     | A_bunary (o,e) ->
+       (match o with
+        | A_NOT -> let (e,_) = negBExp e in f manager b e)
+     | A_bbinary (o,(e1,_),(e2,_)) ->
+       let b1 = f manager b e1 and b2 = f manager b  e2 in
+       (match o with
+        | A_AND -> meet b1 b2
+        | A_OR -> join b1 b2)
+     | A_rbinary (o,e1,e2) ->
+       let env = b.env in
+       let vars = b.vars in
+       let a = Lincons1.array_make env (List.length b.constraints) in
+       let i = ref 0 in
+       List.iter (fun c -> Lincons1.array_set a !i c; i := !i + 1) b.constraints;
+       let b = Abstract1.of_lincons_array manager env a in
+       (match o with
+        | A_LESS ->
+          let e = Texpr1.of_expr env (aExp_to_apron (A_abinary (A_MINUS,e2,e1))) in
+          let c = Tcons1.make e Tcons1.SUP in
+          let a = Tcons1.array_make env 1 in
+          Tcons1.array_set a 0 c;
+          let b = Abstract1.meet_tcons_array manager b a in
+          let a = Abstract1.to_lincons_array manager b in
+          let cs = ref [] in
+          for i=0 to (Lincons1.array_length a)-1 do
+            cs := (Lincons1.array_get a i)::!cs; (*TODO: normalization *)
+          done; { constraints = !cs; env = env; vars = vars }
+        | A_LESS_EQUAL ->
+          let e = Texpr1.of_expr env (aExp_to_apron (A_abinary (A_MINUS,e2,e1))) in
+          let c = Tcons1.make e Tcons1.SUPEQ in
+          let a = Tcons1.array_make env 1 in
+          Tcons1.array_set a 0 c;
+          let b = Abstract1.meet_tcons_array manager b a in
+          let a = Abstract1.to_lincons_array manager b in
+          let cs = ref [] in
+          for i=0 to (Lincons1.array_length a)-1 do
+            cs := (Lincons1.array_get a i)::!cs; (*TODO: normalization *)
+          done; { constraints = !cs; env = env; vars = vars }
+        | A_GREATER ->
+          let e = Texpr1.of_expr env (aExp_to_apron (A_abinary (A_MINUS,e1,e2))) in
+          let c = Tcons1.make e Tcons1.SUP in
+          let a = Tcons1.array_make env 1 in
+          Tcons1.array_set a 0 c;
+          let b = Abstract1.meet_tcons_array manager b a in
+          let a = Abstract1.to_lincons_array manager b in
+          let cs = ref [] in
+          for i=0 to (Lincons1.array_length a)-1 do
+            cs := (Lincons1.array_get a i)::!cs; (*TODO: normalization *)
+          done; { constraints = !cs; env = env; vars = vars }
+        | A_GREATER_EQUAL ->
+          let e = Texpr1.of_expr env (aExp_to_apron (A_abinary (A_MINUS,e1,e2))) in
+          let c = Tcons1.make e Tcons1.SUPEQ in
+          let a = Tcons1.array_make env 1 in
+          Tcons1.array_set a 0 c;
+          let b = Abstract1.meet_tcons_array manager b a in
+          let a = Abstract1.to_lincons_array manager b in
+          let cs = ref [] in
+          for i=0 to (Lincons1.array_length a)-1 do
+            cs := (Lincons1.array_get a i)::!cs; (*TODO: normalization *)
+          done; { constraints = !cs; env = env; vars = vars })
+        in
+        let b1 = f manager b e in 
+        if (!Config.resilience && !Config.domain = "polyhedra") then
+          let b2 = f (Box.manager_alloc ()) b e in  
+          {constraints = b1.constraints @ b2.constraints ; env = b1.env ; vars = b1.vars} 
+        else 
+          b1
+        
   (**)
 
 

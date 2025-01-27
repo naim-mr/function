@@ -211,18 +211,20 @@ let rec bwdStm ?property ?domain funcs env vars (p,r,flag) s tvl =
       let p1 = D.filter ?domain:domain p1 b in					
       let (p2, _, flag2) = bwdBlk funcs env vars (p, r, flag) s2 in
       let p2 = D.filter ?domain:domain p2 (fst (negBExp (b, ba))) in
-      if !tracebwd && not !minimal then begin
-        Format.fprintf !fmt "p1: %a\n" D.print p1;
-        Format.fprintf !fmt "p2: %a\n" D.print p2
+      if true then begin
+        Format.fprintf Format.std_formatter "if in p1: %a\n" D.print p1;
+        Format.fprintf Format.std_formatter "p2: %a\n" D.print p2
       end;
       let joinType = if (taint_b (b,ba) tvl && !Config.resilience)  || not !Config.resilience 
-                      then APPROXIMATION 
+                      then 
+                        let _ = Printf.printf "ifla!!!!\n" in APPROXIMATION 
                       else if !Config.domain = "boxes" 
-                        then RESILIENCE (* resilience *) 
-                        else COMPUTATIONAL 
+                        then let _ = Printf.printf "ifla boxes \n" in RESILIENCE (* resilience *) 
+                        else let _ = Printf.printf "ifla polka\n" in COMPUTATIONAL 
       in
       (D.join joinType p1 p2, r, flag1 || flag2)
       | A_while (l, (b, ba), s) ->
+        let tvl = InvMap.find l !fwdTaintMap in
         let a = InvMap.find l !fwdInvMap in
         let dm = if !refine then Some a else None in
         (* Handle loop condition in the case it is tainted *)
@@ -270,7 +272,17 @@ let rec bwdStm ?property ?domain funcs env vars (p,r,flag) s tvl =
         let p2, _, flag2 = bwdBlk funcs env vars i s in
         let p2' = D.filter ?domain:dm p2 b in
         let p, r, flag = aux i (p2', r, flag2) 1 in
-        addBwdInv l p ;
+        addBwdInv l p;
+        (* let p  = if (taint_b (b,ba) tvl && !Config.resilience)  || not !Config.resilience 
+          then 
+            let _ = Printf.printf "whilela\n" in pr
+          else if !Config.domain = "boxes" 
+            then 
+              let _ = Printf.printf "while JOIN BOXES\n" in
+              D.join RESILIENCE pr p
+            else
+              let _ = Printf.printf "whiledebug comp\n" in
+              D.join COMPUTATIONAL pr p in *)
         if !refine then (D.refine p a, r, flag) else (p, r, flag)
     | A_call (f, ss) ->
       let f = StringMap.find f funcs in

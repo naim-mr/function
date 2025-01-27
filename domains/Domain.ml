@@ -35,7 +35,8 @@ sig
   val defined : ?condition:bExp -> t -> bool
   val complement: t -> t
   val bwdAssign : ?domain:B.t -> ?taint:bool -> ?underapprox:bool -> t -> aExp * aExp -> t
-  val filter : ?domain:B.t -> ?underapprox:bool -> t -> bExp -> t
+  val filter : ?taint:bool -> ?domain:B.t -> ?underapprox:bool -> t -> bExp -> t
+  
   val reset : ?mask:t -> t -> bExp -> t
   val until: t -> t -> t -> t
   val refine : t -> B.t -> t
