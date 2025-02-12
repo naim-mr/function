@@ -480,11 +480,12 @@ module Numerical(N: NUMERICAL)(C: CONSTRAINT): PARTITION = struct
         {constraints = !cs; env = env; vars = vars } 
       in 
       if (!Config.resilience && !Config.domain = "polyhedra") then
-        f manager b (x,e)
-      else
+        let _ = Printf.printf "here\n" in
         let b1 = f manager b (x,e) in 
         let b2 = f (Box.manager_alloc ()) b (x,e) in 
         { b1 with  constraints = b1.constraints @ b2.constraints}
+      else
+        f manager b (x,e)
      
     | _ -> raise (Invalid_argument "bwdAssign: unexpected lvalue")
 
