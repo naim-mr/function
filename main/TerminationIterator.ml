@@ -386,7 +386,7 @@ let rec bwdStm ?property ?domain funcs env vars (p,r,flag) s tvl =
       Format.fprintf !fmt "\nForward Analysis Trace:\n";
     let startfwd = Sys.time () in
     let _ = fwdBlk funcs env vars (fwdBlk funcs env vars (B.top env vars) stmts) s in
-    let _ =  fwdTBlk  funcs env vars [] s in  
+    let _ =  fwdTBlk  funcs env vars (fwdTBlk funcs env vars vars stmts) s in  
     let stopfwd = Sys.time () in
     if not !minimal then
       begin
