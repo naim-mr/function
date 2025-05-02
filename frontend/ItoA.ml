@@ -260,20 +260,26 @@ let rec exp_itoa
          (A_boolean (e2, a), env, pre, post)
        | A_boolean (e1,_), A_arithmetic (A_RANDOM,_) -> 
          (A_boolean (e1, a), env, pre, post)
-       | A_arithmetic (A_var v, a1), A_boolean (e2,a2) -> 
-         let cmp1 = (A_rbinary (A_LESS_EQUAL, (A_var v, a), (annotate (A_const (-1))))) in 
-         let cmp2  = (A_rbinary (A_GREATER_EQUAL, (A_var v, a), (annotate (A_const 1)))) in
+       | A_arithmetic (e1, a1), A_boolean (e2,a2) -> 
+         let cmp1 = (A_rbinary (A_LESS_EQUAL, (e1, a1), (annotate (A_const (-1))))) in 
+         let cmp2  = (A_rbinary (A_GREATER_EQUAL, (e1, a1), (annotate (A_const 1)))) in
          let bvar = A_bbinary (A_AND,(cmp1,a1),(cmp2,a1)) in 
          (A_boolean (A_bbinary (A_AND,(bvar,a1),(e2,a2)), a), env, pre, post)
-       | A_boolean (e2,a2), A_arithmetic (A_var v, a1) -> 
-         let cmp1 = (A_rbinary (A_LESS_EQUAL, (A_var v, a), (annotate (A_const (-1))))) in 
-         let cmp2  = (A_rbinary (A_GREATER_EQUAL, (A_var v, a), (annotate (A_const 1)))) in
+       | A_boolean (e2,a2), A_arithmetic (e1, a1) -> 
+         let cmp1 = (A_rbinary (A_LESS_EQUAL, (e1,a2), (annotate (A_const (-1))))) in 
+         let cmp2  = (A_rbinary (A_GREATER_EQUAL, (e1, a2), (annotate (A_const 1)))) in
          let bvar = A_bbinary (A_AND,(cmp1,a1),(cmp2,a1)) in 
          (A_boolean (A_bbinary (A_AND,(e2,a2),(bvar,a1)), a), env, pre, post)
+       | A_arithmetic (e1,a1), A_arithmetic (e2, a2) -> 
+          let cmp1 = (A_rbinary (A_LESS_EQUAL, (e1,a1), (annotate (A_const (-1))))) in 
+          let cmp2  = (A_rbinary (A_GREATER_EQUAL, (e1, a1), (annotate (A_const 1)))) in
+          let bvar = A_bbinary (A_AND,(cmp1,a1),(cmp2,a1)) in 
+          let cmp1 = (A_rbinary (A_LESS_EQUAL, (e2,a2), (annotate (A_const (-1))))) in 
+          let cmp2  = (A_rbinary (A_GREATER_EQUAL, (e2, a2), (annotate (A_const 1)))) in
+          let bvar2 = A_bbinary (A_AND,(cmp1,a1),(cmp2,a1)) in 
+          (A_boolean (A_bbinary (A_AND,(bvar,a1),(bvar2,a2)), a), env, pre, post)
        | A_boolean (e1,ea1), A_boolean (e2,ea2) -> 
          (A_boolean (A_bbinary (A_AND,(e1,ea1),(e2,ea2)), a), env, pre, post)
-       (* | A_boolean (e1,ea1), A_arithmetic (e2,ea2) -> 
-         (A_boolean (A_bbinary (A_AND,(e1,ea1),(e2,ea2)), a), env, pre, post) *)
        | _ ->  raise (Invalid_argument "exp_itoa:I_and"))
     | I_or (e1,e2) ->
       let (e1, env, pre, post) = exp_itoa ctx env pre post e1 in
@@ -285,16 +291,24 @@ let rec exp_itoa
           (A_boolean (A_MAYBE_INP, a), env, pre, post)
        | A_boolean (e1,ea1), A_boolean (e2,ea2) -> 
          (A_boolean (A_bbinary (A_OR,(e1,ea1),(e2,ea2)),a), env, pre, post)
-         | A_arithmetic (A_var v, a1), A_boolean (e2,a2) -> 
-          let cmp1 = (A_rbinary (A_LESS_EQUAL, (A_var v, a), (annotate (A_const (-1))))) in 
-          let cmp2  = (A_rbinary (A_GREATER_EQUAL, (A_var v, a), (annotate (A_const 1)))) in
+       | A_arithmetic (e1, a1), A_boolean (e2,a2) -> 
+          let cmp1 = (A_rbinary (A_LESS_EQUAL, (e1, a1), (annotate (A_const (-1))))) in 
+          let cmp2  = (A_rbinary (A_GREATER_EQUAL, (e1, a1), (annotate (A_const 1)))) in
           let bvar = A_bbinary (A_AND,(cmp1,a1),(cmp2,a1)) in 
           (A_boolean (A_bbinary (A_OR,(bvar,a1),(e2,a2)), a), env, pre, post)
-        | A_boolean (e2,a2), A_arithmetic (A_var v, a1) -> 
-          let cmp1 = (A_rbinary (A_LESS_EQUAL, (A_var v, a), (annotate (A_const (-1))))) in 
-          let cmp2  = (A_rbinary (A_GREATER_EQUAL, (A_var v, a), (annotate (A_const 1)))) in
+       | A_boolean (e2,a2), A_arithmetic (e1, a1) -> 
+          let cmp1 = (A_rbinary (A_LESS_EQUAL, (e1,a2), (annotate (A_const (-1))))) in 
+          let cmp2  = (A_rbinary (A_GREATER_EQUAL, (e1, a2), (annotate (A_const 1)))) in
           let bvar = A_bbinary (A_AND,(cmp1,a1),(cmp2,a1)) in 
           (A_boolean (A_bbinary (A_OR,(e2,a2),(bvar,a1)), a), env, pre, post)
+       | A_arithmetic (e1,a1), A_arithmetic (e2, a2) -> 
+           let cmp1 = (A_rbinary (A_LESS_EQUAL, (e1,a1), (annotate (A_const (-1))))) in 
+           let cmp2  = (A_rbinary (A_GREATER_EQUAL, (e1, a1), (annotate (A_const 1)))) in
+           let bvar = A_bbinary (A_AND,(cmp1,a1),(cmp2,a1)) in 
+           let cmp1 = (A_rbinary (A_LESS_EQUAL, (e2,a2), (annotate (A_const (-1))))) in 
+           let cmp2  = (A_rbinary (A_GREATER_EQUAL, (e2, a2), (annotate (A_const 1)))) in
+           let bvar2 = A_bbinary (A_AND,(cmp1,a1),(cmp2,a1)) in 
+           (A_boolean (A_bbinary (A_OR,(bvar,a1),(bvar2,a2)), a), env, pre, post)
        | _ -> raise (Invalid_argument "exp_itoa:I_or"))
     | I_assign ((e1, ea1), o, e2) -> 
       (match e1 with
