@@ -1,0 +1,14 @@
+/*
+d306f3d3513c62342fec4e31457766f2473f9e9a
+https://github.com/git/git/commit/d306f3d3513c62342fec4e31457766f2473f9e9a
+termination: false
+*/
+int main()
+{
+    int number = rand;                   
+    int i, width;
+    width = 1;
+    for (i = 10 ; i <= number ; width++ )
+        i *= 10;
+    return 0;
+}
