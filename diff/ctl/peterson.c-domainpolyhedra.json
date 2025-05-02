@@ -1,0 +1,11 @@
+{
+  "Config": {
+    "filename": "tests/recurrence/peterson.c",
+    "analysis_type": "ctl",
+    "property": "AG{AF{C1: true}}",
+    "result": "UKNOWN",
+    "vulnerability": "",
+    "domain": "polyhedra"
+  },
+  "tree": { "Leaf": "16" }
+}

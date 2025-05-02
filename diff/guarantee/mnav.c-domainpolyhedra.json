@@ -1,0 +1,23 @@
+{
+  "Config": {
+    "filename": "tests/guarantee/mnav.c",
+    "analysis_type": "guarantee",
+    "property": "tests/guarantee/mnav.txt",
+    "result": "TRUE",
+    "vulnerability": "",
+    "domain": "polyhedra"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$4{enable} >= 1",
+      "left": { "Leaf": "2" },
+      "right": {
+        "Node": {
+          "constraint": "$4{enable} >= 0",
+          "left": { "Leaf": "0." },
+          "right": { "Leaf": "2" }
+        }
+      }
+    }
+  }
+}

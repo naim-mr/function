@@ -1,0 +1,59 @@
+{
+  "Config": {
+    "filename": "tests/ctl/koskinen/acqrel.c",
+    "analysis_type": "ctl",
+    "property": "AG{OR{A!=1}{AF{R==1}}}",
+    "result": "UKNOWN",
+    "vulnerability": "",
+    "domain": "polyhedra"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{R} >= 2",
+      "left": {
+        "Node": {
+          "constraint": "$1{A} >= 2",
+          "left": { "Leaf": "0." },
+          "right": {
+            "Node": {
+              "constraint": "$1{A} >= 1",
+              "left": { "Leaf": "bottom" },
+              "right": { "Leaf": "0." }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$2{R} >= 1",
+          "left": {
+            "Node": {
+              "constraint": "$1{A} >= 2",
+              "left": { "Leaf": "0" },
+              "right": {
+                "Node": {
+                  "constraint": "$1{A} >= 1",
+                  "left": { "Leaf": "0." },
+                  "right": { "Leaf": "0" }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$1{A} >= 2",
+              "left": { "Leaf": "0." },
+              "right": {
+                "Node": {
+                  "constraint": "$1{A} >= 1",
+                  "left": { "Leaf": "bottom" },
+                  "right": { "Leaf": "0." }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

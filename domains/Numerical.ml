@@ -135,6 +135,7 @@ module Numerical(N: NUMERICAL)(C: CONSTRAINT): PARTITION = struct
     for i=0 to (Lincons1.array_length a)-1 do
       cs := (Lincons1.array_get a i)::!cs; (*TODO: normalization *)
     done; { constraints = !cs; env = env; vars = vars }
+    
   let rec assume ?(pow = 5.) b =
     let addScalar c1 c2 =
       match (c1, c2) with
@@ -480,7 +481,6 @@ module Numerical(N: NUMERICAL)(C: CONSTRAINT): PARTITION = struct
         {constraints = !cs; env = env; vars = vars } 
       in 
       if (!Config.resilience && !Config.domain = "polyhedra") then
-        let _ = Printf.printf "here\n" in
         let b1 = f manager b (x,e) in 
         let b2 = f (Box.manager_alloc ()) b (x,e) in 
         { b1 with  constraints = b1.constraints @ b2.constraints}

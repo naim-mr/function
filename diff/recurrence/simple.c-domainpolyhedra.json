@@ -1,0 +1,41 @@
+{
+  "Config": {
+    "filename": "tests/recurrence/simple.c",
+    "analysis_type": "recurrence",
+    "property": "tests/recurrence/simple.txt",
+    "result": "UKNOWN",
+    "vulnerability": "",
+    "domain": "polyhedra"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$1{x} >= 4",
+      "left": { "Leaf": "bottom" },
+      "right": {
+        "Node": {
+          "constraint": "$1{x} >= 3",
+          "left": { "Leaf": "bottom" },
+          "right": {
+            "Node": {
+              "constraint": "$1{x} >= 2",
+              "left": { "Leaf": "bottom" },
+              "right": {
+                "Node": {
+                  "constraint": "$1{x} >= 1",
+                  "left": { "Leaf": "bottom" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$1{x} >= 0",
+                      "left": { "Leaf": "bottom" },
+                      "right": { "Leaf": "-3$1{x}+10" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

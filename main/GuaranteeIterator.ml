@@ -26,7 +26,8 @@ struct
   let bwdInvMap = ref InvMap.empty
 
   let addBwdInv l (a:D.t) = bwdInvMap := InvMap.add l a !bwdInvMap
-
+  let fwdTaintMap: var list InvMap.t ref = ref InvMap.empty
+  let fwdTBlk (funcs:func StringMap.t) env vars (p:var list) (b:block) : var list = []
   let rec initStm env vars s =
     match s with
     | A_if (_,s1,s2) -> initBlk env vars s1; initBlk env vars s2
@@ -52,7 +53,6 @@ struct
   let rec bwdStm ?(property =  StringMap.empty ) ?(domain) funcs env vars p s =
     match s with
     | A_label (l,_) ->
-
       let p = try D.reset p (fst (StringMap.find l property)) with Not_found -> p in p
     | A_return -> D.bot env vars
     | A_assign ((l,_),(e,_)) -> D.bwdAssign p (l,e)

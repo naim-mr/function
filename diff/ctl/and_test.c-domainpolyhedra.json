@@ -1,0 +1,41 @@
+{
+  "Config": {
+    "filename": "tests/ctl/and_test.c",
+    "analysis_type": "ctl",
+    "property": "EG{EF{n==1}}",
+    "result": "UKNOWN",
+    "vulnerability": "",
+    "domain": "polyhedra"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$1{n} >= 4",
+      "left": { "Leaf": "2$1{n}-2" },
+      "right": {
+        "Node": {
+          "constraint": "$1{n} >= 3",
+          "left": { "Leaf": "4" },
+          "right": {
+            "Node": {
+              "constraint": "$1{n} >= 2",
+              "left": { "Leaf": "2" },
+              "right": {
+                "Node": {
+                  "constraint": "$1{n} >= 1",
+                  "left": { "Leaf": "0." },
+                  "right": {
+                    "Node": {
+                      "constraint": "$1{n} >= 0",
+                      "left": { "Leaf": "3" },
+                      "right": { "Leaf": "bottom" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

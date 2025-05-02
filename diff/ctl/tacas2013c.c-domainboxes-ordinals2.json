@@ -1,0 +1,769 @@
+{
+  "Config": {
+    "filename": "tests/termination/tacas2013c.c",
+    "analysis_type": "ctl",
+    "property": "AF{exit: true}",
+    "result": "TRUE",
+    "vulnerability": "",
+    "domain": "boxes"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$4{x3} >= 4",
+      "left": {
+        "Node": {
+          "constraint": "$3{x2} >= 4",
+          "left": {
+            "Node": {
+              "constraint": "$2{x1} >= 4",
+              "left": { "Leaf": " ($3{x2}-1)⍵ + 4$2{x1}+13$3{x2}-10" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x1} >= 3",
+                  "left": { "Leaf": " ($3{x2}-1)⍵ + 13$3{x2}+2" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{x1} >= 2",
+                      "left": { "Leaf": " ($3{x2}-1)⍵ + 13$3{x2}-2" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$2{x1} >= 1",
+                          "left": { "Leaf": " ($3{x2}-1)⍵ + 13$3{x2}-6" },
+                          "right": { "Leaf": "2" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$3{x2} >= 3",
+              "left": {
+                "Node": {
+                  "constraint": "$2{x1} >= 4",
+                  "left": { "Leaf": " (2)⍵ + 4$2{x1}+29" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{x1} >= 3",
+                      "left": { "Leaf": " (2)⍵ + 41" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$2{x1} >= 2",
+                          "left": { "Leaf": " (2)⍵ + 37" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$2{x1} >= 1",
+                              "left": { "Leaf": " (2)⍵ + 33" },
+                              "right": { "Leaf": "2" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$3{x2} >= 2",
+                  "left": {
+                    "Node": {
+                      "constraint": "$2{x1} >= 4",
+                      "left": { "Leaf": " (1)⍵ + 4$2{x1}+16" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$2{x1} >= 3",
+                          "left": { "Leaf": " (1)⍵ + 28" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$2{x1} >= 2",
+                              "left": { "Leaf": " (1)⍵ + 24" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$2{x1} >= 1",
+                                  "left": { "Leaf": " (1)⍵ + 20" },
+                                  "right": { "Leaf": "2" }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "right": {
+                    "Node": {
+                      "constraint": "$3{x2} >= 1",
+                      "left": {
+                        "Node": {
+                          "constraint": "$2{x1} >= 4",
+                          "left": { "Leaf": "4$2{x1}+3" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$2{x1} >= 3",
+                              "left": { "Leaf": "15" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$2{x1} >= 2",
+                                  "left": { "Leaf": "11" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$2{x1} >= 1",
+                                      "left": { "Leaf": "7" },
+                                      "right": { "Leaf": "2" }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "right": {
+                        "Node": {
+                          "constraint": "$2{x1} >= 4",
+                          "left": { "Leaf": "2" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$2{x1} >= 3",
+                              "left": { "Leaf": "2" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$2{x1} >= 2",
+                                  "left": { "Leaf": "2" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$2{x1} >= 1",
+                                      "left": { "Leaf": "2" },
+                                      "right": { "Leaf": "2" }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$4{x3} >= 3",
+          "left": {
+            "Node": {
+              "constraint": "$3{x2} >= 4",
+              "left": {
+                "Node": {
+                  "constraint": "$2{x1} >= 4",
+                  "left": { "Leaf": " ($3{x2}-1)⍵ + 4$2{x1}+13$3{x2}-10" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{x1} >= 3",
+                      "left": { "Leaf": " ($3{x2}-1)⍵ + 13$3{x2}+2" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$2{x1} >= 2",
+                          "left": { "Leaf": " ($3{x2}-1)⍵ + 13$3{x2}-2" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$2{x1} >= 1",
+                              "left": {
+                                "Leaf": " ($3{x2}-1)⍵ + 13$3{x2}-6"
+                              },
+                              "right": { "Leaf": "2" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$3{x2} >= 3",
+                  "left": {
+                    "Node": {
+                      "constraint": "$2{x1} >= 4",
+                      "left": { "Leaf": " (2)⍵ + 4$2{x1}+29" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$2{x1} >= 3",
+                          "left": { "Leaf": " (2)⍵ + 41" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$2{x1} >= 2",
+                              "left": { "Leaf": " (2)⍵ + 37" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$2{x1} >= 1",
+                                  "left": { "Leaf": " (2)⍵ + 33" },
+                                  "right": { "Leaf": "2" }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "right": {
+                    "Node": {
+                      "constraint": "$3{x2} >= 2",
+                      "left": {
+                        "Node": {
+                          "constraint": "$2{x1} >= 4",
+                          "left": { "Leaf": " (1)⍵ + 4$2{x1}+16" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$2{x1} >= 3",
+                              "left": { "Leaf": " (1)⍵ + 28" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$2{x1} >= 2",
+                                  "left": { "Leaf": " (1)⍵ + 24" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$2{x1} >= 1",
+                                      "left": { "Leaf": " (1)⍵ + 20" },
+                                      "right": { "Leaf": "2" }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "right": {
+                        "Node": {
+                          "constraint": "$3{x2} >= 1",
+                          "left": {
+                            "Node": {
+                              "constraint": "$2{x1} >= 4",
+                              "left": { "Leaf": "4$2{x1}+3" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$2{x1} >= 3",
+                                  "left": { "Leaf": "15" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$2{x1} >= 2",
+                                      "left": { "Leaf": "11" },
+                                      "right": {
+                                        "Node": {
+                                          "constraint": "$2{x1} >= 1",
+                                          "left": { "Leaf": "7" },
+                                          "right": { "Leaf": "2" }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "right": {
+                            "Node": {
+                              "constraint": "$2{x1} >= 4",
+                              "left": { "Leaf": "2" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$2{x1} >= 3",
+                                  "left": { "Leaf": "2" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$2{x1} >= 2",
+                                      "left": { "Leaf": "2" },
+                                      "right": {
+                                        "Node": {
+                                          "constraint": "$2{x1} >= 1",
+                                          "left": { "Leaf": "2" },
+                                          "right": { "Leaf": "2" }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$4{x3} >= 2",
+              "left": {
+                "Node": {
+                  "constraint": "$3{x2} >= 4",
+                  "left": {
+                    "Node": {
+                      "constraint": "$2{x1} >= 4",
+                      "left": {
+                        "Leaf": " ($3{x2}-1)⍵ + 4$2{x1}+13$3{x2}-10"
+                      },
+                      "right": {
+                        "Node": {
+                          "constraint": "$2{x1} >= 3",
+                          "left": { "Leaf": " ($3{x2}-1)⍵ + 13$3{x2}+2" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$2{x1} >= 2",
+                              "left": {
+                                "Leaf": " ($3{x2}-1)⍵ + 13$3{x2}-2"
+                              },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$2{x1} >= 1",
+                                  "left": {
+                                    "Leaf": " ($3{x2}-1)⍵ + 13$3{x2}-6"
+                                  },
+                                  "right": { "Leaf": "2" }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "right": {
+                    "Node": {
+                      "constraint": "$3{x2} >= 3",
+                      "left": {
+                        "Node": {
+                          "constraint": "$2{x1} >= 4",
+                          "left": { "Leaf": " (2)⍵ + 4$2{x1}+29" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$2{x1} >= 3",
+                              "left": { "Leaf": " (2)⍵ + 41" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$2{x1} >= 2",
+                                  "left": { "Leaf": " (2)⍵ + 37" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$2{x1} >= 1",
+                                      "left": { "Leaf": " (2)⍵ + 33" },
+                                      "right": { "Leaf": "2" }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "right": {
+                        "Node": {
+                          "constraint": "$3{x2} >= 2",
+                          "left": {
+                            "Node": {
+                              "constraint": "$2{x1} >= 4",
+                              "left": { "Leaf": " (1)⍵ + 4$2{x1}+16" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$2{x1} >= 3",
+                                  "left": { "Leaf": " (1)⍵ + 28" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$2{x1} >= 2",
+                                      "left": { "Leaf": " (1)⍵ + 24" },
+                                      "right": {
+                                        "Node": {
+                                          "constraint": "$2{x1} >= 1",
+                                          "left": { "Leaf": " (1)⍵ + 20" },
+                                          "right": { "Leaf": "2" }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "right": {
+                            "Node": {
+                              "constraint": "$3{x2} >= 1",
+                              "left": {
+                                "Node": {
+                                  "constraint": "$2{x1} >= 4",
+                                  "left": { "Leaf": "4$2{x1}+3" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$2{x1} >= 3",
+                                      "left": { "Leaf": "15" },
+                                      "right": {
+                                        "Node": {
+                                          "constraint": "$2{x1} >= 2",
+                                          "left": { "Leaf": "11" },
+                                          "right": {
+                                            "Node": {
+                                              "constraint": "$2{x1} >= 1",
+                                              "left": { "Leaf": "7" },
+                                              "right": { "Leaf": "2" }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$2{x1} >= 4",
+                                  "left": { "Leaf": "2" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$2{x1} >= 3",
+                                      "left": { "Leaf": "2" },
+                                      "right": {
+                                        "Node": {
+                                          "constraint": "$2{x1} >= 2",
+                                          "left": { "Leaf": "2" },
+                                          "right": {
+                                            "Node": {
+                                              "constraint": "$2{x1} >= 1",
+                                              "left": { "Leaf": "2" },
+                                              "right": { "Leaf": "2" }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$4{x3} >= 1",
+                  "left": {
+                    "Node": {
+                      "constraint": "$3{x2} >= 4",
+                      "left": {
+                        "Node": {
+                          "constraint": "$2{x1} >= 4",
+                          "left": {
+                            "Leaf": " ($3{x2}-1)⍵ + 4$2{x1}+13$3{x2}-10"
+                          },
+                          "right": {
+                            "Node": {
+                              "constraint": "$2{x1} >= 3",
+                              "left": {
+                                "Leaf": " ($3{x2}-1)⍵ + 13$3{x2}+2"
+                              },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$2{x1} >= 2",
+                                  "left": {
+                                    "Leaf": " ($3{x2}-1)⍵ + 13$3{x2}-2"
+                                  },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$2{x1} >= 1",
+                                      "left": { "Leaf": "7" },
+                                      "right": { "Leaf": "2" }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "right": {
+                        "Node": {
+                          "constraint": "$3{x2} >= 3",
+                          "left": {
+                            "Node": {
+                              "constraint": "$2{x1} >= 4",
+                              "left": { "Leaf": " (2)⍵ + 4$2{x1}+29" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$2{x1} >= 3",
+                                  "left": { "Leaf": " (2)⍵ + 41" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$2{x1} >= 2",
+                                      "left": { "Leaf": " (2)⍵ + 37" },
+                                      "right": {
+                                        "Node": {
+                                          "constraint": "$2{x1} >= 1",
+                                          "left": { "Leaf": "7" },
+                                          "right": { "Leaf": "2" }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "right": {
+                            "Node": {
+                              "constraint": "$3{x2} >= 2",
+                              "left": {
+                                "Node": {
+                                  "constraint": "$2{x1} >= 4",
+                                  "left": { "Leaf": " (1)⍵ + 4$2{x1}+16" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$2{x1} >= 3",
+                                      "left": { "Leaf": " (1)⍵ + 28" },
+                                      "right": {
+                                        "Node": {
+                                          "constraint": "$2{x1} >= 2",
+                                          "left": { "Leaf": " (1)⍵ + 24" },
+                                          "right": {
+                                            "Node": {
+                                              "constraint": "$2{x1} >= 1",
+                                              "left": { "Leaf": "7" },
+                                              "right": { "Leaf": "2" }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$3{x2} >= 1",
+                                  "left": {
+                                    "Node": {
+                                      "constraint": "$2{x1} >= 4",
+                                      "left": { "Leaf": "4$2{x1}+3" },
+                                      "right": {
+                                        "Node": {
+                                          "constraint": "$2{x1} >= 3",
+                                          "left": { "Leaf": "15" },
+                                          "right": {
+                                            "Node": {
+                                              "constraint": "$2{x1} >= 2",
+                                              "left": { "Leaf": "11" },
+                                              "right": {
+                                                "Node": {
+                                                  "constraint": "$2{x1} >= 1",
+                                                  "left": { "Leaf": "7" },
+                                                  "right": { "Leaf": "2" }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$2{x1} >= 4",
+                                      "left": { "Leaf": "2" },
+                                      "right": {
+                                        "Node": {
+                                          "constraint": "$2{x1} >= 3",
+                                          "left": { "Leaf": "2" },
+                                          "right": {
+                                            "Node": {
+                                              "constraint": "$2{x1} >= 2",
+                                              "left": { "Leaf": "2" },
+                                              "right": {
+                                                "Node": {
+                                                  "constraint": "$2{x1} >= 1",
+                                                  "left": { "Leaf": "2" },
+                                                  "right": { "Leaf": "2" }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "right": {
+                    "Node": {
+                      "constraint": "$3{x2} >= 4",
+                      "left": {
+                        "Node": {
+                          "constraint": "$2{x1} >= 4",
+                          "left": { "Leaf": "2" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$2{x1} >= 3",
+                              "left": { "Leaf": "2" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$2{x1} >= 2",
+                                  "left": { "Leaf": "2" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$2{x1} >= 1",
+                                      "left": { "Leaf": "2" },
+                                      "right": { "Leaf": "2" }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "right": {
+                        "Node": {
+                          "constraint": "$3{x2} >= 3",
+                          "left": {
+                            "Node": {
+                              "constraint": "$2{x1} >= 4",
+                              "left": { "Leaf": "2" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$2{x1} >= 3",
+                                  "left": { "Leaf": "2" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$2{x1} >= 2",
+                                      "left": { "Leaf": "2" },
+                                      "right": {
+                                        "Node": {
+                                          "constraint": "$2{x1} >= 1",
+                                          "left": { "Leaf": "2" },
+                                          "right": { "Leaf": "2" }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "right": {
+                            "Node": {
+                              "constraint": "$3{x2} >= 2",
+                              "left": {
+                                "Node": {
+                                  "constraint": "$2{x1} >= 4",
+                                  "left": { "Leaf": "2" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$2{x1} >= 3",
+                                      "left": { "Leaf": "2" },
+                                      "right": {
+                                        "Node": {
+                                          "constraint": "$2{x1} >= 2",
+                                          "left": { "Leaf": "2" },
+                                          "right": {
+                                            "Node": {
+                                              "constraint": "$2{x1} >= 1",
+                                              "left": { "Leaf": "2" },
+                                              "right": { "Leaf": "2" }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$3{x2} >= 1",
+                                  "left": {
+                                    "Node": {
+                                      "constraint": "$2{x1} >= 4",
+                                      "left": { "Leaf": "2" },
+                                      "right": {
+                                        "Node": {
+                                          "constraint": "$2{x1} >= 3",
+                                          "left": { "Leaf": "2" },
+                                          "right": {
+                                            "Node": {
+                                              "constraint": "$2{x1} >= 2",
+                                              "left": { "Leaf": "2" },
+                                              "right": {
+                                                "Node": {
+                                                  "constraint": "$2{x1} >= 1",
+                                                  "left": { "Leaf": "2" },
+                                                  "right": { "Leaf": "2" }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$2{x1} >= 4",
+                                      "left": { "Leaf": "2" },
+                                      "right": {
+                                        "Node": {
+                                          "constraint": "$2{x1} >= 3",
+                                          "left": { "Leaf": "2" },
+                                          "right": {
+                                            "Node": {
+                                              "constraint": "$2{x1} >= 2",
+                                              "left": { "Leaf": "2" },
+                                              "right": {
+                                                "Node": {
+                                                  "constraint": "$2{x1} >= 1",
+                                                  "left": { "Leaf": "2" },
+                                                  "right": { "Leaf": "2" }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -46,6 +46,7 @@ sig
   val reinit: t -> t
   val compress : t -> t
   val vulnerable : t  ->  (Polka.strict Polka.t Vulnerability.t)   list
+  val merge_after: t -> t
   val print : Format.formatter -> t -> unit
   val output_json : var list -> t -> Yojson.Safe.t
   val print_graphviz_dot : Format.formatter -> t -> unit

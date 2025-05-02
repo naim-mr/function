@@ -1,0 +1,23 @@
+{
+  "Config": {
+    "filename": "tests/termination/example2d.c",
+    "analysis_type": "ctl",
+    "property": "AF{exit: true}",
+    "result": "UKNOWN",
+    "vulnerability": "",
+    "domain": "boxes"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$4{y} >= 5",
+      "left": { "Leaf": "bottom" },
+      "right": {
+        "Node": {
+          "constraint": "$4{y} >= -4",
+          "left": { "Leaf": "3" },
+          "right": { "Leaf": "bottom" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "Config": {
+    "filename": "tests/ctl/ltl_automizer/cav2015.c",
+    "analysis_type": "ctl",
+    "property": "AG{OR{x <= 0}{AF{y == 0}}}",
+    "result": "TRUE",
+    "vulnerability": "",
+    "domain": "polyhedra"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{y} >= 1",
+      "left": {
+        "Node": {
+          "constraint": "$1{x} >= 1",
+          "left": { "Leaf": "bottom" },
+          "right": { "Leaf": "0." }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$2{y} >= 0",
+          "left": {
+            "Node": {
+              "constraint": "$1{x} >= 1",
+              "left": { "Leaf": "0." },
+              "right": { "Leaf": "0" }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$1{x} >= 1",
+              "left": { "Leaf": "bottom" },
+              "right": { "Leaf": "0." }
+            }
+          }
+        }
+      }
+    }
+  }
+}

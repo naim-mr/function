@@ -1,0 +1,35 @@
+{
+  "Config": {
+    "filename": "tests/ctl/report/test_until.c",
+    "analysis_type": "ctl",
+    "property": "AU{x >= y}{x==y}",
+    "result": "UKNOWN",
+    "vulnerability": "",
+    "domain": "polyhedra"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x}-$3{y} >= 3",
+      "left": { "Leaf": "2$2{x}-2$3{y}+0" },
+      "right": {
+        "Node": {
+          "constraint": "$2{x}-$3{y} >= 2",
+          "left": { "Leaf": "4" },
+          "right": {
+            "Node": {
+              "constraint": "$2{x}-$3{y} >= 1",
+              "left": { "Leaf": "2" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x}-$3{y} >= 0",
+                  "left": { "Leaf": "0." },
+                  "right": { "Leaf": "bottom" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

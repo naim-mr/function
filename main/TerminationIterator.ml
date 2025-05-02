@@ -115,7 +115,8 @@ struct
   let taint_b (e,ext) tvl =
       let rec aux e  = 
         match e with
-      | A_TRUE  | A_MAYBE	 | A_MAYBE_INP	| A_FALSE -> false
+      | A_MAYBE_INP  -> true
+      | A_TRUE  | A_MAYBE	 	| A_FALSE -> false
       | A_bunary (_,(b,l)) -> aux b
       | A_bbinary (_,(b1,_),(b2,l)) -> aux b1 || aux b2
       | A_rbinary (_,a1,a2) -> let vl1 =  avars a1 in  
@@ -195,34 +196,37 @@ let rec bwdStm ?property ?domain funcs env vars (p,r,flag) s tvl =
     match s with
     | A_label _ -> (p,r,flag)
     | A_return -> D.zero ?domain:domain env vars, r, flag
-    | A_assign ((l,_),(A_INPUT,_)) -> D.bwdAssign ?domain:domain ~taint:true p (l, A_INPUT), r, flag
+    | A_assign ((l,_),(A_INPUT,_)) -> let uap = false in  D.bwdAssign ?domain:domain ~taint:true ~underapprox:uap p (l, A_INPUT), r, flag
     | A_assign ((l,_),(e,_)) ->
       let e_vars = avars (e,l) in 
+      let uap = false in
       let taint =  List.exists (fun x -> List.mem x e_vars) tvl || not (!Config.resilience) in
-      D.bwdAssign ?domain:domain ~taint:taint  p (l, e), r, flag
+      D.bwdAssign ?domain:domain ~taint:taint ~underapprox:uap  p (l, e), r, flag
     | A_assert (b,_) ->
       D.filter ?domain:domain p b, r, flag
     | A_if ((b,ba),s1,s2) ->
+      let uap = false in
+      let taint = (taint_b (b,ba) tvl && !Config.resilience) in
       let (p1, _, flag1) = bwdBlk funcs env vars (p, r, flag) s1 in
-      let p1 = D.filter ?domain:domain p1 b in					
+      let p1 = D.filter ?domain:domain ~taint:taint ~underapprox:uap p1 b in					
       let (p2, _, flag2) = bwdBlk funcs env vars (p, r, flag) s2 in
-      let p2 = D.filter ?domain:domain p2 (fst (negBExp (b, ba))) in
-      if (!tracebwd && not (!minimal)) then begin
+      let p2 = D.filter ?domain:domain ~taint:taint ~underapprox:uap p2 (fst (negBExp (b, ba))) in
+      if !tracebwd && not (!minimal) then begin
         Format.fprintf Format.std_formatter "if in p1: %a\n" D.print p1;
         Format.fprintf Format.std_formatter "p2: %a\n" D.print p2
       end;
-      let joinType = if (taint_b (b,ba) tvl && !Config.resilience)  || not !Config.resilience then 
-                       APPROXIMATION 
-                      else 
-                       RESILIENCE (* resilience *)
-                   
+      let joinType = if (taint || not !Config.resilience) then 
+                        APPROXIMATION 
+                     else
+                        RESILIENCE (* resilience *)
       in
       (D.join joinType p1 p2, r, flag1 || flag2)
       | A_while (l, (b, ba), s) ->
         let a = InvMap.find l !fwdInvMap in
         let dm = if !refine then Some a else None in
+        let uap = false in
         (* Handle loop condition in the case it is tainted *)
-        let p1 = D.filter ?domain:dm p (fst (negBExp (b, ba))) in
+        let p1 = D.filter ?domain:dm p ~underapprox:uap (fst (negBExp (b, ba))) in
         let rec aux (i, _, _) (p2, _, flag2) n =
           if !abort then raise Abort
           else
@@ -249,7 +253,7 @@ let rec bwdStm ?property ?domain funcs env vars (p,r,flag) s tvl =
                 if !tracebwd && not !minimal then
                   Format.fprintf !fmt "i'': %a\n" D.print i'' ;
                 let p2, _, flag2 = bwdBlk funcs env vars (i'', r, flag2) s in
-                let p2' = D.filter ?domain:dm p2 b in
+                let p2' = D.filter ?domain:dm  ~underapprox:uap p2 b in
                 aux (i'', r, flag2) (p2', r, flag2) (n + 1) )
             else
               let i'' =
@@ -259,12 +263,12 @@ let rec bwdStm ?property ?domain funcs env vars (p,r,flag) s tvl =
               if !tracebwd && not !minimal then
                 Format.fprintf !fmt "i'': %a\n" D.print i'' ;
               let p2, _, flag2 = bwdBlk funcs env vars (i'', r, flag2) s in
-              let p2' = D.filter ?domain:dm p2 b in
+              let p2' = D.filter ?domain:dm  ~underapprox:uap p2 b in
               aux (i'', r, flag2) (p2', r, flag2) (n + 1)
         in
         let i = (D.bot ?domain:dm env vars, r, flag) in
         let p2, _, flag2 = bwdBlk funcs env vars i s in
-        let p2' = D.filter ?domain:dm p2 b in
+        let p2' = D.filter ?domain:dm  ~underapprox:uap p2 b in
         let p, r, flag = aux i (p2', r, flag2) 1 in
         addBwdInv l p;
         if !refine then (D.refine p a, r, flag) else (p, r, flag)
@@ -396,18 +400,31 @@ let rec bwdStm ?property ?domain funcs env vars (p,r,flag) s tvl =
             Format.printf "%a: %s\n" label_print l (List.fold_left (fun  acc x -> acc^" "^x.varName) "" a)) !fwdTaintMap
       end;
     (* Backward Analysis *)
+    let block_label block = 
+      match block with
+        | A_empty l -> l
+        | A_block (l,_,_) -> l
+    in
     if !tracebwd && not !minimal then
       Format.fprintf !fmt "\nBackward Analysis Trace:\n";
     start := Sys.time ();
     let startbwd = Sys.time () in
     let i = bwdRec funcs env vars (bwdRec funcs env vars (D.zero env vars) s) stmts in
+    let i = 
+      if !resilience then
+       D.merge_after (List.fold_left (fun i x -> D.bwdAssign i (AbstractSyntax.A_var  x, A_RANDOM )) i (InvMap.find (block_label f.funcBody) !fwdTaintMap))
+      else 
+        i
+    in
     let stopbwd = Sys.time () in
     if not !minimal then begin
       if !timebwd then
         Format.fprintf !fmt "\nBackward Analysis (Time: %f s):\n" (stopbwd-.startbwd)
       else
         Format.fprintf !fmt "\nBackward Analysis:\n";
-      bwdMap_print !fmt !bwdInvMap;
+        bwdMap_print !fmt !bwdInvMap;
+        Format.fprintf !fmt "\n Forget taint variable: \n";
+        Format.fprintf !fmt ": %a\n" D.print i;
     end;
     tree := (D.output_json vars i);
     D.defined  ?condition:precondition i

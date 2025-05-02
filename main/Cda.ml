@@ -45,8 +45,15 @@ struct
     | x::xs -> 
       init_env xs (Environment.add env [|(Var.of_string x.varId)|] [||])
     in
+    
     (* Apron env initalized for every variable *)
     let env = init_env vars (Environment.make [||] [||]) in 
+    let s = f.funcBody in
+    AbstractSyntax.block_print "main" !fmt s;
+    S.fwdTaintMap := fst (ForwardIteratorB.fwdTBlk  funcs env vars [] s) ;
+    Format.fprintf !fmt "\nForward Analysis taint: size %d\n" (InvMap.cardinal !S.fwdTaintMap);
+          InvMap.iter (fun l a -> 
+            Format.printf "%a: %s\n" label_print l (List.fold_left (fun  acc x -> acc^" "^x.varName) "" a)) !S.fwdTaintMap;
     (* Conflict driven analysis result *)
     let i = cda_recursive  ~property:property funcs env vars  stmts main  f in
     
@@ -80,6 +87,8 @@ struct
       let startfwd = Sys.time () in
       (* Compute the forward analysis starting from the environment b (top at the begining) *)
       S.fwdInvMap := ForwardIteratorB.compute   (vars,stmts,funcs)  b main env;
+      
+      
        (* fwdBlk funcs env vars (fwdBlk funcs env vars b stmts) s in *)
       let stopfwd = Sys.time () in
       if not !minimal then (

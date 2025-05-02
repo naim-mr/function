@@ -33,7 +33,7 @@ sig
   val domainEq : B.t -> f -> f -> B.t
   val isLeq : kind -> B.t -> f -> f -> bool
 
-  val join : kind -> B.t -> f -> f -> f
+  val join : ?random:bool -> kind -> B.t -> f -> f -> f
   val widen : ?jokers:int -> B.t -> f -> f -> f
   val extend : B.t -> B.t -> f -> f -> f
   val learn : B.t -> f -> f -> f

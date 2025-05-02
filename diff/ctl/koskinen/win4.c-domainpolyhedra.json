@@ -1,0 +1,53 @@
+{
+  "Config": {
+    "filename": "tests/ctl/koskinen/win4.c",
+    "analysis_type": "ctl",
+    "property": "AF{AG{WItemsNum >= 1}}",
+    "result": "UKNOWN",
+    "vulnerability": "",
+    "domain": "polyhedra"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$1{WItemsNum} >= 6",
+      "left": { "Leaf": "0." },
+      "right": {
+        "Node": {
+          "constraint": "$1{WItemsNum} >= 5",
+          "left": { "Leaf": "0." },
+          "right": {
+            "Node": {
+              "constraint": "$1{WItemsNum} >= 3",
+              "left": { "Leaf": "0." },
+              "right": {
+                "Node": {
+                  "constraint": "$1{WItemsNum} >= 2",
+                  "left": { "Leaf": "0." },
+                  "right": {
+                    "Node": {
+                      "constraint": "$1{WItemsNum} >= 1",
+                      "left": { "Leaf": "0." },
+                      "right": {
+                        "Node": {
+                          "constraint": "$1{WItemsNum} >= 0",
+                          "left": { "Leaf": "4" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$1{WItemsNum} >= -1",
+                              "left": { "Leaf": "7" },
+                              "right": { "Leaf": "-3$1{WItemsNum}+4" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

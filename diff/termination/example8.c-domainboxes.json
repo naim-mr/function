@@ -1,0 +1,12 @@
+{
+  "Config": {
+    "filename": "tests/termination/example8.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "TRUE",
+    "vulnerability": "",
+    "domain": "boxes",
+    "time": 0.17620400000100001
+  },
+  "tree": { "Leaf": "36" }
+}

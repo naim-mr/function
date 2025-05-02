@@ -1,7 +1,14 @@
 (library
  (name banal)
- (libraries zarith utils apron frontend oUnit apron.boxMPQ apron.octMPQ
-   apron.polkaMPQ)
+ (libraries
+  zarith
+  utils
+  apron
+  frontend
+  oUnit
+  apron.boxMPQ
+  apron.octMPQ
+  apron.polkaMPQ)
  (foreign_stubs
   (language c)
   (names ml_float))

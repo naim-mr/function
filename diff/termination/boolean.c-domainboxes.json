@@ -1,0 +1,36 @@
+{
+  "Config": {
+    "filename": "tests/termination/boolean.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "TRUE",
+    "vulnerability": "",
+    "domain": "boxes",
+    "time": 0.0075370000000100002
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 2",
+      "left": { "Leaf": "3$2{x}+2" },
+      "right": {
+        "Node": {
+          "constraint": "$2{x} >= 1",
+          "left": { "Leaf": "5" },
+          "right": {
+            "Node": {
+              "constraint": "$2{x} >= 0",
+              "left": { "Leaf": "2" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x} >= -1",
+                  "left": { "Leaf": "5" },
+                  "right": { "Leaf": "-3$2{x}+2" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

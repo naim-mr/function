@@ -149,6 +149,8 @@ module CTLIterator(D: RANKING_FUNCTION): SEMANTIC = struct
   module ForwardIteratorB = ForwardIterator(D.B)
   module D = D
   module B = D.B
+  let fwdTaintMap: var list InvMap.t ref = ref InvMap.empty
+  let fwdTBlk (funcs:func StringMap.t) env vars (p:var list) (b:block) : var list = []
   (* We use fwdInvMap but not the bwd, necessaray for now to match SEMANTIC module type *)
   let fwdInvMap = ref InvMap.empty
   let bwdInvMap = ref InvMap.empty

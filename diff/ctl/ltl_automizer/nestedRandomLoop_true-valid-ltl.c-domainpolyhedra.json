@@ -1,0 +1,29 @@
+{
+  "Config": {
+    "filename": "tests/ctl/ltl_automizer/nestedRandomLoop_true-valid-ltl.c",
+    "analysis_type": "ctl",
+    "property": "AG{i >= n}",
+    "result": "UKNOWN",
+    "vulnerability": "",
+    "domain": "polyhedra"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{n}-$3{i} >= 1",
+      "left": {
+        "Node": {
+          "constraint": "$2{n} >= 2",
+          "left": { "Leaf": "bottom" },
+          "right": { "Leaf": "bottom" }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$2{n} >= 2",
+          "left": { "Leaf": "bottom" },
+          "right": { "Leaf": "0." }
+        }
+      }
+    }
+  }
+}

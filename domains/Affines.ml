@@ -8,6 +8,7 @@ open Apron
 open Partition
 open Functions
 open Numerical
+open Utils
 
 module Affine (B: PARTITION) : FUNCTION =
 struct
@@ -171,7 +172,7 @@ struct
 
   (**)
 
-  let join_ranking k b f1 f2 =
+  let join_ranking ?(random = false) k b f1 f2 =
     (* k = kind of join, b = domain of first/second function, f1/f2 = value of first/second function *)
     let aux a c = (* checking if constraint c belongs to set of constraints a *)
       let l = Lincons1.array_length a in
@@ -196,45 +197,71 @@ struct
         ) (B.constraints b); (* copying constraints from b to a1 and a2 *)
       let f1 = Linexpr1.copy f1 and f2 = Linexpr1.copy f2 in (* creating copies of f1 and f2 *)
       Linexpr1.set_coeff f1 v (Coeff.s_of_int (-1));
-      Lincons1.array_set a1 (l-1) (Lincons1.make f1 Lincons1.SUPEQ); (* adding constraint # <= f1 to a1 *)
+      Lincons1.array_set a1 (l-1) (Lincons1.make f1 Lincons1.SUPEQ); (* adding constraint # >= f1 to a1 *)
       Linexpr1.set_coeff f2 v (Coeff.s_of_int (-1));
       Lincons1.array_set a2 (l-1) (Lincons1.make f2 Lincons1.SUPEQ); (* adding constraint # <= f2 to a2 *)
       let p1 = Abstract1.of_lincons_array manager env a1 in (* p1 = polyhedra represented by a1 *)
       let p2 = Abstract1.of_lincons_array manager env a2 in (* p2 = polyhedra represented by a2 *)
-      let p = Abstract1.join manager p1 p2 in (* p = convex-hull *)
-      let p = Abstract1.to_lincons_array manager p in (* converting p into set of constraints *)
-      let f = ref [] in
-      for i = 0 to Lincons1.array_length p - 1 do
+      (* keeps the contrainsts on # occuring in the Lincons.t list p *)
+      let filter_constraints f p =      
+        for i = 0 to Lincons1.array_length p - 1 do
         let c = Lincons1.array_get p i in
         try
           if not (Coeff.is_zero (Lincons1.get_coeff c v)) && (*REMOVE?*) not (aux a c)
           then f := c :: !f
         with _ -> ()
-      done; (* f = list of constraints on special variable # *)
-      if 1 = (List.length !f) (* if there is only one constraint on # *)
-      then
-        let f = Lincons1.get_linexpr1 (List.hd !f) in
-        Linexpr1.set_coeff f v (Coeff.s_of_int 0);
-        Fun f (* defined join function *)
-      else Top (* otherwise *)
+        done (* f = list of constraints on special variable # *) 
+      in
+      let res = 
+        let f = ref [] in
+        match k with 
+        | RESILIENCE  ->  
+          (* When resilience join is on we need to underapproximate f1 and f2*)   
+          filter_constraints f (Abstract1.to_lincons_array manager p1);
+          filter_constraints f (Abstract1.to_lincons_array manager p2);
+          if (List.length !f) > 0 then
+          (* There exists a constraint minimizing f1 and f2*)
+            begin
+            (* f is the smaller element of the list *)
+            let f = Lincons1.get_linexpr1 (List.hd ((List.sort  (Constraints.C.compare) !f))) in
+            Linexpr1.set_coeff f v (Coeff.s_of_int 0);
+          Fun f (* defined join function *)
+          end
+          else 
+            let _ = Printf.printf "\nraise top \n \n" in 
+            Top (* otherwise *)
+        |_ ->
+          let p = Abstract1.join manager p1 p2 in (* p = convex-hull *) 
+          let p = Abstract1.to_lincons_array manager p in (* converting p into set of constraints *)
+          filter_constraints f p;
+          if 1 = (List.length !f) then 
+            (* if there is only one constraint on # *)
+            let f = Lincons1.get_linexpr1 (List.hd !f) in
+            Linexpr1.set_coeff f v (Coeff.s_of_int 0);
+            Fun f (* defined join function *)
+          else Top (* otherwise *)
+      in res
     | Bot,_ ->
       (match k with
-       | APPROXIMATION -> Bot
+       | APPROXIMATION  -> Bot
        | COMPUTATIONAL -> f2
-       | RESILIENCE -> f2)
+       | RESILIENCE when random -> f2
+       | RESILIENCE -> Bot)
     | _,Bot ->
       (match k with
        | APPROXIMATION -> Bot
        | COMPUTATIONAL -> f1
-       | RESILIENCE -> f1)
+       | RESILIENCE when random -> f1
+       | RESILIENCE -> Bot )
     | Fun f, Top | Top, Fun f -> 
       (match k with
        | APPROXIMATION -> Top
        | COMPUTATIONAL -> Top
-       | RESILIENCE -> Fun f)
+       | RESILIENCE when random -> Printf.printf "bah je suis pas ici ?\n " ;Fun f
+       | RESILIENCE ->  Printf.printf "pourtant random doit être àà true ? %b " random  ;Top)
     | _ -> Top
 
-  let join k b f1 f2 = { ranking = join_ranking k b f1.ranking f2.ranking; env = f1.env; vars = f1.vars }
+  let join ?(random=false) k b f1 f2 = { ranking = join_ranking ~random:random k b f1.ranking f2.ranking; env = f1.env; vars = f1.vars }
   
   let mulScalar c1 c2 =
     match (c1, c2) with

@@ -564,20 +564,21 @@ struct
       | _ -> raise (Invalid_argument "tree_join_helper: invalid tree structure")
     in
     aux (tree_unification tree1 tree2 env vars) []
+  
 
   let tree_join k (t1, t2) domain env vars = 
-    let fBotLeftRight cs f = 
-      let b = match domain with 
-        | None -> B.inner env vars cs 
-        | Some domain -> B.meet (B.inner env vars cs) domain 
-      in if (B.isBot b) then Bot else Leaf f 
-    in
-    let fLeaf cs f1 f2 = 
-      let b = match domain with 
-        | None -> B.inner env vars cs 
-        | Some domain -> B.meet (B.inner env vars cs) domain 
-      in if (B.isBot b) then Bot else Leaf (F.join k b f1 f2)
-    in tree_join_helper fBotLeftRight fBotLeftRight fLeaf t1 t2 env vars
+      let fBotLeftRight cs f = 
+        let b = match domain with 
+          | None -> B.inner env vars cs 
+          | Some domain -> B.meet (B.inner env vars cs) domain 
+        in if (B.isBot b) then Bot else Leaf f 
+      in
+      let fLeaf cs f1 f2 = 
+        let b = match domain with 
+         | None -> B.inner env vars cs 
+         | Some domain -> B.meet (B.inner env vars cs) domain 
+       in if (B.isBot b) then Bot else Leaf (F.join k b f1 f2)
+      in tree_join_helper fBotLeftRight fBotLeftRight fLeaf t1 t2 env vars
 
   (** The decision tree join is parameterized by the choice of the 
       join `k` between leaf nodes, i.e., approximation or computational 
@@ -591,17 +592,7 @@ struct
       program variables. *)
 
   let join k t1 t2 = 
-    let tree1 , tree2 = tree_unification t1.tree t2.tree t1.env t1.vars in
-    let _ = Printf.printf "tree join :" in
-    let _ = print_tree t1.vars Format.std_formatter tree1 in
-    let _ = match k with  | APPROXIMATION -> Printf.printf "\n approximation JOIN \n" | RESILIENCE-> Printf.printf "\n resilience JOIN \n" 
-                          | COMPUTATIONAL -> Printf.printf "\n computational JOIN \n"in
-    let _ = print_tree t2.vars Format.std_formatter tree2 in
-    let _ = Printf.printf "\n == \n" in
-    let t =   tree_join k (t1.tree,t2.tree) t1.domain t1.env t1.vars  in 
-    let _ = print_tree t1.vars Format.std_formatter t in
-    let _ = Printf.printf "\n-------------\n" in 
-    
+    let t =   tree_join k (t1.tree,t2.tree) t1.domain t1.env t1.vars  in     
     {
     domain = t1.domain;	(* assuming t1.domain = t2.domain *)
     (* tree = tree_join k (t1.tree,t2.tree) t1.domain t1.env t1.vars; *) 
@@ -1023,13 +1014,14 @@ struct
     {domain = domain; tree = aux (tree_unification t1.tree t2_tree env vars) []; env = env; vars = vars }
 
   (**)
-
+  
   let bwdAssign ?domain ?(taint = true) ?(underapprox = false) t e = 
     let cache = ref CMap.empty in
     let pre = domain in
     let post = t.domain in
     let env = t.env in
     let vars = t.vars in
+    let random = ref (snd e = AbstractSyntax.A_RANDOM) in 
     let merge t1 t2 cs =
       let rec aux (t1,t2) cs =
         match t1,t2 with
@@ -1037,15 +1029,13 @@ struct
         | Bot,_ -> t2
         | Leaf f1,Leaf f2 ->
           let b = match pre with | None -> B.inner env vars cs | Some pre -> B.meet (B.inner env vars cs) pre in
-          let joinType = if underapprox && not (taint) then COMPUTATIONAL else
-                          if not (underapprox) then
-                          if taint then  
-                            APPROXIMATION 
+          let joinType = if underapprox && not (!resilience) then COMPUTATIONAL else
+                         if taint  || not (!resilience) then
+                           APPROXIMATION 
                           else 
-                            RESILIENCE
-                          else failwith "underapproximation + taint not handled" 
-             in                               
-          Leaf (F.join joinType b f1 f2)
+                           RESILIENCE
+          in                               
+          Leaf (F.join ~random:!random joinType b f1 f2)
         | Node ((c1,nc1),l1,r1),Node((c2,nc2),l2,r2) when (C.isEq c1 c2) ->
           Node((c1,nc1),aux (l1,l2) (c1::cs),aux (r1,r2) (nc1::cs))
         | _ -> raise (Invalid_argument "bwdAssign:merge:")
@@ -1066,7 +1056,8 @@ struct
       | Bot -> Bot
       | Leaf f -> 
           if B.isBot (B.inner env vars cs) then Bot else Leaf (F.bwdAssign f e)
-      | Node((c,nc),l,r) -> match (fst e) with
+      | Node((c,nc),l,r) ->
+        match (fst e) with
         | A_var variable ->
           if (C.var variable c) then
             let filter_constraints cs dom =
@@ -1078,13 +1069,14 @@ struct
                     c :: cs
                 ) [] cs
             in
-            let c, nc = try
+            let c, nc = 
+              try
                 CMap.find c !cache
               with Not_found ->
                 (match pre, post with
                  | Some pre, Some post ->
                    let key = c in
-                   let c = B.constraints (b_bwdAssign (B.meet (B.inner env vars [c]) post) e) in
+                   let c = B.constraints (b_bwdAssign (B.meet (B.inner env vars [c]) post) e) in                 
                    let c = filter_constraints c pre in
                    let nc = B.constraints (b_bwdAssign (B.meet (B.inner env vars [nc]) post) e)in
                    let nc = filter_constraints nc pre in
@@ -1096,9 +1088,10 @@ struct
                    let nc = B.constraints (b_bwdAssign (B.inner env vars [nc]) e) in
                    cache := CMap.add key (c,nc) !cache;
                    (c, nc)
-                ) in
+                ) 
+            in 
             (match c, nc with
-             | [],[] -> merge (aux l cs) (aux r cs) cs
+             | [],[] -> merge ( aux l cs) (aux r cs) cs
              | [],[y] when (C.isBot y) -> aux l cs
              | [x],[] when (C.isBot x) -> aux r cs
              | [x],[y] when (C.isBot x && C.isBot y) -> Leaf (F.bot env vars)
@@ -1228,23 +1221,25 @@ struct
       (match o with
        | A_NOT -> let (e, _) = negBExp e in filter ~taint:taint ?domain:pre ~underapprox:underapprox t e)
     | A_bbinary (o,(e1,_),(e2,_)) ->
-      let joinType = if underapprox && not (taint) then COMPUTATIONAL else
-        if not (underapprox) then
-        if taint then  
-          APPROXIMATION 
-        else 
-          RESILIENCE
-        else failwith "underapproximation + taint not handled" 
+      let joinType = if underapprox && not (!resilience) then COMPUTATIONAL 
+                     else
+                      if !resilience then
+                        if taint then  
+                          APPROXIMATION 
+                         else 
+                          RESILIENCE
+                      else 
+                        APPROXIMATION 
       in          
       let t1 = filter ~taint:taint ?domain:pre ~underapprox:underapprox t e1 and t2 = filter ~taint:taint ?domain:pre ~underapprox:underapprox t e2 in
       (match o with
-       | A_AND -> Printf.printf "call meet in filter \n"; meet joinType t1 t2
-       | A_OR -> Printf.printf "call join in filter \n"; join joinType t1 t2)
+       | A_AND -> meet joinType t1 t2
+       | A_OR -> join joinType t1 t2)
     | A_rbinary (_,_,_) ->
       let bp = match post with
         | None -> B.inner env vars []
         | Some post -> B.meet (B.inner env vars []) post
-      in
+      in  
       let bs = List.map (fun c -> let nc = C.negate c in (c,nc)) (B.constraints (b_filter bp e)) in
       let bs = List.sort L.compare bs in
       { domain = pre; tree = aux t.tree bs []; env = env; vars = vars }
@@ -1431,7 +1426,7 @@ struct
       | None -> ()
       | Some domain -> B.print fmt domain
     in
-    if false  then
+    if !tracebwd && not (!minimal)  then
       begin
         Format.fprintf !Config.fmt "\nLEARN :\n";
         Format.fprintf !Config.fmt "t1: DOMAIN = {%a}%a\n\n" print_domain domain1 (print_tree vars) t1.tree;
@@ -1714,6 +1709,38 @@ struct
                                   [] j
     |> 
     fun j -> List.map (fun (b,arr) ->  let nb =(List.filter (fun x ->  (not (List.mem x  b))) t.vars  )  in {safe=b;vulnerables=nb;cons=arr})   j
+
+    let merge_after t = 
+      let domain = t.domain in 
+      let env = t.env in
+      let vars = t.vars in
+      match t.tree with 
+      | Node ((c1,nc1),t1,t2)  ->
+        let fBotLeftRight cs f = 
+          let b = match domain with 
+            | None -> B.inner env vars cs 
+            | Some domain -> B.meet (B.inner env vars cs) domain 
+          in if (B.isBot b) then Bot else Leaf f 
+        in
+        let fLeaf cs f1 f2 = 
+          let b = match domain with 
+           | None -> B.inner env vars cs 
+           | Some domain -> B.meet (B.inner env vars cs) domain 
+         in if (B.isBot b) then Bot else Leaf (F.join RESILIENCE ~random:true b f1 f2)
+        in
+        let rec aux (t1, t2) cs = match t1, t2 with
+        | (Bot, Bot) -> Bot
+        | (Leaf f, Bot) -> fBotLeftRight cs f 
+        | (Bot,Leaf f) -> fBotLeftRight cs f
+        | (Leaf f1, Leaf f2) -> let t' =  fLeaf cs f1 f2 in Format.printf "result join %a u %a == %a \n " print {t with tree =  t1} print {t with tree =  t2} print {t with tree = t'} ; t'
+        | Node ((c1,nc1),l1,r1), Node((c2,nc2),l2,r2) ->
+          (* if not (C.isEq c1 c2) then raise (Invalid_argument "tree_join_helper: invalid tree structure, constraints don't match"); *)
+          let l = aux (l1,l2) (c1::cs) in
+          let r = aux (r1,r2) (nc1::cs) in
+          Node ((c1,nc1),l,r)
+        | _ -> raise (Invalid_argument "tree_join_helper: invalid tree structure")
+        in {t with tree = aux (tree_unification_aux t1 t2 env vars []) []}
+      | _ -> t
 end
 
 module TSAB = DecisionTree(AB)

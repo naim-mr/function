@@ -1,0 +1,47 @@
+{
+  "Config": {
+    "filename": "tests/termination/tap2008c.c",
+    "analysis_type": "ctl",
+    "property": "AF{exit: true}",
+    "result": "UKNOWN",
+    "vulnerability": "",
+    "domain": "polyhedra"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 30",
+      "left": { "Leaf": "bottom" },
+      "right": {
+        "Node": {
+          "constraint": "$2{x} >= 29",
+          "left": { "Leaf": "8" },
+          "right": {
+            "Node": {
+              "constraint": "$2{x} >= 28",
+              "left": { "Leaf": "12" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x} >= 21",
+                  "left": { "Leaf": "-27$2{x}+835" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{x} >= 12",
+                      "left": { "Leaf": "4$2{x}-37" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$2{x} >= 11",
+                          "left": { "Leaf": "7" },
+                          "right": { "Leaf": "3" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

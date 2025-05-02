@@ -44,6 +44,7 @@ sig
    (*
       [fwdInvMap]: a map from the label of the program to an associated the over-approximating numerical abstraction computed in a forward analysis  *)
    val fwdInvMap: B.t InvMap.t ref
+   val fwdTaintMap: var list InvMap.t ref
    (*
       [bwdInvMap]: a map from the label of the program to an associated a decision tree that abstract a ranking function of the program.  *)
    val bwdInvMap: D.t InvMap.t ref
@@ -53,7 +54,7 @@ sig
    (*
       [bwdBlk]: abstract backward transfer function of blocks for the decision tree abstract domain *)
    (* val bwdBlk: ?property:'a p -> func StringMap.t -> Environment.t -> var list -> r -> block ->  r   *)
-
+   (* val fwdTBlk: func StringMap.t -> 'a -> 'b -> var list -> block -> var list *)
    val bwdRec: ?property:'a p -> func StringMap.t -> Environment.t -> var list -> D.t -> block ->  D.t 
    val initBlk: Environment.t -> var list -> block -> unit
    (*

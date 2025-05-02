@@ -565,7 +565,8 @@ let doit () =
   let _ =
     if !Config.vulnerability && (!ctltype <> "CFG") then
       (* Launch the vulnerability analysis and output the infered variables *)
-      Vulnerability.analyse S.D.vulnerable  varlist f !S.bwdInvMap  
+      Vulnerability.analyse S.D.vulnerable  varlist f !S.bwdInvMap;
+      Printf.printf " \n %s \n" (Yojson.Safe.pretty_to_string (!Config.vuln_res))
     in
     if !Config.json_output then
     begin

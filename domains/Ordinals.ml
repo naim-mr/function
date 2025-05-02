@@ -87,7 +87,7 @@ struct
       with Exit -> false
     else F.isLeq k b f1 f2
 
-  let join k b (f1,ff1) (f2,ff2) =
+  let join ?(random=false) k b (f1,ff1) (f2,ff2) =
     let env = B.env b in
     let vars = B.vars b in
     let rec aux i ff1 ff2 =
@@ -98,7 +98,7 @@ struct
          | _ -> [F.successor (F.zero env vars)])
       | [],(y::ys) ->
         let x = F.zero env vars in
-        let z = F.join k b x y in
+        let z = F.join ~random:random k b x y in
         (match i with
          | 0 ->
            if (F.defined z)
@@ -110,7 +110,7 @@ struct
            else (F.successor x)::(aux 1 [] ys))
       | (x::xs),[] ->
         let y = F.zero env vars in
-        let z = F.join k b x y in
+        let z = F.join ~random:random k b x y in
         (match i with
          | 0 ->
            if (F.defined z)
@@ -121,7 +121,7 @@ struct
            then (F.successor z)::(aux 0 xs [])
            else (F.successor y)::(aux 1 xs []))
       | (x::xs),(y::ys) ->
-        let z = F.join k b x y in
+        let z = F.join ~random:random k b x y in
         (match i with
          | 0 ->
            if (F.defined z)
@@ -132,7 +132,7 @@ struct
            then (F.successor z)::(aux 0 xs ys)
            else (F.successor (F.zero env vars))::(aux 1 xs ys))
     in
-    let f = F.join k b f1 f2 in
+    let f = F.join ~random:random k b f1 f2 in
     if (F.defined f)
     then
       let ff = aux 0 ff1 ff2 in
