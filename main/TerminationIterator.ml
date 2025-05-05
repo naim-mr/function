@@ -179,7 +179,7 @@ struct
         let f = StringMap.find f funcs in
         let p = List.fold_left (fun ap (s,_) -> fwdTStm funcs env vars p s) p ss in
         fwdTBlk funcs env vars p f.funcBody
-      | A_recall (f,ss) -> raise (Invalid_argument "fwdStm:A_recall")
+      | A_recall (f,ss) -> vars 
     and fwdTBlk funcs env vars (p:var list) (b:block) : var list =
       match b with
       | A_empty l ->
@@ -278,8 +278,8 @@ let rec bwdStm ?property ?domain funcs env vars (p,r,flag) s tvl =
       List.fold_left (fun (ap, ar, aflag) (s, _) ->
           bwdStm ?domain:domain funcs env vars (ap, ar, aflag) s tvl
         ) (p, r, flag) ss
-    | A_recall (f, ss) ->
-      (match domain with
+    | A_recall (f, ss) -> failwith "Recursive function call are not supported"
+      (* (match domain with
        | None ->
          List.fold_left (fun (ap, ar, aflag) (s, _) ->
              bwdStm funcs env vars (ap, ar, aflag) s tvl
@@ -287,7 +287,7 @@ let rec bwdStm ?property ?domain funcs env vars (p,r,flag) s tvl =
        | Some domain ->
          List.fold_left (fun (ap, ar, aflag) (s, _) ->
              bwdStm ~domain:domain funcs env vars (ap, ar, aflag) s tvl
-           ) (r, r, true) ss)
+           ) (r, r, true) ss) *)
 
   and bwdBlk ?property funcs env vars (p,r,flag) (b:block) : D.t * D.t * bool =
     let result_print l p =
