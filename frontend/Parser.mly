@@ -17,6 +17,7 @@ open IntermediateSyntax
 %token TOK_TRUE;
 %token TOK_VOID;
 %token TOK_WHILE;
+%token TOK_DO;
 
 %token <string> TOK_id
 
@@ -115,6 +116,7 @@ selection_stmt:
 
 iteration_stmt:
 	| TOK_WHILE TOK_LPAREN e = annotate(exp) TOK_RPAREN s = annotate(stmt)																			{ I_while (e,s) }
+	| TOK_DO TOK_LCURLY s = list(annotate(stmt))  TOK_RCURLY TOK_WHILE TOK_LPAREN e = annotate(exp) TOK_RPAREN { let e,ext = e in let ext_stmt = snd (List.hd s) in I_block (s@[(I_while ((e,ext_stmt),(I_block s,ext)),ext_stmt)]) }
 	| TOK_FOR TOK_LPAREN e1 = annotate(exp) TOK_SEMICOLON e2 = annotate(exp) TOK_SEMICOLON e3 = annotate(exp) TOK_RPAREN s = annotate(stmt)			{ I_for_simple (e1,e2,e3,s) }
 	| TOK_FOR TOK_LPAREN d = annotate(global_decl) e1 = annotate(exp) TOK_SEMICOLON e2 = annotate(exp) TOK_RPAREN s = annotate(stmt)	{ I_for (d,e1,e2,s) }
 

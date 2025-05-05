@@ -23,6 +23,7 @@ let _ = List.iter (fun (a,b) -> Hashtbl.add keyword a b)
 		"true", TOK_TRUE;
 		"void", TOK_VOID;
 		"while", TOK_WHILE;
+		"do", TOK_DO;
 		"break", TOK_RETURN; (* WARNING: cheating *)
 	]
 }

@@ -529,25 +529,23 @@ let rec stmt_itoa
        (pre@[A_while (dummyId, tst, body), a]@post, lenv)		 
      | _ -> raise (Invalid_argument "stmt_itoa: I_while"))
 
-
-
   | I_for_simple (e1,e2,e3,s) -> (* TODO: fix scope *)
     let (e1,lenv,pre1,post1) = exp_itoa ctx env [] [] e1 in
     let (e2,lenv,pre2,post2) = exp_itoa ctx lenv [] [] e2 in
     let (e3,lenv,pre3,post3) = exp_itoa ctx lenv [] [] e3 in
     let (s,lenv) = stmt_itoa ctx lenv s in
     (match e1,e2,e3 with
-     | A_stmt, A_boolean e2, A_stmt -> (pre1@post1@pre2@[A_while (dummyId,e2,block_itoa (post2@s@pre2@pre3@post3)),a]@post2,lenv)
-     | A_stmt, A_boolean e2, A_arithmetic (A_var _,_) -> (pre1@post1@pre2@[A_while (dummyId,e2,block_itoa (post2@s@pre2@pre3@post3)),a]@post2,lenv)
-     | A_arithmetic (A_var _,_), A_boolean e2, A_stmt -> (pre1@post1@pre2@[A_while (dummyId,e2,block_itoa (post2@s@pre2@pre3@post3)),a]@post2,lenv)
+     | A_stmt, A_boolean e2, A_stmt 
+     | A_stmt, A_boolean e2, A_arithmetic (A_var _,_) 
+     | A_arithmetic (A_var _,_), A_boolean e2, A_stmt 
      | A_arithmetic (A_var _,_), A_boolean e2, A_arithmetic (A_var _,_) -> (pre1@post1@pre2@[A_while (dummyId,e2,block_itoa (post2@s@pre2@pre3@post3)),a]@post2,lenv)		 
-     | A_stmt, A_arithmetic (A_RANDOM,ea2), A_stmt -> (pre1@post1@pre2@[A_while (dummyId,(A_MAYBE,ea2),block_itoa (post2@s@pre2@pre3@post3)),a]@post2,lenv)
-     | A_stmt, A_arithmetic (A_RANDOM,ea2), A_arithmetic (A_var _,_) -> (pre1@post1@pre2@[A_while (dummyId,(A_MAYBE,ea2),block_itoa (post2@s@pre2@pre3@post3)),a]@post2,lenv)
-     | A_arithmetic (A_var _,_), A_arithmetic (A_RANDOM,ea2), A_stmt -> (pre1@post1@pre2@[A_while (dummyId,(A_MAYBE,ea2),block_itoa (post2@s@pre2@pre3@post3)),a]@post2,lenv)
+     | A_stmt, A_arithmetic (A_RANDOM,ea2), A_stmt 
+     | A_stmt, A_arithmetic (A_RANDOM,ea2), A_arithmetic (A_var _,_) 
+     | A_arithmetic (A_var _,_), A_arithmetic (A_RANDOM,ea2), A_stmt 
      | A_arithmetic (A_var _,_), A_arithmetic (A_RANDOM,ea2), A_arithmetic (A_var _,_) -> (pre1@post1@pre2@[A_while (dummyId,(A_MAYBE,ea2),block_itoa (post2@s@pre2@pre3@post3)),a]@post2,lenv)
-     | A_stmt, A_arithmetic (A_INPUT,ea2), A_stmt -> (pre1@post1@pre2@[A_while (dummyId,(A_MAYBE_INP,ea2),block_itoa (post2@s@pre2@pre3@post3)),a]@post2,lenv)
-     | A_stmt, A_arithmetic (A_INPUT,ea2), A_arithmetic (A_var _,_) -> (pre1@post1@pre2@[A_while (dummyId,(A_MAYBE_INP,ea2),block_itoa (post2@s@pre2@pre3@post3)),a]@post2,lenv)
-     | A_arithmetic (A_var _,_), A_arithmetic (A_INPUT,ea2), A_stmt -> (pre1@post1@pre2@[A_while (dummyId,(A_MAYBE_INP,ea2),block_itoa (post2@s@pre2@pre3@post3)),a]@post2,lenv)
+     | A_stmt, A_arithmetic (A_INPUT,ea2), A_stmt 
+     | A_stmt, A_arithmetic (A_INPUT,ea2), A_arithmetic (A_var _,_) 
+     | A_arithmetic (A_var _,_), A_arithmetic (A_INPUT,ea2), A_stmt 
      | A_arithmetic (A_var _,_), A_arithmetic (A_INPUT,ea2), A_arithmetic (A_var _,_) -> (pre1@post1@pre2@[A_while (dummyId,(A_MAYBE_INP,ea2),block_itoa (post2@s@pre2@pre3@post3)),a]@post2,lenv)
      | _ -> raise (Invalid_argument "stmt_itoa: I_for_simple"))
   | I_for (decl,exp1,exp2,stmt) -> (* TODO: fix scope *)
@@ -557,11 +555,11 @@ let rec stmt_itoa
     let (e2,lenv,pre2,post2) = exp_itoa ctx lenv [] [] exp2 in
     let (stmt,lenv) = stmt_itoa ctx lenv stmt in
     (match e1,e2 with
-     | A_boolean e1, A_stmt -> (stmts@pre1@[A_while (dummyId,e1,block_itoa (post1@stmt@pre1@pre2@post2)),a]@post1,lenv)
+     | A_boolean e1, A_stmt 
      | A_boolean e1, A_arithmetic (A_var _,_) -> (stmts@pre1@[A_while (dummyId,e1,block_itoa (post1@stmt@pre1@pre2@post2)),a]@post1,lenv)
-     | A_arithmetic (A_RANDOM,ea1), A_stmt -> (stmts@pre1@[A_while (dummyId,(A_MAYBE,ea1),block_itoa (post1@stmt@pre1@pre2@post2)),a]@post1,lenv)
+     | A_arithmetic (A_RANDOM,ea1), A_stmt 
      | A_arithmetic (A_RANDOM,ea1), A_arithmetic (A_var _,_) -> (stmts@pre1@[A_while (dummyId,(A_MAYBE,ea1),block_itoa (post1@stmt@pre1@pre2@post2)),a]@post1,lenv)
-     | A_arithmetic (A_INPUT,ea1), A_stmt -> (stmts@pre1@[A_while (dummyId,(A_MAYBE_INP,ea1),block_itoa (post1@stmt@pre1@pre2@post2)),a]@post1,lenv)
+     | A_arithmetic (A_INPUT,ea1), A_stmt 
      | A_arithmetic (A_INPUT,ea1), A_arithmetic (A_var _,_) -> (stmts@pre1@[A_while (dummyId,(A_MAYBE_INP,ea1),block_itoa (post1@stmt@pre1@pre2@post2)),a]@post1,lenv)
      | _ -> raise (Invalid_argument "stmt_itoa: I_for"))
 
