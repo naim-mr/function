@@ -10,17 +10,20 @@ int ff_subtitles_next_line()
 {
     int i = rand;                   
     i = i % 1000;
+    int ret;
     if( flag == 1 )
-        return 0;
+        ret =  0;
     if( i == 0 )
     {
         flag = 1;
-        return 0;
+        ret =  0;
     }
     else if( i < 0 )
-    return -i;
+        ret = -i;
     else
-        return i;
+        ret =  i;
+
+    return ret;
 }
 
 int main()

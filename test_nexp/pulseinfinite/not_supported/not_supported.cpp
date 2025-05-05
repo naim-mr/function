@@ -43,6 +43,12 @@ void twovars_goto_not_terminate(int y) {
   goto label;
 }
 
+void loop_call_not_terminate(int y) {
+  while (y == 100)
+    fcall(y);
+  return;
+}
+
 
 
 
@@ -393,3 +399,20 @@ void iterate_crc_terminate()
 }
 
 
+/* Cook et al. 2006 - Prove termination with non-determinism involved */
+int Ack(int x, int y)
+{
+  if (x>0) {
+    int n;
+    if (y>0) {
+      y--;
+      n = Ack(x,y);
+    } else {
+      n = 1;
+    }
+    x--;
+    return Ack(x,n);
+  } else {
+    return y+1;
+  }
+}

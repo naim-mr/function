@@ -9,7 +9,7 @@ int main()
     int reg_count = rand;                   
     if( reg_count > 65534)
         return 0;
-    for( int i = 0 ; reg_count ; i++ )
+    for( int i = 0 ; reg_count != 0  ; i++ )
     {
         //loop
     }

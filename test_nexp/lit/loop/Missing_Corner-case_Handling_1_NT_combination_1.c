@@ -9,12 +9,13 @@ int flag = 0;
 int count = 0;
 int read()
 {
+    int ret;
     if( flag == 1 || count > 100 ) //whether EOF or not
-        return 0;
+        ret = 0;
     int num =  input;                  
     if( num <= 0 ) //abnormal
     {
-        return -1;
+        ret =  -1;
     }
     else
     {
@@ -22,14 +23,15 @@ int read()
         if( num < 995 ) //read a char
         {
             count++;
-            return num;
+            ret =  num;
         }
         else // EOF
         {
             flag = 1;
-            return 0;
+            ret =  0;
         }
     }
+    return ret;
 
 }
 int main()

@@ -15,7 +15,7 @@ def generate_combinations(content, pattern):
     print("---pos---")
     print(positions)
     # Generate all possible combinations of 'input' or 'rand' for each occurrence
-    replacements = list(itertools.product(['input;', 'rand;'], repeat=len(positions)))
+    replacements = list(itertools.product(['input', 'rand'], repeat=len(positions)))
     combination = []
     # Create all versions of the content based on the combinations
     for replacement in replacements:       
@@ -67,6 +67,14 @@ def process_directory(directory, pattern):
              os.remove(file_path)
         i=i+1
 # Example usage:
-directory_path = sys.argv[1]  # Set this to the path of your repository
-pattern=r'__VERIFIER_nondet_.*?\(\);'
-process_directory(directory_path, pattern)
+fod = sys.argv[1]  # Set this to the path of your repository
+print("fod "+fod)
+path = sys.argv[2]  # Set this to the path of your repository
+
+pattern=r'__VERIFIER_nondet_.*?\(\)'
+if fod == '-f': 
+    process_file(path, pattern)
+elif fod == '-d':
+    process_directory(path,pattern)
+else:
+    raise Exception("Should be -f or -d") 

@@ -7,9 +7,9 @@ termination: false
 int main()
 {
     int reg_count = input;                  
-    if( reg_count > 65534)
-        return 0;
-    for( int i = 0 ; reg_count ; i++ )
+    if( reg_count > 65534)  return 0;
+    int i;
+    for( i = 0 ; reg_count != 0  ; i++ )
     {
         //loop
     }
