@@ -8,7 +8,7 @@ suggested parameters:
 */
 
 int main() {
-  int x = ?;
+  int x = rand();
   while (x <= 100) {
     if (?)
       x = -2 * x + 2;

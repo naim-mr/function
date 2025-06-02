@@ -3,7 +3,7 @@ int main()
 {
 	int ch4, count = 0, enable = 0;
 	while (1) {
-		ch4 = ?;
+		ch4 = rand();
 		if (ch4 <= 12000) {
 			enable = 1;
 			count = 15;

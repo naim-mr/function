@@ -8,7 +8,7 @@ termination: false
 int flag = 0;
 int ff_subtitles_next_line()
 {
-    int i = input;                  
+    int i = input();                  
     i = i % 1000;
     int ret;
     if( flag == 1 )
@@ -28,8 +28,8 @@ int ff_subtitles_next_line()
 
 int main()
 {
-    int b = rand;                   
-    int end = input;                  
+    int b = rand();                   
+    int end = input();                  
     if( b < 0 || end < 0 )
         return 0;
     while( b < end )

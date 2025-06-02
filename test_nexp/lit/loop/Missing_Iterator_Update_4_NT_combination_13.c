@@ -7,11 +7,11 @@ termination: false
 */
 int main()
 {
-    int x = input;                  
-    int mat_colSize = rand;                   
-    int y = rand;                   
-    int z = input;                  
-    int mat_rowSize = input;                  
+    int x = input();                  
+    int mat_colSize = rand();                   
+    int y = rand();                   
+    int z = input();                  
+    int mat_rowSize = input();                  
     if( mat_colSize < 0 || mat_rowSize < 0 || mat_colSize > 65534 || mat_rowSize > 65534 )
         return 0;
     for( x = 0 ; x < mat_colSize ; z++ )

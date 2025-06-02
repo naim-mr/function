@@ -15,7 +15,7 @@ void hensel_tacas22_non_terminate(int x, int y)
 
 
 void main(){
-    int x = rand;                   
-    int y = rand;                   
+    int x = rand();                   
+    int y = rand();                   
     hensel_tacas22_non_terminate(x,y);
 }

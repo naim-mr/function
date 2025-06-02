@@ -8,7 +8,7 @@ void simple_loop_not_terminate(int y, int x) {
 
 
 void main(){
-    int y = rand;                   
-    int x = input;                  
+    int y = rand();                   
+    int x = input();                  
     simple_loop_not_terminate(y,x);
 }

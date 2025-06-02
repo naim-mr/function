@@ -7,28 +7,35 @@ RESET="\e[0m"
 BLUE="\e[94m"
 fill="                                                     "
 list=( 
-  #"-domain polyhedra -refine -vulnerability" 
+  #"-domain polyhedra -refine " 
+  "-domain boxes -refine " 
   "-domain boxes -refine -resilience" 
-  "-domain boxes -refine"
+  #"-domain boxes -refine -resilience -cda 2"
+  
   "-domain boxes -ordinals 3  -refine -resilience" 
   "-domain boxes -ordinals 3 -refine"
+  
+  #"-domain polyhedra -refine"
+  "-domain polyhedra -refine" 
   "-domain polyhedra -refine -resilience" 
-  "-domain polyhedra -refine"
+  #"-domain polyhedra -refine -resilience -cda 2" 
+  
   "-domain polyhedra -ordinals 3  -refine -resilience" 
   "-domain polyhedra -ordinals 3 -refine"
+  
   #"-domain polyhedra -joinbwd 5 -refine -resilience" 
   #"-domain polyhedra -joinbwd 5 -refine"
   "-domain polyhedra -joinbwd 5 -ordinals 3  -refine -resilience" 
   "-domain polyhedra -joinbwd 5 -ordinals 3 -refine"
   #"-domain boxes -joinbwd 5 -ordinals 3  -refine -resilience" 
-  #"-domain boxes -joinbwd 5 -ordinals 3 -refine"
-  #"-domain boxes -joinbwd 5 -refine -resilience" 
-  #"-domain boxes -joinbwd 5 -refine"
-  #"-domain polyhedra -joinbwd 8 -refine -resilience" 
-  #"-domain polyhedra -joinbwd 8 -refine"
+  # #"-domain boxes -joinbwd 5 -ordinals 3 -refine"
+  # #"-domain boxes -joinbwd 5 -refine -resilience" 
+  # #"-domain boxes -joinbwd 5 -refine"
+  # #"-domain polyhedra -joinbwd 8 -refine -resilience" 
+  # #"-domain polyhedra -joinbwd 8 -refine"
   "-domain polyhedra -joinbwd 8 -ordinals 3  -refine -resilience" 
   "-domain polyhedra -joinbwd 8 -ordinals 3 -refine"
-  #"-domain boxes -joinbwd 8 -ordinals 3  -refine -resilience" 
+  # #"-domain boxes -joinbwd 8 -ordinals 3  -refine -resilience" 
   #"-domain boxes -joinbwd 8 -ordinals 3 -refine"
   #"-domain boxes -joinbwd 8 -refine -resilience" 
   #"-domain boxes -joinbwd 8 -refine"
@@ -103,6 +110,8 @@ max_time="120s"
 # Pattern for failure in log
 patt_robust="Potentially vulnerable:"
 patt_assert="Final Analysis Result: UNKNOWN"
+patt_assert_proton="FALSE(TERM)"
+patt_unknow_proton="UNKNOWN"
 
 # Pattern for expected failure in file
 patt_ko=".*//@KO"
@@ -294,6 +303,121 @@ treat_file() {
   echo "</a>" >> $index_html
 }
 
+
+
+
+
+treat_file_proton() {
+  file=$1
+  log=$2
+  expected_folder=$3
+  need_new_line=true
+  #for now it's not use could be use if we do a forward safety analysis
+  sound_loc=0
+  compl_loc=0
+  #color for print (to move as global)
+  col_sound="blue"
+  col_compl="gray"
+  # then, we compute the failed assertions
+  nb_failures=$(grep "${patt_assert_proton}" $log| wc -l)
+  nb_vars=$(grep "environnment" $log | cut -c14- | sed s/"$."/""/g )
+  failuresnr=$(grep -A 1  "${patt_assert_proton}" $log)
+  nb_unknown=$(grep "${patt_assert_proton}" $log| wc -l)
+  failureun=$(grep -A 1  "${patt_assert_proton}" $log)
+  #echo "<p><span style=\"color: blue;\">Expected failure lines:</span> ${expected} </p>" >> $file_html
+  #echo "<p><span style=\"color: blue;\">Failure lines:</span> ${vulnerabilities} </p>" >> $file_html
+
+  # THIS PARS WILL BE NECESSARY IF WE WANT TO USE EXPECTED RESULTS
+  #     Soundness part: for line number in expected,
+  #     we search for it in failures
+      #  for nb in `seq 1 $nb_expected`;
+      #  do
+      #    cmd="echo \"${expected}\" | head -${nb} | tail -1"
+      #    line_nb=$(eval "${cmd}")
+      #    echo "${failuresnr}" | grep -q "^${line_nb}$"
+      #    found=$?
+      #    if [[ $found -ne 0 ]]
+      #    then
+      #      line=$(get_nth_line $line_nb $file)
+      #     col_sound="red"
+	    #  	  soundness=$((soundness+1))
+	    #  	  sound_loc=$((sound_loc+1))
+      #     # if [ "$need_new_line" = true ]
+      #     # then
+      #     #   echo -e "\n${BOLD}${RED} SOUNDNESS ERRORS${RESET}"
+      #     #   need_new_line=false
+      #     # else
+      #     #   #echo -e "${BOLD}${RED} SOUNDNESS ERRORS${RESET}"
+      #     # fi
+      #      #echo -e "${RED}missing fail assertions:${RESET}${line}"
+      #      echo "<p>${line_nb}<span style=\"color: red;\">${line}</span></p>" >> $file_html
+      #    fi
+      #  done
+  #     Completness part: for each line number in failures,
+  #     we search for it in expected
+       for nb in `seq 1 $nb_failures`;
+       do
+         cmd="echo \"${failuresnr}\" | head -${nb} | tail -1"
+         line_nb=$(eval "${cmd}")
+         echo "${expected}" | grep -q "^${line_nb}$"
+         found=$?
+         if [[ $found -ne 0 ]]
+         then
+	     	  completness=$((completness+1))
+	     	  compl_loc=$((compl_loc+1))
+          line=$(grep "${patt_assert_proton}" $log | head -${nb} | tail -1)
+           #if [ "$need_new_line" = true ]
+           #then
+           #  #echo -e "\n${BOLD}${BLUE} COMPLETNESS ERROR${RESET}"
+           #  need_new_line=false
+           ##else
+           #  #echo -e "${BOLD}${RED} COMPLETNESS ERROR${RESET}"
+           #fi
+           #echo -e "${BLUE}unexpected fail assertions:${RESET} ${line}"
+           #echo "<p><span style=\"color: blue;\">${line}</span></p>" >> $file_html
+         fi
+       done
+       
+  # Start writing log in the dedicated html file
+  echo "<h3>LOG</h3>" >> $file_html
+  
+  echo "<pre>" >> $file_html
+  cat $log >> $file_html
+  echo "</pre>" >> $file_html
+  if [ "$need_new_line" = false ]
+  then
+    echo -e ""
+  fi
+
+  echo -n "<a href=\"../${log}\" target=\"_parent\">" >> $index_html
+  echo -n "<a href=\"../${log}\" target=\"_parent\">" >> $index_html
+  # Number of vulnerable and non-vulnerable variables
+  lenu=${#vulnerabilities[@]}
+  lenc=${#safe[@]}
+    
+  if (( $compl_loc > 0));
+  then
+    # Here the analysis lack precision
+    echo -n "<span style=\"color: red;\">FALSE</span>" >> $index_html
+    echo "FALSE"
+  else
+    if (( $nb_unknown > 0));
+    then
+      echo -n "<span style=\"color: ${col_compl};\">UNKNOWN</span>" >> $index_html
+      echo "UNKNOWN"
+    else
+    # Property has been inferred !!
+      echo -n "<span style=\"color: ${col_sound};\">TRUE</span>" >> $index_html
+      echo "TRUE"
+    fi
+    
+  fi
+  echo "</a>" >> $index_html
+  echo "</a>" >> $index_html
+}
+
+
+
 min(){
   arg1=$1
   arg2=$2
@@ -321,9 +445,9 @@ treat_examples() {
   # Time global per analysis and per options
   elapsed_glob=("${list[@]/*/0}")
   fileidx=0
-  folder="test_nexp/"
+  folder=$1
   bench_name=$2 
-  expected_folder=$3             # subfolder containing expected result
+  expected_folder=$3             # subfolder containg expected result
   bench_regexp="${folder}/*.c"
 
   nb_file=$(find $folder -iname "*.c" | wc -l)
@@ -349,10 +473,10 @@ treat_examples() {
   do
     echo "<td><strong>${list[i]}</strong></td>" >> $index_html
   done
-  
-  # Column title: number of vulns
-  echo "<td><strong> Number of vulnerabilities </strong></td>" >> $index_html
-  echo "</tr>" >> $index_html
+  echo "<td><strong> UAutomizer </strong></td>" >> $index_html
+  # # Column title: number of vulns
+  # echo "<td><strong> Number of vulnerabilities </strong></td>" >> $index_html
+  # echo "</tr>" >> $index_html
   # Iterate analysis on all files 
 	for file in $(find "${folder}" -iname "*.c" | sort)
 	do
@@ -386,6 +510,7 @@ treat_examples() {
     echo -n "$filename & $proptex \\\\
             "  >> $prop_tex
     # Iterate on analysis options
+    
     for opt in "${list[@]}"
     do
       opt_replaced=$(echo "${opt}" | sed "s/ /_/g")
@@ -489,13 +614,42 @@ treat_examples() {
       index=$(($index+1))
       solvopt=$(($solvopt + 1))
       # create csv files with the result
-      echo "$filename,$prop,$opt,$res,$loc,$subst,$nb_alarm">> $stats_csv
+      echo "$bench_name,$filename,$prop,$opt,$res,$loc,$subst,$nb_alarm">> $stats_csv
    done   
+    echo "<td>" >> $index_html
+    start_time=$(date +%s.%3N)
+    timeout $max_time "script/UAuomizer-linux/Ultimate.py" "--spec" "script/UAutomizer-linux/termination.prp"  "--file" $file "--architecture" "64bit"   > $log 2>&1
+    out=$?
+    end_time=$(date +%s.%3N)
+    subst=$(echo "scale=3; $end_time - $start_time" | bc)
+    if [[ $out -eq 124 ]]
+      then
+        timeout=$((timeout+1))
+        res="TO"
+        echo "<a href=\"../${log}\"><span style=\"color: red;\">TO</span></a>" >> $index_html
+        echo -n "\textcolor{red}{TO} " >> $index_tex
+        echo -e "\n  ${BOLD}${RED}TO ${RESET}\n"
+      elif [[ $out -ne 0 ]]
+      then
+        res="FAIL"
+        failure=$((failure+1))
+        echo "<a href=\"../${log}\"><span style=\"color: red;\">FAIL</span></a>" >> $index_html
+        echo -n "\textcolor{red}{FAIL}  " >> $index_tex
+      else
+        # res = TRUE OR UNKNOWN i.e. result of the CTL analysis 
+        res=$(treat_file_proton $file $log $expected_folder)
+      fi
+      if (($solvopt + 1 < ${#list[@]})) 
+      then
+          echo -n  " & " >> $index_tex
+      fi   
+      echo "</td>" >> $index_html
    echo "<td> ${nb_of_vuln[$fileidx]} </td>" >> $index_html
    fileidx=$(($fileidx + 1))
-   
+   echo "$filename,$prop,UAutomizer,$res,$loc,$subst,$nb_alarm">> $stats_csv
+  done
+  
 
-	done
 
   # echo "<tr><th></th>" >> $index_html
   # # for i in "${!total_glob[@]}";
@@ -559,7 +713,7 @@ done
 echo "},
       hlines,
       vlines
-      }
+      }ma
      " >> $index_tex
 echo -n "\textbf{Filename} &" >> $index_tex
 for i in "${!list[@]}";
@@ -572,12 +726,14 @@ do
   fi
 done
 # Create a csv file
-echo "filename,property,options,result,loc,time,alarms" > $stats_csv
+echo "group,filename,property,options,result,loc,time,alarms" > $stats_csv
 total=$(find $bench -iname "*.c" | wc -l)
 solved=0
 
-treat_examples "termination" "Termination"  ""
-
+treat_examples "test_nexp/pulseinfinite" "Pulse" "Pulse"  ""
+treat_examples "test_nexp/lit/loop/" "EndWatch" "Endwatch"  ""x
+treat_examples "test_nexp/sv_comp/" "SvComp" "SV-COMP"  ""
+treat_examples "test_nexp/svcomp-nla/" "SvComp-nla" "SV-COMP-NLA-PULSE"  ""
 
 
 echo "\end{longtblr}" >> $index_tex 

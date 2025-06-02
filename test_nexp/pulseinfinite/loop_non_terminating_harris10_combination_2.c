@@ -17,8 +17,8 @@ void loop_non_terminating_harris10(int x, int d, int z)
 
 void main(){
     int x,d,z;
-    x = input;                  
-    d = input;                  
-    z = rand;                   
+    x = input();                  
+    d = input();                  
+    z = rand();                   
     loop_non_terminating_harris10(x,d,z);
 }

@@ -7,8 +7,8 @@ termination: false
 int main()
 {
     int i,j;
-    int num_crtc = input;                  
-    int num_output = rand;                   
+    int num_crtc = input();                  
+    int num_output = rand();                   
     if( num_crtc > 65534 || num_output > 65534 )
         return 0;
     for( i = 0 ; i < num_crtc ; i++ )

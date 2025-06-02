@@ -14,10 +14,10 @@ int main() {
       x1 = x1 - 1;
     } else if (?) {
       x2 = x2 - 1;
-      x3 = ?;
+      x3 = rand();
     } else {
       x3 = x3 - 1;
-      x1 = ?;  	
+      x1 = rand()  	
     }
   return 0;
 }

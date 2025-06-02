@@ -218,7 +218,7 @@ let rec bwdStm ?property ?domain funcs env vars (p,r,flag) s tvl =
       let joinType = if (taint || not !Config.resilience) then 
                         APPROXIMATION 
                      else
-                        RESILIENCE (* resilience *)
+                        APPROXIMATION (* resilience *)
       in
       (D.join joinType p1 p2, r, flag1 || flag2)
       | A_while (l, (b, ba), s) ->

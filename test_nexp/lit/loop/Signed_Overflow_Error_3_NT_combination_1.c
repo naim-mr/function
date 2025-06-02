@@ -5,7 +5,7 @@ termination: false
 */
 int main()
 {
-    int number = input;                  
+    int number = input();                  
     int i, width;
     width = 1;
     for (i = 10 ; i <= number ; width++ )

@@ -6,8 +6,8 @@ termination: false
 */
 int main()
 {
-    // unsigned char l = rand;                     
-    int l = input;                    
+    // unsigned char l = rand();                     
+    int l = input();                    
     while( l-- )
     {
         if( l-- )

@@ -13,7 +13,7 @@ void nestedloop2_nonterminate_chen14(int k, int j) {
 
 void main(){
     int k,j;
-    k = input;                  
-    j = input;                  
+    k = input();                  
+    j = input();                  
     nestedloop2_nonterminate_chen14(k,j);
 }

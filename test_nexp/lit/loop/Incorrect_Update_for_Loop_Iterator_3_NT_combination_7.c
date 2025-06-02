@@ -8,9 +8,9 @@ termination: false
 
 int main()
 {
-    int nfds = rand;                   
-    int nr = rand;                   
-    int NR_OPEN = input;                  
+    int nfds = rand();                   
+    int nr = rand();                   
+    int NR_OPEN = input();                  
     while( nfds <= nr )
     {
         nfds = nfds * 2;

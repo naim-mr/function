@@ -15,6 +15,6 @@ void nondet_loop_non_terminate(int z)
 
 
 void main(){
-    int z = input;                  
+    int z = input();                  
     nondet_loop_non_terminate(z);
 }

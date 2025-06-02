@@ -4,7 +4,7 @@
 /* Pulse-inf: works good (also flag the bug) */
 /* TO me: there is no bug here! problem in chen14 paper - the nondet() should eventually make it break */
 //#include <stdlib.h>
-//int	nondet() { return (rand()); }
+//int	nondet() { return (rand()()); }
 void nondet_nonterminate_chen14(int k, int i) {
   if (k >= 0)
     ;
@@ -20,7 +20,7 @@ void nondet_nonterminate_chen14(int k, int i) {
 
 void main(){
     int k,i;
-    k = rand;                   
-    i = rand;                   
+    k = rand();                   
+    i = rand();                   
     nondet_nonterminate_chen14(k,i);
 }

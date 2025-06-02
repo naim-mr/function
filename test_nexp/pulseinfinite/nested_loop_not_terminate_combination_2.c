@@ -16,6 +16,6 @@ void nested_loop_not_terminate(int y) {
 
 
 void main(){
-    int y = rand;                    
+    int y = rand();                    
     nested_loop_not_terminate(y);
 }

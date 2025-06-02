@@ -23,7 +23,7 @@ void main() {
   while(?) {
     r = 1;
     a = 0;
-    n = ?;
+    n = rand();
     while(n>0) {
       n--;
     }

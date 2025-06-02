@@ -12,6 +12,6 @@ void loop_conditional_not_terminate(int y) {
 }
 
 void main(){
-    int y = rand;                   
+    int y = rand();                   
     loop_conditional_not_terminate(y);
 }

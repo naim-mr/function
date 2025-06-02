@@ -12,7 +12,7 @@ void main() {
   while (x > 0 && y > 0)
     if (?) {
       x = x - 1;
-      y = ?;
+      y = rand();
     } else
       y = y - 1;
 }

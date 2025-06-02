@@ -6,9 +6,9 @@ termination: false
 */
 int main()
 {
-    int max_msg_size = input;                  
-    int buffer_read_offset = rand;                   
-    int buffer_bytes_left = rand;                   
+    int max_msg_size = input();                  
+    int buffer_read_offset = rand();                   
+    int buffer_bytes_left = rand();                   
     if( max_msg_size < -1 || buffer_read_offset <= 0 || buffer_bytes_left < 0 )
         return 0;
     int size = 64;

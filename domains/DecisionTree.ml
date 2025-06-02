@@ -1029,11 +1029,9 @@ struct
         | Bot,_ -> t2
         | Leaf f1,Leaf f2 ->
           let b = match pre with | None -> B.inner env vars cs | Some pre -> B.meet (B.inner env vars cs) pre in
-          let joinType = if underapprox && not (!resilience) then COMPUTATIONAL else
-                         if taint  || not (!resilience) then
-                           APPROXIMATION 
-                          else 
-                           RESILIENCE
+          let joinType = if underapprox && not (!resilience)
+                         then COMPUTATIONAL
+                         else APPROXIMATION
           in                               
           Leaf (F.join ~random:!random joinType b f1 f2)
         | Node ((c1,nc1),l1,r1),Node((c2,nc2),l2,r2) when (C.isEq c1 c2) ->
@@ -1090,6 +1088,7 @@ struct
                    (c, nc)
                 ) 
             in 
+            
             (match c, nc with
              | [],[] -> merge ( aux l cs) (aux r cs) cs
              | [],[y] when (C.isBot y) -> aux l cs
@@ -1227,7 +1226,7 @@ struct
                         if taint then  
                           APPROXIMATION 
                          else 
-                          RESILIENCE
+                          APPROXIMATION
                       else 
                         APPROXIMATION 
       in          

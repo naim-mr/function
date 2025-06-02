@@ -13,7 +13,7 @@ int main() {
     if (x1 > 0) {
       if (?) {
         x1 = x1 - 1;
-        x2 = ?;
+        x2 = rand();
       } else
         x2 = x2 - 1;
     } else {
@@ -21,7 +21,7 @@ int main() {
         x1 = x1 + 1;
       else {
         x2 = x2 - 1;
-        x1 = ?;
+        x1 = rand();
       }
     }
   return 0;

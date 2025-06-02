@@ -12,7 +12,7 @@ int read()
     int ret ;
     if( flag == 1 || count > 100 ) //whether EOF or not
         ret = 0;
-    int num =  rand;                   
+    int num =  rand();                   
     if( num <= 0 ) //abnormal
     {
         ret =  -1;

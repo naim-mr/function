@@ -7,7 +7,7 @@ termination: false
 int main()
 {
     int i,j;
-    int num = input;                  
+    int num = input();                  
     if( num > 65534 )
         return 0;
     for( i = 0 ; i < num ; i++ )

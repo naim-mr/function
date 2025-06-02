@@ -18,7 +18,7 @@ void loop_alternating_not_terminate(int y, int x) {
 
 
 void main(){
-    int x = input;                  
-    int y = rand;                   
+    int x = input();                  
+    int y = rand();                   
     loop_alternating_not_terminate(y,x);
 }

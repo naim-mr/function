@@ -1,7 +1,13 @@
 void main () {
-int x,y,z;
-while( y > z ){ 
-    y = y - x;
-}
-// error
+  int x,z,c;
+  x = input();
+  c =[-2,1];
+  while(z >= x){
+    z = z + c;
+  }
+    
+  
+    
+
+  
 }

@@ -215,7 +215,7 @@ struct
       let res = 
         let f = ref [] in
         match k with 
-        | RESILIENCE  ->  
+        | _ when random && !Config.resilience  ->  
           (* When resilience join is on we need to underapproximate f1 and f2*)   
           filter_constraints f (Abstract1.to_lincons_array manager p1);
           filter_constraints f (Abstract1.to_lincons_array manager p2);
@@ -243,22 +243,22 @@ struct
       in res
     | Bot,_ ->
       (match k with
-       | APPROXIMATION  -> Bot
-       | COMPUTATIONAL -> f2
-       | RESILIENCE when random -> f2
-       | RESILIENCE -> Bot)
+      | _ when random && !Config.resilience ->  f2 
+      | APPROXIMATION  -> Bot
+      | COMPUTATIONAL -> f2
+      |RESILIENCE ->  Bot)
     | _,Bot ->
       (match k with
+       | _ when random && !Config.resilience -> f1 
        | APPROXIMATION -> Bot
        | COMPUTATIONAL -> f1
-       | RESILIENCE when random -> f1
        | RESILIENCE -> Bot )
     | Fun f, Top | Top, Fun f -> 
       (match k with
+       | _ when random && !Config.resilience -> Fun f
        | APPROXIMATION -> Top
        | COMPUTATIONAL -> Top
-       | RESILIENCE when random -> Printf.printf "bah je suis pas ici ?\n " ;Fun f
-       | RESILIENCE ->  Printf.printf "pourtant random doit être àà true ? %b " random  ;Top)
+       | RESILIENCE ->  Top)
     | _ -> Top
 
   let join ?(random=false) k b f1 f2 = { ranking = join_ranking ~random:random k b f1.ranking f2.ranking; env = f1.env; vars = f1.vars }

@@ -5,7 +5,7 @@ termination: false
 */
 int main()
 {
-    int number = rand;                   
+    int number = rand();                   
     int i, width;
     width = 1;
     for (i = 10 ; i <= number ; width++ )

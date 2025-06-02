@@ -10,7 +10,7 @@ suggested parameters:
 void main() {
   int x;
   while (true) {
-    x = ?;
+    x = rand();
     while (x != 0) {
       if (x > 0)
         x = x - 1;

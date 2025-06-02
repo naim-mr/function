@@ -10,8 +10,8 @@ int main() {
     int x;
     int y;
     // y = 1;
-    // i = ?;
-    // x = ?;
+    // i = rand();
+    // x = rand();
 
     if (i > 10) {
         x = 1;

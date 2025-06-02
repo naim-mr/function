@@ -6,9 +6,9 @@ termination: false
 */
 int main()
 {
-    int h = rand;                   
-    int hash = rand;                   
-    int rehash = rand;                   
+    int h = rand();                   
+    int hash = rand();                   
+    int rehash = rand();                   
     if( h < 0 || hash <= 0 || rehash <= 0 || rehash > hash)
         return 0;
     int i = h % hash;

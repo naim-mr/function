@@ -543,4 +543,4 @@ echo "\end{longtblr}" >> $prop_tex
 cat $prop_tex >> $index_tex
 echo "</body>"                                    >> $index_html
 echo "</html>"                                    >> $index_html
-print_end
+print_end 

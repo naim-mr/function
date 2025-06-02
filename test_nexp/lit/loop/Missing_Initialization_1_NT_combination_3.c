@@ -6,12 +6,12 @@ termination: false
 int main()
 {
     int res = 0;
-    int pkt = rand;                   
+    int pkt = rand();                   
     while( pkt < 10 )
     {
         while( res == 0 )
         {
-            res = input;                  
+            res = input();                  
             pkt++;
         }
     }
