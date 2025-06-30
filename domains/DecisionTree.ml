@@ -1021,7 +1021,7 @@ struct
     let post = t.domain in
     let env = t.env in
     let vars = t.vars in
-    let random = ref (snd e = AbstractSyntax.A_RANDOM) in 
+    let random = ref (match snd e with AbstractSyntax.A_RANDOM -> true |  AbstractSyntax.A_interval (c1,c2) -> true | _ -> false) in 
     let merge t1 t2 cs =
       let rec aux (t1,t2) cs =
         match t1,t2 with

@@ -400,22 +400,22 @@ let rec bwdStm ?property ?domain funcs env vars (p,r,flag) s tvl =
             Format.printf "%a: %s\n" label_print l (List.fold_left (fun  acc x -> acc^" "^x.varName) "" a)) !fwdTaintMap
       end;
     (* Backward Analysis *)
-    let block_label block = 
+    (* let block_label block = 
       match block with
         | A_empty l -> l
         | A_block (l,_,_) -> l
-    in
+    in *)
     if !tracebwd && not !minimal then
       Format.fprintf !fmt "\nBackward Analysis Trace:\n";
     start := Sys.time ();
     let startbwd = Sys.time () in
     let i = bwdRec funcs env vars (bwdRec funcs env vars (D.zero env vars) s) stmts in
-    let i = 
+    (* let i = 
       if !resilience then
        D.merge_after (List.fold_left (fun i x -> D.bwdAssign i (AbstractSyntax.A_var  x, A_RANDOM )) i (InvMap.find (block_label f.funcBody) !fwdTaintMap))
       else 
         i
-    in
+    in *)
     let stopbwd = Sys.time () in
     if not !minimal then begin
       if !timebwd then

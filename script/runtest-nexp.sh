@@ -105,7 +105,7 @@ soundness=0
 
 
 # max time allowed
-max_time="120s"
+max_time="30s"
 
 # Pattern for failure in log
 patt_robust="Potentially vulnerable:"
