@@ -28,79 +28,28 @@ struct
   module B = D.B
   
   module ForwardIteratorB = ForwardIterator(B)
+  
   let dummy_prop = Exp (StringMap.empty)
   let fwdInvMap = ref InvMap.empty
   let fwdTaintMap = ref InvMap.empty
-  let addFwdInv l (a:B.t) = fwdInvMap := InvMap.add l a !fwdInvMap
+  
+  (* let addFwdInv l (a:B.t) = fwdInvMap := InvMap.add l a !fwdInvMap
   let fwdMap_print fmt m fprint = InvMap.iter (fun l a -> 
       Format.fprintf fmt "%a: %a\n" label_print l fprint a) m
   let fwdMap_print fmt m fprint = InvMap.iter (fun l a -> 
-        Format.fprintf fmt "%a: %a\n" label_print l fprint a) m
+        Format.fprintf fmt "%a: %a\n" label_print l fprint a) m *)
+
   let bwdInvMap = ref InvMap.empty
+  
   let addBwdInv l (a:D.t) = bwdInvMap := InvMap.add l a !bwdInvMap
   let bwdMap_print fmt m = InvMap.iter (fun l a -> 
       Format.fprintf fmt "%a: %a\n" label_print l D.print a) m
-
-  (* Forward Iterator *)
-  let rec fwdStm funcs env vars p s =
-    match s with
-    | A_label _ -> p
-    | A_return -> B.bot env vars
-    | A_assign ((l,_),(e,_)) -> B.fwdAssign p (l,e)
-    | A_assert (b,_) -> B.filter p b
-    | A_if ((b,ba),s1,s2) ->
-      let p1' = fwdBlk funcs env vars (B.filter p b) s1 in
-      let p2 = B.filter p (fst (negBExp (b,ba))) in
-      let p2' = fwdBlk funcs env vars p2 s2 in
-      B.join p1' p2'
-    | A_while (l,(b,ba),s) ->
-      let rec aux i p2 n =
-        let i' = B.join p p2 in
-        if !tracefwd && not !minimal then begin
-          Format.fprintf !fmt "### %a:%i ###:\n" label_print l n;
-          Format.fprintf !fmt "p1: %a\n" B.print p;
-          Format.fprintf !fmt "i: %a\n" B.print i;
-          Format.fprintf !fmt "p2: %a\n" B.print p2;
-          Format.fprintf !fmt "i': %a\n" B.print i'
-        end;
-        if B.isLeq i' i then i else
-          let i'' = if n <= !joinfwd then i' else 
-              B.widen i (B.join i i') in
-          if !tracefwd && not !minimal then
-            Format.fprintf !fmt "i'': %a\n" B.print i'';
-          aux i'' (fwdBlk funcs env vars (B.filter i'' b) s) (n+1)
-      in
-      let i = B.bot env vars in
-      let p2 = fwdBlk funcs env vars (B.filter i b) s in
-      let p = aux i p2 1 in
-      addFwdInv l p; B.filter p (fst (negBExp (b,ba)))
-    | A_call (f,ss) ->
-      let f = StringMap.find f funcs in
-      let p = List.fold_left (fun ap (s,_) -> 
-          fwdStm funcs env vars p s) p ss in
-      fwdBlk funcs env vars p f.funcBody
-    | A_recall (f,ss) -> B.top env vars (* TODO *)
-
-  and fwdBlk funcs env vars (p:B.t) (b:block) : B.t =
-    let result_print l p =
-      Format.fprintf !fmt "### %a ###: %a\n" label_print l B.print p
-    in
-    match b with
-    | A_empty l ->
-      if !tracefwd && not !minimal then result_print l p;
-      addFwdInv l p; p
-    | A_block (l,(s,_),b) ->
-      if !tracefwd && not !minimal then result_print l p;
-      addFwdInv l p; 
-      fwdBlk funcs env vars (fwdStm funcs env vars p s) b
-
   
-  (*  Taint forward analysis *)
-  let addFwdTaint l (a:var list) = fwdTaintMap := InvMap.add l a !fwdTaintMap 
   (* Join of two list*)
   let join l1 l2 = 
     let l = l1 @ l2 in 
     List.sort_uniq (fun x y -> String.compare x.varId y.varId) l
+  
   (* List of vars in an expression *)
   let avars (e,ext) =
       let rec aux e acc = 
@@ -111,7 +60,8 @@ struct
       | A_abinary (_,(a1,_), (a2,_)) -> aux a1 acc @ aux a2 acc 
       in 
       aux e []
-  (* Test if a boolean expression is taint *)
+
+  (* Test if a boolean expression is taint
   let taint_b (e,ext) tvl =
       let rec aux e  = 
         match e with
@@ -190,7 +140,10 @@ struct
         let p' = (fwdTStm funcs env vars p s) in 
         addFwdTaint l p; 
         fwdTBlk funcs env vars p' b
- 
+  *)
+
+
+
  (*Backward Iterator + Recursion *)
 let rec bwdStm ?property ?domain funcs env vars (p,r,flag) s tvl =
     match s with
@@ -206,7 +159,7 @@ let rec bwdStm ?property ?domain funcs env vars (p,r,flag) s tvl =
       D.filter ?domain:domain p b, r, flag
     | A_if ((b,ba),s1,s2) ->
       let uap = false in
-      let taint = (taint_b (b,ba) tvl && !Config.resilience) in
+      let taint = (ForwardIteratorB.taint_b (b,ba) tvl && !Config.resilience) in
       let (p1, _, flag1) = bwdBlk funcs env vars (p, r, flag) s1 in
       let p1 = D.filter ?domain:domain ~taint:taint ~underapprox:uap p1 b in					
       let (p2, _, flag2) = bwdBlk funcs env vars (p, r, flag) s2 in
@@ -385,8 +338,8 @@ let rec bwdStm ?property ?domain funcs env vars (p,r,flag) s tvl =
     if !tracefwd && not !minimal then
       Format.fprintf !fmt "\nForward Analysis Trace:\n";
     let startfwd = Sys.time () in
-    let _ = fwdBlk funcs env vars (fwdBlk funcs env vars (B.top env vars) stmts) s in
-    let _ =  fwdTBlk  funcs env vars (fwdTBlk funcs env vars vars stmts) s in  
+    let _ = ForwardIteratorB.fwdBlk funcs env vars (ForwardIteratorB.fwdBlk funcs env vars (B.top env vars) stmts) s in
+    let _ =  ForwardIteratorB.fwdTBlk  funcs env vars (snd @@ ForwardIteratorB.fwdTBlk funcs env vars vars stmts) s in  
     let stopfwd = Sys.time () in
     if not !minimal then
       begin
@@ -394,7 +347,7 @@ let rec bwdStm ?property ?domain funcs env vars (p,r,flag) s tvl =
           Format.fprintf !fmt "\nForward Analysis (Time: %f s):\n" (stopfwd-.startfwd)
         else
           Format.fprintf !fmt "\nForward Analysis numerical:\n";
-          fwdMap_print !fmt !fwdInvMap (B.print);
+          ForwardIteratorB.fwdMap_print !fmt !fwdInvMap (B.print);
           Format.fprintf !fmt "\nForward Analysis taint: size %d\n" (InvMap.cardinal !fwdTaintMap);
           InvMap.iter (fun l a -> 
             Format.printf "%a: %s\n" label_print l (List.fold_left (fun  acc x -> acc^" "^x.varName) "" a)) !fwdTaintMap
