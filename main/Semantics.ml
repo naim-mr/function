@@ -11,7 +11,7 @@ open CTLProperty
 open Domain
 
 type ctl_property = AbstractSyntax.bExp CTLProperty.generic_property
-type 'a p = Ctl of ctl_property | Exp of   (bExp*'a) StringMap.t
+type 'a p = Ctl of ctl_property | Exp of (bExp*'a) StringMap.t
 
 
 let get_ctl prop = match prop with

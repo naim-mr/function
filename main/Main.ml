@@ -14,9 +14,6 @@ open Semantics
 
 
 
-(* parsing *)
-
-
 let parseFile filename =
   let f = open_in filename in
   let lex = Lexing.from_channel f in
@@ -122,7 +119,7 @@ let parseCTLPropertyString_plain (property:string) =
 let parseCTLPropertyString (property:string) =
     CTLProperty.map (fun p -> fst (parsePropertyString p)) @@ parseCTLPropertyString_plain property 
 
-    let is_keyword = function
+let is_keyword = function
     | "-domain" 
     | "-timeout"
     | "-joinfwd"
@@ -155,7 +152,6 @@ let parseCTLPropertyString (property:string) =
     | "-resilience" -> true
     | _ -> false
     
-
 let parse_args () =
   let rec doit args =
     match args with
@@ -177,18 +173,18 @@ let parse_args () =
       Config.ordinals := true; Ordinals.max := int_of_string x; doit r
     | "-refine"::r -> (* refine in backward analysis *)
       Config.refine := true; doit r
-    | "-retrybwd"::x::r ->
+    | "-retrybwd"::x::r -> (* TOC *)
       Config.retrybwd := int_of_string x;
       doit r
     | "-tracefwd"::r -> (* forward analysis trace *)
       Config.tracefwd := true; doit r
     | "-tracebwd"::r -> (* backward analysis trace *)
       Config.tracebwd := true;
-      CFGInterpreter.trace := true;
-      CFGInterpreter.trace_states := true;
+      CFGInterpreter.trace := true;  (* TOC *)
+      CFGInterpreter.trace_states := true; (* TOC *)
       doit r
     (* Conflict driven analysis arguments -------------------------------------------------*)
-    | "-cda"::x::r -> 
+    | "-cda"::x::r ->  (* TOC *)
       Config.cda := true;
       Config.size :=  int_of_string x;
       Config.refine := true;
@@ -203,7 +199,6 @@ let parse_args () =
       Config.analysis := "recurrence";Config.property := x; doit r
     | "-time"::r -> (* track analysis time *)
       Config.time := true; doit r
-    
     | "-timefwd"::r -> (* track forward analysis time *)
       Config.timefwd := true; doit r
     | "-timebwd"::r -> (* track backward analysis time *)
@@ -227,10 +222,11 @@ let parse_args () =
       Config.noinline := true; doit r
     | "-vulnerability"::r -> 
       Config.vulnerability := true; doit r
-      | "-resilience"::r -> (* resilience analysis *)
+    | "-resilience"::r -> (* resilience analysis *)
       Config.resilience := true; doit r
     | "-output_std"::r -> 
       Config.output_std := true; doit r
+    (* TOC *)
     | "-json_output"::x::r  when not (is_keyword x)->
       Config.json_output := true; output_dir :=x; time:=true
     | "-json_output"::r -> 
@@ -242,66 +238,10 @@ let parse_args () =
 
 (* do all *)
 
-module TerminationBoxes =
-  TerminationIterator.TerminationIterator(DecisionTree.TSAB)
-module TerminationBoxesOrdinals =
-  TerminationIterator.TerminationIterator(DecisionTree.TSOB)
-module TerminationOctagons =
-  TerminationIterator.TerminationIterator(DecisionTree.TSAO)
-module TerminationOctagonsOrdinals =
-  TerminationIterator.TerminationIterator(DecisionTree.TSOO)
-module TerminationPolyhedra =
-  TerminationIterator.TerminationIterator(DecisionTree.TSAP)
-module TerminationPolyhedraOrdinals =
-  TerminationIterator.TerminationIterator(DecisionTree.TSOP)
-
-module GuaranteeBoxes =
-  GuaranteeIterator.GuaranteeIterator(DecisionTree.TSAB)
-module GuaranteeBoxesOrdinals =
-  GuaranteeIterator.GuaranteeIterator(DecisionTree.TSOB)
-module GuaranteeOctagons =
-  GuaranteeIterator.GuaranteeIterator(DecisionTree.TSAO)
-module GuaranteeOctagonsOrdinals =
-  GuaranteeIterator.GuaranteeIterator(DecisionTree.TSOO)
-module GuaranteePolyhedra =
-  GuaranteeIterator.GuaranteeIterator(DecisionTree.TSAP)
-module GuaranteePolyhedraOrdinals =
-  GuaranteeIterator.GuaranteeIterator(DecisionTree.TSOP)
-
-module RecurrenceBoxes =
-  RecurrenceIterator.RecurrenceIterator(DecisionTree.TSAB)
-module RecurrenceBoxesOrdinals =
-  RecurrenceIterator.RecurrenceIterator(DecisionTree.TSOB)
-module RecurrenceOctagons =
-  RecurrenceIterator.RecurrenceIterator(DecisionTree.TSAO)
-module RecurrenceOctagonsOrdinals =
-  RecurrenceIterator.RecurrenceIterator(DecisionTree.TSOO)
-module RecurrencePolyhedra =
-  RecurrenceIterator.RecurrenceIterator(DecisionTree.TSAP)
-module RecurrencePolyhedraOrdinals =
-  RecurrenceIterator.RecurrenceIterator(DecisionTree.TSOP)
-
-module CTLBoxes = CTLIterator.CTLIterator(DecisionTree.TSAB)
-module CTLBoxesOrdinals = CTLIterator.CTLIterator(DecisionTree.TSOB)
-module CTLOctagons = CTLIterator.CTLIterator(DecisionTree.TSAO)
-module CTLOctagonsOrdinals = CTLIterator.CTLIterator(DecisionTree.TSOO)
-module CTLPolyhedra = CTLIterator.CTLIterator(DecisionTree.TSAP)
-module CTLPolyhedraOrdinals = CTLIterator.CTLIterator(DecisionTree.TSOP)
-
-module CFGCTLBoxes = CFGCTLIterator.CFGCTLIterator(DecisionTree.TSAB)
-module CFGCTLBoxesOrdinals = CFGCTLIterator.CFGCTLIterator(DecisionTree.TSOB)
-module CFGCTLOctagons = CFGCTLIterator.CFGCTLIterator(DecisionTree.TSAO)
-module CFGCTLOctagonsOrdinals = CFGCTLIterator.CFGCTLIterator(DecisionTree.TSOO)
-module CFGCTLPolyhedra = CFGCTLIterator.CFGCTLIterator(DecisionTree.TSAP)
-module CFGCTLPolyhedraOrdinals = CFGCTLIterator.CFGCTLIterator(DecisionTree.TSOP)
-
-
-
 let result = ref false
 
 let run_analysis analysis_function program () =
   try 
-    
     let start = Sys.time () in
     let terminating = analysis_function program !main in
     Config.result := terminating;
@@ -323,59 +263,69 @@ let run_analysis analysis_function program () =
 let cda_run s : (module Cda.CDA_ITERATOR)= 
   let module D = (val s: SEMANTIC) in
   (module Cda.Make(D))
-  
-  
+
 let termination_iterator (): (module SEMANTIC)=
+  let open TerminationIterator in 
   let module S =
     (val (match !domain with
-    | "boxes" -> if !ordinals then (module TerminationBoxesOrdinals) else (module TerminationBoxes)
-    | "octagons" -> if !ordinals then (module TerminationOctagonsOrdinals) else (module TerminationOctagons)
-    | "polyhedra" -> if !ordinals then (module TerminationPolyhedraOrdinals) else (module TerminationPolyhedra)
+    | "boxes" -> if !ordinals then (module TerminationIterator(DecisionTree.TSOB)) else (module TerminationIterator(DecisionTree.TSAB))
+    | "octagons" -> if !ordinals then (module TerminationIterator(DecisionTree.TSOO)) else (module TerminationIterator(DecisionTree.TSAO))
+    | "polyhedra" -> if !ordinals then (module TerminationIterator(DecisionTree.TSOP)) else (module TerminationIterator(DecisionTree.TSAP))
     | _ -> raise (Invalid_argument "Unknown Abstract Domain"))
     : SEMANTIC)
   in 
   (module S)
 
 let guarantee_iterator (): (module SEMANTIC)=
+  let open GuaranteeIterator in
   let module S =
     (val (match !domain with
-    | "boxes" -> if !ordinals then (module GuaranteeBoxesOrdinals) else (module GuaranteeBoxes)
-    | "octagons" -> if !ordinals then (module GuaranteeOctagonsOrdinals) else (module GuaranteeOctagons)
-    | "polyhedra" -> if !ordinals then (module GuaranteePolyhedraOrdinals) else (module GuaranteePolyhedra)
+    | "boxes" -> if !ordinals then (module GuaranteeIterator(DecisionTree.TSOB)) else (module GuaranteeIterator(DecisionTree.TSAB))
+    | "octagons" -> if !ordinals then (module GuaranteeIterator(DecisionTree.TSOO)) else (module GuaranteeIterator(DecisionTree.TSAO))
+    | "polyhedra" -> if !ordinals then (module GuaranteeIterator(DecisionTree.TSOP)) else (module GuaranteeIterator(DecisionTree.TSAP))
     | _ -> raise (Invalid_argument "Unknown Abstract Domain"))
     : SEMANTIC)
   in 
   (module S)
-
-
-
-let recurrence_iterator (): (module SEMANTIC)=
-  let module S =
-    (val (match !domain with
-    | "boxes" -> if !ordinals then (module RecurrenceBoxesOrdinals) else (module RecurrenceBoxes)
-    | "octagons" -> if !ordinals then (module RecurrenceOctagonsOrdinals) else (module RecurrenceOctagons)
-    | "polyhedra" -> if !ordinals then (module RecurrencePolyhedra) else (module RecurrencePolyhedraOrdinals)
-    | _ -> raise (Invalid_argument "Unknown Abstract Domain"))
-    : SEMANTIC)
-  in 
-  (module S)
-
   
-let ctl_iterator (): (module SEMANTIC)=
+let recurrence_iterator (): (module SEMANTIC)=
+  let open RecurrenceIterator in
   let module S =
     (val (match !domain with
-    | "boxes" -> if !ordinals then (module CTLBoxesOrdinals) else (module CTLBoxes)
-    | "octagons" -> if !ordinals then (module CTLOctagonsOrdinals) else (module CTLOctagons)
-    | "polyhedra" -> if !ordinals then (module CTLPolyhedraOrdinals) else (module CTLPolyhedra)
+    | "boxes" -> if !ordinals then (module RecurrenceIterator(DecisionTree.TSOB)) else (module RecurrenceIterator(DecisionTree.TSAB))
+    | "octagons" -> if !ordinals then (module RecurrenceIterator(DecisionTree.TSOO)) else (module RecurrenceIterator(DecisionTree.TSAO))
+    | "polyhedra" -> if !ordinals then (module RecurrenceIterator(DecisionTree.TSOP)) else (module RecurrenceIterator(DecisionTree.TSAP))
     | _ -> raise (Invalid_argument "Unknown Abstract Domain"))
     : SEMANTIC)
   in 
   (module S)
+
+let ctl_iterator (): (module SEMANTIC)=
+  let open CTLIterator in 
+  let module S =
+    (val (match !domain with
+    | "boxes" -> if !ordinals then (module CTLIterator(DecisionTree.TSOB)) else (module CTLIterator(DecisionTree.TSAB))
+    | "octagons" -> if !ordinals then (module CTLIterator(DecisionTree.TSOO)) else (module CTLIterator(DecisionTree.TSAO))
+    | "polyhedra" -> if !ordinals then (module CTLIterator(DecisionTree.TSOP)) else (module CTLIterator(DecisionTree.TSAP))
+    | _ -> raise (Invalid_argument "Unknown Abstract Domain"))
+    : SEMANTIC)
+  in 
+  (module S)
+
+module CFGCTLBoxes = CFGCTLIterator.CFGCTLIterator(DecisionTree.TSAB)
+module CFGCTLBoxesOrdinals = CFGCTLIterator.CFGCTLIterator(DecisionTree.TSOB)
+module CFGCTLOctagons = CFGCTLIterator.CFGCTLIterator(DecisionTree.TSAO)
+module CFGCTLOctagonsOrdinals = CFGCTLIterator.CFGCTLIterator(DecisionTree.TSOO)
+module CFGCTLPolyhedra = CFGCTLIterator.CFGCTLIterator(DecisionTree.TSAP)
+module CFGCTLPolyhedraOrdinals = CFGCTLIterator.CFGCTLIterator(DecisionTree.TSOP)
+
 
 let termination (module S: SEMANTIC) program =
-  if not !minimal then (
+  if not !minimal then 
+    begin
     Format.fprintf !fmt "\nAbstract Syntax:\n" ;
-    AbstractSyntax.prog_print !fmt program ) ;
+    AbstractSyntax.prog_print !fmt program 
+    end;
   let parsedPrecondition = parsePropertyString !precondition in
   let precondition = fst @@ AbstractSyntax.StringMap.find "" @@ ItoA.property_itoa_of_prog program !main parsedPrecondition in
   let analysis_function = S.analyze  ~precondition:(Some precondition) ~property:S.dummy_prop in
@@ -393,7 +343,7 @@ let guarantee (module S: SEMANTIC) program  property =
       Format.fprintf !fmt "\nAbstract Syntax:\n";
       AbstractSyntax.prog_print !fmt program;
       Format.fprintf !fmt "\nProperty: ";
-      AbstractSyntax.property_print !fmt property;
+      AbstractSyntax.property_print !fmt property
     end;
   let parsedPrecondition = parsePropertyString !precondition in
   let precondition = fst @@ AbstractSyntax.StringMap.find "" @@ ItoA.property_itoa_of_prog program !main parsedPrecondition in
@@ -416,7 +366,7 @@ let recurrence (module S: SEMANTIC) program property =
   let parsedPrecondition = parsePropertyString !precondition in
   let precondition = fst @@ AbstractSyntax.StringMap.find "" @@ ItoA.property_itoa_of_prog program !main parsedPrecondition in
   let analysis_function  = S.analyze in
-    run_analysis (analysis_function ~precondition:(Some precondition) ~property:(Exp property)) program ()
+  run_analysis (analysis_function ~precondition:(Some precondition) ~property:(Exp property)) program ()
 
 let ctl_ast (module S: SEMANTIC) prog property=
   let starttime = Sys.time () in
@@ -496,17 +446,17 @@ let doit () =
     begin
     Regression.create_logfile_name ();
     (* Open the log file *)
-    Config.f_log := Out_channel.open_bin !Config.logfile;
+    Config.f_log := open_out_bin !Config.logfile;
     (* Set the formatter to logfile*)
     fmt := Format.formatter_of_out_channel !Config.f_log
-    end
-  ;
-  (* Get the right iterator *) 
+    end;
+  (* Get the iterator for the demanded analysis *) 
   let semantic = 
       match !analysis with
       | "termination" -> termination_iterator ()
       | "guarantee"   -> guarantee_iterator ()
       | "recurrence"  -> recurrence_iterator ()
+      (* TOC *)
       | "ctl" 
       | "ctl-ast"  
       | "ctl-cfg" ->  ctl_iterator ()
@@ -514,13 +464,8 @@ let doit () =
   in
   (* Property and filename must be given (except for termination property) *)
   if !filename = "" then raise (Invalid_argument "No Source File Specified");
-  if !property = "" 
-  then 
-    begin
-      match !analysis with
-      | "termination" -> ()
-      | _ ->  raise (Invalid_argument "No Property File Specified")
-    end;
+  if ((String.compare !property  "" = 0 ) && (String.compare !analysis "termination" <> 0))  
+    then raise (Invalid_argument "No Property File Specified");
   (* Parsing the property and the file to an ast *)
   let sources = parseFile !filename in
   let program,property,prop = match !analysis with  
@@ -539,10 +484,9 @@ let doit () =
                           | _ -> raise (Invalid_argument "Unknown Analysis") 
   in
   (* A program is a map of variable, a bock (see: AbstractSyntax.ml) and a map of functions *)
-  let (vars,b,func)  = program  in
+  let (vars,b,funcs)  = program  in
   (* Get the main function and the variables as a list *)
-  let f = AbstractSyntax.StringMap.find !main func in
-  let varlist = AbstractSyntax.StringMap.to_seq vars |> List.of_seq |> List.map snd  in 
+  let func = AbstractSyntax.StringMap.find !main funcs in
   let module S = (val semantic: SEMANTIC) in 
   (* Launch the analysis and get the returned output "true" or "unknow" *)
   let _ =
@@ -550,13 +494,12 @@ let doit () =
     let module C = (val (cda_run semantic): CDA_ITERATOR) in
     let parsedPrecondition = parsePropertyString !precondition in
     let precondition = fst @@ AbstractSyntax.StringMap.find "" @@ ItoA.property_itoa_of_prog program !main parsedPrecondition in
-    C.analyze ~property:property ~precondition:(Some precondition) func vars b !main 
+    C.analyze ~property:property ~precondition:(Some precondition) funcs vars b !main 
     else
       match !analysis with
       | "termination" -> termination (module S) program
       | "guarantee"   -> guarantee (module S) program prop
       | "recurrence" -> recurrence (module S) program prop
-
       | "ctl" when !ctltype = "CFG" -> ctl_cfg ()
       | "ctl"  (* default CTL analysis is CTL-AST *)
         -> ctl_ast (module S) program  (match property with Semantics.Ctl p -> p |_ ->  raise (Invalid_argument("Impossible to reach")))
@@ -565,20 +508,21 @@ let doit () =
   let _ =
     if !Config.vulnerability && (!ctltype <> "CFG") then
       (* Launch the vulnerability analysis and output the infered variables *)
-      Vulnerability.analyse S.D.vulnerable  varlist f !S.bwdInvMap;
-      Printf.printf " \n %s \n" (Yojson.Safe.pretty_to_string (!Config.vuln_res))
+      let varlist = List.map snd  @@ List.of_seq @@ AbstractSyntax.StringMap.to_seq vars in
+      Vulnerability.analyse S.D.vulnerable varlist func !S.bwdInvMap;
+      Format.printf " \n %s \n" (Yojson.Safe.pretty_to_string (!Config.vuln_res))
     in
     if !Config.json_output then
     begin
-    Out_channel.close !Config.f_log; 
+    close_out !Config.f_log; 
     Regression.output_json ()
     end
   ;
   (* Get the log to ouput them on std output *)
   if !Config.output_std && !Config.json_output then
     begin
-    let f_log = In_channel.open_bin !logfile in
-    let s = In_channel.input_all f_log  in
+    let f_log = open_in_bin !logfile in
+    let s = input_value f_log  in
     Format.printf "%s" s
     end
 let _ = doit () 

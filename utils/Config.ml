@@ -41,7 +41,7 @@ let ctltype = ref ""
 let logfile = ref ""
 let result = ref false
 let output_std = ref false
-let f_log = ref Out_channel.stdout
+let f_log = ref stdout
 let tree: Yojson.Safe.t ref  = ref `Null
 let vuln_res: Yojson.Safe.t ref = ref  `Null
 

@@ -24,6 +24,6 @@ let output_json () =
   let jsonfile = basefile^".json" in
   let output =  json_string !filename time !analysis !property (if !Config.result then "TRUE" else "UKNOWN") !domain  !exectime in
   let json : Yojson.Safe.t =  `Assoc(("Config",Yojson.Safe.from_string output)::("tree", !tree)::[("vulnerability", !vuln_res)]) in 
-  let f = Out_channel.open_bin (jsonfile) in
+  let f = open_out_bin (jsonfile) in
   Yojson.Safe.pretty_to_channel f json;
-  Out_channel.close f
+  close_out f

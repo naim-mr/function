@@ -400,11 +400,6 @@ let rec bwdStm ?property ?domain funcs env vars (p,r,flag) s tvl =
             Format.printf "%a: %s\n" label_print l (List.fold_left (fun  acc x -> acc^" "^x.varName) "" a)) !fwdTaintMap
       end;
     (* Backward Analysis *)
-    (* let block_label block = 
-      match block with
-        | A_empty l -> l
-        | A_block (l,_,_) -> l
-    in *)
     if !tracebwd && not !minimal then
       Format.fprintf !fmt "\nBackward Analysis Trace:\n";
     start := Sys.time ();
