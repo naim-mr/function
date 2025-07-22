@@ -505,7 +505,7 @@ module Numerical(N: NUMERICAL)(C: CONSTRAINT): PARTITION = struct
     result
 
 
-  let rec filter b e  =
+  let filter b e  =
     let rec f manager b e = 
      match e with
      | A_TRUE -> b

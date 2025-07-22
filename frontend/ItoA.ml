@@ -67,6 +67,7 @@ let getFunc env (v: string) (x: extent): func =
 let typ_itoa ((t: IntermediateSyntax.typ), (_: extent)): AbstractSyntax.typ =
   match t with
   | I_INT -> A_INT
+  | I_PTR -> A_PTR
 
 (* expressions *)
 let rec exp_itoa 
@@ -88,6 +89,7 @@ let rec exp_itoa
         | Some I_PLUS -> int_of_string i
         | Some I_MINUS -> - (int_of_string i)
         | None -> int_of_string i
+        | _ -> raise (Invalid_argument "exp_itoa: only constant bounds for interval are supported")
       in (A_arithmetic (A_interval (aux o1 i1, aux o2 i2), a), env, pre, post)
     | I_incr (e, ea) | I_decr (e, ea) -> (* post-increment/decrement *)
       let aux (e: IntermediateSyntax.exp) = match e with
@@ -119,8 +121,6 @@ let rec exp_itoa
              | Some v -> (A_arithmetic (A_var v,a),env,pre@stmt,post))
           with ItoA_error _ -> (* non-determinisms approximates calls to unknown functions *) (A_arithmetic (A_RANDOM,a),env,pre,post))
        | _ -> raise (Invalid_argument "exp_itoa:I_call"))
-
-
     | I_preincr (e, ea) | I_predecr (e, ea) -> (* pre-increment/decrement *)
       let aux (e: IntermediateSyntax.exp) = match e with
         | I_preincr _ -> A_PLUS
@@ -155,7 +155,9 @@ let rec exp_itoa
                | _ -> 
                  let one = (A_const (-1), ea) in
                  let mul = (A_abinary (A_MULTIPLY, one, (e, ea)), a) in
-                 (A_arithmetic mul, env, pre, post)))
+                 (A_arithmetic mul, env, pre, post))
+           | I_DEREF -> (A_arithmetic (A_aunary (A_DEREF, (e,ea)),ea), env, pre, post)
+           | I_ADDR -> (A_arithmetic (A_aunary (A_ADDR, (e,ea)),ea), env, pre, post))
        | _ -> raise (Invalid_argument "exp_itoa:I_unary"))				
     | I_mul (e1, e2) | I_div (e1, e2) | I_add (e1, e2) | I_minus (e1, e2) ->
       let (e1, env, pre, post) = exp_itoa ctx env pre post e1 in

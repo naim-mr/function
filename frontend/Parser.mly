@@ -11,6 +11,7 @@ open IntermediateSyntax
 %token TOK_ELSE;
 %token TOK_FALSE;
 %token TOK_IF;
+%token TOK_PTR;
 %token TOK_INT;
 %token TOK_FOR;
 %token TOK_RETURN;
@@ -30,6 +31,7 @@ open IntermediateSyntax
 %token TOK_COMMA;
 %token TOK_COLON;
 %token TOK_SEMICOLON;
+%token TOK_ADDR; // CONFLICT
 %token TOK_AND;
 %token TOK_OR;
 %token TOK_NOT;
@@ -75,6 +77,7 @@ global_decl:
 
 global_typ:
 	| TOK_INT	{ I_INT } 
+	| TOK_PTR	{ I_PTR } 
 
 declarator:
 	| d = annotate(TOK_id)										{ d, None }
@@ -182,6 +185,8 @@ unary_exp:
 unary_op:
 	| TOK_PLUS	{ I_PLUS }
 	| TOK_MINUS	{ I_MINUS }
+	| TOK_MULTIPLY	{ I_DEREF }
+	| TOK_ADDR  { I_ADDR }
 
 postfix_exp:
 	| e = primary_exp																				{ e }

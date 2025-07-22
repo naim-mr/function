@@ -11,9 +11,11 @@ open IntermediateSyntax
 (* types *)
 type typ =
   | A_INT
+  | A_PTR
 
 let typ_print fmt = function
   | A_INT -> Format.fprintf fmt "int"
+  | A_PTR -> Format.fprintf fmt "int*"
 
 (* variables *)
 type var = {
@@ -58,13 +60,17 @@ let aBinOp_print fmt = function
 (* arithmetic unary operators *)
 type aUnOp =
   | A_UMINUS	(* - *)
-
+  | A_DEREF   (* * *)
+  | A_ADDR   (* & *)
 let aUnOp_tostring = function
   | A_UMINUS -> "-"
+  | A_DEREF -> "*"
+  | A_ADDR -> "&"
 
 let aUnOp_print fmt = function
   | A_UMINUS -> Format.fprintf fmt "-"
-
+  | A_DEREF -> Format.fprintf fmt "*"
+  | A_ADDR -> Format.fprintf fmt "&"
 (* boolean binary operators *)
 type bBinOp =
   | A_AND	(* && *)
@@ -153,14 +159,15 @@ let rec aExp_to_apron e =
   match e with
   | A_RANDOM
   | A_INPUT -> Texpr1.Cst (Coeff.Interval Interval.top)
-  
   | A_var x -> Texpr1.Var (Var.of_string x.varId)
   | A_const i -> Texpr1.Cst (Coeff.s_of_int i)
   | A_interval (i1,i2) -> Texpr1.Cst (Coeff.i_of_int i1 i2)
   | A_aunary (o,(e,_)) ->
     let e = aExp_to_apron e in
     (match o with
-     | A_UMINUS -> Texpr1.Unop (Texpr1.Neg,e,Texpr1.Int,Texpr1.Zero))
+     | A_UMINUS -> Texpr1.Unop (Texpr1.Neg,e,Texpr1.Int,Texpr1.Zero)
+     | A_DEREF  -> failwith "nyi"
+     | A_ADDR  -> failwith "nyi")
   | A_abinary (o,(e1,_),(e2,_)) ->
     let e1 = aExp_to_apron e1 in
     let e2 = aExp_to_apron e2 in

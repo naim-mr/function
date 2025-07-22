@@ -340,6 +340,8 @@ let rec bwdStm ?property ?domain funcs env vars (p,r,flag) s tvl =
     let startfwd = Sys.time () in
     let _ = ForwardIteratorB.fwdBlk funcs env vars (ForwardIteratorB.fwdBlk funcs env vars (B.top env vars) stmts) s in
     let _ =  ForwardIteratorB.fwdTBlk  funcs env vars (snd @@ ForwardIteratorB.fwdTBlk funcs env vars vars stmts) s in  
+    fwdInvMap := !ForwardIteratorB.fwdInvMap;
+    fwdTaintMap := !ForwardIteratorB.fwdTaintMap;
     let stopfwd = Sys.time () in
     if not !minimal then
       begin

@@ -16,6 +16,7 @@ let _ = List.iter (fun (a,b) -> Hashtbl.add keyword a b)
 		"false", TOK_FALSE;
 		"if", TOK_IF;
 		"int", TOK_INT;
+		"int*", TOK_PTR;
 		"for", TOK_FOR;
 		"return", TOK_RETURN;
 		"true", TOK_TRUE;
@@ -52,6 +53,7 @@ and token = parse
 	| ":"										{ TOK_COLON }
 	| ";"										{ TOK_SEMICOLON }
 	| "&&"										{ TOK_AND }
+	| "&"										{ TOK_ADDR }
 	| "||"										{ TOK_OR }
 	| "!"										{ TOK_NOT }
 	| "<"										{ TOK_LESS }
@@ -73,7 +75,6 @@ and token = parse
 	| "*="										{ TOK_MULTIPLY_EQUAL }
 	| "/="										{ TOK_DIVIDE_EQUAL }
 	| "%="										{ TOK_MODULO_EQUAL }
-	
 	| "?"										{ TOK_RANDOM }
 	| "__VERIFIER_nondet_int()"					{ TOK_INPUT }
 	| "(int*) "? "alloca" [^ ';' '\n' '\r']*	{ TOK_RANDOM }
