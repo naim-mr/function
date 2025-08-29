@@ -174,14 +174,6 @@ struct
 
   let join_ranking ?(random = false) k b f1 f2 =
     (* k = kind of join, b = domain of first/second function, f1/f2 = value of first/second function *)
-    let aux a c = (* checking if constraint c belongs to set of constraints a *)
-      let l = Lincons1.array_length a in
-      let b = ref false in
-      for i = 0 to l - 1 do
-        if c = (Lincons1.array_get a i)
-        then b := true
-      done; !b
-    in (*REMOVE?*)
     match f1,f2 with
     | Fun f1,Fun f2 ->
       let env = Environment.add (B.env b) [|v|] [||] in (* adding special variable # to environment of b *)
@@ -203,22 +195,35 @@ struct
       let p1 = Abstract1.of_lincons_array manager env a1 in (* p1 = polyhedra represented by a1 *)
       let p2 = Abstract1.of_lincons_array manager env a2 in (* p2 = polyhedra represented by a2 *)
       (* keeps the contrainsts on # occuring in the Lincons.t list p *)
-      let filter_constraints f p =      
+      let filter_constraints p =  
+        let in_env a c = (* checking if constraint c belongs to set of constraints a *)
+          let l = Lincons1.array_length a in
+          let b = ref false in
+          for i = 0 to l - 1 do
+            if Linexpr0.cmp (c.Lincons1.lincons0.Lincons0.linexpr0) (Lincons1.array_get a i).Lincons1.lincons0.Lincons0.linexpr0 = 0 
+            then b := true
+          done; !b
+        in (*REMOVE?*)    
+        let f = ref [] in 
         for i = 0 to Lincons1.array_length p - 1 do
-        let c = Lincons1.array_get p i in
-        try
-          if not (Coeff.is_zero (Lincons1.get_coeff c v)) && (*REMOVE?*) not (aux a c)
-          then f := c :: !f
-        with _ -> ()
-        done (* f = list of constraints on special variable # *) 
+          let c = Lincons1.array_get p i in
+          try
+            if not (Coeff.is_zero (Lincons1.get_coeff c v)) && (*REMOVE?*) not (in_env a c)
+            then f := c :: !f
+          with e ->  let msg = Printexc.to_string e
+                     and stack = Printexc.get_backtrace () in
+                     Printf.eprintf "there was an error: %s%s\n" msg stack;
+                     raise e
+        done; (* f = list of constraints on special variable # *) 
+        !f
       in
       let res = 
         let f = ref [] in
         match k with 
         | _ when random && !Config.resilience  ->  
           (* When resilience join is on we need to underapproximate f1 and f2*)   
-          filter_constraints f (Abstract1.to_lincons_array manager p1);
-          filter_constraints f (Abstract1.to_lincons_array manager p2);
+          f := filter_constraints (Abstract1.to_lincons_array manager p1);
+          f := !f @ (filter_constraints (Abstract1.to_lincons_array manager p2));
           if (List.length !f) > 0 then
           (* There exists a constraint minimizing f1 and f2*)
             begin
@@ -232,14 +237,18 @@ struct
             Top (* otherwise *)
         |_ ->
           let p = Abstract1.join manager p1 p2 in (* p = convex-hull *) 
+          Abstract1.print Format.std_formatter p;
           let p = Abstract1.to_lincons_array manager p in (* converting p into set of constraints *)
-          filter_constraints f p;
+          f := filter_constraints p;
+          List.iter (fun c -> Lincons1.print Format.std_formatter c) !f;
+          print_newline ();
           if 1 = (List.length !f) then 
-            (* if there is only one constraint on # *)
+            (* there is only one constraint on # *)
             let f = Lincons1.get_linexpr1 (List.hd !f) in
             Linexpr1.set_coeff f v (Coeff.s_of_int 0);
             Fun f (* defined join function *)
-          else Top (* otherwise *)
+          else 
+            Top (* otherwise *)
       in res
     | Bot,_ ->
       (match k with
@@ -324,16 +333,14 @@ struct
   let learn_ranking b f1 f2 =
     (* b = domain of first/second function, f1/f2 = value of first/second
        function *)
-    let aux a c =
-      (* checking if constraint c belongs to set of constraints a *)
-      let l = Lincons1.array_length a in
-      let b = ref false in
-      for i = 0 to l - 1 do
-        if c = Lincons1.array_get a i then b := true
-      done ;
-      !b
-    in
-    (*REMOVE?*)
+    let in_env a c = (* checking if constraint c belongs to set of constraints a *)
+     let l = Lincons1.array_length a in
+     let b = ref false in
+     for i = 0 to l - 1 do
+       if Linexpr0.cmp (c.Lincons1.lincons0.Lincons0.linexpr0) (Lincons1.array_get a i).Lincons1.lincons0.Lincons0.linexpr0 = 0 
+       then b := true
+    done; !b
+    in (*REMOVE?*)
     match (f1, f2) with
     | Fun f1, Fun f2 ->
         let env = Environment.add (B.env b) [|v|] [||] in
@@ -376,7 +383,7 @@ struct
           try
             if
               (not (Coeff.is_zero (Lincons1.get_coeff c v)))
-              && (*REMOVE?*) not (aux a c)
+              && (*REMOVE?*) not (in_env a c)
             then f := c :: !f
           with _ -> ()
         done ;
@@ -396,14 +403,14 @@ struct
 
   let widen_ranking b f1 f2 =
     (* b = domain of first/second function, f1/f2 = value of first/second function *)
-    let aux a c = (* checking if constraint c belongs to set of constraints a *)
+    let in_env a c = (* checking if constraint c belongs to set of constraints a *)
       let l = Lincons1.array_length a in
       let b = ref false in
       for i = 0 to l - 1 do
-        if c = (Lincons1.array_get a i)
+        if Linexpr0.cmp (c.Lincons1.lincons0.Lincons0.linexpr0) (Lincons1.array_get a i).Lincons1.lincons0.Lincons0.linexpr0 = 0 
         then b := true
       done; !b
-    in (*REMOVE?*)
+    in (* REMOVE ? *)
     match f1,f2 with
     | Fun f1,Fun f2 ->
       let env = Environment.add (B.env b) [|v|] [||] in (* adding special variable # to environment of b *)
@@ -429,7 +436,7 @@ struct
       for i = 0 to Lincons1.array_length p - 1 do
         let c = Lincons1.array_get p i in
         try
-          if not (Coeff.is_zero (Lincons1.get_coeff c v)) && (*REMOVE?*) not (aux a c)
+          if not (Coeff.is_zero (Lincons1.get_coeff c v)) && (*REMOVE?*) not (in_env a c)
           then f := c :: !f
         with _ -> ()
       done; (* f = list of constraints on special variable # *)

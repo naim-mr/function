@@ -366,7 +366,7 @@ module ApronDomain(Param: NUMERICAL) = struct
               (* prevent from adding the ray defining the contraint itself *)
               (* this is required to analyze preciselw bwd_loop7! *)
               (* TODO: better heuristic to find which ray to add *)
-              if Linexpr0.compare ea g.Generator1.generator0.Generator0.linexpr0 = 0 then acc else
+              if Linexpr0.cmp ea g.Generator1.generator0.Generator0.linexpr0 = 0 then acc else
               (* sign of scalar product *)
               let x = Lin.B.sign (fst (Lin.A.eval env e)) in
               if x >= 0 then g::acc else acc
