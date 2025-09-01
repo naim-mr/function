@@ -15,7 +15,7 @@ def generate_combinations(content, pattern):
     print("---pos---")
     print(positions)
     # Generate all possible combinations of 'input' or 'rand' for each occurrence
-    replacements = list(itertools.product(['input', 'rand'], repeat=len(positions)))
+    replacements = list(itertools.product(['input()', 'rand()'], repeat=len(positions)))
     combination = []
     # Create all versions of the content based on the combinations
     for replacement in replacements:       

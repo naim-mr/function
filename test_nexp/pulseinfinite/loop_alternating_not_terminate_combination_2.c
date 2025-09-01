@@ -1,4 +1,5 @@
 
+
 /* pulse-inf: works good */
 void loop_alternating_not_terminate(int y, int x) {
   int turn = 0;

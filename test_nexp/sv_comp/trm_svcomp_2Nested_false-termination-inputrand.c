@@ -12,8 +12,8 @@ extern int __VERIFIER_nondet_int(void);
 
 int main()
 {
-    int x = __VERIFIER_nondet_int ();
-    int y = __VERIFIER_nondet_int() ;
+    int x = input ();
+    int y = rand() ;
 	while (x >= 0) {
 		x = x + y;
 		y = y + 1;

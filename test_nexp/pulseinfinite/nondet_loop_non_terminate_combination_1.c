@@ -7,7 +7,7 @@ void nondet_loop_non_terminate(int z)
 {
   int x = 1;
   while (x < z)
-    if (__VERIFIER_nondet_int())
+    if (input())
       x++;
 }
 

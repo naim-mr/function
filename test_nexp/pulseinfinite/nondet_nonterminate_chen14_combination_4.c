@@ -11,7 +11,7 @@ void nondet_nonterminate_chen14(int k, int i) {
   else
     i = -1;
   while (i >= 0)
-    i = nondet();
+    i = input()                ;
   i = 2;
 }
 
@@ -20,7 +20,7 @@ void nondet_nonterminate_chen14(int k, int i) {
 
 void main(){
     int k,i;
-    k = rand();                   
-    i = rand();                   
+    k = rand()                 ;                  
+    i = rand()                 ;                  
     nondet_nonterminate_chen14(k,i);
 }

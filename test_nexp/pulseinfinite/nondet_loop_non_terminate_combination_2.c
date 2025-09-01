@@ -7,7 +7,7 @@ void nondet_loop_non_terminate(int z)
 {
   int x = 1;
   while (x < z)
-    if (__VERIFIER_nondet_int())
+    if (rand())
       x++;
 }
 
@@ -15,6 +15,6 @@ void nondet_loop_non_terminate(int z)
 
 
 void main(){
-    int z = rand();                   
+    int z = input();                   
     nondet_loop_non_terminate(z);
 }
