@@ -11,8 +11,8 @@ int main()
 {
     int x;
     int y;
-    x = rand()                 ;
-    y = input()                ;
+    x = rand()                                 ;
+    y = input()                                ;
     if (x + y >= 0) { 
         while (x > 0) {
             x = x + x + y;

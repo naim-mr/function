@@ -6,10 +6,10 @@ termination: false
 int main()
 {
 
-    int linesToRead = rand();
+    int linesToRead = input()                ;
     if( linesToRead < 0 )
         return 0;
-    int h = input();
+    int h = input()                ;
     while( h > 0 )
     {
         if( linesToRead > h )

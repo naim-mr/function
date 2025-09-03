@@ -6,12 +6,12 @@ int main() {
     int i;
     int j;
     int r;
-    i = rand()                 ;
-    j = input()                ;
+    i = rand()                                 ;
+    j = input()                                ;
     
     while (i - j >= 1) {
-        i = i -  input()                ;
-        r = input()                 + 1;
+        i = i -  input()                                ;
+        r = input()                                 + 1;
         j = j + r;
     }
     
