@@ -30,3 +30,4 @@ results/*
 *.exe
 logs/*
 diff/*
+*.ipynb_checkpoints*
