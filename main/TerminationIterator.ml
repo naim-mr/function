@@ -18,6 +18,7 @@ open Semantics
 open DecisionTree
 open ForwardIterator
 open AbstractSyntax
+open SetTaint
 
 module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
   type r = D.t * D.t * bool
@@ -26,16 +27,10 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
   module B = D.B
   module ForwardIteratorB = ForwardIterator (B)
 
+
   let dummy_prop = Exp StringMap.empty
   let fwdInvMap = ref InvMap.empty
   let fwdTaintMap = ref InvMap.empty
-
-  (* let addFwdInv l (a:B.t) = fwdInvMap := InvMap.add l a !fwdInvMap
-  let fwdMap_print fmt m fprint = InvMap.iter (fun l a -> 
-      Format.fprintf fmt "%a: %a\n" label_print l fprint a) m
-  let fwdMap_print fmt m fprint = InvMap.iter (fun l a -> 
-        Format.fprintf fmt "%a: %a\n" label_print l fprint a) m *)
-
   let bwdInvMap = ref InvMap.empty
   let addBwdInv l (a : D.t) = bwdInvMap := InvMap.add l a !bwdInvMap
 
@@ -44,102 +39,6 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
       (fun l a -> Format.fprintf fmt "%a: %a\n" label_print l D.print a)
       m
 
-  (* Join of two list*)
-  let join l1 l2 =
-    let l = l1 @ l2 in
-    List.sort_uniq (fun x y -> String.compare x.varId y.varId) l
-
-  (* List of vars in an expression *)
-  let avars (e, ext) =
-    let rec aux e acc =
-      match e with
-      | A_var x -> x :: acc
-      | A_interval _ | A_const _ | A_INPUT | A_RANDOM -> acc
-      | A_aunary (_, (a, _)) -> aux a acc
-      | A_abinary (_, (a1, _), (a2, _)) -> aux a1 acc @ aux a2 acc
-    in
-    aux e []
-
-  (* Test if a boolean expression is taint
-  let taint_b (e,ext) tvl =
-      let rec aux e  = 
-        match e with
-      | A_MAYBE_INP  -> true
-      | A_TRUE  | A_MAYBE	 	| A_FALSE -> false
-      | A_bunary (_,(b,l)) -> aux b
-      | A_bbinary (_,(b1,_),(b2,l)) -> aux b1 || aux b2
-      | A_rbinary (_,a1,a2) -> let vl1 =  avars a1 in  
-                               let vl2 =  avars a2 in 
-                               if List.exists (fun x -> List.mem x tvl) vl1 || List.exists (fun x -> List.mem x tvl) vl2
-                                then true
-                              else false
-      in 
-      aux e 
-  (* Assgined block: return set of variables assigned in a block (only syntactic) *)
-  let assigned block =
-      let rec aux stmt acc = 
-       match stmt with 
-      | A_assign ((A_var x ,_ ), (_,_))-> x :: acc
-      | A_if ((b,ba),s1,s2) -> aux_block s1 acc @ aux_block s2 acc
-      | A_while (l,(b,ba),s) -> aux_block s acc
-      | _ -> acc
-      and 
-      aux_block s acc =  match s with 
-      | A_empty l ->
-         acc
-      | A_block (l,(s,_),b) ->
-        aux s acc @ aux_block b acc
-      in
-      aux_block block []
-   (* Iterator of taint analysis *)
-   let rec fwdTStm funcs env vars p s =
-      match s with
-      | A_label _ -> p
-      | A_return -> p 
-      | A_assign ((A_var x,_),(A_INPUT,_)) -> x::p
-      | A_assign ((A_var x,_),(A_RANDOM,_)) -> List.filter (fun v -> v <> x ) p
-      | A_assign ((A_var x,_),(e,l)) -> let e_vars = avars (e,l) in 
-                                  if List.exists (fun x -> List.mem x e_vars) p
-                                    then x::p
-                                  else List.filter (fun v -> v <> x ) p
-      | A_assign (_,_) -> p 
-      | A_assert _  -> p
-      | A_if ((b,ba),s1,s2) ->
-        let assigned_vars = assigned s1 @ assigned s2 in 
-        let r1 = fwdTBlk funcs env vars p s1 in
-        let r2 = fwdTBlk funcs env vars p s2 in
-        let iflow = if taint_b (b,ba) p then 
-                    assigned_vars 
-                    else []
-        in
-        join (join r1 r2) iflow
-      | A_while (l,(b,ba),s) ->
-        let rec aux i p2 =
-          if List.for_all (fun x-> List.mem x i) p2 then i
-          else
-            aux p2 (fwdTStm funcs env vars p2 (A_if ((b,ba),s, A_empty l)))
-          in
-        let i = p in
-        let p2 = (fwdTStm funcs env vars i (A_if ((b,ba),s, A_empty l))) in
-        let p = aux i p2 in
-        addFwdTaint l p;
-        p
-      | A_call (f,ss) ->
-        let f = StringMap.find f funcs in
-        let p = List.fold_left (fun ap (s,_) -> fwdTStm funcs env vars p s) p ss in
-        fwdTBlk funcs env vars p f.funcBody
-      | A_recall (f,ss) -> vars 
-    and fwdTBlk funcs env vars (p:var list) (b:block) : var list =
-      match b with
-      | A_empty l ->
-        addFwdTaint l p; p
-      | A_block (l,(s,_),b) ->
-        if !tracefwd && not !minimal then
-          Format.printf "%a: %s\n" label_print l (List.fold_left (fun  acc x -> acc^"-"^x.varName) "" p);
-        let p' = (fwdTStm funcs env vars p s) in 
-        addFwdTaint l p; 
-        fwdTBlk funcs env vars p' b
-  *)
 
   (*Backward Iterator + Recursion *)
   let rec bwdStm ?property ?domain funcs env vars (p, r, flag) s tvl =
@@ -152,10 +51,10 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
           r,
           flag )
     | A_assign ((l, _), (e, _)) ->
-        let e_vars = avars (e, l) in
+        let e_vars = ForwardIteratorB.avars (e, l) in
         let uap = false in
         let taint =
-          List.exists (fun x -> List.mem x e_vars) tvl || not !Config.resilience
+          SetTaint.is_empty (SetTaint.inter e_vars tvl) || not !Config.resilience
         in
         (D.bwdAssign ?domain ~taint ~underapprox:uap p (l, e), r, flag)
     | A_assert (b, _) -> (D.filter ?domain p b, r, flag)
@@ -360,8 +259,8 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
         s
     in
     let _ =
-      ForwardIteratorB.fwdTBlk funcs env vars
-        (snd @@ ForwardIteratorB.fwdTBlk funcs env vars vars stmts)
+      ForwardIteratorB.fwdTBlk funcs env (SetTaint.of_list vars)
+        (snd @@ ForwardIteratorB.fwdTBlk funcs env vars (SetTaint.of_list vars) stmts)
         s
     in
     fwdInvMap := !ForwardIteratorB.fwdInvMap;
@@ -378,7 +277,7 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
       InvMap.iter
         (fun l a ->
           Format.printf "%a: %s\n" label_print l
-            (List.fold_left (fun acc x -> acc ^ " " ^ x.varName) "" a))
+            (SetTaint.fold (fun x acc -> acc ^ " " ^ x.varName) a ""))
         !fwdTaintMap);
     (* Backward Analysis *)
     if !tracebwd && not !minimal then

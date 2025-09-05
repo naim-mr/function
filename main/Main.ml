@@ -507,7 +507,6 @@ let doit () =
     | "termination" -> termination_iterator ()
     | "guarantee" -> guarantee_iterator ()
     | "recurrence" -> recurrence_iterator ()
-    (* TOC *)
     | "ctl" | "ctl-ast" | "ctl-cfg" -> ctl_iterator ()
     | _ -> raise (Invalid_argument "Unknown Analysis")
   in

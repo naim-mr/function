@@ -9,6 +9,7 @@ open Apron
 open InvMap
 open CTLProperty
 open Domain
+open SetTaint
 
 type ctl_property = AbstractSyntax.bExp CTLProperty.generic_property
 type 'a p = Ctl of ctl_property | Exp of (bExp * 'a) StringMap.t
@@ -24,42 +25,29 @@ let get_bexp prop =
   | _ -> raise (Invalid_argument "Waiting a bexp property received a ctl")
 
 module type SEMANTIC = sig
-  (*  
-      [D]: Underlying instanciantion of the DecisionTree Abstract Domain    *)
   module D : RANKING_FUNCTION
+  (** [D]: Underlying instanciantion of the DecisionTree Abstract Domain *)
 
-  (*
-      [B]: Underlying instanciantion of the Numerical Abstract Domain used in D  *)
   module B = D.B
+  (** [B]: Underlying instanciantion of the Numerical Abstract Domain used in D
+  *)
 
-  (*
-      [r]: Ghost type to to handle the  different types returned by bwdBlk in different iterators  *)
   type r
-  (*
-      [p]: Ghost type to to handle the  different types for the properties
-      two case:
-         (bExp*'a) StringMap.t
-         or 
-         ctl_property   *)
+  (** [r]: Ghost type to to handle the different types returned by bwdBlk in
+      different iterators *)
 
   val dummy_prop : 'a p
 
-  (*
-      [fwdInvMap]: a map from the label of the program to an associated the over-approximating numerical abstraction computed in a forward analysis  *)
   val fwdInvMap : B.t InvMap.t ref
-  val fwdTaintMap : var list InvMap.t ref
+  (** [fwdInvMap]: a map from the label of the program to an associated the
+      over-approximating numerical abstraction computed in a forward analysis *)
 
-  (*
-      [bwdInvMap]: a map from the label of the program to an associated a decision tree that abstract a ranking function of the program.  *)
+  val fwdTaintMap : SetTaint.t InvMap.t ref
+
   val bwdInvMap : D.t InvMap.t ref
+  (** [bwdInvMap]: a map from the label of the program to an associated a
+      decision tree that abstract a ranking function of the program. *)
 
-  (*
-      [bwdStm]: abstract backward transfer function of statement for the decision tree abstract domain    *)
-  (* val bwdStm: ?property:'a p -> ?domain:B.t -> func StringMap.t -> Environment.t -> var list -> r -> stmt -> r *)
-  (*
-      [bwdBlk]: abstract backward transfer function of blocks for the decision tree abstract domain *)
-  (* val bwdBlk: ?property:'a p -> func StringMap.t -> Environment.t -> var list -> r -> block ->  r   *)
-  (* val fwdTBlk: func StringMap.t -> 'a -> 'b -> var list -> block -> var list *)
   val bwdRec :
     ?property:'a p ->
     func StringMap.t ->
@@ -68,15 +56,18 @@ module type SEMANTIC = sig
     D.t ->
     block ->
     D.t
+  (** [bwdRec]: abstract backward transfer function of statement for the
+      decision tree abstract domain *)
 
   val initBlk : Environment.t -> var list -> block -> unit
+  (** [initBlk]: initialisation function *)
 
-  (*
-      [analyze]: iterating function that run the analysis for the given semantic  *)
   val analyze :
     ?precondition:bExp option ->
     ?property:'a p ->
     AbstractSyntax.prog ->
     string ->
     bool
+  (** [analyze]: iterating function that run the analysis for the given semantic
+  *)
 end

@@ -11,6 +11,7 @@ open Config
 open Semantics
 open Domain
 open Partition
+open SetTaint
 
 module ForwardIterator (B : PARTITION) = struct
   let fwdMap_print fmt m fprint =
@@ -89,20 +90,18 @@ module ForwardIterator (B : PARTITION) = struct
 
   (*  Taint forward analysis *)
   (* Join of two list*)
-  let join l1 l2 =
-    let l = l1 @ l2 in
-    List.sort_uniq (fun x y -> String.compare x.varId y.varId) l
+  let join = SetTaint.union
 
   (* List of vars in an expression *)
   let avars (e, ext) =
     let rec aux e acc =
       match e with
-      | A_var x -> x :: acc
+      | A_var x -> SetTaint.add x acc
       | A_interval _ | A_const _ | A_INPUT | A_RANDOM -> acc
       | A_aunary (_, (a, _)) -> aux a acc
-      | A_abinary (_, (a1, _), (a2, _)) -> aux a1 acc @ aux a2 acc
+      | A_abinary (_, (a1, _), (a2, _)) -> SetTaint.union (aux a1 acc) (aux a2 acc)
     in
-    aux e []
+    aux e SetTaint.empty
 
   (* Test if a boolean expression is taint *)
   let taint_b (e, ext) tvl =
@@ -116,8 +115,8 @@ module ForwardIterator (B : PARTITION) = struct
           let vl1 = avars a1 in
           let vl2 = avars a2 in
           if
-            List.exists (fun x -> List.mem x tvl) vl1
-            || List.exists (fun x -> List.mem x tvl) vl2
+            SetTaint.is_empty (SetTaint.inter tvl vl1) 
+            || SetTaint.is_empty (SetTaint.inter tvl vl2) 
           then true
           else false
     in
@@ -126,39 +125,39 @@ module ForwardIterator (B : PARTITION) = struct
   let assigned block =
     let rec aux stmt acc =
       match stmt with
-      | A_assign ((A_var x, _), (_, _)) -> x :: acc
-      | A_if ((b, ba), s1, s2) -> aux_block s1 acc @ aux_block s2 acc
+      | A_assign ((A_var x, _), (_, _)) -> SetTaint.add x acc
+      | A_if ((b, ba), s1, s2) -> SetTaint.union (aux_block s1 acc) (aux_block s2 acc)
       | A_while (l, (b, ba), s) -> aux_block s acc
       | _ -> acc
     and aux_block s acc =
       match s with
       | A_empty l -> acc
-      | A_block (l, (s, _), b) -> aux s acc @ aux_block b acc
+      | A_block (l, (s, _), b) -> SetTaint.union (aux s acc) (aux_block b acc)
     in
-    aux_block block []
+    aux_block block SetTaint.empty
 
   (* Assgined block: return set of variables assigned in a block (only syntactic) *)
   let rec fwdTStm funcs env vars p s =
     match s with
     | A_label _ -> p
     | A_return -> p
-    | A_assign ((A_var x, _), (A_INPUT, _)) -> x :: p
-    | A_assign ((A_var x, _), (A_RANDOM, _)) -> List.filter (fun v -> v <> x) p
+    | A_assign ((A_var x, _), (A_INPUT, _)) -> SetTaint.add x p 
+    | A_assign ((A_var x, _), (A_RANDOM, _)) -> SetTaint.filter (fun v -> String.compare v.varId x.varId != 0) p 
     | A_assign ((A_var x, _), (e, l)) ->
         let e_vars = avars (e, l) in
-        if List.exists (fun x -> List.mem x e_vars) p then x :: p
-        else List.filter (fun v -> v <> x) p
+        if SetTaint.is_empty (SetTaint.inter e_vars p) then SetTaint.add x p 
+        else SetTaint.filter (fun v -> String.compare v.varId x.varId != 0) p
     | A_assign (_, _) -> p
     | A_assert _ -> p
     | A_if ((b, ba), s1, s2) ->
-        let assigned_vars = assigned s1 @ assigned s2 in
+        let assigned_vars = SetTaint.union (assigned s1)  (assigned s2) in
         let r1 = fwdTBlk funcs env vars p s1 in
         let r2 = fwdTBlk funcs env vars p s2 in
-        let iflow = if taint_b (b, ba) p then assigned_vars else [] in
+        let iflow = if taint_b (b, ba) p then assigned_vars else SetTaint.empty in
         join (join (snd r1) (snd r2)) iflow
     | A_while (l, (b, ba), s) ->
         let rec aux i p2 =
-          if List.for_all (fun x -> List.mem x i) p2 then i
+          if SetTaint.subset i p2 then i
           else aux p2 (fwdTStm funcs env vars p2 (A_if ((b, ba), s, A_empty l)))
         in
         let i = p in
@@ -174,7 +173,7 @@ module ForwardIterator (B : PARTITION) = struct
         snd (fwdTBlk funcs env vars p f.funcBody)
     | A_recall (f, ss) -> raise (Invalid_argument "fwdStm:A_recall")
 
-  and fwdTBlk funcs env vars (p : var list) (b : block) =
+  and fwdTBlk funcs env vars p (b : block) =
     match b with
     | A_empty l ->
         Printf.printf "empty debug cda %d \n" (InvMap.cardinal !fwdTaintMap);
@@ -183,11 +182,11 @@ module ForwardIterator (B : PARTITION) = struct
     | A_block (l, (s, _), b) ->
         if !tracefwd && not !minimal then
           Format.printf "%a: %s\n" label_print l
-            (List.fold_left (fun acc x -> acc ^ "-" ^ x.varName) "" p);
+            (SetTaint.fold (fun x acc -> acc ^ "-" ^ x.varName) p "");
         let p' = fwdTStm funcs env vars p s in
         addFwdTaint l p;
         fwdTBlk funcs env vars p' b
 
-  and fwdTaintMap = ref InvMap.empty
-  and addFwdTaint l (a : var list) = fwdTaintMap := InvMap.add l a !fwdTaintMap
+  and fwdTaintMap : SetTaint.t InvMap.t ref = ref InvMap.empty
+  and addFwdTaint l (a : SetTaint.t) = fwdTaintMap := InvMap.add l a !fwdTaintMap
 end

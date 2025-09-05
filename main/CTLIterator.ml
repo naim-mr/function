@@ -9,6 +9,7 @@ open Semantics
 open Config
 open ForwardIterator
 open Config
+open SetTaint
 
 (* type for CTL properties, instantiated with bExp for atomic propositions *)
 type ctl_property = AbstractSyntax.bExp CTLProperty.generic_property
@@ -172,7 +173,7 @@ module CTLIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
   module D = D
   module B = D.B
 
-  let fwdTaintMap : var list InvMap.t ref = ref InvMap.empty
+  let fwdTaintMap : SetTaint.t InvMap.t ref = ref InvMap.empty
 
   let fwdTBlk (funcs : func StringMap.t) env vars (p : var list) (b : block) :
       var list =

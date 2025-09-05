@@ -11,6 +11,7 @@ open Apron
 open Domain
 open Functions
 open Semantics
+open SetTaint
 
 module GuaranteeIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
   type r = D.t
@@ -29,7 +30,7 @@ module GuaranteeIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
 
   let bwdInvMap = ref InvMap.empty
   let addBwdInv l (a : D.t) = bwdInvMap := InvMap.add l a !bwdInvMap
-  let fwdTaintMap : var list InvMap.t ref = ref InvMap.empty
+  let fwdTaintMap : SetTaint.t InvMap.t ref = ref InvMap.empty
 
   let fwdTBlk (funcs : func StringMap.t) env vars (p : var list) (b : block) :
       var list =

@@ -7,6 +7,7 @@ open Apron
 open ForwardIterator
 open Partition
 open Config
+open SetTaint
 
 module type CDA_ITERATOR = sig
   val analyze :
@@ -62,13 +63,13 @@ end = struct
     let env = init_env vars (Environment.make [||] [||]) in
     let s = f.funcBody in
     AbstractSyntax.block_print "main" !fmt s;
-    S.fwdTaintMap := fst (ForwardIteratorB.fwdTBlk funcs env vars [] s);
+    S.fwdTaintMap := fst (ForwardIteratorB.fwdTBlk funcs env vars SetTaint.empty s);
     Format.fprintf !fmt "\nForward Analysis taint: size %d\n"
       (InvMap.cardinal !S.fwdTaintMap);
     InvMap.iter
       (fun l a ->
         Format.printf "%a: %s\n" label_print l
-          (List.fold_left (fun acc x -> acc ^ " " ^ x.varName) "" a))
+          (SetTaint.fold (fun x acc -> acc ^ " " ^ x.varName) a ""))
       !S.fwdTaintMap;
     (* Conflict driven analysis result *)
     let i = cda_recursive ~property funcs env vars stmts main f in
