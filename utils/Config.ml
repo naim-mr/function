@@ -25,15 +25,17 @@ let timebwd = ref false
 let timefwd = ref false
 let fmt = ref Format.std_formatter
 let timeout = ref 300.0
-let ctl_existential_equivalence = ref false 
+let ctl_existential_equivalence = ref false
 let tracefwd = ref false
 let tracebwd = ref false
 let dot = ref false (* output trees in graphviz dot format *)
 let abort = ref false
 let vulnerability = ref false
 let resilience = ref false
+
 exception Abort
 exception Timeout
+
 let json_output = ref false
 let output_dir = ref "logs/"
 let exectime = ref "0"
@@ -42,7 +44,5 @@ let logfile = ref ""
 let result = ref false
 let output_std = ref false
 let f_log = ref stdout
-let tree: Yojson.Safe.t ref  = ref `Null
-let vuln_res: Yojson.Safe.t ref = ref  `Null
-
-
+let tree : Yojson.Safe.t ref = ref `Null
+let vuln_res : Yojson.Safe.t ref = ref `Null
