@@ -23,12 +23,12 @@ let parseFile filename =
     r
   with
   | Parser.Error ->
-      Printf.eprintf "Parse Error (Invalid Syntax) near %s\n"
+      Format.eprintf "Parse Error (Invalid Syntax) near %s\n"
         (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
       failwith "Parse Error"
   | Failure e ->
       if e == "lexing: empty token" then (
-        Printf.eprintf "Parse Error (Invalid Token) near %s\n"
+        Formateprintf "Parse Error (Invalid Token) near %s\n"
           (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
         failwith "Parse Error")
       else failwith e
@@ -37,12 +37,12 @@ let parsePropertyString str =
   let lex = Lexing.from_string str in
   try PropertyParser.file PropertyLexer.start lex with
   | PropertyParser.Error ->
-      Printf.eprintf "Parse Error (Invalid Syntax) near %s\n"
+      Format.eprintf "Parse Error (Invalid Syntax) near %s\n"
         (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
       failwith "Parse Error"
   | Failure e ->
       if e == "lexing: empty token" then (
-        Printf.eprintf "Parse Error (Invalid Token) near %s\n"
+        Format.eprintf "Parse Error (Invalid Token) near %s\n"
           (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
         failwith "Parse Error")
       else failwith e
@@ -58,12 +58,12 @@ let parseProperty filename =
     r
   with
   | PropertyParser.Error ->
-      Printf.eprintf "Parse Error (Invalid Syntax) near %s\n"
+      Format.eprintf "Parse Error (Invalid Syntax) near %s\n"
         (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
       failwith "Parse Error"
   | Failure e ->
       if e == "lexing: empty token" then (
-        Printf.eprintf "Parse Error (Invalid Token) near %s\n"
+        Format.eprintf "Parse Error (Invalid Token) near %s\n"
           (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
         failwith "Parse Error")
       else failwith e
@@ -79,12 +79,12 @@ let parseCTLProperty filename =
     CTLProperty.map (fun p -> fst (parsePropertyString p)) res
   with
   | CTLPropertyParser.Error ->
-      Printf.eprintf "Parse Error (Invalid Syntax) near %s\n"
+      Format.eprintf "Parse Error (Invalid Syntax) near %s\n"
         (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
       failwith "Parse Error"
   | Failure e ->
       if e == "lexing: empty token" then (
-        Printf.eprintf "Parse Error (Invalid Token) near %s\n"
+        Format.eprintf "Parse Error (Invalid Token) near %s\n"
           (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
         failwith "Parse Error")
       else failwith e
@@ -97,12 +97,12 @@ let parseCTLPropertyString_plain (property : string) =
     CTLPropertyParser.prog CTLPropertyLexer.read lex
   with
   | CTLPropertyParser.Error ->
-      Printf.eprintf "Parse Error (Invalid Syntax) near %s\n"
+      Format.eprintf "Parse Error (Invalid Syntax) near %s\n"
         (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
       failwith "Parse Error"
   | Failure e ->
       if e == "lexing: empty token" then (
-        Printf.eprintf "Parse Error (Invalid Token) near %s\n"
+        Format.eprintf "Parse Error (Invalid Token) near %s\n"
           (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
         failwith "Parse Error")
       else failwith e
