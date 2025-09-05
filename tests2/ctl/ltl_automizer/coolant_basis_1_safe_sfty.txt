@@ -1,1 +1,0 @@
-AG{OR{chainBroken != 1}{AG{chainBroken == 1}}}
