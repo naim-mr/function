@@ -81,7 +81,6 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
         let a = InvMap.find l !fwdInvMap in
         let dm = if !refine then Some a else None in
         let uap = false in
-        (* Handle loop condition in the case it is tainted *)
         let p1 =
           D.filter ?domain:dm p ~underapprox:uap (fst (negBExp (b, ba)))
         in
@@ -299,9 +298,7 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
         Format.fprintf !fmt "\nBackward Analysis (Time: %f s):\n"
           (stopbwd -. startbwd)
       else Format.fprintf !fmt "\nBackward Analysis:\n";
-      bwdMap_print !fmt !bwdInvMap;
-      Format.fprintf !fmt "\n Forget taint variable: \n";
-      Format.fprintf !fmt ": %a\n" D.print i);
+      bwdMap_print !fmt !bwdInvMap;);
     tree := D.output_json vars i;
     D.defined ?condition:precondition i
 end
