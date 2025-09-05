@@ -28,7 +28,7 @@ let parseFile filename =
       failwith "Parse Error"
   | Failure e ->
       if e == "lexing: empty token" then (
-        Formateprintf "Parse Error (Invalid Token) near %s\n"
+        Format.eprintf "Parse Error (Invalid Token) near %s\n"
           (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
         failwith "Parse Error")
       else failwith e
@@ -124,7 +124,6 @@ let is_keyword = function
 let parse_args () =
   let rec doit args =
     match args with
-    (* General arguments -----------------------------------------------------*)
     | "-domain" :: x :: r ->
         (* abstract domain: boxes|octagons|polyhedra *)
         Config.domain := x;
@@ -164,7 +163,7 @@ let parse_args () =
         Config.refine := true;
         doit r
     | "-retrybwd" :: x :: r ->
-        (* TOC *)
+        (* Retry widening heuristic *)
         Config.retrybwd := int_of_string x;
         doit r
     | "-tracefwd" :: r ->
@@ -175,23 +174,18 @@ let parse_args () =
         (* backward analysis trace *)
         Config.tracebwd := true;
         CFGInterpreter.trace := true;
-        (* TOC *)
         CFGInterpreter.trace_states := true;
-        (* TOC *)
         doit r
-    (* Conflict driven analysis arguments -------------------------------------------------*)
     | "-cda" :: x :: r ->
-        (* TOC *)
+        (* Conflict-driven analysis *)
         Config.cda := true;
         Config.size := int_of_string x;
         Config.refine := true;
         doit r
-    (* Termination arguments -------------------------------------------------*)
     | "-termination" :: r ->
-        (* guarantee analysis *)
+        (* termination analysis *)
         Config.analysis := "termination";
         doit r
-    (* Recurrence / Guarantee arguments --------------------------------------*)
     | "-guarantee" :: x :: r ->
         (* guarantee analysis *)
         Config.analysis := "guarantee";
@@ -214,7 +208,6 @@ let parse_args () =
         (* track backward analysis time *)
         Config.timebwd := true;
         doit r
-    (* CTL arguments ---------------------------------------------------------*)
     | "-ctl" :: x :: r ->
         (* CTL analysis *)
         Config.analysis := "ctl";
@@ -260,7 +253,6 @@ let parse_args () =
     | "-output_std" :: r ->
         Config.output_std := true;
         doit r
-    (* TOC *)
     | "-json_output" :: x :: r when not (is_keyword x) ->
         Config.json_output := true;
         output_dir := x;
@@ -276,10 +268,7 @@ let parse_args () =
   in
   doit (List.tl (Array.to_list Sys.argv))
 
-(* do all *)
-
-let result = ref false
-
+(* Factorised function to run termination/guarantee/reccurence analysis *)
 let run_analysis analysis_function program () =
   try
     let start = Sys.time () in
@@ -297,10 +286,6 @@ let run_analysis analysis_function program () =
     Format.fprintf !fmt "\nThe Analysis Timed Out!\n";
     Format.fprintf !fmt "\nDone.\n";
     false
-
-let cda_run s : (module Cda.CDA_ITERATOR) =
-  let module D = (val s : SEMANTIC) in
-  (module Cda.Make (D))
 
 let termination_iterator () : (module SEMANTIC) =
   let open TerminationIterator in
@@ -374,6 +359,7 @@ let ctl_iterator () : (module SEMANTIC) =
   in
   (module S)
 
+(* TODO: factorised it with a first order module manipulating function *)
 module CFGCTLBoxes = CFGCTLIterator.CFGCTLIterator (DecisionTree.TSAB)
 module CFGCTLBoxesOrdinals = CFGCTLIterator.CFGCTLIterator (DecisionTree.TSOB)
 module CFGCTLOctagons = CFGCTLIterator.CFGCTLIterator (DecisionTree.TSAO)
@@ -383,7 +369,7 @@ module CFGCTLPolyhedra = CFGCTLIterator.CFGCTLIterator (DecisionTree.TSAP)
 module CFGCTLPolyhedraOrdinals =
   CFGCTLIterator.CFGCTLIterator (DecisionTree.TSOP)
 
-let termination (module S : SEMANTIC) program =
+let run_termination (module S : SEMANTIC) program =
   if not !minimal then (
     Format.fprintf !fmt "\nAbstract Syntax:\n";
     AbstractSyntax.prog_print !fmt program);
@@ -398,7 +384,7 @@ let termination (module S : SEMANTIC) program =
   in
   run_analysis analysis_function program ()
 
-let guarantee (module S : SEMANTIC) program property =
+let run_rec_gua (module S : SEMANTIC) program property =
   let property =
     match property with
     | None -> raise (Invalid_argument "Unknown Property")
@@ -421,30 +407,7 @@ let guarantee (module S : SEMANTIC) program property =
        ~property:(Exp property))
     program ()
 
-let recurrence (module S : SEMANTIC) program property =
-  let property =
-    match property with
-    | None -> raise (Invalid_argument "Unknown Property")
-    | Some property -> property
-  in
-  if not !minimal then (
-    Format.fprintf !fmt "\nAbstract Syntax:\n";
-    AbstractSyntax.prog_print !fmt program;
-    Format.fprintf !fmt "\nProperty: ";
-    AbstractSyntax.property_print !fmt property);
-  let parsedPrecondition = parsePropertyString !precondition in
-  let precondition =
-    fst
-    @@ AbstractSyntax.StringMap.find ""
-    @@ ItoA.property_itoa_of_prog program !main parsedPrecondition
-  in
-  let analysis_function = S.analyze in
-  run_analysis
-    (analysis_function ~precondition:(Some precondition)
-       ~property:(Exp property))
-    program ()
-
-let ctl_ast (module S : SEMANTIC) prog property =
+let run_ctl_ast (module S : SEMANTIC) prog property =
   let starttime = Sys.time () in
   let parsedPrecondition = parsePropertyString !precondition in
   let precondition =
@@ -468,7 +431,7 @@ let ctl_ast (module S : SEMANTIC) prog property =
   else Format.fprintf !fmt "\nFinal Analysis Result: UNKNOWN\n";
   result
 
-let ctl_cfg () =
+let run_ctl_cfg () =
   if !filename = "" then raise (Invalid_argument "No Source File Specified");
   if !property = "" then
     raise (Invalid_argument "No Property Specifilet s = Lexing.dummy_posed");
@@ -525,6 +488,10 @@ let ctl_cfg () =
   else Format.fprintf !fmt "\nAnalysis Result: UNKNOWN\n";
   result
 
+let run_cda s : (module Cda.CDA_ITERATOR) =
+  let module D = (val s : SEMANTIC) in
+  (module Cda.Make (D))
+
 let doit () =
   (* Parsing cli args -> into Config ref variables *)
   parse_args ();
@@ -575,7 +542,7 @@ let doit () =
         (program, Semantics.Ctl property, None)
     | _ -> raise (Invalid_argument "Unknown Analysis")
   in
-  (* A program is a map of variable, a bock (see: AbstractSyntax.ml) and a map of functions *)
+  (* A program is a map of variable, a block (see: AbstractSyntax.ml) and a map of functions *)
   let vars, b, funcs = program in
   (* Get the main function and the variables as a list *)
   let func = AbstractSyntax.StringMap.find !main funcs in
@@ -583,7 +550,7 @@ let doit () =
   (* Launch the analysis and get the returned output "true" or "unknow" *)
   let _ =
     if !Config.cda then
-      let module C = (val cda_run semantic : CDA_ITERATOR) in
+      let module C = (val run_cda semantic : CDA_ITERATOR) in
       let parsedPrecondition = parsePropertyString !precondition in
       let precondition =
         fst
@@ -593,12 +560,11 @@ let doit () =
       C.analyze ~property ~precondition:(Some precondition) funcs vars b !main
     else
       match !analysis with
-      | "termination" -> termination (module S) program
-      | "guarantee" -> guarantee (module S) program prop
-      | "recurrence" -> recurrence (module S) program prop
-      | "ctl" when !ctltype = "CFG" -> ctl_cfg ()
+      | "termination" -> run_termination (module S) program
+      | "guarantee" | "recurrence" -> run_rec_gua (module S) program prop
+      | "ctl" when !ctltype = "CFG" -> run_ctl_cfg ()
       | "ctl" (* default CTL analysis is CTL-AST *) ->
-          ctl_ast
+          run_ctl_ast
             (module S)
             program
             (match property with
