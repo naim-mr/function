@@ -19,6 +19,7 @@ open DecisionTree
 open ForwardIterator
 open AbstractSyntax
 open SetTaint
+open Taint
 
 module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
   type r = D.t * D.t * bool
@@ -26,8 +27,6 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
   module D = D
   module B = D.B
   module ForwardIteratorB = ForwardIterator (B)
-
-
   let dummy_prop = Exp StringMap.empty
   let fwdInvMap = ref InvMap.empty
   let fwdTaintMap = ref InvMap.empty
@@ -38,7 +37,6 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
     InvMap.iter
       (fun l a -> Format.fprintf fmt "%a: %a\n" label_print l D.print a)
       m
-
 
   (*Backward Iterator + Recursion *)
   let rec bwdStm ?property ?domain funcs env vars (p, r, flag) s tvl =
@@ -51,7 +49,7 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
           r,
           flag )
     | A_assign ((l, _), (e, _)) ->
-        let e_vars = ForwardIteratorB.avars (e, l) in
+        let e_vars = Taint.avars (e, l) in
         let uap = false in
         let taint =
           SetTaint.is_empty (SetTaint.inter e_vars tvl) || not !Config.resilience
@@ -61,7 +59,7 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
     | A_if ((b, ba), s1, s2) ->
         let uap = false in
         let taint =
-          ForwardIteratorB.taint_b (b, ba) tvl && !Config.resilience
+          Taint.taint_b (b, ba) tvl && !Config.resilience
         in
         let p1, _, flag1 = bwdBlk funcs env vars (p, r, flag) s1 in
         let p1 = D.filter ?domain ~taint ~underapprox:uap p1 b in

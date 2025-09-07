@@ -730,6 +730,7 @@ echo "group,filename,property,options,result,loc,time,alarms" > $stats_csv
 total=$(find $bench -iname "*.c" | wc -l)
 solved=0
 
+
 treat_examples "test_nexp/pulseinfinite" "Pulse" "Pulse"  ""
 treat_examples "test_nexp/lit/loop/" "EndWatch" "Endwatch"  ""x
 treat_examples "test_nexp/sv_comp/" "SvComp" "SV-COMP"  ""

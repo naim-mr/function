@@ -12,6 +12,7 @@ open Semantics
 open Domain
 open Partition
 open SetTaint
+open Taint
 
 module ForwardIterator (B : PARTITION) = struct
   let fwdMap_print fmt m fprint =
@@ -88,72 +89,28 @@ module ForwardIterator (B : PARTITION) = struct
         addFwdInv l p;
         fwdBlk funcs env vars (fwdStm funcs env vars p s) b
 
-  (*  Taint forward analysis *)
-  (* Join of two list*)
-  let join = SetTaint.union
-
-  (* List of vars in an expression *)
-  let avars (e, ext) =
-    let rec aux e acc =
-      match e with
-      | A_var x -> SetTaint.add x acc
-      | A_interval _ | A_const _ | A_INPUT | A_RANDOM -> acc
-      | A_aunary (_, (a, _)) -> aux a acc
-      | A_abinary (_, (a1, _), (a2, _)) -> SetTaint.union (aux a1 acc) (aux a2 acc)
-    in
-    aux e SetTaint.empty
-
-  (* Test if a boolean expression is taint *)
-  let taint_b (e, ext) tvl =
-    let rec aux e =
-      match e with
-      | A_MAYBE_INP -> true
-      | A_TRUE | A_MAYBE | A_FALSE -> false
-      | A_bunary (_, (b, l)) -> aux b
-      | A_bbinary (_, (b1, _), (b2, l)) -> aux b1 || aux b2
-      | A_rbinary (_, a1, a2) ->
-          let vl1 = avars a1 in
-          let vl2 = avars a2 in
-          if
-            SetTaint.is_empty (SetTaint.inter tvl vl1) 
-            || SetTaint.is_empty (SetTaint.inter tvl vl2) 
-          then true
-          else false
-    in
-    aux e
-
-  let assigned block =
-    let rec aux stmt acc =
-      match stmt with
-      | A_assign ((A_var x, _), (_, _)) -> SetTaint.add x acc
-      | A_if ((b, ba), s1, s2) -> SetTaint.union (aux_block s1 acc) (aux_block s2 acc)
-      | A_while (l, (b, ba), s) -> aux_block s acc
-      | _ -> acc
-    and aux_block s acc =
-      match s with
-      | A_empty l -> acc
-      | A_block (l, (s, _), b) -> SetTaint.union (aux s acc) (aux_block b acc)
-    in
-    aux_block block SetTaint.empty
-
   (* Assgined block: return set of variables assigned in a block (only syntactic) *)
   let rec fwdTStm funcs env vars p s =
+    let open Taint in
     match s with
     | A_label _ -> p
     | A_return -> p
-    | A_assign ((A_var x, _), (A_INPUT, _)) -> SetTaint.add x p 
-    | A_assign ((A_var x, _), (A_RANDOM, _)) -> SetTaint.filter (fun v -> String.compare v.varId x.varId != 0) p 
+    | A_assign ((A_var x, _), (A_INPUT, _)) -> add x p
+    | A_assign ((A_var x, _), (A_RANDOM, _)) ->
+        filter (fun v -> String.compare v.varId x.varId != 0) p
     | A_assign ((A_var x, _), (e, l)) ->
         let e_vars = avars (e, l) in
-        if SetTaint.is_empty (SetTaint.inter e_vars p) then SetTaint.add x p 
-        else SetTaint.filter (fun v -> String.compare v.varId x.varId != 0) p
+        if is_bot (meet e_vars p) then add x p
+        else filter (fun v -> String.compare v.varId x.varId != 0) p
     | A_assign (_, _) -> p
     | A_assert _ -> p
     | A_if ((b, ba), s1, s2) ->
-        let assigned_vars = SetTaint.union (assigned s1)  (assigned s2) in
+        let assigned_vars = join (assigned s1) (assigned s2) in
         let r1 = fwdTBlk funcs env vars p s1 in
         let r2 = fwdTBlk funcs env vars p s2 in
-        let iflow = if taint_b (b, ba) p then assigned_vars else SetTaint.empty in
+        let iflow =
+          if taint_b (b, ba) p then assigned_vars else SetTaint.empty
+        in
         join (join (snd r1) (snd r2)) iflow
     | A_while (l, (b, ba), s) ->
         let rec aux i p2 =
@@ -188,5 +145,7 @@ module ForwardIterator (B : PARTITION) = struct
         fwdTBlk funcs env vars p' b
 
   and fwdTaintMap : SetTaint.t InvMap.t ref = ref InvMap.empty
-  and addFwdTaint l (a : SetTaint.t) = fwdTaintMap := InvMap.add l a !fwdTaintMap
+
+  and addFwdTaint l (a : SetTaint.t) =
+    fwdTaintMap := InvMap.add l a !fwdTaintMap
 end

@@ -17,12 +17,12 @@ type 'a p = Ctl of ctl_property | Exp of (bExp * 'a) StringMap.t
 let get_ctl prop =
   match prop with
   | Ctl prop -> prop
-  | _ -> raise (Invalid_argument "Waiting a ctl property received a bexp")
+  | _ -> raise (Invalid_argument "Expected a ctl property: received a bexp")
 
 let get_bexp prop =
   match prop with
   | Exp prop -> prop
-  | _ -> raise (Invalid_argument "Waiting a bexp property received a ctl")
+  | _ -> raise (Invalid_argument "Expected a bexp property, got a ctl")
 
 module type SEMANTIC = sig
   module D : RANKING_FUNCTION
@@ -37,12 +37,12 @@ module type SEMANTIC = sig
       different iterators *)
 
   val dummy_prop : 'a p
-
+ 
   val fwdInvMap : B.t InvMap.t ref
   (** [fwdInvMap]: a map from the label of the program to an associated the
       over-approximating numerical abstraction computed in a forward analysis *)
 
-  val fwdTaintMap : SetTaint.t InvMap.t ref
+  val fwdTaintMap : SetTaint.t InvMap.t ref 
 
   val bwdInvMap : D.t InvMap.t ref
   (** [bwdInvMap]: a map from the label of the program to an associated a
