@@ -17,7 +17,7 @@ type 'a p = Ctl of ctl_property | Exp of (bExp * 'a) StringMap.t
 let get_ctl prop =
   match prop with
   | Ctl prop -> prop
-  | _ -> raise (Invalid_argument "Expected a ctl property: received a bexp")
+  | _ -> raise (Invalid_argument "Expected a ctl property: got a bexp")
 
 let get_bexp prop =
   match prop with
