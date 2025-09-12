@@ -133,7 +133,6 @@ module ForwardIterator (B : PARTITION) = struct
   and fwdTBlk funcs env vars p (b : block) =
     match b with
     | A_empty l ->
-        Printf.printf "empty debug cda %d \n" (InvMap.cardinal !fwdTaintMap);
         addFwdTaint l p;
         (!fwdTaintMap, p)
     | A_block (l, (s, _), b) ->

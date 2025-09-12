@@ -718,5 +718,6 @@ module CTLIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
     let programInvariant = InvMap.find initialLabel inv in
     bwdInvMap := inv;
     tree := D.output_json program.variables programInvariant;
-    D.defined ?condition:precondition programInvariant
+    Config.result := D.defined ?condition:precondition programInvariant;
+    !Config.result
 end

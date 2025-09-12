@@ -121,7 +121,7 @@ let isKeyword = function
       true
   | _ -> false
 
-let parse_args () =
+let parseArgs () =
   let rec doit args =
     match args with
     | "-domain" :: x :: r ->
@@ -248,10 +248,8 @@ let parse_args () =
         doit r
     | "-resilience" :: r ->
         (* resilience analysis *)
+        Config.analysis := "termination";
         Config.resilience := true;
-        doit r
-    | "-output_std" :: r ->
-        Config.output_std := true;
         doit r
     | "-json_output" :: x :: r when not (isKeyword x) ->
         Config.json_output := true;
@@ -268,24 +266,38 @@ let parse_args () =
   in
   doit (List.tl (Array.to_list Sys.argv))
 
+let check_args () =
+  if
+    !Config.resilience
+    && not (String.compare !Config.analysis "termination" <> 0)
+  then
+    raise
+      (Invalid_argument "Resilience analysis is avalaible only for termination");
+  if !Config.vulnerability && String.compare !Config.ctltype "CFG" == 0 then
+    raise
+      (Invalid_argument
+         "Vulnerability  analysis is avalaible only for AST based iterations");
+  if String.compare !Config.filename "" = 0 then
+    raise (Invalid_argument "No Source File Specified");
+  if
+    String.compare !property "" = 0
+    && String.compare !analysis "termination" <> 0
+  then raise (Invalid_argument "No Property File Specified")
+
 (* Factorised function to run termination/guarantee/reccurence analysis *)
 let run_analysis analysis_function program () =
   try
     let start = Sys.time () in
-    let terminating = analysis_function program !main in
-    Config.result := terminating;
+    Config.result := analysis_function program !main;
     let stop = Sys.time () in
-    Format.fprintf !fmt "Final Analysis Result: ";
-    let result = if terminating then "TRUE" else "UNKNOWN" in
-    Format.fprintf !fmt "%s\n" result;
+    let res = if !Config.result then "TRUE" else "UNKNOW" in
+    Format.fprintf !fmt "Final Analysis Result: %s\n" res;
     if !time then exectime := string_of_float (stop -. start);
     Format.fprintf !fmt "Time: %f s\n" (stop -. start);
-    Format.fprintf !fmt "\nDone.\n";
-    terminating
+    Format.fprintf !fmt "\nDone.\n"
   with Config.Timeout ->
     Format.fprintf !fmt "\nThe Analysis Timed Out!\n";
-    Format.fprintf !fmt "\nDone.\n";
-    false
+    Format.fprintf !fmt "\nDone.\n"
 
 let termination_iterator () : (module SEMANTIC) =
   let open TerminationIterator in
@@ -374,6 +386,7 @@ let run_termination (module S : SEMANTIC) program =
     Format.fprintf !fmt "\nAbstract Syntax:\n";
     AbstractSyntax.prog_print !fmt program);
   let parsedPrecondition = parsePropertyString !precondition in
+  (* TODO:  property_itoa_of_prog logic is strange *)
   let precondition =
     fst
     @@ AbstractSyntax.StringMap.find ""
@@ -420,16 +433,14 @@ let run_ctl_ast (module S : SEMANTIC) prog property =
     AbstractSyntax.prog_print !fmt prog;
     Format.fprintf !fmt "\n");
   let analyze = S.analyze in
-  let result =
-    analyze ~precondition:(Some precondition) ~property:(Ctl property) prog ""
-  in
+  Config.result :=
+    analyze ~precondition:(Some precondition) ~property:(Ctl property) prog "";
   if !time then (
     let stoptime = Sys.time () in
     exectime := string_of_float (stoptime -. starttime);
     Format.fprintf !fmt "\nTime: %f" (stoptime -. starttime));
-  if result then Format.fprintf !fmt "\nFinal Analysis Result: TRUE\n"
-  else Format.fprintf !fmt "\nFinal Analysis Result: UNKNOWN\n";
-  result
+  if !Config.result then Format.fprintf !fmt "\nFinal Analysis Result: TRUE\n"
+  else Format.fprintf !fmt "\nFinal Analysis Result: UNKNOWN\n"
 
 let run_ctl_cfg () =
   if !filename = "" then raise (Invalid_argument "No Source File Specified");
@@ -476,117 +487,98 @@ let run_ctl_cfg () =
   let mainFunc = Cfg.find_func !main cfg in
   let possibleLoopHeads = Loop_detection.possible_loop_heads cfg mainFunc in
   let domSets = Loop_detection.dominator cfg mainFunc in
-  let result =
-    analyze ~precondition cfg mainFunc possibleLoopHeads domSets ctlProperty
-  in
-  Config.result := result;
+  Config.result :=
+    analyze ~precondition cfg mainFunc possibleLoopHeads domSets ctlProperty;
   if !time then (
     let stoptime = Sys.time () in
-    Config.exectime := string_of_float (stoptime -. starttime);
+    exectime := string_of_float (stoptime -. starttime);
     Format.fprintf !fmt "\nTime: %f" (stoptime -. starttime));
-  if result then Format.fprintf !fmt "\nAnalysis Result: TRUE\n"
-  else Format.fprintf !fmt "\nAnalysis Result: UNKNOWN\n";
-  result
+  if !Config.result then Format.fprintf !fmt "\nFinal Analysis Result: TRUE\n"
+  else Format.fprintf !fmt "\nFinal Analysis Result: UNKNOWN\n"
 
 let run_cda s : (module Cda.CDA_ITERATOR) =
   let module D = (val s : SEMANTIC) in
   (module Cda.Make (D))
 
+let get_semantic () =
+  match !analysis with
+  | "termination" -> termination_iterator ()
+  | "guarantee" -> guarantee_iterator ()
+  | "recurrence" -> recurrence_iterator ()
+  | "ctl" | "ctl-ast" | "ctl-cfg" -> ctl_iterator ()
+  | _ -> raise (Invalid_argument "Unknown Analysis")
+
+let get_ast_prop itast =
+  match !analysis with
+  | "termination" ->
+      let s = Lexing.dummy_pos in
+      let p =
+        ( IntermediateSyntax.I_universal (IntermediateSyntax.I_TRUE, (s, s)),
+          (s, s) )
+      in
+      let program, property = ItoA.prog_itoa ~property:(!main, p) itast in
+      (program, Semantics.Exp (Option.get property), None)
+  | "guarantee" | "recurrence" ->
+      let program, property =
+        ItoA.prog_itoa ~property:(!main, parseProperty !property) itast
+      in
+      (program, Semantics.Exp (Option.get property), property)
+  | "ctl" | "ctl-ast" | "ctl-cfg" ->
+      let parsedProperty = parseCTLPropertyString !property in
+      let program, property =
+        ItoA.ctl_prog_itoa parsedProperty !main (parseFile !filename)
+      in
+      (program, Semantics.Ctl property, None)
+  | _ -> raise (Invalid_argument "Unknown Analysis")
+
 let doit () =
   (* Parsing cli args -> into Config ref variables *)
-  parse_args ();
-  if !Config.json_output then (
-    Regression.create_logfile_name ();
-    (* Open the log file *)
-    Config.f_log := open_out_bin !Config.logfile;
-    (* Set the formatter to logfile*)
-    fmt := Format.formatter_of_out_channel !Config.f_log);
+  parseArgs ();
+  check_args ();
   (* Get the iterator for the demanded analysis *)
-  let semantic =
-    match !analysis with
-    | "termination" -> termination_iterator ()
-    | "guarantee" -> guarantee_iterator ()
-    | "recurrence" -> recurrence_iterator ()
-    | "ctl" | "ctl-ast" | "ctl-cfg" -> ctl_iterator ()
-    | _ -> raise (Invalid_argument "Unknown Analysis")
-  in
+  let semantic = get_semantic () in
   (* Property and filename must be given (except for termination property) *)
-  if !filename = "" then raise (Invalid_argument "No Source File Specified");
-  if
-    String.compare !property "" = 0
-    && String.compare !analysis "termination" <> 0
-  then raise (Invalid_argument "No Property File Specified");
-  (* Parsing the property and the file to an ast *)
-  let sources = parseFile !filename in
-  let program, property, prop =
-    match !analysis with
-    | "termination" ->
-        let s = Lexing.dummy_pos in
-        let p =
-          ( IntermediateSyntax.I_universal (IntermediateSyntax.I_TRUE, (s, s)),
-            (s, s) )
-        in
-        let program, property = ItoA.prog_itoa ~property:(!main, p) sources in
-        (program, Semantics.Exp (Option.get property), None)
-    | "guarantee" | "recurrence" ->
-        let program, property =
-          ItoA.prog_itoa ~property:(!main, parseProperty !property) sources
-        in
-        (program, Semantics.Exp (Option.get property), property)
-    | "ctl" | "ctl-ast" | "ctl-cfg" ->
-        let parsedProperty = parseCTLPropertyString !property in
-        let program, property =
-          ItoA.ctl_prog_itoa parsedProperty !main (parseFile !filename)
-        in
-        (program, Semantics.Ctl property, None)
-    | _ -> raise (Invalid_argument "Unknown Analysis")
-  in
+  (* Parsing the property and the file to an intermediate ast *)
+  let itast = parseFile !filename in
+  (* Get the ast and the properties*)
+  let program, property, prop = get_ast_prop itast in
   (* A program is a map of variable, a block (see: AbstractSyntax.ml) and a map of functions *)
   let vars, b, funcs = program in
   (* Get the main function and the variables as a list *)
   let func = AbstractSyntax.StringMap.find !main funcs in
   let module S = (val semantic : SEMANTIC) in
   (* Launch the analysis and get the returned output "true" or "unknow" *)
-  let _ =
-    if !Config.cda then
-      let module C = (val run_cda semantic : CDA_ITERATOR) in
-      let parsedPrecondition = parsePropertyString !precondition in
-      let precondition =
-        fst
-        @@ AbstractSyntax.StringMap.find ""
-        @@ ItoA.property_itoa_of_prog program !main parsedPrecondition
-      in
-      C.analyze ~property ~precondition:(Some precondition) funcs vars b !main
-    else
-      match !analysis with
-      | "termination" -> run_termination (module S) program
-      | "guarantee" | "recurrence" -> run_rec_gua (module S) program prop
-      | "ctl" when !ctltype = "CFG" -> run_ctl_cfg ()
-      | "ctl" (* default CTL analysis is CTL-AST *) ->
-          run_ctl_ast
-            (module S)
-            program
-            (match property with
-            | Semantics.Ctl p -> p
-            | _ -> raise (Invalid_argument "Impossible to reach"))
-      | _ -> raise (Invalid_argument "Unknown Analysis")
-  in
-  let _ =
-    if !Config.vulnerability && !ctltype <> "CFG" then (
-      (* Launch the vulnerability analysis and output the infered variables *)
-      let varlist =
-        List.map snd @@ List.of_seq @@ AbstractSyntax.StringMap.to_seq vars
-      in
-      Vulnerability.analyse S.D.vulnerable varlist func !S.bwdInvMap;
-      Format.printf " \n %s \n" (Yojson.Safe.pretty_to_string !Config.vuln_res))
-  in
-  if !Config.json_output then (
-    close_out !Config.f_log;
-    Regression.output_json ());
-  (* Get the log to ouput them on std output *)
-  if !Config.output_std && !Config.json_output then
-    let f_log = open_in_bin !logfile in
-    let s = input_value f_log in
-    Format.printf "%s" s
+  (if !Config.cda then
+     let module C = (val run_cda semantic : CDA_ITERATOR) in
+     let parsedPrecondition = parsePropertyString !precondition in
+     let precondition =
+       fst
+       @@ AbstractSyntax.StringMap.find ""
+       @@ ItoA.property_itoa_of_prog program !main parsedPrecondition
+     in
+     Config.result :=
+       C.analyze ~property ~precondition:(Some precondition) funcs vars b !main
+   else
+     match !analysis with
+     | "termination" -> run_termination (module S) program
+     | "guarantee" | "recurrence" -> run_rec_gua (module S) program prop
+     | "ctl" when !ctltype = "CFG" -> run_ctl_cfg ()
+     | "ctl" (* default CTL analysis is CTL-AST *) ->
+         run_ctl_ast
+           (module S)
+           program
+           (match property with
+           | Semantics.Ctl p -> p
+           | _ -> raise (Invalid_argument "Impossible to reach"))
+     | _ -> raise (Invalid_argument "Unknown Analysis"));
+  if !Config.vulnerability && !ctltype <> "CFG" then (
+    (* Launch the vulnerability analysisand output the infered variables *)
+    let varlist =
+      List.map snd @@ List.of_seq @@ AbstractSyntax.StringMap.to_seq vars
+    in
+    Vulnerability.analyse S.D.vulnerable varlist func !S.bwdInvMap;
+    Format.fprintf !fmt " \n %s \n"
+      (Yojson.Safe.pretty_to_string !Config.vuln_res);
+    if !Config.json_output then Regression.output_json ())
 
 let _ = doit ()

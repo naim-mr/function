@@ -1965,12 +1965,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
           | Bot, Bot -> Bot
           | Leaf f, Bot -> fBotLeftRight cs f
           | Bot, Leaf f -> fBotLeftRight cs f
-          | Leaf f1, Leaf f2 ->
-              let t' = fLeaf cs f1 f2 in
-              Format.printf "result join %a u %a == %a \n " print
-                { t with tree = t1 } print { t with tree = t2 } print
-                { t with tree = t' };
-              t'
+          | Leaf f1, Leaf f2 -> fLeaf cs f1 f2
           | Node ((c1, nc1), l1, r1), Node ((c2, nc2), l2, r2) ->
               (* if not (C.isEq c1 c2) then raise (Invalid_argument "tree_join_helper: invalid tree structure, constraints don't match"); *)
               let l = aux (l1, l2) (c1 :: cs) in
