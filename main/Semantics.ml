@@ -9,7 +9,7 @@ open Apron
 open InvMap
 open CTLProperty
 open Domain
-open SetTaint
+open VarSet
 
 type ctl_property = AbstractSyntax.bExp CTLProperty.generic_property
 type 'a p = Ctl of ctl_property | Exp of (bExp * 'a) StringMap.t
@@ -42,7 +42,7 @@ module type SEMANTIC = sig
   (** [fwdInvMap]: a map from the label of the program to an associated the
       over-approximating numerical abstraction computed in a forward analysis *)
 
-  val fwdTaintMap : SetTaint.t InvMap.t ref 
+  val fwdTaintMap : VarSet.t InvMap.t ref 
 
   val bwdInvMap : D.t InvMap.t ref
   (** [bwdInvMap]: a map from the label of the program to an associated a

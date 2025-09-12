@@ -11,7 +11,7 @@ open Config
 open Domain
 open Functions
 open Semantics
-open SetTaint
+open VarSet
 
 module RecurrenceIterator (D : RANKING_FUNCTION) = struct
   type r = D.t
@@ -32,7 +32,7 @@ module RecurrenceIterator (D : RANKING_FUNCTION) = struct
 
   let bwdInvMap = ref InvMap.empty
   let addBwdInv l (a : D.t) = bwdInvMap := InvMap.add l a !bwdInvMap
-  let fwdTaintMap : SetTaint.t InvMap.t ref = ref InvMap.empty
+  let fwdTaintMap : VarSet.t InvMap.t ref = ref InvMap.empty
 
   let fwdTBlk (funcs : func StringMap.t) env vars (p : var list) (b : block) :
       var list =

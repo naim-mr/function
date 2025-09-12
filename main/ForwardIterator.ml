@@ -11,7 +11,7 @@ open Config
 open Semantics
 open Domain
 open Partition
-open SetTaint
+open VarSet
 open Taint
 
 module ForwardIterator (B : PARTITION) = struct
@@ -109,12 +109,12 @@ module ForwardIterator (B : PARTITION) = struct
         let r1 = fwdTBlk funcs env vars p s1 in
         let r2 = fwdTBlk funcs env vars p s2 in
         let iflow =
-          if taint_b (b, ba) p then assigned_vars else SetTaint.empty
+          if taint_b (b, ba) p then assigned_vars else VarSet.empty
         in
         join (join (snd r1) (snd r2)) iflow
     | A_while (l, (b, ba), s) ->
         let rec aux i p2 =
-          if SetTaint.subset i p2 then i
+          if VarSet.subset i p2 then i
           else aux p2 (fwdTStm funcs env vars p2 (A_if ((b, ba), s, A_empty l)))
         in
         let i = p in
@@ -138,13 +138,13 @@ module ForwardIterator (B : PARTITION) = struct
     | A_block (l, (s, _), b) ->
         if !tracefwd && not !minimal then
           Format.printf "%a: %s\n" label_print l
-            (SetTaint.fold (fun x acc -> acc ^ "-" ^ x.varName) p "");
+            (VarSet.fold (fun x acc -> acc ^ "-" ^ x.varName) p "");
         let p' = fwdTStm funcs env vars p s in
         addFwdTaint l p;
         fwdTBlk funcs env vars p' b
 
-  and fwdTaintMap : SetTaint.t InvMap.t ref = ref InvMap.empty
+  and fwdTaintMap : VarSet.t InvMap.t ref = ref InvMap.empty
 
-  and addFwdTaint l (a : SetTaint.t) =
+  and addFwdTaint l (a : VarSet.t) =
     fwdTaintMap := InvMap.add l a !fwdTaintMap
 end

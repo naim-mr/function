@@ -1,16 +1,16 @@
 open AbstractSyntax
-open SetTaint
+open VarSet
 
 module Taint = struct
-  type t = SetTaint.t
+  type t = VarSet.t
 
-  let bot = SetTaint.empty
-  let join = SetTaint.union
-  let add x t = SetTaint.add x t
-  let filter = SetTaint.filter
-  let meet = SetTaint.inter
-  let leq = SetTaint.subset
-  let is_bot = SetTaint.is_empty
+  let bot = VarSet.empty
+  let join = VarSet.union
+  let add x t = VarSet.add x t
+  let filter = VarSet.filter
+  let meet = VarSet.inter
+  let leq = VarSet.subset
+  let is_bot = VarSet.is_empty
 
   (* List of vars in an expression *)
   let avars (e, ext) =

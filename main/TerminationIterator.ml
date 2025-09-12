@@ -18,7 +18,7 @@ open Semantics
 open DecisionTree
 open ForwardIterator
 open AbstractSyntax
-open SetTaint
+open VarSet
 open Taint
 
 module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
@@ -53,7 +53,7 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
         let e_vars = Taint.avars (e, l) in
         let uap = false in
         let taint =
-          SetTaint.is_empty (SetTaint.inter e_vars tvl)
+          VarSet.is_empty (VarSet.inter e_vars tvl)
           || not !Config.resilience
         in
         (D.bwdAssign ?domain ~taint ~underapprox:uap p (l, e), r, flag)
@@ -221,9 +221,9 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
         s
     in
     let _ =
-      ForwardIteratorB.fwdTBlk funcs env (SetTaint.of_list vars)
+      ForwardIteratorB.fwdTBlk funcs env (VarSet.of_list vars)
         (snd
-        @@ ForwardIteratorB.fwdTBlk funcs env vars (SetTaint.of_list vars) stmts
+        @@ ForwardIteratorB.fwdTBlk funcs env vars (VarSet.of_list vars) stmts
         )
         s
     in
@@ -241,7 +241,7 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
       InvMap.iter
         (fun l a ->
           Format.printf "%a: %s\n" label_print l
-            (SetTaint.fold (fun x acc -> acc ^ " " ^ x.varName) a ""))
+            (VarSet.fold (fun x acc -> acc ^ " " ^ x.varName) a ""))
         !fwdTaintMap);
     (* Backward Analysis *)
     if !tracebwd && not !minimal then
