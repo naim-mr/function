@@ -9,7 +9,9 @@ open Banal_abstract_syntax
 open Banal_typed_syntax
 open Banal_semantics
 open Banal_domain
+open Utils.Apron_utils
 open Apron
+
 module Itv_rat = Banal_itv_rat
 module Linearization = Banal_linearization
 
@@ -292,7 +294,9 @@ module ApronDomain (Param : NUMERICAL) = struct
         (* for each constraint oldc in a *)
         for i = 0 to Lincons1.array_length ar - 1 do
           let oldc = Lincons1.array_get ar i in
-          if c <> oldc then (
+          if
+            lincons1_cmp c oldc = 0
+          then (
             (* try to replace oldc with c *)
             Lincons1.array_set ar i c;
             let aa = Abstract1.of_lincons_array man env ar in
@@ -304,7 +308,7 @@ module ApronDomain (Param : NUMERICAL) = struct
       (pool @ [ c ]);
     (* now, remove c *)
     let l = list_of_lincons_array ar in
-    let ll = List.filter (fun cc -> c <> cc) l in
+    let ll = List.filter (fun cc -> lincons1_cmp c cc = 0 ) l in
     if trace_remove && List.length l <> List.length ll then
       Format.printf "### remove_constraint remove: %a ###@\n" Lincons1.print c;
     abs_of_lincons_list env ll

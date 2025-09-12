@@ -9,6 +9,7 @@ open Partition
 open Functions
 open Numerical
 open Utils
+open Apron_utils
 
 module Affine (B : PARTITION) : FUNCTION = struct
   module B = B
@@ -213,11 +214,7 @@ module Affine (B : PARTITION) : FUNCTION = struct
             let l = Lincons1.array_length a in
             let b = ref false in
             for i = 0 to l - 1 do
-              if
-                Linexpr0.cmp c.Lincons1.lincons0.Lincons0.linexpr0
-                  (Lincons1.array_get a i).Lincons1.lincons0.Lincons0.linexpr0
-                = 0
-              then b := true
+              if lincons1_cmp c (Lincons1.array_get a i) = 0 then b := true
             done;
             !b
           in
@@ -264,12 +261,9 @@ module Affine (B : PARTITION) : FUNCTION = struct
           | _ ->
               let p = Abstract1.join manager p1 p2 in
               (* p = convex-hull *)
-              Abstract1.print Format.std_formatter p;
               let p = Abstract1.to_lincons_array manager p in
               (* converting p into set of constraints *)
               f := filter_constraints p;
-              List.iter (fun c -> Lincons1.print Format.std_formatter c) !f;
-              print_newline ();
               if 1 = List.length !f then (
                 (* there is only one constraint on # *)
                 let f = Lincons1.get_linexpr1 (List.hd !f) in
@@ -368,11 +362,7 @@ module Affine (B : PARTITION) : FUNCTION = struct
       let l = Lincons1.array_length a in
       let b = ref false in
       for i = 0 to l - 1 do
-        if
-          Linexpr0.cmp c.Lincons1.lincons0.Lincons0.linexpr0
-            (Lincons1.array_get a i).Lincons1.lincons0.Lincons0.linexpr0
-          = 0
-        then b := true
+        if lincons1_cmp c (Lincons1.array_get a i) = 0 then b := true
       done;
       !b
     in
@@ -447,11 +437,7 @@ module Affine (B : PARTITION) : FUNCTION = struct
       let l = Lincons1.array_length a in
       let b = ref false in
       for i = 0 to l - 1 do
-        if
-          Linexpr0.cmp c.Lincons1.lincons0.Lincons0.linexpr0
-            (Lincons1.array_get a i).Lincons1.lincons0.Lincons0.linexpr0
-          = 0
-        then b := true
+        if lincons1_cmp c (Lincons1.array_get a i) = 0 then b := true
       done;
       !b
     in
