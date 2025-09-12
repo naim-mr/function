@@ -111,7 +111,7 @@ let parseCTLPropertyString (property : string) =
   CTLProperty.map (fun p -> fst (parsePropertyString p))
   @@ parseCTLPropertyString_plain property
 
-let is_keyword = function
+let isKeyword = function
   | "-domain" | "-timeout" | "-joinfwd" | "-joinbwd" | "-main" | "-meetbwd"
   | "-minimal" | "-ordinals" | "-refine" | "-retrybwd" | "-tracefwd"
   | "-tracebwd" | "-cda" | "-termination" | "-guarantee" | "-recurrence"
@@ -253,7 +253,7 @@ let parse_args () =
     | "-output_std" :: r ->
         Config.output_std := true;
         doit r
-    | "-json_output" :: x :: r when not (is_keyword x) ->
+    | "-json_output" :: x :: r when not (isKeyword x) ->
         Config.json_output := true;
         output_dir := x;
         time := true
