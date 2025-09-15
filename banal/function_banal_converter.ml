@@ -33,7 +33,7 @@ let rec of_aExp_aux (aExp : FAS.aExp) : expr =
       T_int_const (i1, i2)
   | FAS.A_aunary (op, (e, _)) ->
       let expr = (of_aExp_aux e, int_type, dummy_extent) in
-      let unOp = match op with FAS.A_UMINUS -> A_UNARY_MINUS in
+      let unOp = match op with FAS.A_UMINUS -> A_UNARY_MINUS | FAS.A_DEREF | FAS.A_ADDR -> raise (Invalid_argument "Array are not yet supported with banal") in
       T_unary (unOp, expr)
   | FAS.A_abinary (op, (e1, _), (e2, _)) ->
       let expr1 = (of_aExp_aux e1, int_type, dummy_extent) in
