@@ -265,11 +265,11 @@ let parseArgs () =
     | [] -> ()
   in
   doit (List.tl (Array.to_list Sys.argv))
-
+let f = Stdlib.compare 
 let check_args () =
   if
     !Config.resilience
-    && not (String.compare !Config.analysis "termination" <> 0)
+    && (String.compare !Config.analysis "termination" <> 0)
   then
     raise
       (Invalid_argument "Resilience analysis is avalaible only for termination");
