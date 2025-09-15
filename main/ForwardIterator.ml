@@ -90,7 +90,7 @@ module ForwardIterator (B : PARTITION) = struct
         fwdBlk funcs env vars (fwdStm funcs env vars p s) b
 
   (* Assgined block: return set of variables assigned in a block (only syntactic) *)
-  let rec fwdTStm funcs env vars p s =
+  let rec fwdTStm funcs p s =
     let open Taint in
     match s with
     | A_label _ -> p
@@ -106,45 +106,38 @@ module ForwardIterator (B : PARTITION) = struct
     | A_assert _ -> p
     | A_if ((b, ba), s1, s2) ->
         let assigned_vars = join (assigned s1) (assigned s2) in
-        let r1 = fwdTBlk funcs env vars p s1 in
-        let r2 = fwdTBlk funcs env vars p s2 in
-        let iflow =
-          if taint_b (b, ba) p then assigned_vars else VarSet.empty
-        in
+        let r1 = fwdTBlk funcs p s1 in
+        let r2 = fwdTBlk funcs p s2 in
+        let iflow = if taint_b (b, ba) p then assigned_vars else VarSet.empty in
         join (join (snd r1) (snd r2)) iflow
     | A_while (l, (b, ba), s) ->
         let rec aux i p2 =
           if VarSet.subset i p2 then i
-          else aux p2 (fwdTStm funcs env vars p2 (A_if ((b, ba), s, A_empty l)))
+          else aux p2 (fwdTStm funcs p2 (A_if ((b, ba), s, A_empty l)))
         in
         let i = p in
-        let p2 = fwdTStm funcs env vars i (A_if ((b, ba), s, A_empty l)) in
+        let p2 = fwdTStm funcs i (A_if ((b, ba), s, A_empty l)) in
         let p = aux i p2 in
         addFwdTaint l p;
         p
     | A_call (f, ss) ->
         let f = StringMap.find f funcs in
-        let p =
-          List.fold_left (fun ap (s, _) -> fwdTStm funcs env vars p s) p ss
-        in
-        snd (fwdTBlk funcs env vars p f.funcBody)
+        let p = List.fold_left (fun ap (s, _) -> fwdTStm funcs p s) p ss in
+        snd (fwdTBlk funcs p f.funcBody)
     | A_recall (f, ss) -> raise (Invalid_argument "fwdStm:A_recall")
 
-  and fwdTBlk funcs env vars p (b : block) =
+  and fwdTBlk funcs p (b : block) =
     match b with
     | A_empty l ->
         addFwdTaint l p;
         (!fwdTaintMap, p)
     | A_block (l, (s, _), b) ->
-        if !tracefwd && not !minimal then
-          Format.printf "%a: %s\n" label_print l
-            (VarSet.fold (fun x acc -> acc ^ "-" ^ x.varName) p "");
-        let p' = fwdTStm funcs env vars p s in
+        Format.printf "%a: %s\n" label_print l
+          (VarSet.fold (fun x acc -> acc ^ "-" ^ x.varName) p "");
+        let p' = fwdTStm funcs p s in
         addFwdTaint l p;
-        fwdTBlk funcs env vars p' b
+        fwdTBlk funcs p' b
 
   and fwdTaintMap : VarSet.t InvMap.t ref = ref InvMap.empty
-
-  and addFwdTaint l (a : VarSet.t) =
-    fwdTaintMap := InvMap.add l a !fwdTaintMap
+  and addFwdTaint l (a : VarSet.t) = fwdTaintMap := InvMap.add l a !fwdTaintMap
 end

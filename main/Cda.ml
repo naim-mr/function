@@ -63,7 +63,7 @@ end = struct
     let env = init_env vars (Environment.make [||] [||]) in
     let s = f.funcBody in
     AbstractSyntax.block_print "main" !fmt s;
-    S.fwdTaintMap := fst (ForwardIteratorB.fwdTBlk funcs env vars VarSet.empty s);
+    S.fwdTaintMap := fst (ForwardIteratorB.fwdTBlk funcs VarSet.empty s);
     Format.fprintf !fmt "\nForward Analysis taint: size %d\n"
       (InvMap.cardinal !S.fwdTaintMap);
     InvMap.iter

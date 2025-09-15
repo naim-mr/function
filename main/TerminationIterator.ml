@@ -205,6 +205,9 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
     let f = StringMap.find main funcs in
     let v1 = snd (List.split (StringMap.bindings vars)) in
     let v2 = snd (List.split (StringMap.bindings f.funcVars)) in
+    let v1set = VarSet.of_list v1 in
+    let v2set = VarSet.of_list v2 in
+    let var_set = VarSet.union v1set v2set  in
     let vars = List.append v1 v2 in
     let env = init_env vars (Environment.make [||] [||]) in
     let s = f.funcBody in
@@ -220,13 +223,8 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
         (ForwardIteratorB.fwdBlk funcs env vars (B.top env vars) stmts)
         s
     in
-    let _ =
-      ForwardIteratorB.fwdTBlk funcs env (VarSet.of_list vars)
-        (snd
-        @@ ForwardIteratorB.fwdTBlk funcs env vars (VarSet.of_list vars) stmts
-        )
-        s
-    in
+    let _ = ForwardIteratorB.fwdTBlk funcs var_set stmts in
+    let _ = ForwardIteratorB.fwdTBlk funcs var_set s in        
     fwdInvMap := !ForwardIteratorB.fwdInvMap;
     fwdTaintMap := !ForwardIteratorB.fwdTaintMap;
     let stopfwd = Sys.time () in
@@ -241,7 +239,7 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
       InvMap.iter
         (fun l a ->
           Format.printf "%a: %s\n" label_print l
-            (VarSet.fold (fun x acc -> acc ^ " " ^ x.varName) a ""))
+            (VarSet.fold (fun x acc -> acc ^ "" ^ x.varId ^ "{" ^ x.varName ^"}") a ""))
         !fwdTaintMap);
     (* Backward Analysis *)
     if !tracebwd && not !minimal then
@@ -251,12 +249,6 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
     let i =
       bwdRec funcs env vars (bwdRec funcs env vars (D.zero env vars) s) stmts
     in
-    (* let i = 
-      if !resilience then
-       D.merge_after (List.fold_left (fun i x -> D.bwdAssign i (AbstractSyntax.A_var  x, A_RANDOM )) i (InvMap.find (block_label f.funcBody) !fwdTaintMap))
-      else 
-        i
-    in *)
     let stopbwd = Sys.time () in
     if not !minimal then (
       if !timebwd then
