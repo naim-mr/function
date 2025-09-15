@@ -146,7 +146,7 @@ int_expr:
 
 
 rnd_int_expr:
-| e=ext(TOK_QUESTIONMARK)
+| TOK_QUESTIONMARK
     { AST_int_random }
 
 
@@ -335,7 +335,7 @@ stat:
 
 /* adds extent information to rule */
 %inline ext(X): 
-| x=X { x, ($startpos, $endpos) }
+| X { $1, ($startpos, $endpos) }
 
 
 %%

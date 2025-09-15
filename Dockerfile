@@ -8,7 +8,7 @@ ENV APT_DEPS build-essential opam clang git pkg-config libgmp-dev libmpfr-dev \
              rsync m4 curl wget libc6-dev-i386 zip
 
 ENV TERM xterm-256color
-ENV OPAM_DEPS apron zarith menhir ounit dune
+ENV OPAM_DEPS apron zarith menhir ounit dune yojson
 
 RUN apt-get update
 RUN apt-get install --no-install-recommends -y $APT_DEPS
@@ -18,6 +18,9 @@ ENV LC_ALL C.UTF-8
 
 RUN \
     opam init --disable-sandboxing -y \
+    &&  eval $(opam env) \
+    &&  opam switch create 4.14.0 ocaml-base-compiler.4.14.0 \
+    &&  opam switch set ocaml-base-compiler.4.14.0 \ 
     &&  eval $(opam env) \
     &&  opam update -y   \
     &&  opam install -y -j 8 $OPAM_DEPS \

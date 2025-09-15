@@ -731,10 +731,10 @@ total=$(find $bench -iname "*.c" | wc -l)
 solved=0
 
 
-treat_examples "test_nexp/pulseinfinite" "Pulse" "Pulse"  ""
-treat_examples "test_nexp/lit/loop/" "EndWatch" "Endwatch"  ""x
-treat_examples "test_nexp/sv_comp/" "SvComp" "SV-COMP"  ""
-treat_examples "test_nexp/svcomp-nla/" "SvComp-nla" "SV-COMP-NLA-PULSE"  ""
+treat_examples "test_res/pulseinfinite" "Pulse" "Pulse"  ""
+treat_examples "test_res/lit/loop/" "EndWatch" "Endwatch"  ""
+treat_examples "test_res/sv_comp/" "SvComp" "SV-COMP"  ""
+treat_examples "test_res/svcomp-nla/" "SvComp-nla" "SV-COMP-NLA-PULSE"  ""
 
 
 echo "\end{longtblr}" >> $index_tex 

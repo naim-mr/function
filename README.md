@@ -20,11 +20,7 @@ FuncTion requires the following applications and libraries:
 	```
 	(sudo) apt-get install opam
 	```
-* Ounit:og
 
-
-	```
-	(sudo) opam install ounit
 * Menhir: LR(1) parser generator (v.3.0.0)
 
 	```
@@ -60,7 +56,6 @@ dune build
 
 You can clean the generated files with:
 
-
 ```
 dune clean
 ```
@@ -73,8 +68,7 @@ The command-line analyzer can be invoked using the following call pattern:
 
 where "file" is the path to the C file to be analyzed and "analysis" the type of the analysis to perform. 
 
-The analyzer first performs a forward reachability analysis, and then a backward analysis to find a 
-piecewise-defined ranking function and sufficient preconditions at the entry point for the program 
+The analyzer first performs a forward reachability analysis, and then a backward analysis to find a piecewise-defined ranking function and sufficient preconditions at the entry point for the program 
 to satisfy the given analyzed property.
 
 The following general command-line options are recognized
@@ -87,22 +81,26 @@ The following general command-line options are recognized
 	 -meetbwd 2			                set the dual widening delay in backward analysis
 	 -ordinals 2                        set the maximum ordinal value for the ranking functions
 	 -refine            			    reduces the backward analysis to the reachabile states
-	 -json_ouput						To output a summary of the analaysis as a  json in a file `filename.json` (it disables the output on std_output)
-	 -output_std						To output on std_output even with json_ouput
+	 -json_ouput						To output a summary of the analaysis as a  json in a file `filename.json` 
 
 The analyzer answers TRUE in case it can successfully prove the property. Otherwise, it answers UNKNOWN.
 
 FuncTion can analyze the following properties:
 
 * Termination
+* Termination Resilience
 * Guarantee / Recurrence 
 * Computation-Tree-Logic (CTL) 
 
-## Termination
+## Termination & Termination Resilience
 
 To check for termination, call the analyzer with the following call pattern:
 
 	./main.exe <file> -termination [options]
+
+For termination resilience: 
+
+	./main.exe <file> -resilience [options]
 
 ## Guarantee / Recurrence
 
@@ -124,11 +122,12 @@ where "property" is the CTL property to be analyzed.
 The following additional command-line options exist for the CTL analysis:
 (showing their default value):
 
-	 -precondition true                 a precondition that is assumed to hold at the start of the program
+	 -precondition "[prop]"                 a precondition that is assumed to hold at the start of the program e.g. "x == 1"
 	 -noinline			                disable inlining of function calls
      -ast                               run the analysis on the abstract-syntax-tree instead of the control-flow-graph,
                                         note that in that case function calls and goto/break/continue are not supported
      -dot                               print out control-flow-graph and decision trees in graphviz dot format
+
 # Vulnerability 
 Automatic detection of potentially vulnerable variables that
 could be controlled to violate a CTL property of programs can be done using the option: 
@@ -138,10 +137,14 @@ could be controlled to violate a CTL property of programs can be done using the 
 This analyzes output sets of potentially vulnerable variable, sets
 of definitely non-vulnerable variables. It also provides sufficient constraints on the vulnerable variables that "protect" the program and ensure the property.
 ## Benchmark:
-To reproduce the benchmarks of the analysis you have to call : 
-	`./script/runtest.sh .` 
-It generates then a table in a HTML file and in CSV in result/ folder. See script/README.md, for more details.
+We provide different directory to test our analysis.
 
+`tests/termination`: to test termination
+`tests/ctl`: to test ctl properties
+`tests/guarantee`: to test guarantee properties
+`tests/recurrence`: to test recurrence properties
+`test_res/`: to test termination resilience
+`test_vuln/`: to test vulnerability
 
 # Docker installation 
 ## To create the image
@@ -153,7 +156,4 @@ It generates then a table in a HTML file and in CSV in result/ folder. See scrip
 It will open an interactive shell as:
 root@id$
 
-The id, is the id of the container.
-
 You can then use the analysis with the commands explained in this README.
-Or run the benchmark (see also the README in script/)
