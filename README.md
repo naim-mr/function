@@ -1,7 +1,7 @@
 # FuncTion
 
 FuncTion is a research prototype static analyzer designed for proving conditional termination and conditional CTL properties of C programs.
-It is also capable of inferring minimal set of variable with an associate sufficient precondition to ensure a CTL property and a maximal set of variable for which a valuation might falsify the CTL property.
+It is also capable of inferring minimal set of variable with an associate sufficient precondition to ensure a CTL property and a maximal set of variable for which a valuation might falsify it.
 
 The tool automatically infers piecewise-defined ranking functions and sufficient preconditions by means of abstract interpretation.
 
