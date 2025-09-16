@@ -10,7 +10,7 @@ int main() {
     t = 0;
 	
 	while(i >= 0){
-		i = i - 1;
+		i = i - 2;
 	}
     while (i != 0 && j != 0) {
 		loop:
