@@ -7,7 +7,7 @@ open Apron
 open Affines
 open Functions
 
-let max = ref 5
+
 
 module OrdinalValued (F : FUNCTION) : FUNCTION = struct
   module B = F.B
@@ -110,7 +110,7 @@ module OrdinalValued (F : FUNCTION) : FUNCTION = struct
     let f = F.join ~random k b f1 f2 in
     if F.defined f then
       let ff = aux 0 ff1 ff2 in
-      if List.length ff > !max then (F.top env vars, []) else (f, ff)
+      if List.length ff > !Config.ordmax then (F.top env vars, []) else (f, ff)
     else if
       (* f = Bot OR f = Top *)
       F.isBot f
@@ -120,7 +120,7 @@ module OrdinalValued (F : FUNCTION) : FUNCTION = struct
       F.defined f1 && F.defined f2
     then
       let ff = aux 1 ff1 ff2 in
-      if List.length ff > !max then (f, []) else (F.zero env vars, ff)
+      if List.length ff > !Config.ordmax then (f, []) else (F.zero env vars, ff)
     else (f, [])
 
   let learn b (f1, ff1) (f2, ff2) =
@@ -159,7 +159,7 @@ module OrdinalValued (F : FUNCTION) : FUNCTION = struct
     let f = F.learn b f1 f2 in
     if F.defined f then
       let ff = aux 0 ff1 ff2 in
-      if List.length ff > !max then (F.top env vars, []) else (f, ff)
+      if List.length ff > !Config.ordmax then (F.top env vars, []) else (f, ff)
     else if
       (* f = Bot OR f = Top *)
       F.isBot f
@@ -169,7 +169,7 @@ module OrdinalValued (F : FUNCTION) : FUNCTION = struct
       F.defined f1 && F.defined f2
     then
       let ff = aux 1 ff1 ff2 in
-      if List.length ff > !max then (f, []) else (F.zero env vars, ff)
+      if List.length ff > !Config.ordmax then (f, []) else (F.zero env vars, ff)
     else (f, [])
 
   let widen ?(jokers = 0) b (f1, ff1) (f2, ff2) =
@@ -205,16 +205,16 @@ module OrdinalValued (F : FUNCTION) : FUNCTION = struct
           if F.isTop z then F.zero env vars :: aux (i - 1) xs (succ ys)
           else z :: aux (i - 1) xs ys
     in
-    let i = !max + 1 - jokers in
+    let i = !Config.ordmax + 1 - jokers in
     if F.isTop f1 || F.isTop f2 then (F.widen b f1 f2, [])
     else
       let f = if i > 0 then F.widen b f1 f2 else f2 in
       if F.isTop f then
         let ff = aux (i - 1) ff1 (succ ff2) in
-        if List.length ff > !max then top env vars else (F.zero env vars, ff)
+        if List.length ff > !Config.ordmax then top env vars else (F.zero env vars, ff)
       else if F.defined f then
         let ff = aux (i - 1) ff1 ff2 in
-        if List.length ff > !max then top env vars else (f, ff)
+        if List.length ff > !Config.ordmax then top env vars else (f, ff)
       else (f, [])
 
   let extend b1 b2 (f1, ff1) (f2, ff2) =
@@ -261,14 +261,14 @@ module OrdinalValued (F : FUNCTION) : FUNCTION = struct
       let f = F.bwdAssign f e in
       if F.defined f then
         let ff = aux 0 ff in
-        if List.length ff > !max then (F.top env vars, []) else (f, ff)
+        if List.length ff > !Config.ordmax then (F.top env vars, []) else (f, ff)
       else if
         (* f = Bot OR f = Top *)
         F.isBot f
       then (f, []) (* f = Bot *)
       else (* f = Top *)
         let ff = aux 1 ff in
-        if List.length ff > !max then (f, []) else (F.zero env vars, ff)
+        if List.length ff > !Config.ordmax then (f, []) else (F.zero env vars, ff)
     else (f, [])
 
   let filter (f, ff) e = (F.filter f e, ff)

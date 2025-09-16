@@ -7,7 +7,7 @@ let create_logfile_name () =
   in
   let name =
     name ^ "-domain" ^ !domain
-    ^ (if !ordinals then "-ordinals" ^ string_of_int !Ordinals.max else "")
+    ^ (if !ordinals then "-ordinals" ^ string_of_int !Config.ordmax else "")
     ^ (if !refine then "-refine" else "")
     ^ (if !vulnerability then "-vulnerability" else "")
     ^ ".out"
@@ -33,7 +33,7 @@ let output_json () =
   in
   let basefile =
     basefile ^ "-domain" ^ !domain
-    ^ (if !ordinals then "-ordinals" ^ string_of_int !Ordinals.max else "")
+    ^ (if !ordinals then "-ordinals" ^ string_of_int !Config.ordmax else "")
     ^ if !refine then "-refine" else ""
   in
   let jsonfile = basefile ^ ".json" in

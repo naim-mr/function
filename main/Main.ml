@@ -124,6 +124,10 @@ let isKeyword = function
 let parseArgs () =
   let rec doit args =
     match args with
+    | "-config" :: x :: r ->
+      (* parse analysis type and domain from a json config file *)
+      Config.from_json x;
+      doit r
     | "-domain" :: x :: r ->
         (* abstract domain: boxes|octagons|polyhedra *)
         Config.domain := x;
@@ -156,7 +160,7 @@ let parseArgs () =
     | "-ordinals" :: x :: r ->
         (* ordinal-valued ranking functions *)
         Config.ordinals := true;
-        Ordinals.max := int_of_string x;
+        Config.ordmax := int_of_string x;
         doit r
     | "-refine" :: r ->
         (* refine in backward analysis *)

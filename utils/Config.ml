@@ -12,6 +12,7 @@ let main = ref "main"
 let minimal = ref false
 let compress = ref true (* false *)
 let ordinals = ref false
+let ordmax = ref 2
 let cda = ref false
 let cdamax = ref 0
 let property = ref ""
@@ -44,4 +45,14 @@ let logfile = ref ""
 let result = ref false
 let f_log = ref stdout
 let tree : Yojson.Safe.t ref = ref `Null
-let vuln_res : Yojson.Safe.t ref = ref @@  `String "Not analyzed"
+let vuln_res : Yojson.Safe.t ref = ref @@ `String "Not analyzed"
+
+let from_json filename =
+  let json = Yojson.Safe.from_file filename in
+  match json with
+  | `Assoc
+      [ ("analysis", `String a); ("domain", `String d) ]
+    ->
+      analysis := a;
+      domain := d
+  | _ -> raise (Invalid_argument "Wrong config json format.")
