@@ -78,9 +78,11 @@ run_tests_vuln() {
 run_test_resilience() {  
     run_tests_term "-resilience" "test_res"
 }
-# run_tests_ctl "" "tests/ctl"
 
-# run_tests_vuln 
+run_tests_ctl "" "tests/ctl"
+
+run_tests_vuln  ""
+
 run_tests_term "" "tests/termination"
 
 run_test_resilience ""
