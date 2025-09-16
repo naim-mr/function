@@ -1,0 +1,3 @@
+{
+    "property": "OR{varC <= 5}{AF{varR > 5}}"
+}
