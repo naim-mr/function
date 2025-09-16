@@ -30,7 +30,7 @@ jobs:
       - name: Generate logs
         run: |
           mkdir -p logs_new
-          ./script/logs.bash main.exe logs_new
+          bash script/logs.bash main.exe logs_new
 
       - name: Run diff script
         run: |
