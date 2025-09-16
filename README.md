@@ -151,10 +151,6 @@ We provide different directory to test our analysis.
 ## To create the image
 > docker build -t function. 
 
-## To run the analysis
+## To run it
 > docker run -it function
 
-It will open an interactive shell as:
-root@id$
-
-You can then use the analysis with the commands explained in this README.
