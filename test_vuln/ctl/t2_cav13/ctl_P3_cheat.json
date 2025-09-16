@@ -1,0 +1,3 @@
+{
+    "property": "OR{varA != 1}{EF{varR==1}}"
+}

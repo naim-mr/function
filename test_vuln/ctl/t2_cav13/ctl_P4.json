@@ -1,0 +1,3 @@
+{
+    "property": "EF{AND{varA == 1}{AG{varR != 1}}}"
+}

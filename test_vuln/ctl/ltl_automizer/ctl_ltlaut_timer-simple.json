@@ -1,0 +1,3 @@
+{
+    "property": "NOT{AG{OR{timer_1 != 0}{AF{output_1 == 1}}}}"
+}

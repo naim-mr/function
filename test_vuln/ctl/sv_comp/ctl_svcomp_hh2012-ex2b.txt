@@ -1,1 +1,0 @@
-AND{AG{AF{assert1: n <= 60}}}{AG{AF{assert2: n == 60}}}
