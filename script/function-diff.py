@@ -61,12 +61,12 @@ def debug(msg):
 # Locations
 ###########
 
-def remove_stub_prefix(path):
-    l = path.split("share/mopsa/stubs")
-    if len(l) == 2:
-        return ("share/mopsa/stubs" + l[1])
-    else:
-        return path
+# def remove_stub_prefix(path):
+#     l = path.split("share/mopsa/stubs")
+#     if len(l) == 2:
+#         return ("share/mopsa/stubs" + l[1])
+#     else:
+#         return path
 
 class Position:
     def __init__(self, data):
@@ -161,11 +161,10 @@ class Report:
         self.path = path
         with open(path,'rt') as f:
             data = json.load(f)
-            print("coucou\n")
-            print(data)
             self.time = float(data["Config"]["time"])
             self.tree = data["tree"]
-            if data["Config"]["result"]:
+            self.result = data["Config"]["result"]
+            if data["Config"]["result"] == "TRUE":
                 self.success = True
                 self.alarms = set()
                 self.assumptions = set()
@@ -239,6 +238,7 @@ class ReportDiff:
         self.new_success = not old.success and new.success
         self.new_failure = old.success and not new.success
         self.new_tree = not (old.tree == new.tree)
+        self.new_result  =  not (old.result == new.result)
     def is_empty(self):
         return (
             (args.ignore_time or 1000.0*abs(self.time) <= args.time_tolerance)
@@ -249,6 +249,7 @@ class ReportDiff:
             and not self.new_success
             and not self.new_failure
             and not self.new_tree
+            and not self.new_result
             )
 
     def is_regressed(self):
@@ -258,6 +259,7 @@ class ReportDiff:
             or self.new_assumptions
             or self.new_failure
             or self.new_tree
+            or self.new_result
         )
 
 
@@ -269,6 +271,7 @@ class ReportDiff:
             if not args.ignore_time and 1000.0*abs(self.time) > args.time_tolerance:
                 diffs.append(Diff.substitue("time: %.4f"%self.old.time, "time: %.4f"%self.new.time))
             diffs.append(Diff.substitue(self.old.tree,self.new.tree))
+            diffs.append(Diff.substitue(self.old.result,self.new.result))
             diffs += [Diff.add(a) for a in self.new_alarms]
             diffs += [Diff.remove(a) for a in self.removed_alarms]
             diffs += [Diff.add(w) for w in self.new_assumptions]
@@ -352,7 +355,6 @@ def main():
 
     diffs = DbDiff(old,new)
     nb = len(diffs.reports)
-    
     info("%d report%s compared"%(nb,"s" if nb >= 2 else ""))
     if args.regression:
         if diffs.is_regressed():
