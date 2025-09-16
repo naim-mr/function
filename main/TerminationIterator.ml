@@ -94,7 +94,7 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
               Format.fprintf !fmt "i': %a\n" D.print i');
             let jokers =
               0
-              (* max 0 ((!retrybwd * (!Ordinals.max + 1)) - n + !joinbwd) *)
+              (* max 0 ((!retrybwd * (!Config.ordmax + 1)) - n + !joinbwd) *)
             in
             if D.isLeq COMPUTATIONAL i' i then (
               if D.isLeq APPROXIMATION i' i then (

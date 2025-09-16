@@ -6,7 +6,7 @@
   (into ..))
  (flags
   (:standard -open Frontend -open Domains -open Utils))
- (libraries yojson frontend utils domains str))
+ (libraries yojson frontend utils domains))
 
 (env
  (dev

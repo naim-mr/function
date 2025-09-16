@@ -304,7 +304,7 @@ module CTLIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
                   let isLeqComp = D.isLeq COMPUTATIONAL in_state' in_state in
                   let isLeqApprox = D.isLeq APPROXIMATION in_state' in_state in
                   let jokers =
-                    max 0 ((!retrybwd * (!Ordinals.max + 1)) - n + !joinbwd)
+                    max 0 ((!retrybwd * (!Config.ordmax + 1)) - n + !joinbwd)
                   in
                   if isLeqComp then (
                     if isLeqApprox then (
