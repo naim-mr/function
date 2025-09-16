@@ -14,16 +14,18 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install OCaml & Dune
-        uses: avsm/setup-ocaml@v2
-        with:
-          ocaml-version: 'latest'
-          opam-repository-branch: 'main'
+      - name: Checkout tree
+        uses: actions/checkout@v5
 
-      - name: Install dependencies
-        run: |
-          opam install . --deps-only -y
-          dune build
+      - name: Set-up OCaml
+        uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: 4
+
+      - run: opam install . --deps-only
+
+      - run: opam exec -- dune build
+
 
       - name: Generate logs
         run: |
