@@ -1,0 +1,35 @@
+name: Log Diff Check
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  diff-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install OCaml & Dune
+        uses: avsm/setup-ocaml@v2
+        with:
+          ocaml-version: 'latest'
+          opam-repository-branch: 'main'
+
+      - name: Install dependencies
+        run: |
+          opam install . --deps-only -y
+          dune build
+
+      - name: Generate logs
+        run: |
+          mkdir -p logs_new
+          ./script/logs.bash main.exe logs_new
+
+      - name: Run diff script
+        run: |
+          python3 script/function-diff.py -d logs logs_new
