@@ -5,8 +5,8 @@
   (until-clean)
   (into ..))
  (flags
-  (:standard -open Frontend -open Domains -open Cfgfrontend -open Utils))
- (libraries yojson frontend cfgfrontend utils domains str))
+  (:standard -open Frontend -open Domains -open Utils))
+ (libraries yojson frontend utils domains str))
 
 (env
  (dev

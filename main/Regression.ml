@@ -48,7 +48,7 @@ let output_json () =
       :: ("tree", !tree)
       :: [ ("vulnerability", !vuln_res) ])
   in
-  let f = open_out_bin jsonfile in
-  (* Yojson.Safe.pretty_to_channel f json; *)
+  let f = open_out_bin jsonfile in 
+  Yojson.Safe.pretty_to_channel f json;  
   Yojson.Safe.pretty_to_channel stdout json;
-  close_out f
+  close_out f 
