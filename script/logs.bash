@@ -40,7 +40,7 @@ run_tests_ctl() {
                 fi
                 # Options spécifiques CTL
                 echo "Running CTL: $EXEC -config $CONFIG $cfile -ctl $PROP $opt"
-                ./"$EXEC" -config "$CONFIG" "$cfile" -ctl "$PROP" $opt -json_output "$OUT_DIR" > /dev/null 2>&1 || true
+                ./"$EXEC" -config "$CONFIG" "$cfile" -ctl "$PROP" $opt -json_output "$OUT_DIR" > /dev/null 2>&1  || true
             fi
         done
     done
@@ -64,7 +64,7 @@ run_tests_term() {
                 base="${cfile%.c}"
                 # Options spécifiques Termination
                 echo "Running Termination: $EXEC --config $CONFIG $cfile $opt"
-                ./"$EXEC" "$cfile" -config "$CONFIG" $opt -json_output "$OUT_DIR" > /dev/null 2>&1 || true
+                ./"$EXEC" "$cfile" -config "$CONFIG" $opt -json_output "$OUT_DIR" > /dev/null 2>&1  || true
             fi
         done
     done
@@ -79,6 +79,9 @@ run_test_resilience() {
     run_tests_term "-resilience" "test_res"
 }
 # run_tests_ctl "" "tests/ctl"
-# run_tests_term "" "tests/termination"
+
 # run_tests_vuln 
-run_test_resilience
+run_tests_term "" "tests/termination"
+
+run_test_resilience ""
+
