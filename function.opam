@@ -18,6 +18,7 @@ depends: [
   "ounit"
   "mlgmpidl"
   "zarith"
+  "yojson"
 ]
 build: [
   ["dune" "subst"] {dev}
