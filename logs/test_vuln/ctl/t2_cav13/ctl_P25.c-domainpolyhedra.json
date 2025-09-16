@@ -1,0 +1,53 @@
+{
+  "Config": {
+    "filename": "test_vuln/ctl/t2_cav13/ctl_P25.c",
+    "analysis_type": "ctl",
+    "property": "OR{varC <= 5}{AF{varR > 5}}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.33828000000100001
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{varR} >= 6",
+      "left": {
+        "Node": {
+          "constraint": "$1{varC} >= 8",
+          "left": { "Leaf": "0." },
+          "right": {
+            "Node": {
+              "constraint": "$1{varC} >= 6",
+              "left": { "Leaf": "0." },
+              "right": { "Leaf": "0" }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$1{varC} >= 8",
+          "left": { "Leaf": "top" },
+          "right": {
+            "Node": {
+              "constraint": "$1{varC} >= 6",
+              "left": { "Leaf": "top" },
+              "right": { "Leaf": "top" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "varCS,varC",
+        "Potentially vulnerable": "varR",
+        "Constraints": "[|$2-6>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 2 }, { "Min vuln": 1 }, { "Nb vuln": 1 }, { "Total": 3 }
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "Config": {
+    "filename": "test_res/pulseinfinite/hensel_tacas22_non_terminate_combination_3.c",
+    "analysis_type": "termination-resilience",
+    "property": "",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.050558000000100003
+  },
+  "tree": { "Leaf": "7" },
+  "vulnerability": "Not analyzed"
+}

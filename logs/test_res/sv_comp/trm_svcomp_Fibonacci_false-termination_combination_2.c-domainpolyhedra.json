@@ -1,0 +1,12 @@
+{
+  "Config": {
+    "filename": "test_res/sv_comp/trm_svcomp_Fibonacci_false-termination_combination_2.c",
+    "analysis_type": "termination-resilience",
+    "property": "",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.12689100000100001
+  },
+  "tree": { "Leaf": "6" },
+  "vulnerability": "Not analyzed"
+}

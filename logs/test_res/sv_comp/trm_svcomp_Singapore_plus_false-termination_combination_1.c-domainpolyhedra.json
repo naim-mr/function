@@ -1,0 +1,12 @@
+{
+  "Config": {
+    "filename": "test_res/sv_comp/trm_svcomp_Singapore_plus_false-termination_combination_1.c",
+    "analysis_type": "termination-resilience",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.014295000000100001
+  },
+  "tree": { "Leaf": "top" },
+  "vulnerability": "Not analyzed"
+}

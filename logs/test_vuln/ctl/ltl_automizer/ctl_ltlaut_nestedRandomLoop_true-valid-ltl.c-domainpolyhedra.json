@@ -1,0 +1,29 @@
+{
+  "Config": {
+    "filename": "test_vuln/ctl/ltl_automizer/ctl_ltlaut_nestedRandomLoop_true-valid-ltl.c",
+    "analysis_type": "ctl",
+    "property": "AG{i >= n}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.0034550000000100005
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{n}-$3{i} >= 1",
+      "left": { "Leaf": "bottom" },
+      "right": { "Leaf": "0." }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "$1",
+        "Potentially vulnerable": "i,n",
+        "Constraints": "[|-$2+$3>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 1 }, { "Min vuln": 2 }, { "Nb vuln": 1 }, { "Total": 3 }
+    ]
+  }
+}

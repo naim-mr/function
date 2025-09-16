@@ -1,0 +1,54 @@
+{
+  "Config": {
+    "filename": "tests/termination/vijay.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.054694000000100003
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$3{y} >= 5",
+      "left": { "Leaf": "top" },
+      "right": {
+        "Node": {
+          "constraint": "$3{y} >= 4",
+          "left": { "Leaf": "top" },
+          "right": {
+            "Node": {
+              "constraint": "$3{y} >= 3",
+              "left": { "Leaf": "8" },
+              "right": {
+                "Node": {
+                  "constraint": "$3{y} >= 0",
+                  "left": { "Leaf": "6" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$3{y} >= -2",
+                      "left": { "Leaf": "5" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$3{y} >= -3",
+                          "left": { "Leaf": "7" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$3{y} >= -4",
+                              "left": { "Leaf": "top" },
+                              "right": { "Leaf": "top" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

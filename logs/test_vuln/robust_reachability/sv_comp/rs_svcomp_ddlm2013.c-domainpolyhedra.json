@@ -1,0 +1,29 @@
+{
+  "Config": {
+    "filename": "test_vuln/robust_reachability/sv_comp/rs_svcomp_ddlm2013.c",
+    "analysis_type": "ctl",
+    "property": "AF{asset1:a != b}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.0042180000000100003
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$6{flag} >= 1",
+      "left": { "Leaf": "bottom" },
+      "right": {
+        "Node": {
+          "constraint": "$6{flag} >= 0",
+          "left": { "Leaf": "bottom" },
+          "right": { "Leaf": "bottom" }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [],
+    "stats": [
+      { "Max safe": 0 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 0 }
+    ]
+  }
+}

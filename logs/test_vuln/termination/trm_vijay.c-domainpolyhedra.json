@@ -1,0 +1,65 @@
+{
+  "Config": {
+    "filename": "test_vuln/termination/trm_vijay.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.045504000000100007
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$3{y} >= 5",
+      "left": { "Leaf": "top" },
+      "right": {
+        "Node": {
+          "constraint": "$3{y} >= 4",
+          "left": { "Leaf": "top" },
+          "right": {
+            "Node": {
+              "constraint": "$3{y} >= 3",
+              "left": { "Leaf": "8" },
+              "right": {
+                "Node": {
+                  "constraint": "$3{y} >= 0",
+                  "left": { "Leaf": "6" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$3{y} >= -2",
+                      "left": { "Leaf": "5" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$3{y} >= -3",
+                          "left": { "Leaf": "7" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$3{y} >= -4",
+                              "left": { "Leaf": "top" },
+                              "right": { "Leaf": "top" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "x,$1",
+        "Potentially vulnerable": "y",
+        "Constraints": "[|$3-3=0|],[|-$3+2>=0; $3>=0|],[|-$3-1>=0; $3+2>=0|],[|$3+3=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 2 }, { "Min vuln": 1 }, { "Nb vuln": 1 }, { "Total": 3 }
+    ]
+  }
+}

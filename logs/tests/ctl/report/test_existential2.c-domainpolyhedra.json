@@ -1,0 +1,60 @@
+{
+  "Config": {
+    "filename": "tests/ctl/report/test_existential2.c",
+    "analysis_type": "ctl",
+    "property": "EF{r == 1}",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.042051000000100002
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$4{r} >= 2",
+      "left": {
+        "Node": {
+          "constraint": "$2{x} >= 200",
+          "left": { "Leaf": "0." },
+          "right": {
+            "Node": {
+              "constraint": "$2{x} >= 199",
+              "left": { "Leaf": "0." },
+              "right": { "Leaf": "0." }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$4{r} >= 1",
+          "left": {
+            "Node": {
+              "constraint": "$2{x} >= 200",
+              "left": { "Leaf": "0." },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x} >= 199",
+                  "left": { "Leaf": "0." },
+                  "right": { "Leaf": "0." }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$2{x} >= 200",
+              "left": { "Leaf": "0." },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x} >= 199",
+                  "left": { "Leaf": "0." },
+                  "right": { "Leaf": "0." }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

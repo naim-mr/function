@@ -1,0 +1,53 @@
+{
+  "Config": {
+    "filename": "test_vuln/ctl/ltl_automizer/ctl_ltlaut_cav2015.c",
+    "analysis_type": "ctl",
+    "property": "AG{OR{x <= 0}{AF{y == 0}}}",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.10924700000100001
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$3{y} >= 1",
+      "left": {
+        "Node": {
+          "constraint": "$2{x} >= 1",
+          "left": { "Leaf": "0." },
+          "right": { "Leaf": "0" }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$3{y} >= 0",
+          "left": {
+            "Node": {
+              "constraint": "$2{x} >= 1",
+              "left": { "Leaf": "0." },
+              "right": { "Leaf": "0" }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$2{x} >= 1",
+              "left": { "Leaf": "0." },
+              "right": { "Leaf": "0" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "y,x,$1",
+        "Potentially vulnerable": "",
+        "Constraints": "top"
+      }
+    ],
+    "stats": [
+      { "Max safe": 3 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 3 }
+    ]
+  }
+}

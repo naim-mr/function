@@ -27,16 +27,22 @@ let json_string filename time analysis property result domain time =
     filename analysis property result domain time
 
 let output_json () =
-  let replace = Str.regexp "tests/[A-Za-z]+/" in
-  let basefile =
-    Str.replace_first replace (!output_dir ^ !analysis ^ "/") !filename
+  if !Config.resilience then 
+    Config.analysis := !analysis ^ "-resilience";
+  let dirname = !output_dir ^ Filename.dirname !filename in
+  if not (Sys.file_exists dirname) then Unix.mkdir dirname 0o755;
+  let jsonfile =
+    String.concat ""
+      [
+        !output_dir;
+        !filename;
+        "-domain";
+        !domain;
+        (if !ordinals then "-ordinals" ^ string_of_int !Config.ordmax else "");
+        (if !refine then "-refine" else "");
+        ".json";
+      ]
   in
-  let basefile =
-    basefile ^ "-domain" ^ !domain
-    ^ (if !ordinals then "-ordinals" ^ string_of_int !Config.ordmax else "")
-    ^ if !refine then "-refine" else ""
-  in
-  let jsonfile = basefile ^ ".json" in
   let output =
     json_string !filename time !analysis !property
       (if !Config.result then "TRUE" else "UKNOWN")
@@ -48,7 +54,7 @@ let output_json () =
       :: ("tree", !tree)
       :: [ ("vulnerability", !vuln_res) ])
   in
-  let f = open_out_bin jsonfile in 
-  Yojson.Safe.pretty_to_channel f json;  
-  Yojson.Safe.pretty_to_channel stdout json;
-  close_out f 
+  let f = open_out jsonfile in
+  Yojson.Safe.pretty_to_channel f json;
+  Yojson.Safe.pretty_to_channel Stdlib.stdout json;
+  close_out f

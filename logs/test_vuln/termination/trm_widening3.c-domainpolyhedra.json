@@ -1,0 +1,41 @@
+{
+  "Config": {
+    "filename": "test_vuln/termination/trm_widening3.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.013142000000100001
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x}-$3{y} >= 1",
+      "left": {
+        "Node": {
+          "constraint": "$2{x} >= 1",
+          "left": { "Leaf": "top" },
+          "right": { "Leaf": "2" }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$2{x} >= 1",
+          "left": { "Leaf": "4" },
+          "right": { "Leaf": "2" }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "y,$1",
+        "Potentially vulnerable": "x",
+        "Constraints": "[|-$2>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 2 }, { "Min vuln": 1 }, { "Nb vuln": 1 }, { "Total": 3 }
+    ]
+  }
+}

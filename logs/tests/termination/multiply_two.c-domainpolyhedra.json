@@ -1,0 +1,24 @@
+{
+  "Config": {
+    "filename": "tests/termination/multiply_two.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.0068390000000100003
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 10",
+      "left": { "Leaf": "2" },
+      "right": {
+        "Node": {
+          "constraint": "$2{x} >= 5",
+          "left": { "Leaf": "4" },
+          "right": { "Leaf": "top" }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

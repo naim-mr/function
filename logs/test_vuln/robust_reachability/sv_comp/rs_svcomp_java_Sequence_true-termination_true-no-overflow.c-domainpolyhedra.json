@@ -1,0 +1,77 @@
+{
+  "Config": {
+    "filename": "test_vuln/robust_reachability/sv_comp/rs_svcomp_java_Sequence_true-termination_true-no-overflow.c",
+    "analysis_type": "ctl",
+    "property": "AF{AND{AF{j >= 21}}{i==100}}",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.20305000000100002
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$3{j} >= 21",
+      "left": {
+        "Node": {
+          "constraint": "$2{i} >= 101",
+          "left": { "Leaf": "0." },
+          "right": {
+            "Node": {
+              "constraint": "$2{i} >= 100",
+              "left": { "Leaf": "0." },
+              "right": {
+                "Node": {
+                  "constraint": "$2{i} >= 99",
+                  "left": { "Leaf": "0." },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{i} >= 98",
+                      "left": { "Leaf": "0." },
+                      "right": { "Leaf": "0." }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$2{i} >= 101",
+          "left": { "Leaf": "0." },
+          "right": {
+            "Node": {
+              "constraint": "$2{i} >= 100",
+              "left": { "Leaf": "0." },
+              "right": {
+                "Node": {
+                  "constraint": "$2{i} >= 99",
+                  "left": { "Leaf": "0." },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{i} >= 98",
+                      "left": { "Leaf": "0." },
+                      "right": { "Leaf": "0." }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "j,i,c,$1",
+        "Potentially vulnerable": "",
+        "Constraints": "top"
+      }
+    ],
+    "stats": [
+      { "Max safe": 4 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 4 }
+    ]
+  }
+}

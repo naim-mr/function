@@ -1,0 +1,24 @@
+{
+  "Config": {
+    "filename": "tests/termination/sas2014a.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.010128000000100002
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$3{r} >= 1",
+      "left": {
+        "Node": {
+          "constraint": "$1{x}-$2{y}+$3{r} >= 1",
+          "left": { "Leaf": "top" },
+          "right": { "Leaf": "4" }
+        }
+      },
+      "right": { "Leaf": "1" }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

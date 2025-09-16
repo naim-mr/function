@@ -1,0 +1,71 @@
+{
+  "Config": {
+    "filename": "test_vuln/termination/trm_widening1.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.043148000000100003
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{z} >= 1",
+      "left": {
+        "Node": {
+          "constraint": "$1{y} >= 1",
+          "left": { "Leaf": "top" },
+          "right": {
+            "Node": {
+              "constraint": "$1{y} >= 0",
+              "left": { "Leaf": "3$2{z}+4" },
+              "right": { "Leaf": "3$2{z}+4" }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$2{z} >= 0",
+          "left": {
+            "Node": {
+              "constraint": "$1{y} >= 1",
+              "left": { "Leaf": "3$1{y}+4" },
+              "right": {
+                "Node": {
+                  "constraint": "$1{y} >= 0",
+                  "left": { "Leaf": "4" },
+                  "right": { "Leaf": "4" }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$1{y} >= 1",
+              "left": { "Leaf": "3$1{y}+4" },
+              "right": {
+                "Node": {
+                  "constraint": "$1{y} >= 0",
+                  "left": { "Leaf": "4" },
+                  "right": { "Leaf": "1" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "",
+        "Potentially vulnerable": "y,z",
+        "Constraints": "[|$1=0; $2-1>=0|],[|-$1-1>=0; $2-1>=0|],[|$2=0; $1-1>=0|],[|$2=0; $1=0|],[|\n$2=0; -$1-1>=0|],[|\n-$2-1>=0; $1-1>=0|],[|\n$1=0; -$2-1>=0|],[|\n-$1-1>=0; -$2-1>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 0 }, { "Min vuln": 2 }, { "Nb vuln": 1 }, { "Total": 2 }
+    ]
+  }
+}

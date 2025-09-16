@@ -1,0 +1,12 @@
+{
+  "Config": {
+    "filename": "test_res/svcomp-nla/cohencu4-both-nt_combination_2.c",
+    "analysis_type": "termination-resilience",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.012659000000100002
+  },
+  "tree": { "Leaf": "bottom" },
+  "vulnerability": "Not analyzed"
+}

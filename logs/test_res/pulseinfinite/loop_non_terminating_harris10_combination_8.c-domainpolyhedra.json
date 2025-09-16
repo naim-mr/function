@@ -1,0 +1,12 @@
+{
+  "Config": {
+    "filename": "test_res/pulseinfinite/loop_non_terminating_harris10_combination_8.c",
+    "analysis_type": "termination-resilience",
+    "property": "",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.031267000000100007
+  },
+  "tree": { "Leaf": "9" },
+  "vulnerability": "Not analyzed"
+}

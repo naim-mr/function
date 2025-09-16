@@ -1,0 +1,47 @@
+{
+  "Config": {
+    "filename": "test_vuln/termination/trm_squeez_interval_2b.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.020279000000100002
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{y} >= 3",
+      "left": { "Leaf": "3$2{y}-1" },
+      "right": {
+        "Node": {
+          "constraint": "$2{y} >= 2",
+          "left": { "Leaf": "5" },
+          "right": {
+            "Node": {
+              "constraint": "$2{y} >= -1",
+              "left": { "Leaf": "2" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{y} >= -2",
+                  "left": { "Leaf": "5" },
+                  "right": { "Leaf": "-3$2{y}-1" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "$1",
+        "Potentially vulnerable": "y",
+        "Constraints": "[|$2-3>=0|],[|$2-2=0|],[|-$2+1>=0; $2+1>=0|],[|$2+2=0|],[|-$2-3>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 1 }, { "Min vuln": 1 }, { "Nb vuln": 1 }, { "Total": 2 }
+    ]
+  }
+}

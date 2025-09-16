@@ -1,0 +1,12 @@
+{
+  "Config": {
+    "filename": "test_res/pulseinfinite/nested_loop_not_terminate_combination_2.c",
+    "analysis_type": "termination-resilience",
+    "property": "",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.020841000000100002
+  },
+  "tree": { "Leaf": "4" },
+  "vulnerability": "Not analyzed"
+}

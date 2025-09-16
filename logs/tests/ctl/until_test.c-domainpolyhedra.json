@@ -1,0 +1,30 @@
+{
+  "Config": {
+    "filename": "tests/ctl/until_test.c",
+    "analysis_type": "ctl",
+    "property": "AU{x >= y}{x == y}",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.0094000000000100011
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x}-$3{y} >= 2",
+      "left": { "Leaf": "0." },
+      "right": {
+        "Node": {
+          "constraint": "$2{x}-$3{y} >= 1",
+          "left": { "Leaf": "0." },
+          "right": {
+            "Node": {
+              "constraint": "$2{x}-$3{y} >= 0",
+              "left": { "Leaf": "0." },
+              "right": { "Leaf": "0." }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

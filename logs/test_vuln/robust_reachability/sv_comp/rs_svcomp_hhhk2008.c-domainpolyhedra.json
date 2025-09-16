@@ -1,0 +1,71 @@
+{
+  "Config": {
+    "filename": "test_vuln/robust_reachability/sv_comp/rs_svcomp_hhhk2008.c",
+    "analysis_type": "ctl",
+    "property": "AF{assert1: res != a + b}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.096149000000100002
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$3{b} >= 1000001",
+      "left": {
+        "Node": {
+          "constraint": "$2{a} >= 1000001",
+          "left": { "Leaf": "bottom" },
+          "right": { "Leaf": "bottom" }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$3{b} >= 2",
+          "left": {
+            "Node": {
+              "constraint": "$2{a} >= 1000001",
+              "left": { "Leaf": "bottom" },
+              "right": { "Leaf": "top" }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$3{b} >= 1",
+              "left": {
+                "Node": {
+                  "constraint": "$2{a} >= 1000001",
+                  "left": { "Leaf": "bottom" },
+                  "right": { "Leaf": "bottom" }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$3{b} >= 0",
+                  "left": {
+                    "Node": {
+                      "constraint": "$2{a} >= 1000001",
+                      "left": { "Leaf": "bottom" },
+                      "right": { "Leaf": "bottom" }
+                    }
+                  },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{a} >= 1000001",
+                      "left": { "Leaf": "bottom" },
+                      "right": { "Leaf": "bottom" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [],
+    "stats": [
+      { "Max safe": 0 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 0 }
+    ]
+  }
+}

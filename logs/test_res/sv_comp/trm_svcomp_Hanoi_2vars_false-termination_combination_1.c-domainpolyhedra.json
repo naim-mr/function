@@ -1,0 +1,12 @@
+{
+  "Config": {
+    "filename": "test_res/sv_comp/trm_svcomp_Hanoi_2vars_false-termination_combination_1.c",
+    "analysis_type": "termination-resilience",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.013068000000100002
+  },
+  "tree": { "Leaf": "top" },
+  "vulnerability": "Not analyzed"
+}

@@ -1,0 +1,53 @@
+{
+  "Config": {
+    "filename": "test_vuln/ctl/ctl_existential_test1.c",
+    "analysis_type": "ctl",
+    "property": "EF{r == 1}",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.0082930000000100008
+  },
+  "tree": {
+    "Node": {
+      "constraint": "2$3{x}-$4{y} >= 4",
+      "left": {
+        "Node": {
+          "constraint": "$2{r} >= 2",
+          "left": { "Leaf": "0." },
+          "right": {
+            "Node": {
+              "constraint": "$2{r} >= 1",
+              "left": { "Leaf": "0." },
+              "right": { "Leaf": "0." }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$2{r} >= 2",
+          "left": { "Leaf": "0." },
+          "right": {
+            "Node": {
+              "constraint": "$2{r} >= 1",
+              "left": { "Leaf": "0." },
+              "right": { "Leaf": "0." }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "y,x,r,$1",
+        "Potentially vulnerable": "",
+        "Constraints": "top"
+      }
+    ],
+    "stats": [
+      { "Max safe": 4 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 4 }
+    ]
+  }
+}

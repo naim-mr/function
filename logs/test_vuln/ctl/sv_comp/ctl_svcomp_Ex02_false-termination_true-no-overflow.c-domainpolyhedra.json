@@ -1,0 +1,53 @@
+{
+  "Config": {
+    "filename": "test_vuln/ctl/sv_comp/ctl_svcomp_Ex02_false-termination_true-no-overflow.c",
+    "analysis_type": "ctl",
+    "property": "OR{i >= 5}{AF{exit: true}}",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.080321000000100007
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{i} >= 7",
+      "left": { "Leaf": "0." },
+      "right": {
+        "Node": {
+          "constraint": "$2{i} >= 6",
+          "left": { "Leaf": "0." },
+          "right": {
+            "Node": {
+              "constraint": "$2{i} >= 5",
+              "left": { "Leaf": "0." },
+              "right": {
+                "Node": {
+                  "constraint": "$2{i} >= 2",
+                  "left": { "Leaf": "3$2{i}+1" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{i} >= 1",
+                      "left": { "Leaf": "4" },
+                      "right": { "Leaf": "1" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "$1",
+        "Potentially vulnerable": "i",
+        "Constraints": "[|$2-7>=0|],[|$2-6=0|],[|$2-5=0|],[|-$2+4>=0; $2-2>=0|],[|$2-1=0|],[|\n-$2>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 1 }, { "Min vuln": 1 }, { "Nb vuln": 1 }, { "Total": 2 }
+    ]
+  }
+}

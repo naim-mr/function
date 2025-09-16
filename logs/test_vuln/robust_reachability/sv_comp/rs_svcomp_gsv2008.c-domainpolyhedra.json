@@ -1,0 +1,65 @@
+{
+  "Config": {
+    "filename": "test_vuln/robust_reachability/sv_comp/rs_svcomp_gsv2008.c",
+    "analysis_type": "ctl",
+    "property": "AF{assert1: y < 0}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.0080890000000100014
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$3{y} >= 100000",
+      "left": {
+        "Node": {
+          "constraint": "$2{x} >= 0",
+          "left": { "Leaf": "bottom" },
+          "right": { "Leaf": "bottom" }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$3{y} >= 0",
+          "left": {
+            "Node": {
+              "constraint": "$2{x} >= 0",
+              "left": { "Leaf": "bottom" },
+              "right": { "Leaf": "bottom" }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$3{y} >= -999",
+              "left": {
+                "Node": {
+                  "constraint": "$2{x} >= 0",
+                  "left": { "Leaf": "2" },
+                  "right": { "Leaf": "bottom" }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x} >= 0",
+                  "left": { "Leaf": "bottom" },
+                  "right": { "Leaf": "bottom" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "$1",
+        "Potentially vulnerable": "x,y",
+        "Constraints": "[|-$3-1>=0; $3+999>=0; $2>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 1 }, { "Min vuln": 2 }, { "Nb vuln": 1 }, { "Total": 3 }
+    ]
+  }
+}

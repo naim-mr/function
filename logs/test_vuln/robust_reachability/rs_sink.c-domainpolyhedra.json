@@ -1,0 +1,35 @@
+{
+  "Config": {
+    "filename": "test_vuln/robust_reachability/rs_sink.c",
+    "analysis_type": "ctl",
+    "property": "AF{x == 0}",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.039824000000100002
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$1{x} >= 1",
+      "left": { "Leaf": "0." },
+      "right": {
+        "Node": {
+          "constraint": "$1{x} >= 0",
+          "left": { "Leaf": "0." },
+          "right": { "Leaf": "0." }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "x",
+        "Potentially vulnerable": "",
+        "Constraints": "top"
+      }
+    ],
+    "stats": [
+      { "Max safe": 1 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 1 }
+    ]
+  }
+}

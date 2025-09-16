@@ -1,0 +1,89 @@
+{
+  "Config": {
+    "filename": "test_vuln/robust_reachability/sv_comp/rs_svcomp_cggmp2005.c",
+    "analysis_type": "ctl",
+    "property": "AF{assert1:j != 6}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.10788900000100001
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$3{j} >= 8",
+      "left": {
+        "Node": {
+          "constraint": "$2{i}-$3{j} >= 1",
+          "left": { "Leaf": "1" },
+          "right": {
+            "Node": {
+              "constraint": "$2{i}-$3{j} >= -2",
+              "left": { "Leaf": "4" },
+              "right": { "Leaf": "top" }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$3{j} >= 7",
+          "left": {
+            "Node": {
+              "constraint": "$2{i}-$3{j} >= 1",
+              "left": { "Leaf": "1" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{i}-$3{j} >= -2",
+                  "left": { "Leaf": "bottom" },
+                  "right": { "Leaf": "top" }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$3{j} >= 6",
+              "left": {
+                "Node": {
+                  "constraint": "$2{i}-$3{j} >= 1",
+                  "left": { "Leaf": "bottom" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{i}-$3{j} >= -2",
+                      "left": { "Leaf": "4" },
+                      "right": { "Leaf": "-$2{i}+10" }
+                    }
+                  }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$2{i}-$3{j} >= 1",
+                  "left": { "Leaf": "1" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{i}-$3{j} >= -2",
+                      "left": { "Leaf": "4" },
+                      "right": { "Leaf": "-$2{i}+$3{j}+4" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "$1",
+        "Potentially vulnerable": "i,j",
+        "Constraints": "[|$3-8>=0; $2-$3-1>=0|],[|-$2+$3>=0; $3-8>=0; $2-$3+2>=0|],[|$3-7=0; $2-8>=0|],[|\n$3-6=0; -$2+6>=0; $2-4>=0|],[|\n$3-6=0; -$2+3>=0|],[|\n-$3+5>=0; $2-$3-1>=0|],[|\n-$2+$3>=0; -$3+5>=0; $2-$3+2>=0|],[|\n-$2+$3-3>=0; -$3+5>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 1 }, { "Min vuln": 2 }, { "Nb vuln": 1 }, { "Total": 3 }
+    ]
+  }
+}

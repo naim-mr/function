@@ -1,0 +1,53 @@
+{
+  "Config": {
+    "filename": "test_vuln/termination/trm_zune.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.060419000000100004
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{days} >= 733",
+      "left": { "Leaf": "top" },
+      "right": {
+        "Node": {
+          "constraint": "$2{days} >= 732",
+          "left": { "Leaf": "bottom" },
+          "right": {
+            "Node": {
+              "constraint": "$2{days} >= 731",
+              "left": { "Leaf": "bottom" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{days} >= 367",
+                  "left": { "Leaf": "8" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{days} >= 366",
+                      "left": { "Leaf": "bottom" },
+                      "right": { "Leaf": "3" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "year,$1",
+        "Potentially vulnerable": "days",
+        "Constraints": "[|-$2+730>=0; $2-367>=0|],[|-$2+365>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 2 }, { "Min vuln": 1 }, { "Nb vuln": 1 }, { "Total": 3 }
+    ]
+  }
+}

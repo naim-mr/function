@@ -1,0 +1,54 @@
+{
+  "Config": {
+    "filename": "tests/ctl/koskinen/toylin1.c",
+    "analysis_type": "ctl",
+    "property": "AF{resp > 5}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.054526000000100002
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$4{curr_serv} >= 1",
+      "left": {
+        "Node": {
+          "constraint": "$3{resp} >= 6",
+          "left": {
+            "Node": {
+              "constraint": "$1{c}-$4{curr_serv} >= 0",
+              "left": { "Leaf": "0." },
+              "right": { "Leaf": "0." }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$3{resp} >= 5",
+              "left": {
+                "Node": {
+                  "constraint": "$1{c}-$4{curr_serv} >= 0",
+                  "left": { "Leaf": "bottom" },
+                  "right": { "Leaf": "bottom" }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$1{c}-$4{curr_serv} >= 0",
+                  "left": { "Leaf": "bottom" },
+                  "right": { "Leaf": "bottom" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$3{resp} >= 6",
+          "left": { "Leaf": "0." },
+          "right": { "Leaf": "bottom" }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

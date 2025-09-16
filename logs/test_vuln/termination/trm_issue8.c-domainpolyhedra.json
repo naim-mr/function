@@ -1,0 +1,70 @@
+{
+  "Config": {
+    "filename": "test_vuln/termination/trm_issue8.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.042804000000100006
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$4{y}-$5{z} >= 0",
+      "left": {
+        "Node": {
+          "constraint": "$4{y} >= 1",
+          "left": {
+            "Node": {
+              "constraint": "$3{x} >= -1",
+              "left": { "Leaf": "2" },
+              "right": { "Leaf": "2" }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$3{x} >= -1",
+              "left": { "Leaf": "2" },
+              "right": { "Leaf": "2" }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$4{y} >= 1",
+          "left": {
+            "Node": {
+              "constraint": "$3{x} >= -1",
+              "left": { "Leaf": "2" },
+              "right": { "Leaf": "bottom" }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$3{x} >= -1",
+              "left": { "Leaf": "2" },
+              "right": { "Leaf": "5" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "z,y,flag,$1",
+        "Potentially vulnerable": "x",
+        "Constraints": "[|$3+1>=0|]"
+      },
+      {
+        "Non-vulnerable": "z,x,flag,$1",
+        "Potentially vulnerable": "y",
+        "Constraints": "[|-$4>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 4 }, { "Min vuln": 1 }, { "Nb vuln": 2 }, { "Total": 10 }
+    ]
+  }
+}

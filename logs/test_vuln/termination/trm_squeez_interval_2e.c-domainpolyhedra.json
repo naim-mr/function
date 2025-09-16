@@ -1,0 +1,149 @@
+{
+  "Config": {
+    "filename": "test_vuln/termination/trm_squeez_interval_2e.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.94933300000100008
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$4{y} >= 31",
+      "left": {
+        "Node": {
+          "constraint": "$4{y} >= 6",
+          "left": { "Leaf": "6" },
+          "right": {
+            "Node": {
+              "constraint": "$4{y} >= 5",
+              "left": "BOT",
+              "right": {
+                "Node": {
+                  "constraint": "$4{y} >= -4",
+                  "left": "BOT",
+                  "right": "BOT"
+                }
+              }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$4{y} >= 21",
+          "left": {
+            "Node": {
+              "constraint": "$4{y} >= 6",
+              "left": { "Leaf": "7" },
+              "right": {
+                "Node": {
+                  "constraint": "$4{y} >= 5",
+                  "left": "BOT",
+                  "right": {
+                    "Node": {
+                      "constraint": "$4{y} >= -4",
+                      "left": "BOT",
+                      "right": "BOT"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$4{y} >= 11",
+              "left": {
+                "Node": {
+                  "constraint": "$4{y} >= 6",
+                  "left": { "Leaf": "8" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$4{y} >= 5",
+                      "left": "BOT",
+                      "right": {
+                        "Node": {
+                          "constraint": "$4{y} >= -4",
+                          "left": "BOT",
+                          "right": "BOT"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$4{y} >= 6",
+                  "left": { "Leaf": "-3$4{y}+243" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$4{y} >= 5",
+                      "left": { "Leaf": "11" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$4{y} >= 1",
+                          "left": {
+                            "Node": {
+                              "constraint": "$4{y} >= -4",
+                              "left": { "Leaf": "3" },
+                              "right": "BOT"
+                            }
+                          },
+                          "right": {
+                            "Node": {
+                              "constraint": "$4{y} >= -4",
+                              "left": { "Leaf": "3" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$4{y} >= -5",
+                                  "left": { "Leaf": "11" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$4{y} >= -10",
+                                      "left": { "Leaf": "3$4{y}+243" },
+                                      "right": {
+                                        "Node": {
+                                          "constraint": "$4{y} >= -20",
+                                          "left": { "Leaf": "8" },
+                                          "right": {
+                                            "Node": {
+                                              "constraint": "$4{y} >= -30",
+                                              "left": { "Leaf": "7" },
+                                              "right": { "Leaf": "6" }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "x,step,$3,x,$1",
+        "Potentially vulnerable": "y",
+        "Constraints": "[|$4-31>=0|],[|-$4+30>=0; $4-21>=0|],[|-$4+20>=0; $4-11>=0|],[|-$4+10>=0;\n                                                               $4-6>=0|],[|\n$4-5=0|],[|\n-$4+4>=0; $4-1>=0|],[|\n-$4>=0; $4+4>=0|],[|\n$4+5=0|],[|\n-$4-6>=0; $4+10>=0|],[|\n-$4-11>=0; $4+20>=0|],[|\n-$4-21>=0; $4+30>=0|],[|\n-$4-31>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 5 }, { "Min vuln": 1 }, { "Nb vuln": 1 }, { "Total": 6 }
+    ]
+  }
+}

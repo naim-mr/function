@@ -1,0 +1,71 @@
+{
+  "Config": {
+    "filename": "test_vuln/ctl/koskinen/ctl_koskinen_acqrel.c",
+    "analysis_type": "ctl",
+    "property": "AG{OR{a!=1}{AF{r==1}}}",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.13749200000100001
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$3{a} >= 2",
+      "left": {
+        "Node": {
+          "constraint": "$2{r} >= 2",
+          "left": { "Leaf": "0" },
+          "right": {
+            "Node": {
+              "constraint": "$2{r} >= 1",
+              "left": { "Leaf": "0" },
+              "right": { "Leaf": "0" }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$3{a} >= 1",
+          "left": {
+            "Node": {
+              "constraint": "$2{r} >= 2",
+              "left": { "Leaf": "0." },
+              "right": {
+                "Node": {
+                  "constraint": "$2{r} >= 1",
+                  "left": { "Leaf": "0." },
+                  "right": { "Leaf": "0." }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$2{r} >= 2",
+              "left": { "Leaf": "0" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{r} >= 1",
+                  "left": { "Leaf": "0" },
+                  "right": { "Leaf": "0" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "x,r,n,a",
+        "Potentially vulnerable": "",
+        "Constraints": "top"
+      }
+    ],
+    "stats": [
+      { "Max safe": 4 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 4 }
+    ]
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "Config": {
+    "filename": "tests/termination/euclid.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.13533600000100002
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x}-2$3{y} >= 1",
+      "left": {
+        "Node": {
+          "constraint": "$2{x}-$3{y} >= 1",
+          "left": { "Leaf": "top" },
+          "right": {
+            "Node": {
+              "constraint": "$2{x}-$3{y} >= 0",
+              "left": { "Leaf": "2" },
+              "right": { "Leaf": "top" }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$2{x}-2$3{y} >= 0",
+          "left": {
+            "Node": {
+              "constraint": "$2{x}-$3{y} >= 1",
+              "left": { "Leaf": "5" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x}-$3{y} >= 0",
+                  "left": { "Leaf": "2" },
+                  "right": { "Leaf": "top" }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$2{x}-$3{y} >= 1",
+              "left": { "Leaf": "top" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x}-$3{y} >= 0",
+                  "left": { "Leaf": "2" },
+                  "right": {
+                    "Node": {
+                      "constraint": "2$2{x}-$3{y} >= 1",
+                      "left": { "Leaf": "top" },
+                      "right": {
+                        "Node": {
+                          "constraint": "2$2{x}-$3{y} >= 0",
+                          "left": { "Leaf": "5" },
+                          "right": { "Leaf": "top" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

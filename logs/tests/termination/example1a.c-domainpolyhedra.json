@@ -1,0 +1,60 @@
+{
+  "Config": {
+    "filename": "tests/termination/example1a.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.078424000000100011
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$4{y} >= 3",
+      "left": { "Leaf": "top" },
+      "right": {
+        "Node": {
+          "constraint": "$4{y} >= 2",
+          "left": {
+            "Node": {
+              "constraint": "$4{y} >= 0",
+              "left": { "Leaf": "9" },
+              "right": "BOT"
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$4{y} >= 1",
+              "left": {
+                "Node": {
+                  "constraint": "$4{y} >= 0",
+                  "left": { "Leaf": "7" },
+                  "right": "BOT"
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$4{y} >= 0",
+                  "left": { "Leaf": "6" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$4{y} >= -1",
+                      "left": { "Leaf": "6" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$4{y} >= -2",
+                          "left": { "Leaf": "8" },
+                          "right": { "Leaf": "top" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

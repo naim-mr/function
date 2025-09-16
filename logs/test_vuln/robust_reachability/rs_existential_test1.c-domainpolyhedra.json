@@ -1,0 +1,53 @@
+{
+  "Config": {
+    "filename": "test_vuln/robust_reachability/rs_existential_test1.c",
+    "analysis_type": "ctl",
+    "property": "AF{r != 1}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.0059270000000100007
+  },
+  "tree": {
+    "Node": {
+      "constraint": "2$3{x}-$4{y} >= 4",
+      "left": {
+        "Node": {
+          "constraint": "$2{r} >= 2",
+          "left": { "Leaf": "0." },
+          "right": {
+            "Node": {
+              "constraint": "$2{r} >= 1",
+              "left": { "Leaf": "bottom" },
+              "right": { "Leaf": "0." }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$2{r} >= 2",
+          "left": { "Leaf": "0." },
+          "right": {
+            "Node": {
+              "constraint": "$2{r} >= 1",
+              "left": { "Leaf": "bottom" },
+              "right": { "Leaf": "0." }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "y,x,$1",
+        "Potentially vulnerable": "r",
+        "Constraints": "[|$2-2>=0|],[|-$2>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 3 }, { "Min vuln": 1 }, { "Nb vuln": 1 }, { "Total": 4 }
+    ]
+  }
+}

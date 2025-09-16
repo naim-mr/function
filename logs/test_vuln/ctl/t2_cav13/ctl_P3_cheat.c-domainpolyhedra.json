@@ -1,0 +1,233 @@
+{
+  "Config": {
+    "filename": "test_vuln/ctl/t2_cav13/ctl_P3_cheat.c",
+    "analysis_type": "ctl",
+    "property": "OR{varA != 1}{EF{varR==1}}",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.36639200000100003
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$6{varR} >= 2",
+      "left": {
+        "Node": {
+          "constraint": "$5{varA} >= 2",
+          "left": {
+            "Node": {
+              "constraint": "$4{m_init} >= 1",
+              "left": {
+                "Node": {
+                  "constraint": "$3{n_init} >= 1",
+                  "left": { "Leaf": "0" },
+                  "right": { "Leaf": "0" }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$3{n_init} >= 1",
+                  "left": { "Leaf": "0" },
+                  "right": { "Leaf": "0" }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$5{varA} >= 1",
+              "left": {
+                "Node": {
+                  "constraint": "$4{m_init} >= 1",
+                  "left": {
+                    "Node": {
+                      "constraint": "$3{n_init} >= 1",
+                      "left": { "Leaf": "0." },
+                      "right": { "Leaf": "0." }
+                    }
+                  },
+                  "right": {
+                    "Node": {
+                      "constraint": "$3{n_init} >= 1",
+                      "left": { "Leaf": "0." },
+                      "right": { "Leaf": "0." }
+                    }
+                  }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$4{m_init} >= 1",
+                  "left": {
+                    "Node": {
+                      "constraint": "$3{n_init} >= 1",
+                      "left": { "Leaf": "0" },
+                      "right": { "Leaf": "0" }
+                    }
+                  },
+                  "right": {
+                    "Node": {
+                      "constraint": "$3{n_init} >= 1",
+                      "left": { "Leaf": "0" },
+                      "right": { "Leaf": "0" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$6{varR} >= 1",
+          "left": {
+            "Node": {
+              "constraint": "$5{varA} >= 2",
+              "left": {
+                "Node": {
+                  "constraint": "$4{m_init} >= 1",
+                  "left": {
+                    "Node": {
+                      "constraint": "$3{n_init} >= 1",
+                      "left": { "Leaf": "0" },
+                      "right": { "Leaf": "0" }
+                    }
+                  },
+                  "right": {
+                    "Node": {
+                      "constraint": "$3{n_init} >= 1",
+                      "left": { "Leaf": "0" },
+                      "right": { "Leaf": "0" }
+                    }
+                  }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$5{varA} >= 1",
+                  "left": {
+                    "Node": {
+                      "constraint": "$4{m_init} >= 1",
+                      "left": {
+                        "Node": {
+                          "constraint": "$3{n_init} >= 1",
+                          "left": { "Leaf": "0." },
+                          "right": { "Leaf": "0." }
+                        }
+                      },
+                      "right": {
+                        "Node": {
+                          "constraint": "$3{n_init} >= 1",
+                          "left": { "Leaf": "0." },
+                          "right": { "Leaf": "0." }
+                        }
+                      }
+                    }
+                  },
+                  "right": {
+                    "Node": {
+                      "constraint": "$4{m_init} >= 1",
+                      "left": {
+                        "Node": {
+                          "constraint": "$3{n_init} >= 1",
+                          "left": { "Leaf": "0" },
+                          "right": { "Leaf": "0" }
+                        }
+                      },
+                      "right": {
+                        "Node": {
+                          "constraint": "$3{n_init} >= 1",
+                          "left": { "Leaf": "0" },
+                          "right": { "Leaf": "0" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$5{varA} >= 2",
+              "left": {
+                "Node": {
+                  "constraint": "$4{m_init} >= 1",
+                  "left": {
+                    "Node": {
+                      "constraint": "$3{n_init} >= 1",
+                      "left": { "Leaf": "0" },
+                      "right": { "Leaf": "0" }
+                    }
+                  },
+                  "right": {
+                    "Node": {
+                      "constraint": "$3{n_init} >= 1",
+                      "left": { "Leaf": "0" },
+                      "right": { "Leaf": "0" }
+                    }
+                  }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$5{varA} >= 1",
+                  "left": {
+                    "Node": {
+                      "constraint": "$4{m_init} >= 1",
+                      "left": {
+                        "Node": {
+                          "constraint": "$3{n_init} >= 1",
+                          "left": { "Leaf": "0." },
+                          "right": { "Leaf": "0." }
+                        }
+                      },
+                      "right": {
+                        "Node": {
+                          "constraint": "$3{n_init} >= 1",
+                          "left": { "Leaf": "0." },
+                          "right": { "Leaf": "0." }
+                        }
+                      }
+                    }
+                  },
+                  "right": {
+                    "Node": {
+                      "constraint": "$4{m_init} >= 1",
+                      "left": {
+                        "Node": {
+                          "constraint": "$3{n_init} >= 1",
+                          "left": { "Leaf": "0" },
+                          "right": { "Leaf": "0" }
+                        }
+                      },
+                      "right": {
+                        "Node": {
+                          "constraint": "$3{n_init} >= 1",
+                          "left": { "Leaf": "0" },
+                          "right": { "Leaf": "0" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "varR,varA,n_init,n,m_init,m",
+        "Potentially vulnerable": "",
+        "Constraints": "top"
+      }
+    ],
+    "stats": [
+      { "Max safe": 6 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 6 }
+    ]
+  }
+}

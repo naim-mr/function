@@ -1,0 +1,24 @@
+{
+  "Config": {
+    "filename": "tests/termination/predecrement.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.0061790000000100003
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 2",
+      "left": { "Leaf": "3$2{x}+2" },
+      "right": {
+        "Node": {
+          "constraint": "$2{x} >= 1",
+          "left": { "Leaf": "5" },
+          "right": { "Leaf": "2" }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

@@ -1,0 +1,71 @@
+{
+  "Config": {
+    "filename": "test_vuln/robust_reachability/rs_peterson.c",
+    "analysis_type": "ctl",
+    "property": "AF{C1: true}",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 3.5338910000100002
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{flag2} >= 1",
+      "left": {
+        "Node": {
+          "constraint": "$1{flag1} >= 1",
+          "left": { "Leaf": "14" },
+          "right": {
+            "Node": {
+              "constraint": "$1{flag1} >= 0",
+              "left": { "Leaf": "14" },
+              "right": { "Leaf": "14" }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$2{flag2} >= 0",
+          "left": {
+            "Node": {
+              "constraint": "$1{flag1} >= 1",
+              "left": { "Leaf": "14" },
+              "right": {
+                "Node": {
+                  "constraint": "$1{flag1} >= 0",
+                  "left": { "Leaf": "14" },
+                  "right": { "Leaf": "14" }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$1{flag1} >= 1",
+              "left": { "Leaf": "14" },
+              "right": {
+                "Node": {
+                  "constraint": "$1{flag1} >= 0",
+                  "left": { "Leaf": "14" },
+                  "right": { "Leaf": "14" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "turn,flag2,flag1",
+        "Potentially vulnerable": "",
+        "Constraints": "top"
+      }
+    ],
+    "stats": [
+      { "Max safe": 3 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 3 }
+    ]
+  }
+}

@@ -28,8 +28,6 @@ _tags
 .idea
 results/*
 *.exe
-logs/*
-diff/*
 *.ipynb_checkpoints*
 script/proton
 script/UAutomizer-linux

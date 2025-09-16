@@ -1,0 +1,125 @@
+{
+  "Config": {
+    "filename": "test_vuln/robust_reachability/sv_comp/rs_svcomp_hh2012-ex3b.c",
+    "analysis_type": "ctl",
+    "property": "OR{AF{assert1: 0 > j || j > i || i > j + 3 || j > 4 }}{AF{assert2: 0 > j || j > i || i > j + 3 || j > 4 }}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.45559900000100001
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$3{j} >= 5",
+      "left": {
+        "Node": {
+          "constraint": "$2{i} >= 4",
+          "left": { "Leaf": "bottom" },
+          "right": { "Leaf": "2" }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$3{j} >= 4",
+          "left": {
+            "Node": {
+              "constraint": "$2{i}-$3{j} >= 0",
+              "left": { "Leaf": "bottom" },
+              "right": { "Leaf": "2" }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$3{j} >= 3",
+              "left": {
+                "Node": {
+                  "constraint": "$2{i}-2$3{j} >= 0",
+                  "left": {
+                    "Node": {
+                      "constraint": "$2{i}-$3{j} >= 4",
+                      "left": { "Leaf": "bottom" },
+                      "right": { "Leaf": "bottom" }
+                    }
+                  },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{i}-$3{j} >= 0",
+                      "left": {
+                        "Node": {
+                          "constraint": "$2{i} >= 4",
+                          "left": { "Leaf": "bottom" },
+                          "right": { "Leaf": "8" }
+                        }
+                      },
+                      "right": { "Leaf": "5" }
+                    }
+                  }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$3{j} >= -1",
+                  "left": {
+                    "Node": {
+                      "constraint": "$2{i}-$3{j} >= 4",
+                      "left": {
+                        "Node": {
+                          "constraint": "$2{i} >= 4",
+                          "left": { "Leaf": "bottom" },
+                          "right": { "Leaf": "17" }
+                        }
+                      },
+                      "right": {
+                        "Node": {
+                          "constraint": "$2{i}-$3{j} >= 0",
+                          "left": {
+                            "Node": {
+                              "constraint": "$2{i} >= 4",
+                              "left": { "Leaf": "bottom" },
+                              "right": { "Leaf": "top" }
+                            }
+                          },
+                          "right": { "Leaf": "-3$3{j}+14" }
+                        }
+                      }
+                    }
+                  },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{i}-$3{j} >= 4",
+                      "left": {
+                        "Node": {
+                          "constraint": "$2{i} >= 4",
+                          "left": { "Leaf": "bottom" },
+                          "right": { "Leaf": "-3$3{j}+14" }
+                        }
+                      },
+                      "right": {
+                        "Node": {
+                          "constraint": "$2{i}-$3{j} >= 0",
+                          "left": { "Leaf": "top" },
+                          "right": { "Leaf": "-3$3{j}+14" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "$1",
+        "Potentially vulnerable": "i,j",
+        "Constraints": "[|-$2+3>=0; $3-5>=0|],[|$3-4=0; -$2+3>=0|],[|$3-3=0; $2-3=0|],[|$3-3=0;\n                                                                -$2+2>=0|],[|\n$3+1=0; $2-3=0|],[|\n-$2+$3-1>=0; -$3+2>=0; $3+1>=0|],[|\n-$2+3>=0; -$3-2>=0; $2-$3-4>=0|],[|\n-$2+$3-1>=0; -$3-2>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 1 }, { "Min vuln": 2 }, { "Nb vuln": 1 }, { "Total": 3 }
+    ]
+  }
+}

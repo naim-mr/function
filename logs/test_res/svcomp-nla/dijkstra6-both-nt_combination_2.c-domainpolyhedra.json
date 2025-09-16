@@ -1,0 +1,12 @@
+{
+  "Config": {
+    "filename": "test_res/svcomp-nla/dijkstra6-both-nt_combination_2.c",
+    "analysis_type": "termination-resilience",
+    "property": "",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.012874000000100002
+  },
+  "tree": { "Leaf": "7" },
+  "vulnerability": "Not analyzed"
+}

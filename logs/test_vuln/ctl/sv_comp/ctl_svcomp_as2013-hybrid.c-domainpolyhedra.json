@@ -1,0 +1,119 @@
+{
+  "Config": {
+    "filename": "test_vuln/ctl/sv_comp/ctl_svcomp_as2013-hybrid.c",
+    "analysis_type": "ctl",
+    "property": "AND{AG{AF{assert1:0 > i}}}{AG{AF{assert1: i > 10 }}}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.14664600000100001
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$3{j} >= 10",
+      "left": {
+        "Node": {
+          "constraint": "$2{i} >= 9",
+          "left": { "Leaf": "bottom" },
+          "right": {
+            "Node": {
+              "constraint": "$2{i} >= 8",
+              "left": { "Leaf": "bottom" },
+              "right": { "Leaf": "bottom" }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$3{j} >= 9",
+          "left": {
+            "Node": {
+              "constraint": "$2{i} >= 10",
+              "left": { "Leaf": "bottom" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{i} >= 9",
+                  "left": { "Leaf": "bottom" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{i} >= 8",
+                      "left": { "Leaf": "bottom" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$2{i} >= -1",
+                          "left": { "Leaf": "bottom" },
+                          "right": { "Leaf": "bottom" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$3{j} >= 8",
+              "left": {
+                "Node": {
+                  "constraint": "$2{i} >= 10",
+                  "left": { "Leaf": "bottom" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{i} >= 9",
+                      "left": { "Leaf": "bottom" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$2{i} >= 8",
+                          "left": { "Leaf": "bottom" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$2{i} >= -1",
+                              "left": { "Leaf": "bottom" },
+                              "right": { "Leaf": "bottom" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$2{i} >= 10",
+                  "left": { "Leaf": "bottom" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{i} >= 9",
+                      "left": { "Leaf": "bottom" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$2{i} >= 8",
+                          "left": { "Leaf": "bottom" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$2{i} >= -1",
+                              "left": { "Leaf": "bottom" },
+                              "right": { "Leaf": "bottom" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [],
+    "stats": [
+      { "Max safe": 0 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 0 }
+    ]
+  }
+}

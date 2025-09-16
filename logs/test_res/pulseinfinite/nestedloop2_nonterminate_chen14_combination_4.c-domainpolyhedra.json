@@ -1,0 +1,12 @@
+{
+  "Config": {
+    "filename": "test_res/pulseinfinite/nestedloop2_nonterminate_chen14_combination_4.c",
+    "analysis_type": "termination-resilience",
+    "property": "",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.026627000000100002
+  },
+  "tree": { "Leaf": "5" },
+  "vulnerability": "Not analyzed"
+}

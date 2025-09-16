@@ -1,0 +1,12 @@
+{
+  "Config": {
+    "filename": "test_res/sv_comp/trm_svcomp_ChooseLife_false-termination_combination_6.c",
+    "analysis_type": "termination-resilience",
+    "property": "",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.034742000000100006
+  },
+  "tree": { "Leaf": "12" },
+  "vulnerability": "Not analyzed"
+}

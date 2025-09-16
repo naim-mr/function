@@ -1,0 +1,239 @@
+{
+  "Config": {
+    "filename": "test_vuln/ctl/t2_cav13/ctl_P26.c",
+    "analysis_type": "ctl",
+    "property": "OR{varC > 5}{EG{varR <= 5}}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.17653200000100001
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$3{varCS} >= 2",
+      "left": {
+        "Node": {
+          "constraint": "$2{varR} >= 6",
+          "left": {
+            "Node": {
+              "constraint": "$1{varC}-$3{varCS} >= 0",
+              "left": {
+                "Node": {
+                  "constraint": "$1{varC} >= 6",
+                  "left": { "Leaf": "0." },
+                  "right": { "Leaf": "bottom" }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$1{varC}-$3{varCS} >= -1",
+                  "left": {
+                    "Node": {
+                      "constraint": "$1{varC} >= 6",
+                      "left": { "Leaf": "0." },
+                      "right": { "Leaf": "bottom" }
+                    }
+                  },
+                  "right": {
+                    "Node": {
+                      "constraint": "$1{varC} >= 6",
+                      "left": { "Leaf": "0." },
+                      "right": { "Leaf": "bottom" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$2{varR} >= 5",
+              "left": {
+                "Node": {
+                  "constraint": "$1{varC}-$3{varCS} >= 0",
+                  "left": {
+                    "Node": {
+                      "constraint": "$1{varC} >= 6",
+                      "left": { "Leaf": "0." },
+                      "right": { "Leaf": "bottom" }
+                    }
+                  },
+                  "right": {
+                    "Node": {
+                      "constraint": "$1{varC}-$3{varCS} >= -1",
+                      "left": {
+                        "Node": {
+                          "constraint": "$1{varC} >= 6",
+                          "left": { "Leaf": "0." },
+                          "right": { "Leaf": "bottom" }
+                        }
+                      },
+                      "right": {
+                        "Node": {
+                          "constraint": "$1{varC} >= 6",
+                          "left": { "Leaf": "0." },
+                          "right": { "Leaf": "bottom" }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$2{varR} >= 4",
+                  "left": {
+                    "Node": {
+                      "constraint": "$1{varC}-$3{varCS} >= 0",
+                      "left": {
+                        "Node": {
+                          "constraint": "$1{varC} >= 6",
+                          "left": { "Leaf": "0." },
+                          "right": { "Leaf": "bottom" }
+                        }
+                      },
+                      "right": {
+                        "Node": {
+                          "constraint": "$1{varC}-$3{varCS} >= -1",
+                          "left": {
+                            "Node": {
+                              "constraint": "$1{varC} >= 6",
+                              "left": { "Leaf": "0." },
+                              "right": { "Leaf": "bottom" }
+                            }
+                          },
+                          "right": {
+                            "Node": {
+                              "constraint": "$1{varC} >= 6",
+                              "left": { "Leaf": "0." },
+                              "right": { "Leaf": "bottom" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "right": {
+                    "Node": {
+                      "constraint": "$1{varC}-$3{varCS} >= 0",
+                      "left": {
+                        "Node": {
+                          "constraint": "$1{varC} >= 6",
+                          "left": { "Leaf": "0." },
+                          "right": { "Leaf": "bottom" }
+                        }
+                      },
+                      "right": {
+                        "Node": {
+                          "constraint": "$1{varC}-$3{varCS} >= -1",
+                          "left": {
+                            "Node": {
+                              "constraint": "$1{varC} >= 6",
+                              "left": { "Leaf": "0." },
+                              "right": { "Leaf": "bottom" }
+                            }
+                          },
+                          "right": {
+                            "Node": {
+                              "constraint": "$1{varC} >= 6",
+                              "left": { "Leaf": "0." },
+                              "right": { "Leaf": "bottom" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$3{varCS} >= 1",
+          "left": {
+            "Node": {
+              "constraint": "$2{varR} >= 6",
+              "left": {
+                "Node": {
+                  "constraint": "$1{varC}-$3{varCS} >= 0",
+                  "left": {
+                    "Node": {
+                      "constraint": "$1{varC} >= 6",
+                      "left": { "Leaf": "0." },
+                      "right": { "Leaf": "bottom" }
+                    }
+                  },
+                  "right": { "Leaf": "bottom" }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$2{varR} >= 5",
+                  "left": {
+                    "Node": {
+                      "constraint": "$1{varC}-$3{varCS} >= 0",
+                      "left": {
+                        "Node": {
+                          "constraint": "$1{varC} >= 6",
+                          "left": { "Leaf": "0." },
+                          "right": { "Leaf": "bottom" }
+                        }
+                      },
+                      "right": { "Leaf": "bottom" }
+                    }
+                  },
+                  "right": {
+                    "Node": {
+                      "constraint": "$1{varC}-$3{varCS} >= 0",
+                      "left": {
+                        "Node": {
+                          "constraint": "$1{varC} >= 6",
+                          "left": { "Leaf": "0." },
+                          "right": { "Leaf": "bottom" }
+                        }
+                      },
+                      "right": { "Leaf": "bottom" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$2{varR} >= 6",
+              "left": {
+                "Node": {
+                  "constraint": "$1{varC} >= 6",
+                  "left": { "Leaf": "0." },
+                  "right": { "Leaf": "bottom" }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$1{varC} >= 6",
+                  "left": { "Leaf": "0." },
+                  "right": { "Leaf": "bottom" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "varR",
+        "Potentially vulnerable": "varC,varCS",
+        "Constraints": "[|$3-2>=0; $1-$3>=0; $1-6>=0|],[|-$1+$3-1=0; $1-6>=0|],[|-$1+$3-2>=0; $1-6>=0|],[|\n$3-1=0; $1-6>=0|],[|\n-$3>=0; $1-6>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 1 }, { "Min vuln": 2 }, { "Nb vuln": 1 }, { "Total": 3 }
+    ]
+  }
+}

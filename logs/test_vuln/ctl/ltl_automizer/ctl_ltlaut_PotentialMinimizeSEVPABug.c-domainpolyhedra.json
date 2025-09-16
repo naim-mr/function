@@ -1,0 +1,71 @@
+{
+  "Config": {
+    "filename": "test_vuln/ctl/ltl_automizer/ctl_ltlaut_PotentialMinimizeSEVPABug.c",
+    "analysis_type": "ctl",
+    "property": "AG{OR{x <= 0}{AF{y == 0}}}",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.11509400000100001
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{y} >= 1",
+      "left": {
+        "Node": {
+          "constraint": "$1{x} >= 3",
+          "left": { "Leaf": "0." },
+          "right": {
+            "Node": {
+              "constraint": "$1{x} >= 1",
+              "left": { "Leaf": "0." },
+              "right": { "Leaf": "0" }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$2{y} >= 0",
+          "left": {
+            "Node": {
+              "constraint": "$1{x} >= 3",
+              "left": { "Leaf": "0." },
+              "right": {
+                "Node": {
+                  "constraint": "$1{x} >= 1",
+                  "left": { "Leaf": "0." },
+                  "right": { "Leaf": "0" }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$1{x} >= 3",
+              "left": { "Leaf": "0." },
+              "right": {
+                "Node": {
+                  "constraint": "$1{x} >= 1",
+                  "left": { "Leaf": "0." },
+                  "right": { "Leaf": "0" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "$3,y,x",
+        "Potentially vulnerable": "",
+        "Constraints": "top"
+      }
+    ],
+    "stats": [
+      { "Max safe": 3 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 3 }
+    ]
+  }
+}

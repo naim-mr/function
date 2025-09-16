@@ -1,0 +1,12 @@
+{
+  "Config": {
+    "filename": "tests/ctl/sv_comp/afnp2014.c",
+    "analysis_type": "ctl",
+    "property": "AF{here: x < y}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.024609000000100003
+  },
+  "tree": { "Leaf": "top" },
+  "vulnerability": "Not analyzed"
+}

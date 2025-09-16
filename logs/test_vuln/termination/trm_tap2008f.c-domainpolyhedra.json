@@ -1,0 +1,71 @@
+{
+  "Config": {
+    "filename": "test_vuln/termination/trm_tap2008f.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.10665800000100001
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 5",
+      "left": { "Leaf": "top" },
+      "right": {
+        "Node": {
+          "constraint": "$2{x} >= 3",
+          "left": { "Leaf": "top" },
+          "right": {
+            "Node": {
+              "constraint": "$2{x} >= 2",
+              "left": { "Leaf": "6" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x} >= 1",
+                  "left": { "Leaf": "bottom" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{x} >= 0",
+                      "left": { "Leaf": "2" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$2{x} >= -1",
+                          "left": { "Leaf": "bottom" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$2{x} >= -2",
+                              "left": { "Leaf": "6" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$2{x} >= -4",
+                                  "left": { "Leaf": "top" },
+                                  "right": { "Leaf": "top" }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "$1",
+        "Potentially vulnerable": "x",
+        "Constraints": "[|$2-2=0|],[|$2=0|],[|$2+2=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 1 }, { "Min vuln": 1 }, { "Nb vuln": 1 }, { "Total": 2 }
+    ]
+  }
+}

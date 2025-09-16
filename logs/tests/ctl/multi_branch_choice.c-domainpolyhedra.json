@@ -1,0 +1,36 @@
+{
+  "Config": {
+    "filename": "tests/ctl/multi_branch_choice.c",
+    "analysis_type": "ctl",
+    "property": "AF{OR{x==4}{x==-4}}",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.066401000000100006
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 5",
+      "left": { "Leaf": "0." },
+      "right": {
+        "Node": {
+          "constraint": "$2{x} >= 4",
+          "left": { "Leaf": "0." },
+          "right": {
+            "Node": {
+              "constraint": "$2{x} >= -3",
+              "left": { "Leaf": "0." },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x} >= -4",
+                  "left": { "Leaf": "0." },
+                  "right": { "Leaf": "0." }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

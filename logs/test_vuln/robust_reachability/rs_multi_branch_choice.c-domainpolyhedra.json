@@ -1,0 +1,47 @@
+{
+  "Config": {
+    "filename": "test_vuln/robust_reachability/rs_multi_branch_choice.c",
+    "analysis_type": "ctl",
+    "property": "AF{OR{x==4}{x==-4}}",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.071153000000100012
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 5",
+      "left": { "Leaf": "0." },
+      "right": {
+        "Node": {
+          "constraint": "$2{x} >= 4",
+          "left": { "Leaf": "0." },
+          "right": {
+            "Node": {
+              "constraint": "$2{x} >= -3",
+              "left": { "Leaf": "0." },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x} >= -4",
+                  "left": { "Leaf": "0." },
+                  "right": { "Leaf": "0." }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "x,$1",
+        "Potentially vulnerable": "",
+        "Constraints": "top"
+      }
+    ],
+    "stats": [
+      { "Max safe": 2 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 2 }
+    ]
+  }
+}

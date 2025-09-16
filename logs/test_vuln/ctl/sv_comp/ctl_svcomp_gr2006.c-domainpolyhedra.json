@@ -1,0 +1,17 @@
+{
+  "Config": {
+    "filename": "test_vuln/ctl/sv_comp/ctl_svcomp_gr2006.c",
+    "analysis_type": "ctl",
+    "property": "AG{AF{assert1:x == 100}}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.009674000000010001
+  },
+  "tree": { "Leaf": "bottom" },
+  "vulnerability": {
+    "res": [],
+    "stats": [
+      { "Max safe": 0 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 0 }
+    ]
+  }
+}

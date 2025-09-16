@@ -1,0 +1,53 @@
+{
+  "Config": {
+    "filename": "test_vuln/robust_reachability/rs_mnav.c",
+    "analysis_type": "ctl",
+    "property": "AF{enable == 0}",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.077376000000100004
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$4{enable} >= 1",
+      "left": {
+        "Node": {
+          "constraint": "$3{count} >= 0",
+          "left": { "Leaf": "0." },
+          "right": { "Leaf": "0." }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$4{enable} >= 0",
+          "left": {
+            "Node": {
+              "constraint": "$3{count} >= 0",
+              "left": { "Leaf": "0." },
+              "right": { "Leaf": "0." }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$3{count} >= 0",
+              "left": { "Leaf": "0." },
+              "right": { "Leaf": "0." }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "enable,count,ch4,$1",
+        "Potentially vulnerable": "",
+        "Constraints": "top"
+      }
+    ],
+    "stats": [
+      { "Max safe": 4 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 4 }
+    ]
+  }
+}

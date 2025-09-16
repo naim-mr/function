@@ -1,0 +1,12 @@
+{
+  "Config": {
+    "filename": "test_res/sv_comp/trm_svcomp_PastaC10_false-termination_combination_6.c",
+    "analysis_type": "termination-resilience",
+    "property": "",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.0061830000000100009
+  },
+  "tree": { "Leaf": "4" },
+  "vulnerability": "Not analyzed"
+}

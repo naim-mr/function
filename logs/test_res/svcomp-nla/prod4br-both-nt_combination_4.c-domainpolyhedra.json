@@ -1,0 +1,12 @@
+{
+  "Config": {
+    "filename": "test_res/svcomp-nla/prod4br-both-nt_combination_4.c",
+    "analysis_type": "termination-resilience",
+    "property": "",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.024909000000100001
+  },
+  "tree": { "Leaf": "4" },
+  "vulnerability": "Not analyzed"
+}

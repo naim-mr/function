@@ -1,0 +1,24 @@
+{
+  "Config": {
+    "filename": "tests/termination/mccarthy91.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.13032700000100001
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x1} >= 101",
+      "left": { "Leaf": "7" },
+      "right": {
+        "Node": {
+          "constraint": "$2{x1} >= 90",
+          "left": { "Leaf": "top" },
+          "right": { "Leaf": "top" }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

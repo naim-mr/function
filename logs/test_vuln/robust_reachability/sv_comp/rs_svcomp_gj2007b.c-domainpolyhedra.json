@@ -1,0 +1,17 @@
+{
+  "Config": {
+    "filename": "test_vuln/robust_reachability/sv_comp/rs_svcomp_gj2007b.c",
+    "analysis_type": "ctl",
+    "property": "AND{AF{assert1: (m < 0 && n > 0)}}{AF{assert1: (m < n && n > 0)}}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.0031920000000100003
+  },
+  "tree": { "Leaf": "bottom" },
+  "vulnerability": {
+    "res": [],
+    "stats": [
+      { "Max safe": 0 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 0 }
+    ]
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "Config": {
+    "filename": "test_vuln/ctl/ltl_automizer/ctl_ltlaut_Bug_NoLoopAtEndForTerminatingPrograms_safe.c",
+    "analysis_type": "ctl",
+    "property": "NOT{AF{ap > 2}}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.072766000000100001
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$3{ap} >= 3",
+      "left": {
+        "Node": {
+          "constraint": "$2{loop_counter} >= 2",
+          "left": { "Leaf": "bottom" },
+          "right": {
+            "Node": {
+              "constraint": "$2{loop_counter} >= 1",
+              "left": { "Leaf": "bottom" },
+              "right": { "Leaf": "bottom" }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$3{ap} >= 2",
+          "left": {
+            "Node": {
+              "constraint": "$2{loop_counter} >= 2",
+              "left": { "Leaf": "bottom" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{loop_counter} >= 1",
+                  "left": { "Leaf": "bottom" },
+                  "right": { "Leaf": "0." }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$3{ap} >= 1",
+              "left": {
+                "Node": {
+                  "constraint": "$2{loop_counter} >= 2",
+                  "left": { "Leaf": "bottom" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{loop_counter} >= 1",
+                      "left": { "Leaf": "0." },
+                      "right": { "Leaf": "0." }
+                    }
+                  }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$2{loop_counter} >= 2",
+                  "left": { "Leaf": "top" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{loop_counter} >= 1",
+                      "left": { "Leaf": "0." },
+                      "right": { "Leaf": "0." }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "$1",
+        "Potentially vulnerable": "ap,loop_counter",
+        "Constraints": "[|$3-2=0; -$2>=0|],[|$3-1=0; $2-1=0|],[|$3-1=0; -$2>=0|],[|$2-1=0; -$3>=0|],[|\n-$2>=0; -$3>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 1 }, { "Min vuln": 2 }, { "Nb vuln": 1 }, { "Total": 3 }
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "Config": {
+    "filename": "test_res/pulseinfinite/nondet_nonterminate_chen14_combination_2.c",
+    "analysis_type": "termination-resilience",
+    "property": "",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.0079910000000100006
+  },
+  "tree": { "Leaf": "8" },
+  "vulnerability": "Not analyzed"
+}

@@ -1,0 +1,24 @@
+{
+  "Config": {
+    "filename": "tests/termination/increment_one.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.0040250000000000008
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 11",
+      "left": { "Leaf": "2" },
+      "right": {
+        "Node": {
+          "constraint": "$2{x} >= 10",
+          "left": { "Leaf": "4" },
+          "right": { "Leaf": "-2$2{x}+24" }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

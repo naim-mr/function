@@ -1,0 +1,42 @@
+{
+  "Config": {
+    "filename": "tests/ctl/and_test.c",
+    "analysis_type": "ctl",
+    "property": "AND{AG{AF{n==1}}}{AF{n==0}}",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.038563000000100004
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$1{n} >= 3",
+      "left": { "Leaf": "0" },
+      "right": {
+        "Node": {
+          "constraint": "$1{n} >= 2",
+          "left": { "Leaf": "0" },
+          "right": {
+            "Node": {
+              "constraint": "$1{n} >= 1",
+              "left": { "Leaf": "0" },
+              "right": {
+                "Node": {
+                  "constraint": "$1{n} >= 0",
+                  "left": { "Leaf": "0" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$1{n} >= -1",
+                      "left": { "Leaf": "0" },
+                      "right": { "Leaf": "0" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

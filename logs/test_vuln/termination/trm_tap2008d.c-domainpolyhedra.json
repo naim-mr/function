@@ -1,0 +1,47 @@
+{
+  "Config": {
+    "filename": "test_vuln/termination/trm_tap2008d.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.069197000000100012
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 11",
+      "left": { "Leaf": "bottom" },
+      "right": {
+        "Node": {
+          "constraint": "$2{x} >= 10",
+          "left": { "Leaf": "bottom" },
+          "right": {
+            "Node": {
+              "constraint": "$2{x} >= 2",
+              "left": { "Leaf": "bottom" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x} >= 1",
+                  "left": { "Leaf": "bottom" },
+                  "right": { "Leaf": "3" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "up,$1",
+        "Potentially vulnerable": "x",
+        "Constraints": "[|-$2>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 2 }, { "Min vuln": 1 }, { "Nb vuln": 1 }, { "Total": 3 }
+    ]
+  }
+}

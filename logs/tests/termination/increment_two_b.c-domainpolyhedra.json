@@ -1,0 +1,30 @@
+{
+  "Config": {
+    "filename": "tests/termination/increment_two_b.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.0070480000000000005
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 11",
+      "left": { "Leaf": "2" },
+      "right": {
+        "Node": {
+          "constraint": "$2{x} >= 9",
+          "left": { "Leaf": "5" },
+          "right": {
+            "Node": {
+              "constraint": "$2{x} >= 7",
+              "left": { "Leaf": "-3$2{x}+40" },
+              "right": { "Leaf": "bottom" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

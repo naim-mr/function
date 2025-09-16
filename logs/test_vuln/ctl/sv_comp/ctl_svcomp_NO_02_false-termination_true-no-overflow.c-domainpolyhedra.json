@@ -1,0 +1,53 @@
+{
+  "Config": {
+    "filename": "test_vuln/ctl/sv_comp/ctl_svcomp_NO_02_false-termination_true-no-overflow.c",
+    "analysis_type": "ctl",
+    "property": "EF{EG{j==0}}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.033100000000100001
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$3{j} >= 1",
+      "left": {
+        "Node": {
+          "constraint": "$2{i} >= 100",
+          "left": { "Leaf": "bottom" },
+          "right": { "Leaf": "0." }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$3{j} >= 0",
+          "left": {
+            "Node": {
+              "constraint": "$2{i} >= 100",
+              "left": { "Leaf": "bottom" },
+              "right": { "Leaf": "0." }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$2{i} >= 100",
+              "left": { "Leaf": "bottom" },
+              "right": { "Leaf": "0." }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "j,$1",
+        "Potentially vulnerable": "i",
+        "Constraints": "[|-$2+99>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 2 }, { "Min vuln": 1 }, { "Nb vuln": 1 }, { "Total": 3 }
+    ]
+  }
+}

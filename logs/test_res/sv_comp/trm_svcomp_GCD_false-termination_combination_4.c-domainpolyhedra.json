@@ -1,0 +1,12 @@
+{
+  "Config": {
+    "filename": "test_res/sv_comp/trm_svcomp_GCD_false-termination_combination_4.c",
+    "analysis_type": "termination-resilience",
+    "property": "",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 1.0585940000100001
+  },
+  "tree": { "Leaf": "4" },
+  "vulnerability": "Not analyzed"
+}

@@ -1,0 +1,114 @@
+{
+  "Config": {
+    "filename": "tests/ctl/ltl_automizer/coolant_basis_6_unsafe_sfty.c",
+    "analysis_type": "ctl",
+    "property": "AG{OR{limit <= -273 && limit >= 10}{OR{tempIn >= 0}{AF{ warnLED == 1}}}}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 4.1876170000100004
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$4{tempIn} >= 0",
+      "left": {
+        "Node": {
+          "constraint": "$3{warnLED} >= 2",
+          "left": {
+            "Node": {
+              "constraint": "$16{limit} >= 10",
+              "left": { "Leaf": "bottom" },
+              "right": {
+                "Node": {
+                  "constraint": "$16{limit} >= -272",
+                  "left": { "Leaf": "bottom" },
+                  "right": { "Leaf": "bottom" }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$3{warnLED} >= 1",
+              "left": {
+                "Node": {
+                  "constraint": "$16{limit} >= 10",
+                  "left": { "Leaf": "bottom" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$16{limit} >= -272",
+                      "left": { "Leaf": "bottom" },
+                      "right": { "Leaf": "bottom" }
+                    }
+                  }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$16{limit} >= 10",
+                  "left": { "Leaf": "bottom" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$16{limit} >= -272",
+                      "left": { "Leaf": "bottom" },
+                      "right": { "Leaf": "bottom" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$3{warnLED} >= 2",
+          "left": {
+            "Node": {
+              "constraint": "$16{limit} >= 10",
+              "left": { "Leaf": "bottom" },
+              "right": {
+                "Node": {
+                  "constraint": "$16{limit} >= -272",
+                  "left": { "Leaf": "bottom" },
+                  "right": { "Leaf": "bottom" }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$3{warnLED} >= 1",
+              "left": {
+                "Node": {
+                  "constraint": "$16{limit} >= 10",
+                  "left": { "Leaf": "bottom" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$16{limit} >= -272",
+                      "left": { "Leaf": "bottom" },
+                      "right": { "Leaf": "bottom" }
+                    }
+                  }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$16{limit} >= 10",
+                  "left": { "Leaf": "bottom" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$16{limit} >= -272",
+                      "left": { "Leaf": "bottom" },
+                      "right": { "Leaf": "bottom" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

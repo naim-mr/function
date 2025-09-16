@@ -1,0 +1,92 @@
+{
+  "Config": {
+    "filename": "tests/termination/squeez_interval_1e.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.095730000000100013
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$4{y} >= 41",
+      "left": { "Leaf": "4" },
+      "right": {
+        "Node": {
+          "constraint": "$4{y} >= 31",
+          "left": { "Leaf": "5" },
+          "right": {
+            "Node": {
+              "constraint": "$4{y} >= 21",
+              "left": { "Leaf": "6" },
+              "right": {
+                "Node": {
+                  "constraint": "$4{y} >= 11",
+                  "left": { "Leaf": "7" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$4{y} >= 7",
+                      "left": { "Leaf": "top" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$4{y} >= 6",
+                          "left": { "Leaf": "12" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$4{y} >= 1",
+                              "left": { "Leaf": "10" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$4{y} >= -5",
+                                  "left": { "Leaf": "10" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$4{y} >= -6",
+                                      "left": { "Leaf": "12" },
+                                      "right": {
+                                        "Node": {
+                                          "constraint": "$4{y} >= -10",
+                                          "left": { "Leaf": "top" },
+                                          "right": {
+                                            "Node": {
+                                              "constraint": "$4{y} >= -20",
+                                              "left": { "Leaf": "7" },
+                                              "right": {
+                                                "Node": {
+                                                  "constraint": "$4{y} >= -30",
+                                                  "left": { "Leaf": "6" },
+                                                  "right": {
+                                                    "Node": {
+                                                      "constraint": "$4{y} >= -40",
+                                                      "left": { "Leaf": "5" },
+                                                      "right": {
+                                                        "Leaf": "4"
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

@@ -1,0 +1,12 @@
+{
+  "Config": {
+    "filename": "test_res/sv_comp/trm_svcomp_NarrowKonv_false-termination_combination_2.c",
+    "analysis_type": "termination-resilience",
+    "property": "",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.060228000000100001
+  },
+  "tree": { "Leaf": "4" },
+  "vulnerability": "Not analyzed"
+}

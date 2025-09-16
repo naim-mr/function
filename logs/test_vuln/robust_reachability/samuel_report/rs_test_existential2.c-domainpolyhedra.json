@@ -1,0 +1,71 @@
+{
+  "Config": {
+    "filename": "test_vuln/robust_reachability/samuel_report/rs_test_existential2.c",
+    "analysis_type": "ctl",
+    "property": "AF{r != 1}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.043027000000100007
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$4{r} >= 2",
+      "left": {
+        "Node": {
+          "constraint": "$2{x} >= 200",
+          "left": { "Leaf": "0." },
+          "right": {
+            "Node": {
+              "constraint": "$2{x} >= 199",
+              "left": { "Leaf": "0." },
+              "right": { "Leaf": "0." }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$4{r} >= 1",
+          "left": {
+            "Node": {
+              "constraint": "$2{x} >= 200",
+              "left": { "Leaf": "bottom" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x} >= 199",
+                  "left": { "Leaf": "bottom" },
+                  "right": { "Leaf": "bottom" }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$2{x} >= 200",
+              "left": { "Leaf": "0." },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x} >= 199",
+                  "left": { "Leaf": "0." },
+                  "right": { "Leaf": "0." }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "y,x,$1",
+        "Potentially vulnerable": "r",
+        "Constraints": "[|$4-2>=0|],[|-$4>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 3 }, { "Min vuln": 1 }, { "Nb vuln": 1 }, { "Total": 4 }
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "Config": {
+    "filename": "tests/ctl/sv_comp/bh2017-ex-add.c",
+    "analysis_type": "ctl",
+    "property": "AF{assert1: n <= 60}",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.056345000000100003
+  },
+  "tree": { "Leaf": "3" },
+  "vulnerability": "Not analyzed"
+}

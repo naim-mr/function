@@ -1,0 +1,101 @@
+{
+  "Config": {
+    "filename": "test_vuln/ctl/ltl_automizer/ctl_ltlaut_timer-simple.c",
+    "analysis_type": "ctl",
+    "property": "NOT{AG{OR{timer_1 != 0}{AF{output_1 == 1}}}}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.12010300000100001
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{output_1} >= 2",
+      "left": {
+        "Node": {
+          "constraint": "$1{timer_1} >= 9",
+          "left": { "Leaf": "bottom" },
+          "right": {
+            "Node": {
+              "constraint": "$1{timer_1} >= 1",
+              "left": { "Leaf": "bottom" },
+              "right": {
+                "Node": {
+                  "constraint": "$1{timer_1} >= 0",
+                  "left": { "Leaf": "bottom" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$1{timer_1} >= -1",
+                      "left": { "Leaf": "bottom" },
+                      "right": { "Leaf": "bottom" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$2{output_1} >= 1",
+          "left": {
+            "Node": {
+              "constraint": "$1{timer_1} >= 9",
+              "left": { "Leaf": "bottom" },
+              "right": {
+                "Node": {
+                  "constraint": "$1{timer_1} >= 1",
+                  "left": { "Leaf": "bottom" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$1{timer_1} >= 0",
+                      "left": { "Leaf": "bottom" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$1{timer_1} >= -1",
+                          "left": { "Leaf": "bottom" },
+                          "right": { "Leaf": "bottom" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$1{timer_1} >= 9",
+              "left": { "Leaf": "bottom" },
+              "right": {
+                "Node": {
+                  "constraint": "$1{timer_1} >= 1",
+                  "left": { "Leaf": "bottom" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$1{timer_1} >= 0",
+                      "left": { "Leaf": "bottom" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$1{timer_1} >= -1",
+                          "left": { "Leaf": "bottom" },
+                          "right": { "Leaf": "bottom" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [],
+    "stats": [
+      { "Max safe": 0 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 0 }
+    ]
+  }
+}

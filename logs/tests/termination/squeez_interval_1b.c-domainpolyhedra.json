@@ -1,0 +1,54 @@
+{
+  "Config": {
+    "filename": "tests/termination/squeez_interval_1b.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.053063000000100003
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{y} >= 11",
+      "left": { "Leaf": "top" },
+      "right": {
+        "Node": {
+          "constraint": "$2{y} >= 4",
+          "left": { "Leaf": "top" },
+          "right": {
+            "Node": {
+              "constraint": "$2{y} >= 3",
+              "left": { "Leaf": "7" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{y} >= 1",
+                  "left": { "Leaf": "5" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{y} >= -2",
+                      "left": { "Leaf": "5" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$2{y} >= -3",
+                          "left": { "Leaf": "7" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$2{y} >= -10",
+                              "left": { "Leaf": "top" },
+                              "right": { "Leaf": "top" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

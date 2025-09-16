@@ -1,0 +1,12 @@
+{
+  "Config": {
+    "filename": "test_res/svcomp-nla/egcd2-both-nt_combination_3.c",
+    "analysis_type": "termination-resilience",
+    "property": "",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.041973000000100007
+  },
+  "tree": { "Leaf": "4" },
+  "vulnerability": "Not analyzed"
+}

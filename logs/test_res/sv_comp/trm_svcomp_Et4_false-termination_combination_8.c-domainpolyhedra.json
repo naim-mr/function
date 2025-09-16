@@ -1,0 +1,12 @@
+{
+  "Config": {
+    "filename": "test_res/sv_comp/trm_svcomp_Et4_false-termination_combination_8.c",
+    "analysis_type": "termination-resilience",
+    "property": "",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.016796000000100002
+  },
+  "tree": { "Leaf": "5" },
+  "vulnerability": "Not analyzed"
+}

@@ -1,0 +1,35 @@
+{
+  "Config": {
+    "filename": "test_vuln/ctl/ctl_countdown.c",
+    "analysis_type": "ctl",
+    "property": "AG{AF{x == 0}}",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.08906600000010001
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$1{x} >= 1",
+      "left": { "Leaf": "0." },
+      "right": {
+        "Node": {
+          "constraint": "$1{x} >= 0",
+          "left": { "Leaf": "0." },
+          "right": { "Leaf": "0." }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "x,c",
+        "Potentially vulnerable": "",
+        "Constraints": "top"
+      }
+    ],
+    "stats": [
+      { "Max safe": 2 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 2 }
+    ]
+  }
+}

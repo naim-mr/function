@@ -1,0 +1,12 @@
+{
+  "Config": {
+    "filename": "test_res/pulseinfinite/nondet_loop_non_terminate_combination_4.c",
+    "analysis_type": "termination-resilience",
+    "property": "",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.0060150000000100002
+  },
+  "tree": { "Leaf": "4" },
+  "vulnerability": "Not analyzed"
+}

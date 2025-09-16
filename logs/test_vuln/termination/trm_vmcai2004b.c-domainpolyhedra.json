@@ -1,0 +1,35 @@
+{
+  "Config": {
+    "filename": "test_vuln/termination/trm_vmcai2004b.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.0069590000000000008
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$1{x} >= 5",
+      "left": { "Leaf": "3" },
+      "right": {
+        "Node": {
+          "constraint": "$1{x} >= 0",
+          "left": { "Leaf": "top" },
+          "right": { "Leaf": "1" }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "",
+        "Potentially vulnerable": "x",
+        "Constraints": "[|$1-5>=0|],[|-$1-1>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 0 }, { "Min vuln": 1 }, { "Nb vuln": 1 }, { "Total": 1 }
+    ]
+  }
+}

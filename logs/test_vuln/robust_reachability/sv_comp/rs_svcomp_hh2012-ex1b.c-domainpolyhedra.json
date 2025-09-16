@@ -1,0 +1,53 @@
+{
+  "Config": {
+    "filename": "test_vuln/robust_reachability/sv_comp/rs_svcomp_hh2012-ex1b.c",
+    "analysis_type": "ctl",
+    "property": "OR{OR{OR{AF{assert1: j > 100}}{AF{assert2: j != 100}}}{AF{assert3: i > 100}}}{assert4: i !=100}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.051886000000100005
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$3{j} >= 101",
+      "left": {
+        "Node": {
+          "constraint": "$2{i} >= 100",
+          "left": { "Leaf": "bottom" },
+          "right": { "Leaf": "2." }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$3{j} >= 100",
+          "left": {
+            "Node": {
+              "constraint": "$2{i} >= 100",
+              "left": { "Leaf": "bottom" },
+              "right": { "Leaf": "bottom" }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$2{i} >= 100",
+              "left": { "Leaf": "bottom" },
+              "right": { "Leaf": "bottom" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "$1",
+        "Potentially vulnerable": "i,j",
+        "Constraints": "[|-$2+99>=0; $3-101>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 1 }, { "Min vuln": 2 }, { "Nb vuln": 1 }, { "Total": 3 }
+    ]
+  }
+}

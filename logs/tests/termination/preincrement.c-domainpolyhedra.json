@@ -1,0 +1,24 @@
+{
+  "Config": {
+    "filename": "tests/termination/preincrement.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.0065420000000100008
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 11",
+      "left": { "Leaf": "2" },
+      "right": {
+        "Node": {
+          "constraint": "$2{x} >= 10",
+          "left": { "Leaf": "5" },
+          "right": { "Leaf": "-3$2{x}+35" }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

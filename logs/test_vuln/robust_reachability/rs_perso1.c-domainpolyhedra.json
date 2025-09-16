@@ -1,0 +1,35 @@
+{
+  "Config": {
+    "filename": "test_vuln/robust_reachability/rs_perso1.c",
+    "analysis_type": "ctl",
+    "property": "AF{safe == 1}",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.077062000000100009
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$4{safe} >= 2",
+      "left": { "Leaf": "0." },
+      "right": {
+        "Node": {
+          "constraint": "$4{safe} >= 1",
+          "left": { "Leaf": "0." },
+          "right": { "Leaf": "0." }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "y,x,safe,$1",
+        "Potentially vulnerable": "",
+        "Constraints": "top"
+      }
+    ],
+    "stats": [
+      { "Max safe": 4 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 4 }
+    ]
+  }
+}

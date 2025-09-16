@@ -1,0 +1,12 @@
+{
+  "Config": {
+    "filename": "test_res/sv_comp/trm_svcomp_Mysore_false-termination_combination_4.c",
+    "analysis_type": "termination-resilience",
+    "property": "",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.024095000000100002
+  },
+  "tree": { "Leaf": "4" },
+  "vulnerability": "Not analyzed"
+}

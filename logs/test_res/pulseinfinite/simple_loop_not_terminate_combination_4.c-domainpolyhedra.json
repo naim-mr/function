@@ -1,0 +1,12 @@
+{
+  "Config": {
+    "filename": "test_res/pulseinfinite/simple_loop_not_terminate_combination_4.c",
+    "analysis_type": "termination-resilience",
+    "property": "",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.0071580000000100002
+  },
+  "tree": { "Leaf": "5" },
+  "vulnerability": "Not analyzed"
+}

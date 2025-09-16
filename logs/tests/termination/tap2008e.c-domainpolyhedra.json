@@ -1,0 +1,78 @@
+{
+  "Config": {
+    "filename": "tests/termination/tap2008e.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.18607900000100001
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 50",
+      "left": { "Leaf": "2" },
+      "right": {
+        "Node": {
+          "constraint": "$2{x} >= 49",
+          "left": { "Leaf": "7" },
+          "right": {
+            "Node": {
+              "constraint": "$2{x} >= 40",
+              "left": { "Leaf": "-5$2{x}+252" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x} >= 29",
+                  "left": { "Leaf": "bottom" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{x} >= 28",
+                      "left": { "Leaf": "bottom" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$2{x} >= 20",
+                          "left": { "Leaf": "bottom" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$2{x} >= 13",
+                              "left": { "Leaf": "bottom" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$2{x} >= 12",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$2{x} >= 3",
+                                      "left": { "Leaf": "5$2{x}+2" },
+                                      "right": {
+                                        "Node": {
+                                          "constraint": "$2{x} >= 2",
+                                          "left": { "Leaf": "12" },
+                                          "right": {
+                                            "Node": {
+                                              "constraint": "$2{x} >= 1",
+                                              "left": { "Leaf": "7" },
+                                              "right": { "Leaf": "2" }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

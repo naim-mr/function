@@ -1,0 +1,65 @@
+{
+  "Config": {
+    "filename": "test_vuln/robust_reachability/koskinen/rs_koskinen_win4.c",
+    "analysis_type": "ctl",
+    "property": "AF{AG{WItemsNum >= 1}}",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.14329600000100002
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$1{WItemsNum} >= 6",
+      "left": { "Leaf": "0." },
+      "right": {
+        "Node": {
+          "constraint": "$1{WItemsNum} >= 5",
+          "left": { "Leaf": "0." },
+          "right": {
+            "Node": {
+              "constraint": "$1{WItemsNum} >= 3",
+              "left": { "Leaf": "0." },
+              "right": {
+                "Node": {
+                  "constraint": "$1{WItemsNum} >= 2",
+                  "left": { "Leaf": "0." },
+                  "right": {
+                    "Node": {
+                      "constraint": "$1{WItemsNum} >= 1",
+                      "left": { "Leaf": "0." },
+                      "right": {
+                        "Node": {
+                          "constraint": "$1{WItemsNum} >= 0",
+                          "left": { "Leaf": "4" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$1{WItemsNum} >= -1",
+                              "left": { "Leaf": "7" },
+                              "right": { "Leaf": "-3$1{WItemsNum}+4" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "",
+        "Potentially vulnerable": "WItemsNum",
+        "Constraints": "[|$1-6>=0|],[|$1-5=0|],[|-$1+4>=0; $1-3>=0|],[|$1-2=0|],[|$1-1=0|],[|\n$1=0|],[|\n$1+1=0|],[|\n-$1-2>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 0 }, { "Min vuln": 1 }, { "Nb vuln": 1 }, { "Total": 1 }
+    ]
+  }
+}

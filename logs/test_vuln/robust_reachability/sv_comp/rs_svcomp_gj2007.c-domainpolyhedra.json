@@ -1,0 +1,137 @@
+{
+  "Config": {
+    "filename": "test_vuln/robust_reachability/sv_comp/rs_svcomp_gj2007.c",
+    "analysis_type": "ctl",
+    "property": "AF{assert1: y != 100}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.45961100000100003
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$3{y} >= 101",
+      "left": {
+        "Node": {
+          "constraint": "$2{x} >= 100",
+          "left": { "Leaf": "1" },
+          "right": {
+            "Node": {
+              "constraint": "$2{x} >= 99",
+              "left": { "Leaf": "5" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x} >= 50",
+                  "left": { "Leaf": "-4$2{x}+401" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{x} >= 49",
+                      "left": { "Leaf": "205" },
+                      "right": { "Leaf": "-3$2{x}+352" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$3{y} >= 100",
+          "left": {
+            "Node": {
+              "constraint": "$2{x} >= 100",
+              "left": { "Leaf": "bottom" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x} >= 99",
+                  "left": { "Leaf": "5" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{x} >= 50",
+                      "left": { "Leaf": "-4$2{x}+401" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$2{x} >= 49",
+                          "left": { "Leaf": "205" },
+                          "right": { "Leaf": "-3$2{x}+352" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$3{y} >= 99",
+              "left": {
+                "Node": {
+                  "constraint": "$2{x} >= 100",
+                  "left": { "Leaf": "1" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{x} >= 99",
+                      "left": { "Leaf": "bottom" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$2{x} >= 50",
+                          "left": { "Leaf": "top" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$2{x} >= 49",
+                              "left": { "Leaf": "top" },
+                              "right": { "Leaf": "top" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x} >= 100",
+                  "left": { "Leaf": "1" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{x} >= 99",
+                      "left": { "Leaf": "5" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$2{x} >= 50",
+                          "left": { "Leaf": "top" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$2{x} >= 49",
+                              "left": { "Leaf": "top" },
+                              "right": { "Leaf": "top" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "$1",
+        "Potentially vulnerable": "x,y",
+        "Constraints": "[|$3-101>=0; $2-100>=0|],[|$2-99=0; $3-101>=0|],[|-$2+98>=0; $3-101>=0;\n                                                  $2-50>=0|],[|\n$2-49=0; $3-101>=0|],[|\n-$2+48>=0; $3-101>=0|],[|\n$3-100=0; $2-99=0|],[|\n$3-100=0; -$2+98>=0; $2-50>=0|],[|\n$3-100=0; $2-49=0|],[|\n$3-100=0; -$2+48>=0|],[|\n$3-99=0; $2-100>=0|],[|\n-$3+98>=0; $2-100>=0|],[|\n$2-99=0; -$3+98>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 1 }, { "Min vuln": 2 }, { "Nb vuln": 1 }, { "Total": 3 }
+    ]
+  }
+}

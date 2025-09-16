@@ -1,0 +1,48 @@
+{
+  "Config": {
+    "filename": "tests/termination/tap2008b.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.035905000000100003
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 36",
+      "left": { "Leaf": "5" },
+      "right": {
+        "Node": {
+          "constraint": "$2{x} >= 31",
+          "left": { "Leaf": "bottom" },
+          "right": {
+            "Node": {
+              "constraint": "$2{x} >= 2",
+              "left": { "Leaf": "5$2{x}+2" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x} >= 1",
+                  "left": { "Leaf": "7" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{x} >= 0",
+                      "left": { "Leaf": "2" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$2{x} >= -5",
+                          "left": { "Leaf": "bottom" },
+                          "right": { "Leaf": "5" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

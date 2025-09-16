@@ -1,0 +1,18 @@
+{
+  "Config": {
+    "filename": "tests/ctl/sv_comp/Bangalore_false-no-overflow.c",
+    "analysis_type": "ctl",
+    "property": "EF{x < 0}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.045977000000100001
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 0",
+      "left": { "Leaf": "bottom" },
+      "right": { "Leaf": "0." }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

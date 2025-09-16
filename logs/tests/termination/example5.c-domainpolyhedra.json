@@ -1,0 +1,24 @@
+{
+  "Config": {
+    "filename": "tests/termination/example5.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.0070880000000100004
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 10",
+      "left": { "Leaf": "2" },
+      "right": {
+        "Node": {
+          "constraint": "$2{x} >= 5",
+          "left": { "Leaf": "4" },
+          "right": { "Leaf": "top" }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

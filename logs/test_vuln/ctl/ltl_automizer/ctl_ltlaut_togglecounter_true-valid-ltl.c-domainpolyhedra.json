@@ -1,0 +1,41 @@
+{
+  "Config": {
+    "filename": "test_vuln/ctl/ltl_automizer/ctl_ltlaut_togglecounter_true-valid-ltl.c",
+    "analysis_type": "ctl",
+    "property": "AG{AND{AF{t == 1}}{AF{t == 0}}}",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.036420000000100005
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$3{t} >= 2",
+      "left": { "Leaf": "0" },
+      "right": {
+        "Node": {
+          "constraint": "$3{t} >= 1",
+          "left": { "Leaf": "0" },
+          "right": {
+            "Node": {
+              "constraint": "$3{t} >= 0",
+              "left": { "Leaf": "0" },
+              "right": { "Leaf": "0" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "t,i,$1",
+        "Potentially vulnerable": "",
+        "Constraints": "top"
+      }
+    ],
+    "stats": [
+      { "Max safe": 3 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 3 }
+    ]
+  }
+}

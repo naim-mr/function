@@ -1,0 +1,330 @@
+{
+  "Config": {
+    "filename": "tests/ctl/ltl_automizer/coolant_basis_5_safe_cheat.c",
+    "analysis_type": "ctl",
+    "property": "AU{init == 0}{OR{AU{init == 1}{AG{init == 3}}}{AG{init == 1}}}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 15.387022000100002
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$13{limitRand} >= 10",
+      "left": {
+        "Node": {
+          "constraint": "$12{tempInRand} >= 282",
+          "left": {
+            "Node": {
+              "constraint": "$11{init} >= 4",
+              "left": { "Leaf": "0." },
+              "right": {
+                "Node": {
+                  "constraint": "$11{init} >= 3",
+                  "left": { "Leaf": "0." },
+                  "right": {
+                    "Node": {
+                      "constraint": "$11{init} >= 2",
+                      "left": { "Leaf": "0." },
+                      "right": {
+                        "Node": {
+                          "constraint": "$11{init} >= 1",
+                          "left": { "Leaf": "0." },
+                          "right": {
+                            "Node": {
+                              "constraint": "$11{init} >= 0",
+                              "left": { "Leaf": "0." },
+                              "right": { "Leaf": "0." }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$12{tempInRand} >= 273",
+              "left": {
+                "Node": {
+                  "constraint": "$11{init} >= 4",
+                  "left": { "Leaf": "0." },
+                  "right": {
+                    "Node": {
+                      "constraint": "$11{init} >= 3",
+                      "left": { "Leaf": "0." },
+                      "right": {
+                        "Node": {
+                          "constraint": "$11{init} >= 2",
+                          "left": { "Leaf": "0." },
+                          "right": {
+                            "Node": {
+                              "constraint": "$11{init} >= 1",
+                              "left": { "Leaf": "0." },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 0",
+                                  "left": { "Leaf": "0." },
+                                  "right": { "Leaf": "0." }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$11{init} >= 4",
+                  "left": { "Leaf": "0." },
+                  "right": {
+                    "Node": {
+                      "constraint": "$11{init} >= 3",
+                      "left": { "Leaf": "0." },
+                      "right": {
+                        "Node": {
+                          "constraint": "$11{init} >= 2",
+                          "left": { "Leaf": "0." },
+                          "right": {
+                            "Node": {
+                              "constraint": "$11{init} >= 1",
+                              "left": { "Leaf": "0." },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 0",
+                                  "left": { "Leaf": "0." },
+                                  "right": { "Leaf": "0." }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$13{limitRand} >= -272",
+          "left": {
+            "Node": {
+              "constraint": "$12{tempInRand} >= 282",
+              "left": {
+                "Node": {
+                  "constraint": "$11{init} >= 4",
+                  "left": { "Leaf": "bottom" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$11{init} >= 3",
+                      "left": { "Leaf": "bottom" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$11{init} >= 2",
+                          "left": { "Leaf": "bottom" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$11{init} >= 1",
+                              "left": { "Leaf": "bottom" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 0",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": { "Leaf": "bottom" }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$12{tempInRand} >= 273",
+                  "left": {
+                    "Node": {
+                      "constraint": "$11{init} >= 4",
+                      "left": { "Leaf": "bottom" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$11{init} >= 3",
+                          "left": { "Leaf": "bottom" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$11{init} >= 2",
+                              "left": { "Leaf": "bottom" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 1",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$11{init} >= 0",
+                                      "left": { "Leaf": "bottom" },
+                                      "right": { "Leaf": "bottom" }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "right": {
+                    "Node": {
+                      "constraint": "$11{init} >= 4",
+                      "left": { "Leaf": "bottom" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$11{init} >= 3",
+                          "left": { "Leaf": "bottom" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$11{init} >= 2",
+                              "left": { "Leaf": "bottom" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 1",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$11{init} >= 0",
+                                      "left": { "Leaf": "bottom" },
+                                      "right": { "Leaf": "bottom" }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$12{tempInRand} >= 282",
+              "left": {
+                "Node": {
+                  "constraint": "$11{init} >= 4",
+                  "left": { "Leaf": "0." },
+                  "right": {
+                    "Node": {
+                      "constraint": "$11{init} >= 3",
+                      "left": { "Leaf": "0." },
+                      "right": {
+                        "Node": {
+                          "constraint": "$11{init} >= 2",
+                          "left": { "Leaf": "0." },
+                          "right": {
+                            "Node": {
+                              "constraint": "$11{init} >= 1",
+                              "left": { "Leaf": "0." },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 0",
+                                  "left": { "Leaf": "0." },
+                                  "right": { "Leaf": "0." }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$12{tempInRand} >= 273",
+                  "left": {
+                    "Node": {
+                      "constraint": "$11{init} >= 4",
+                      "left": { "Leaf": "0." },
+                      "right": {
+                        "Node": {
+                          "constraint": "$11{init} >= 3",
+                          "left": { "Leaf": "0." },
+                          "right": {
+                            "Node": {
+                              "constraint": "$11{init} >= 2",
+                              "left": { "Leaf": "0." },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 1",
+                                  "left": { "Leaf": "0." },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$11{init} >= 0",
+                                      "left": { "Leaf": "0." },
+                                      "right": { "Leaf": "0." }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "right": {
+                    "Node": {
+                      "constraint": "$11{init} >= 4",
+                      "left": { "Leaf": "0." },
+                      "right": {
+                        "Node": {
+                          "constraint": "$11{init} >= 3",
+                          "left": { "Leaf": "0." },
+                          "right": {
+                            "Node": {
+                              "constraint": "$11{init} >= 2",
+                              "left": { "Leaf": "0." },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 1",
+                                  "left": { "Leaf": "0." },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$11{init} >= 0",
+                                      "left": { "Leaf": "0." },
+                                      "right": { "Leaf": "0." }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

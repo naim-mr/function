@@ -1,0 +1,35 @@
+{
+  "Config": {
+    "filename": "test_vuln/termination/trm_postdecrement.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.0063460000000100008
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 1",
+      "left": { "Leaf": "3$2{x}+5" },
+      "right": {
+        "Node": {
+          "constraint": "$2{x} >= 0",
+          "left": { "Leaf": "5" },
+          "right": { "Leaf": "2" }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "y,$1",
+        "Potentially vulnerable": "x",
+        "Constraints": "[|$2-1>=0|],[|$2=0|],[|-$2-1>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 2 }, { "Min vuln": 1 }, { "Nb vuln": 1 }, { "Total": 3 }
+    ]
+  }
+}

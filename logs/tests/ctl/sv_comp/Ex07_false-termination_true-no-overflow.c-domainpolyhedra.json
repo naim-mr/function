@@ -1,0 +1,36 @@
+{
+  "Config": {
+    "filename": "tests/ctl/sv_comp/Ex07_false-termination_true-no-overflow.c",
+    "analysis_type": "ctl",
+    "property": "AF{AG{i==0}}",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.037157000000100006
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{i} >= 2",
+      "left": { "Leaf": "0." },
+      "right": {
+        "Node": {
+          "constraint": "$2{i} >= 1",
+          "left": { "Leaf": "0." },
+          "right": {
+            "Node": {
+              "constraint": "$2{i} >= 0",
+              "left": { "Leaf": "0." },
+              "right": {
+                "Node": {
+                  "constraint": "$2{i} >= -1",
+                  "left": { "Leaf": "0." },
+                  "right": { "Leaf": "0." }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

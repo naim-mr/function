@@ -1,0 +1,12 @@
+{
+  "Config": {
+    "filename": "tests/termination/example8.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.034706000000100005
+  },
+  "tree": { "Leaf": "top" },
+  "vulnerability": "Not analyzed"
+}

@@ -1,0 +1,42 @@
+{
+  "Config": {
+    "filename": "tests/ctl/existential_test3.c",
+    "analysis_type": "ctl",
+    "property": "EF{r == 1}",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.016211000000100004
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$3{x} >= 1",
+      "left": {
+        "Node": {
+          "constraint": "$2{r} >= 2",
+          "left": { "Leaf": "0." },
+          "right": {
+            "Node": {
+              "constraint": "$2{r} >= 1",
+              "left": { "Leaf": "0." },
+              "right": { "Leaf": "0." }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$2{r} >= 2",
+          "left": { "Leaf": "0." },
+          "right": {
+            "Node": {
+              "constraint": "$2{r} >= 1",
+              "left": { "Leaf": "0." },
+              "right": { "Leaf": "0." }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

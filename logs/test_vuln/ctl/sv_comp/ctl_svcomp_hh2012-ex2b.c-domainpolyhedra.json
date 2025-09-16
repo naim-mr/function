@@ -1,0 +1,35 @@
+{
+  "Config": {
+    "filename": "test_vuln/ctl/sv_comp/ctl_svcomp_hh2012-ex2b.c",
+    "analysis_type": "ctl",
+    "property": "AND{AG{AF{assert1: n <= 60}}}{AG{AF{assert2: n == 60}}}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.015362000000100001
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{n} >= 61",
+      "left": { "Leaf": "bottom" },
+      "right": {
+        "Node": {
+          "constraint": "$2{n} >= 60",
+          "left": { "Leaf": "1." },
+          "right": { "Leaf": "1." }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "$1",
+        "Potentially vulnerable": "n",
+        "Constraints": "[|$2-60=0|],[|-$2+59>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 1 }, { "Min vuln": 1 }, { "Nb vuln": 1 }, { "Total": 2 }
+    ]
+  }
+}

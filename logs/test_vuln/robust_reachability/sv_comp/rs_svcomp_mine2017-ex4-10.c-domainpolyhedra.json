@@ -1,0 +1,53 @@
+{
+  "Config": {
+    "filename": "test_vuln/robust_reachability/sv_comp/rs_svcomp_mine2017-ex4-10.c",
+    "analysis_type": "ctl",
+    "property": "AND{AF{assert2: v <= 52 && v >= 51}}{AND{AF{assert0: 1 <= v}}{AF{assert2: v <= 52 }}}",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.058364000000100003
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{v} >= 53",
+      "left": { "Leaf": "1" },
+      "right": {
+        "Node": {
+          "constraint": "$2{v} >= 51",
+          "left": { "Leaf": "1" },
+          "right": {
+            "Node": {
+              "constraint": "$2{v} >= 49",
+              "left": { "Leaf": "3" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{v} >= 1",
+                  "left": { "Leaf": "-$2{v}+53" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{v} >= -1",
+                      "left": { "Leaf": "-$2{v}+53" },
+                      "right": { "Leaf": "-$2{v}+53" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "$1",
+        "Potentially vulnerable": "v",
+        "Constraints": "[|$2-53>=0|],[|-$2+52>=0; $2-51>=0|],[|-$2+50>=0; $2-49>=0|],[|-$2+48>=0;\n                                                               $2-1>=0|],[|\n-$2>=0; $2+1>=0|],[|\n-$2-2>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 1 }, { "Min vuln": 1 }, { "Nb vuln": 1 }, { "Total": 2 }
+    ]
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "Config": {
+    "filename": "test_vuln/ctl/ctl_potential_termination_1.c",
+    "analysis_type": "ctl",
+    "property": "EF{exit: true}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.011608000000100001
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$4{y} >= 2",
+      "left": {
+        "Node": {
+          "constraint": "$3{x}-$4{y} >= 1",
+          "left": {
+            "Node": {
+              "constraint": "$2{i} >= 11",
+              "left": { "Leaf": "3" },
+              "right": { "Leaf": "2." }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$3{x}-$4{y} >= 0",
+              "left": {
+                "Node": {
+                  "constraint": "$2{i} >= 11",
+                  "left": { "Leaf": "3" },
+                  "right": { "Leaf": "bottom" }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$2{i} >= 11",
+                  "left": { "Leaf": "3" },
+                  "right": { "Leaf": "2." }
+                }
+              }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$4{y} >= 1",
+          "left": {
+            "Node": {
+              "constraint": "$3{x}-$4{y} >= 1",
+              "left": {
+                "Node": {
+                  "constraint": "$2{i} >= 11",
+                  "left": { "Leaf": "bottom" },
+                  "right": { "Leaf": "2." }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$3{x}-$4{y} >= 0",
+                  "left": {
+                    "Node": {
+                      "constraint": "$2{i} >= 11",
+                      "left": { "Leaf": "bottom" },
+                      "right": { "Leaf": "bottom" }
+                    }
+                  },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{i} >= 11",
+                      "left": { "Leaf": "bottom" },
+                      "right": { "Leaf": "2." }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$3{x}-$4{y} >= 1",
+              "left": {
+                "Node": {
+                  "constraint": "$2{i} >= 11",
+                  "left": { "Leaf": "3" },
+                  "right": { "Leaf": "2." }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$3{x}-$4{y} >= 0",
+                  "left": {
+                    "Node": {
+                      "constraint": "$2{i} >= 11",
+                      "left": { "Leaf": "3" },
+                      "right": { "Leaf": "bottom" }
+                    }
+                  },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{i} >= 11",
+                      "left": { "Leaf": "3" },
+                      "right": { "Leaf": "2." }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "x,$1",
+        "Potentially vulnerable": "i,y",
+        "Constraints": "[|$4-2>=0; $2-11>=0|],[|-$4>=0; $2-11>=0|]"
+      },
+      {
+        "Non-vulnerable": "i,$1",
+        "Potentially vulnerable": "x,y",
+        "Constraints": "[|$4-2>=0; $3-$4-1>=0|],[|-$3+$4-1>=0; $4-2>=0|],[|-$4>=0; $3-$4-1>=0|],[|\n-$3+$4-1>=0; -$4>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 2 }, { "Min vuln": 2 }, { "Nb vuln": 2 }, { "Total": 8 }
+    ]
+  }
+}

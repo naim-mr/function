@@ -1,0 +1,35 @@
+{
+  "Config": {
+    "filename": "test_vuln/termination/trm_multiply_two.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.0064020000000000006
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 10",
+      "left": { "Leaf": "2" },
+      "right": {
+        "Node": {
+          "constraint": "$2{x} >= 5",
+          "left": { "Leaf": "4" },
+          "right": { "Leaf": "top" }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "$1",
+        "Potentially vulnerable": "x",
+        "Constraints": "[|$2-10>=0|],[|-$2+9>=0; $2-5>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 1 }, { "Min vuln": 1 }, { "Nb vuln": 1 }, { "Total": 2 }
+    ]
+  }
+}

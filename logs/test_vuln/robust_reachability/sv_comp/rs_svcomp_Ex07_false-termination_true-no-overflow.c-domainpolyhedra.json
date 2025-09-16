@@ -1,0 +1,47 @@
+{
+  "Config": {
+    "filename": "test_vuln/robust_reachability/sv_comp/rs_svcomp_Ex07_false-termination_true-no-overflow.c",
+    "analysis_type": "ctl",
+    "property": "AF{AG{i==0}}",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.028293000000100003
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{i} >= 2",
+      "left": { "Leaf": "0." },
+      "right": {
+        "Node": {
+          "constraint": "$2{i} >= 1",
+          "left": { "Leaf": "0." },
+          "right": {
+            "Node": {
+              "constraint": "$2{i} >= 0",
+              "left": { "Leaf": "0." },
+              "right": {
+                "Node": {
+                  "constraint": "$2{i} >= -1",
+                  "left": { "Leaf": "0." },
+                  "right": { "Leaf": "0." }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "i,$1",
+        "Potentially vulnerable": "",
+        "Constraints": "top"
+      }
+    ],
+    "stats": [
+      { "Max safe": 2 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 2 }
+    ]
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "Config": {
+    "filename": "tests/ctl/sv_comp/cggmp2005.c",
+    "analysis_type": "ctl",
+    "property": "AF{j == 6}",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.026636000000100004
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$3{j} >= 7",
+      "left": { "Leaf": "0." },
+      "right": {
+        "Node": {
+          "constraint": "$3{j} >= 6",
+          "left": { "Leaf": "0." },
+          "right": { "Leaf": "0." }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

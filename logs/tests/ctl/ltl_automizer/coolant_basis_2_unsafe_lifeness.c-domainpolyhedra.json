@@ -1,0 +1,18 @@
+{
+  "Config": {
+    "filename": "tests/ctl/ltl_automizer/coolant_basis_2_unsafe_lifeness.c",
+    "analysis_type": "ctl",
+    "property": "AG{AF{otime < time}}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.54898900000100004
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$8{otime}-$9{time} >= 0",
+      "left": { "Leaf": "bottom" },
+      "right": { "Leaf": "bottom" }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

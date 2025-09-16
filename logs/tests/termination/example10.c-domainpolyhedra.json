@@ -1,0 +1,96 @@
+{
+  "Config": {
+    "filename": "tests/termination/example10.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.30961400000100004
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$3{x2} >= 2",
+      "left": {
+        "Node": {
+          "constraint": "$2{x1} >= 2",
+          "left": { "Leaf": "top" },
+          "right": {
+            "Node": {
+              "constraint": "$2{x1} >= 1",
+              "left": { "Leaf": "4$3{x2}+3" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x1} >= 0",
+                  "left": { "Leaf": "2" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{x1} >= -1",
+                      "left": { "Leaf": "top" },
+                      "right": { "Leaf": "top" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$3{x2} >= 1",
+          "left": {
+            "Node": {
+              "constraint": "$2{x1} >= 2",
+              "left": { "Leaf": "top" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x1} >= 1",
+                  "left": { "Leaf": "7" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{x1} >= 0",
+                      "left": { "Leaf": "2" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$2{x1} >= -1",
+                          "left": { "Leaf": "7" },
+                          "right": { "Leaf": "-4$2{x1}+3" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$2{x1} >= 2",
+              "left": { "Leaf": "2" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x1} >= 1",
+                  "left": { "Leaf": "2" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{x1} >= 0",
+                      "left": { "Leaf": "2" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$2{x1} >= -1",
+                          "left": { "Leaf": "2" },
+                          "right": { "Leaf": "2" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

@@ -1,0 +1,71 @@
+{
+  "Config": {
+    "filename": "test_vuln/robust_reachability/koskinen/rs_koskinen_toylin1.c",
+    "analysis_type": "ctl",
+    "property": "AF{resp > 5}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.063246000000100001
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$3{resp} >= 6",
+      "left": {
+        "Node": {
+          "constraint": "$2{servers} >= 1",
+          "left": {
+            "Node": {
+              "constraint": "$1{c}-$2{servers} >= 0",
+              "left": { "Leaf": "0." },
+              "right": { "Leaf": "0." }
+            }
+          },
+          "right": { "Leaf": "0." }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$3{resp} >= 5",
+          "left": {
+            "Node": {
+              "constraint": "$2{servers} >= 1",
+              "left": {
+                "Node": {
+                  "constraint": "$1{c}-$2{servers} >= 0",
+                  "left": { "Leaf": "bottom" },
+                  "right": { "Leaf": "bottom" }
+                }
+              },
+              "right": { "Leaf": "bottom" }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$2{servers} >= 1",
+              "left": {
+                "Node": {
+                  "constraint": "$1{c}-$2{servers} >= 0",
+                  "left": { "Leaf": "bottom" },
+                  "right": { "Leaf": "bottom" }
+                }
+              },
+              "right": { "Leaf": "bottom" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "servers,ddd,curr_serv,c",
+        "Potentially vulnerable": "resp",
+        "Constraints": "[|$3-6>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 4 }, { "Min vuln": 1 }, { "Nb vuln": 1 }, { "Total": 5 }
+    ]
+  }
+}

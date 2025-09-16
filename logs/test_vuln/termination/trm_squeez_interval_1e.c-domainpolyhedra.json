@@ -1,0 +1,103 @@
+{
+  "Config": {
+    "filename": "test_vuln/termination/trm_squeez_interval_1e.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.10847900000100002
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$4{y} >= 41",
+      "left": { "Leaf": "4" },
+      "right": {
+        "Node": {
+          "constraint": "$4{y} >= 31",
+          "left": { "Leaf": "5" },
+          "right": {
+            "Node": {
+              "constraint": "$4{y} >= 21",
+              "left": { "Leaf": "6" },
+              "right": {
+                "Node": {
+                  "constraint": "$4{y} >= 11",
+                  "left": { "Leaf": "7" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$4{y} >= 7",
+                      "left": { "Leaf": "top" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$4{y} >= 6",
+                          "left": { "Leaf": "12" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$4{y} >= 1",
+                              "left": { "Leaf": "10" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$4{y} >= -5",
+                                  "left": { "Leaf": "10" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$4{y} >= -6",
+                                      "left": { "Leaf": "12" },
+                                      "right": {
+                                        "Node": {
+                                          "constraint": "$4{y} >= -10",
+                                          "left": { "Leaf": "top" },
+                                          "right": {
+                                            "Node": {
+                                              "constraint": "$4{y} >= -20",
+                                              "left": { "Leaf": "7" },
+                                              "right": {
+                                                "Node": {
+                                                  "constraint": "$4{y} >= -30",
+                                                  "left": { "Leaf": "6" },
+                                                  "right": {
+                                                    "Node": {
+                                                      "constraint": "$4{y} >= -40",
+                                                      "left": { "Leaf": "5" },
+                                                      "right": {
+                                                        "Leaf": "4"
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "step,$3,x,$1",
+        "Potentially vulnerable": "y",
+        "Constraints": "[|$4-41>=0|],[|-$4+40>=0; $4-31>=0|],[|-$4+30>=0; $4-21>=0|],[|-$4+20>=0;\n                                                               $4-11>=0|],[|\n$4-6=0|],[|\n-$4+5>=0; $4-1>=0|],[|\n-$4>=0; $4+5>=0|],[|\n$4+6=0|],[|\n-$4-11>=0; $4+20>=0|],[|\n-$4-21>=0; $4+30>=0|],[|\n-$4-31>=0; $4+40>=0|],[|\n-$4-41>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 4 }, { "Min vuln": 1 }, { "Nb vuln": 1 }, { "Total": 5 }
+    ]
+  }
+}

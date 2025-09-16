@@ -1,0 +1,65 @@
+{
+  "Config": {
+    "filename": "test_vuln/termination/trm_squeez_interval_1b.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.045529000000100004
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{y} >= 11",
+      "left": { "Leaf": "top" },
+      "right": {
+        "Node": {
+          "constraint": "$2{y} >= 4",
+          "left": { "Leaf": "top" },
+          "right": {
+            "Node": {
+              "constraint": "$2{y} >= 3",
+              "left": { "Leaf": "7" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{y} >= 1",
+                  "left": { "Leaf": "5" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$2{y} >= -2",
+                      "left": { "Leaf": "5" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$2{y} >= -3",
+                          "left": { "Leaf": "7" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$2{y} >= -10",
+                              "left": { "Leaf": "top" },
+                              "right": { "Leaf": "top" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "step,$1",
+        "Potentially vulnerable": "y",
+        "Constraints": "[|$2-3=0|],[|-$2+2>=0; $2-1>=0|],[|-$2>=0; $2+2>=0|],[|$2+3=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 2 }, { "Min vuln": 1 }, { "Nb vuln": 1 }, { "Total": 3 }
+    ]
+  }
+}

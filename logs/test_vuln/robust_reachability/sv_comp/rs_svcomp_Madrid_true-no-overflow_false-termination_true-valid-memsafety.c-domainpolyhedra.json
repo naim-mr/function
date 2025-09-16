@@ -1,0 +1,47 @@
+{
+  "Config": {
+    "filename": "test_vuln/robust_reachability/sv_comp/rs_svcomp_Madrid_true-no-overflow_false-termination_true-valid-memsafety.c",
+    "analysis_type": "ctl",
+    "property": "AF{AND{x==7}{AF{AG{x==2}}}}",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "time": 0.023079000000100003
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 8",
+      "left": { "Leaf": "0." },
+      "right": {
+        "Node": {
+          "constraint": "$2{x} >= 7",
+          "left": { "Leaf": "0." },
+          "right": {
+            "Node": {
+              "constraint": "$2{x} >= 3",
+              "left": { "Leaf": "0." },
+              "right": {
+                "Node": {
+                  "constraint": "$2{x} >= 2",
+                  "left": { "Leaf": "0." },
+                  "right": { "Leaf": "0." }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "x,$1",
+        "Potentially vulnerable": "",
+        "Constraints": "top"
+      }
+    ],
+    "stats": [
+      { "Max safe": 2 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 2 }
+    ]
+  }
+}

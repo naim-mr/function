@@ -1,0 +1,41 @@
+{
+  "Config": {
+    "filename": "test_vuln/termination/trm_example8.c",
+    "analysis_type": "termination",
+    "property": "",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.025095000000100003
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{x} >= 101",
+      "left": { "Leaf": "2" },
+      "right": {
+        "Node": {
+          "constraint": "$2{x} >= -34",
+          "left": { "Leaf": "top" },
+          "right": {
+            "Node": {
+              "constraint": "$2{x} >= -49",
+              "left": { "Leaf": "top" },
+              "right": { "Leaf": "5" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "$1",
+        "Potentially vulnerable": "x",
+        "Constraints": "[|$2-101>=0|],[|-$2-50>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 1 }, { "Min vuln": 1 }, { "Nb vuln": 1 }, { "Total": 2 }
+    ]
+  }
+}

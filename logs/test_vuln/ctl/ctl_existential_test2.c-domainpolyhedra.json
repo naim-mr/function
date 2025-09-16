@@ -1,0 +1,25 @@
+{
+  "Config": {
+    "filename": "test_vuln/ctl/ctl_existential_test2.c",
+    "analysis_type": "ctl",
+    "property": "EF{r == 1}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.0065680000000100008
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$2{r} >= 2",
+      "left": "BOT",
+      "right": {
+        "Node": { "constraint": "$2{r} >= 1", "left": "BOT", "right": "BOT" }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [],
+    "stats": [
+      { "Max safe": 0 }, { "Min vuln": 0 }, { "Nb vuln": 0 }, { "Total": 0 }
+    ]
+  }
+}

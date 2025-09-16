@@ -1,0 +1,53 @@
+{
+  "Config": {
+    "filename": "test_vuln/ctl/sv_comp/ctl_svcomp_bh2017-ex-add.c",
+    "analysis_type": "ctl",
+    "property": "AND{AND{AG{AF{assert1: n <= 60}}}{AG{AF{assert2: m == 60}}}}{AG{AF{assert3: n == 60}}}",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "time": 0.13842100000100003
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$3{m} >= 60",
+      "left": {
+        "Node": {
+          "constraint": "$2{n} >= 61",
+          "left": { "Leaf": "bottom" },
+          "right": {
+            "Node": {
+              "constraint": "$2{n} >= 60",
+              "left": { "Leaf": "1." },
+              "right": { "Leaf": "1." }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$2{n} >= 61",
+          "left": { "Leaf": "bottom" },
+          "right": {
+            "Node": {
+              "constraint": "$2{n} >= 60",
+              "left": { "Leaf": "1." },
+              "right": { "Leaf": "1." }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": {
+    "res": [
+      {
+        "Non-vulnerable": "m,$1",
+        "Potentially vulnerable": "n",
+        "Constraints": "[|$2-60=0|],[|-$2+59>=0|]"
+      }
+    ],
+    "stats": [
+      { "Max safe": 2 }, { "Min vuln": 1 }, { "Nb vuln": 1 }, { "Total": 3 }
+    ]
+  }
+}
