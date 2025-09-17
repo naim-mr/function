@@ -3,6 +3,8 @@ name: Log Diff Check
 on:
   pull_request:
   push:
+    paths:
+      - "**/*.ml"
 
 jobs:
   diff-check:
