@@ -36,4 +36,4 @@ jobs:
 
       - name: Run diff script
         run: |
-          python3 script/function-diff.py logs logs_new
+          python3 script/function-diff.py --ignore-time logs logs_new
