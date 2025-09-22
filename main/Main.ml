@@ -111,145 +111,101 @@ let parseCTLPropertyString (property : string) =
   CTLProperty.map (fun p -> fst (parsePropertyString p))
   @@ parseCTLPropertyString_plain property
 
-let isKeyword = function
-  | "-domain" | "-timeout" | "-joinfwd" | "-joinbwd" | "-main" | "-meetbwd"
-  | "-minimal" | "-ordinals" | "-refine" | "-retrybwd" | "-tracefwd"
-  | "-tracebwd" | "-cda" | "-termination"
-  | "-time" | "-timefwd" | "-timebwd" | "-ctl" 
-  | "-dot" | "-precondition" | "-ctl_existential_equivalence" | "-noinline"
-  | "-vulnerability" | "-output_std" | "-json_output" | "-resilience" ->
-      true
-  | _ -> false
 
-let parseArgs () =
-  let rec doit args =
-    match args with
-    | "-config" :: x :: r ->
-      (* parse analysis type and domain from a json config file *)
-      Config.from_json x;
-      doit r
-    | "-domain" :: x :: r ->
-        (* abstract domain: boxes|octagons|polyhedra *)
-        Config.domain := x;
-        doit r
-    | "-timeout" :: x :: r ->
-        (* analysis timeout *)
-        Config.timeout := float_of_string x;
-        doit r
-    | "-joinfwd" :: x :: r ->
-        (* widening delay in forward analysis *)
-        Config.joinfwd := int_of_string x;
-        doit r
-    | "-joinbwd" :: x :: r ->
-        (* widening delay in backward analysis *)
-        Config.joinbwd := int_of_string x;
-        doit r
-    | "-main" :: x :: r ->
-        (* analyzer entry point *)
-        Config.main := x;
-        doit r
-    | "-meetbwd" :: x :: r ->
-        (* dual widening delay in backward analysis *)
-        Config.meetbwd := int_of_string x;
-        doit r
-    | "-minimal" :: r ->
-        (* analysis result only *)
-        Config.minimal := true;
-        Config.minimal := true;
-        doit r
-    | "-ordinals" :: x :: r ->
-        (* ordinal-valued ranking functions *)
-        Config.ordinals := true;
-        Config.ordmax := int_of_string x;
-        doit r
-    | "-refine" :: r ->
-        (* refine in backward analysis *)
-        Config.refine := true;
-        doit r
-    | "-retrybwd" :: x :: r ->
-        (* Retry widening heuristic *)
-        Config.retrybwd := int_of_string x;
-        doit r
-    | "-tracefwd" :: r ->
-        (* forward analysis trace *)
-        Config.tracefwd := true;
-        doit r
-    | "-tracebwd" :: r ->
-        (* backward analysis trace *)
-        Config.tracebwd := true;
-        doit r
-    | "-cda" :: x :: r ->
-        (* Conflict-driven analysis *)
-        Config.cda := true;
-        Config.size := int_of_string x;
-        Config.refine := true;
-        doit r
-    | "-termination" :: r ->
-        (* termination analysis *)
-        Config.analysis := "termination";
-        doit r
-    | "-time" :: r ->
-        (* track analysis time *)
-        Config.time := true;
-        doit r
-    | "-timefwd" :: r ->
-        (* track forward analysis time *)
-        Config.timefwd := true;
-        doit r
-    | "-timebwd" :: r ->
-        (* track backward analysis time *)
-        Config.timebwd := true;
-        doit r
-    | "-ctl" :: x :: r ->
-        (* CTL analysis *)
-        Config.analysis := "ctl";
-        Config.property := x;
-        doit r
-    | "-dot" :: r ->
-        (* print CFG and decision trees in 'dot' format *)
-        dot := true;
-        doit r
-    | "-precondition" :: c :: r ->
-        (* optional precondition that holds 
-                                  at the start of the program, default = true *)
-        Config.precondition := c;
-        doit r
-    | "-ctl_existential_equivalence" :: r ->
-        (* use CTL equivalence relations to 
-                                              convert existential to universal CTL properties *)
-        Config.ctl_existential_equivalence := true;
-        doit r
-    | "-noinline" :: r ->
-        (* don't inline function calls, only for CFG based analysis *)
-        Config.noinline := true;
-        doit r
-    | "-vulnerability" :: r ->
-        Config.vulnerability := true;
-        doit r
-    | "-resilience" :: r ->
-        (* resilience analysis *)
-        Config.analysis := "termination";
-        Config.resilience := true;
-        doit r
-    | "-json_output" :: x :: r when not (isKeyword x) ->
-        Config.json_output := true;
-        output_dir := x;
-        time := true
-    | "-json_output" :: r ->
-        Config.json_output := true;
-        time := true;
-        doit r
-    | x :: r ->
-        filename := x;
-        doit r
-    | [] -> ()
-  in
-  doit (List.tl (Array.to_list Sys.argv))
-let f = Stdlib.compare 
+let parse_args () =
+  Arg.parse
+    [
+      ( "-config",
+        Arg.String (fun s -> Config.from_json s),
+        "Set analysis configuration with a json file" );
+      ( "-domain",
+        Arg.String (fun s -> Config.domain := s),
+        "Numerical Abstract Domain used" );
+      ( "-timeout",
+        Arg.Float (fun d -> Config.timeout := d),
+        "Maximal analysis time in seconds" );
+      ( "-joinfwd",
+        Arg.Int (fun i -> Config.joinfwd := i),
+        "Widening delay in forward analysis" );
+      ( "-joinbwd",
+        Arg.Int (fun i -> Config.joinfwd := i),
+        "Widening delay in backward analysis" );
+      ("-main", Arg.String (fun s -> Config.main := s), "Analysis entry point");
+      ( "-meetbwd",
+        Arg.Int (fun i -> Config.meetbwd := i),
+        "Dual widening delay in backward analysis" );
+      ( "-minimal",
+        Arg.Unit (fun _ -> Config.minimal := true),
+        "Output analysis result only" );
+      ( "-ordinals",
+        Arg.Int
+          (fun i ->
+            Config.ordmax := i;
+            Config.ordinals := true),
+        "Set ordinals based analysis" );
+      ( "-refine",
+        Arg.Unit (fun _ -> Config.refine := true),
+        "Refine the backward analysis" );
+      ( "-retrybwd",
+        Arg.Int (fun i -> Config.retrybwd := i),
+        "Retry widening heuristic" );
+      ( "-tracefwd",
+        Arg.Unit (fun _ -> Config.tracefwd := true),
+        "Forward analysis trace" );
+      ( "-tracebwd",
+        Arg.Unit (fun _ -> Config.tracebwd := true),
+        "Backward analysis trace" );
+      ( "-cda",
+        Arg.Int
+          (fun i ->
+            Config.cda := true;
+            Config.refine := true;
+            Config.size := i),
+        "Conflict-driven analysis" );
+      ( "-termination",
+        Arg.Unit (fun _ -> Config.analysis := "termination"),
+        "Termination analysis" );
+      ("-time", Arg.Unit (fun _ -> Config.time := true), "Track analysis time");
+      ( "-timefwd",
+        Arg.Unit (fun _ -> Config.timefwd := true),
+        "Track forward analysis time" );
+      ( "-timebwd",
+        Arg.Unit (fun _ -> Config.timefwd := true),
+        "Track backward analysis time" );
+      ("-ctl", Arg.String (fun s -> Config.analysis := "ctl"; Config.property := s), "CTL analysis");
+      ( "-dot",
+        Arg.Unit (fun _ -> Config.dot := true),
+        "Output decision trees in dot format" );
+      ( "-precondition",
+        Arg.String (fun s -> Config.precondition := s),
+        "Optional precondition that holds at the starts of the program" );
+      ( "-ctl_existential_equivalence",
+        Arg.Unit (fun _ -> Config.ctl_existential_equivalence := true),
+        "Convert existential ctl properties to universal" );
+      ( "-vulnerability",
+        Arg.Unit (fun _ -> Config.vulnerability := true),
+        "Vulnerability analysis" );
+      ( "-resilience",
+        Arg.Unit
+          (fun _ ->
+            Config.analysis := "termination";
+            Config.resilience := true),
+        "Termination Resilience analysis" );
+      ( "-json_output",
+        Arg.Unit (fun _ -> Config.json_output := true),
+        "Summary of the analysis in a json" );
+      ( "-json_output",
+        Arg.String
+          (fun s ->
+            Config.json_output := true;
+            Config.output_dir := s),
+        "Summary of the analysis in a json" );
+    ]
+    (fun s -> Config.filename := s)
+    ""
+
 let check_args () =
-  if
-    !Config.resilience
-    && (String.compare !Config.analysis "termination" <> 0)
+  if !Config.resilience && String.compare !Config.analysis "termination" <> 0
   then
     raise
       (Invalid_argument "Resilience analysis is avalaible only for termination");
@@ -349,7 +305,6 @@ let run_ctl_ast (module S : SEMANTIC) prog property =
   if !Config.result then Format.fprintf !fmt "\nFinal Analysis Result: TRUE\n"
   else Format.fprintf !fmt "\nFinal Analysis Result: UNKNOWN\n"
 
-
 let run_cda s : (module Cda.CDA_ITERATOR) =
   let module D = (val s : SEMANTIC) in
   (module Cda.Make (D))
@@ -380,7 +335,7 @@ let get_ast_prop itast =
 
 let doit () =
   (* Parsing cli args -> into Config ref variables *)
-  parseArgs ();
+  parse_args ();
   check_args ();
   (* Get the iterator for the demanded analysis *)
   let semantic = get_semantic () in
@@ -423,8 +378,7 @@ let doit () =
     in
     Vulnerability.analyse S.D.vulnerable varlist func !S.bwdInvMap;
     Format.fprintf !fmt " \n %s \n"
-      (Yojson.Safe.pretty_to_string !Config.vuln_res))
-  ;
+      (Yojson.Safe.pretty_to_string !Config.vuln_res));
   if !Config.json_output then Regression.output_json ()
 
 let _ = doit ()
