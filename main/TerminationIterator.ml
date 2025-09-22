@@ -45,15 +45,13 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
     | A_label _ -> p
     | A_return -> D.zero ?domain env vars
     | A_assign ((l, _), (A_INPUT, _)) ->
-        let uap = false in
-        D.bwdAssign ?domain ~taint:true ~underapprox:uap p (l, A_INPUT)
+        D.bwdAssign ?domain ~taint:true ~underapprox:false p (l, A_INPUT)
     | A_assign ((l, _), (e, _)) ->
         let e_vars = Taint.avars (e, l) in
-        let uap = false in
         let taint =
           VarSet.is_empty (VarSet.inter e_vars tvl) || not !Config.resilience
         in
-        D.bwdAssign ?domain ~taint ~underapprox:uap p (l, e)
+        D.bwdAssign ?domain ~taint ~underapprox:false p (l, e)
     | A_assert (b, _) -> D.filter ?domain p b
     | A_if ((b, ba), s1, s2) ->
         let uap = false in
