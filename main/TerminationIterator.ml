@@ -40,30 +40,27 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
       m
 
   (*Backward Iterator + Recursion *)
-  let rec bwdStm ?property ?domain funcs env vars (p, r, flag) s tvl =
+  let rec bwdStm ?property ?domain funcs env vars p s tvl =
     match s with
-    | A_label _ -> (p, r, flag)
-    | A_return -> (D.zero ?domain env vars, r, flag)
+    | A_label _ -> p
+    | A_return -> D.zero ?domain env vars
     | A_assign ((l, _), (A_INPUT, _)) ->
         let uap = false in
-        ( D.bwdAssign ?domain ~taint:true ~underapprox:uap p (l, A_INPUT),
-          r,
-          flag )
+        D.bwdAssign ?domain ~taint:true ~underapprox:uap p (l, A_INPUT)
     | A_assign ((l, _), (e, _)) ->
         let e_vars = Taint.avars (e, l) in
         let uap = false in
         let taint =
-          VarSet.is_empty (VarSet.inter e_vars tvl)
-          || not !Config.resilience
+          VarSet.is_empty (VarSet.inter e_vars tvl) || not !Config.resilience
         in
-        (D.bwdAssign ?domain ~taint ~underapprox:uap p (l, e), r, flag)
-    | A_assert (b, _) -> (D.filter ?domain p b, r, flag)
+        D.bwdAssign ?domain ~taint ~underapprox:uap p (l, e)
+    | A_assert (b, _) -> D.filter ?domain p b
     | A_if ((b, ba), s1, s2) ->
         let uap = false in
         let taint = Taint.taint_b (b, ba) tvl && !Config.resilience in
-        let p1, _, flag1 = bwdBlk funcs env vars (p, r, flag) s1 in
+        let p1 = bwdBlk funcs env vars p s1 in
         let p1 = D.filter ?domain ~taint ~underapprox:uap p1 b in
-        let p2, _, flag2 = bwdBlk funcs env vars (p, r, flag) s2 in
+        let p2 = bwdBlk funcs env vars p s2 in
         let p2 =
           D.filter ?domain ~taint ~underapprox:uap p2 (fst (negBExp (b, ba)))
         in
@@ -74,7 +71,7 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
           if taint || not !Config.resilience then APPROXIMATION
           else APPROXIMATION (* resilience *)
         in
-        (D.join joinType p1 p2, r, flag1 || flag2)
+        D.join joinType p1 p2
     | A_while (l, (b, ba), s) ->
         let a = InvMap.find l !fwdInvMap in
         let dm = if !refine then Some a else None in
@@ -82,7 +79,7 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
         let p1 =
           D.filter ?domain:dm p ~underapprox:uap (fst (negBExp (b, ba)))
         in
-        let rec aux (i, _, _) (p2, _, flag2) n =
+        let rec aux i p2 n =
           if !abort then raise Abort
           else
             let i' = D.join APPROXIMATION p1 p2 in
@@ -101,14 +98,14 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
                 if !tracebwd && not !minimal then (
                   Format.fprintf !fmt "### %a:FIXPOINT ###:\n" label_print l;
                   Format.fprintf !fmt "i: %a\n" D.print i);
-                (i, r, flag2))
+                i)
               else
                 let i'' = if n <= !joinbwd then i' else D.widen ~jokers i i' in
                 if !tracebwd && not !minimal then
                   Format.fprintf !fmt "i'': %a\n" D.print i'';
-                let p2, _, flag2 = bwdBlk funcs env vars (i'', r, flag2) s in
+                let p2 = bwdBlk funcs env vars i'' s in
                 let p2' = D.filter ?domain:dm ~underapprox:uap p2 b in
-                aux (i'', r, flag2) (p2', r, flag2) (n + 1))
+                aux i'' p2' (n + 1))
             else
               let i'' =
                 if n <= !joinbwd then i'
@@ -116,23 +113,23 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
               in
               if !tracebwd && not !minimal then
                 Format.fprintf !fmt "i'': %a\n" D.print i'';
-              let p2, _, flag2 = bwdBlk funcs env vars (i'', r, flag2) s in
+              let p2 = bwdBlk funcs env vars i'' s in
               let p2' = D.filter ?domain:dm ~underapprox:uap p2 b in
-              aux (i'', r, flag2) (p2', r, flag2) (n + 1)
+              aux i'' p2' (n + 1)
         in
-        let i = (D.bot ?domain:dm env vars, r, flag) in
-        let p2, _, flag2 = bwdBlk funcs env vars i s in
+        let i = D.bot ?domain:dm env vars in
+        let p2 = bwdBlk funcs env vars i s in
         let p2' = D.filter ?domain:dm ~underapprox:uap p2 b in
-        let p, r, flag = aux i (p2', r, flag2) 1 in
+        let p = aux i p2' 1 in
         addBwdInv l p;
-        if !refine then (D.refine p a, r, flag) else (p, r, flag)
+        if !refine then D.refine p a else p
     | A_call (f, ss) ->
         let f = StringMap.find f funcs in
         let p = bwdRec funcs env vars p f.funcBody in
         List.fold_left
-          (fun (ap, ar, aflag) (s, _) ->
-            bwdStm ?domain funcs env vars (ap, ar, aflag) s tvl)
-          (p, r, flag) ss
+          (fun ap (s, _) ->
+            bwdStm ?domain funcs env vars ap s tvl)
+          p ss
     | A_recall (f, ss) -> failwith "Recursive function call are not supported"
   (* (match domain with
        | None ->
@@ -144,8 +141,7 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
              bwdStm ~domain:domain funcs env vars (ap, ar, aflag) s tvl
            ) (r, r, true) ss) *)
 
-  and bwdBlk ?property funcs env vars (p, r, flag) (b : block) :
-      D.t * D.t * bool =
+  and bwdBlk ?property funcs env vars p (b : block) : D.t =
     let result_print l p =
       Format.fprintf !fmt "### %a ###:\n%a@." label_print l D.print p
     in
@@ -155,26 +151,26 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
         let p = if !refine then D.refine p a else p in
         if !tracebwd && not !minimal then result_print l p;
         addBwdInv l p;
-        (p, r, flag)
+        p
     | A_block (l, (s, _), b) ->
         stop := Sys.time ();
         if !stop -. !start > !timeout then raise Timeout
         else
-          let b, rb, flagb = bwdBlk funcs env vars (p, r, flag) b in
+          let b = bwdBlk funcs env vars p b in
           let a = InvMap.find l !fwdInvMap in
           let tvl = InvMap.find l !fwdTaintMap in
-          let p, r, flag =
-            if !refine then bwdStm ~domain:a funcs env vars (b, rb, flagb) s tvl
-            else bwdStm funcs env vars (b, rb, flagb) s tvl
+          let p =
+            if !refine then bwdStm ~domain:a funcs env vars b s tvl
+            else bwdStm funcs env vars b s tvl
           in
           let p = if !refine then D.refine p a else p in
           if !tracebwd && not !minimal then result_print l p;
           addBwdInv l p;
-          (p, r, flag)
+          p
 
   and bwdRec ?property funcs env vars (p : D.t) (b : block) : D.t =
-    let res, _, _ = bwdBlk funcs env vars (p, D.bot env vars, false) b in
-    res
+    bwdBlk funcs env vars p b
+    
 
   (* Analyzer *)
   let rec initStm env vars s =
@@ -200,14 +196,15 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
     let rec init_env xs env =
       match xs with
       | [] -> env
-      | x :: xs -> init_env xs (Environment.add env [| Var.of_string x.varId |] [||])
+      | x :: xs ->
+          init_env xs (Environment.add env [| Var.of_string x.varId |] [||])
     in
     let f = StringMap.find main funcs in
     let v1 = snd (List.split (StringMap.bindings vars)) in
     let v2 = snd (List.split (StringMap.bindings f.funcVars)) in
     let v1set = VarSet.of_list v1 in
     let v2set = VarSet.of_list v2 in
-    let var_set = VarSet.union v1set v2set  in
+    let var_set = VarSet.union v1set v2set in
     let vars = List.append v1 v2 in
     let env = init_env vars (Environment.make [||] [||]) in
     let s = f.funcBody in
@@ -224,7 +221,7 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
         s
     in
     let _ = ForwardIteratorB.fwdTBlk funcs var_set stmts in
-    let _ = ForwardIteratorB.fwdTBlk funcs var_set s in        
+    let _ = ForwardIteratorB.fwdTBlk funcs var_set s in
     fwdInvMap := !ForwardIteratorB.fwdInvMap;
     fwdTaintMap := !ForwardIteratorB.fwdTaintMap;
     let stopfwd = Sys.time () in
@@ -239,7 +236,9 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
       InvMap.iter
         (fun l a ->
           Format.printf "%a: %s\n" label_print l
-            (VarSet.fold (fun x acc -> acc ^ "" ^ x.varId ^ "{" ^ x.varName ^"}") a ""))
+            (VarSet.fold
+               (fun x acc -> acc ^ "" ^ x.varId ^ "{" ^ x.varName ^ "}")
+               a ""))
         !fwdTaintMap);
     (* Backward Analysis *)
     if !tracebwd && not !minimal then
