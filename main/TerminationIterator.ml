@@ -22,7 +22,7 @@ open VarSet
 open Taint
 
 module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
-  type r = D.t * D.t * bool
+  type r = D.t
 
   module D = D
   module B = D.B
