@@ -1849,11 +1849,12 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
     in
     { domain; tree = aux t.tree; env; vars }
 
-  let manager = Polka.manager_alloc_strict ()
+
 
   (* Compute the vulnerability analysis, right now the algorithm is naif and doesnot implement the dynamic programming *)
   let vulnerable t : Polka.strict Polka.t Vulnerability.t list =
     (* print_tree t.vars Format.std_formatter (compress t).tree ; *)
+    let manager = Polka.manager_alloc_strict () in
     Format.print_newline ();
     let forget x = (AbstractSyntax.A_var x, A_RANDOM) in
     let rec unconstraint t cns =

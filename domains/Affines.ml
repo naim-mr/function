@@ -16,7 +16,7 @@ module Affine (B : PARTITION) : FUNCTION = struct
 
   (**)
 
-  let manager = Polka.manager_alloc_strict ()
+  let manager = B.manager
 
   type a = Bot | Fun of Linexpr1.t | Top
   type f = { ranking : a; env : Environment.t; vars : var list }
@@ -474,6 +474,12 @@ module Affine (B : PARTITION) : FUNCTION = struct
         let p2 = Abstract1.of_lincons_array manager env a2 in
         (* p2 = polyhedra represented by a2 *)
         let p = Abstract1.widening manager p1 p2 in
+        Printf.printf "\ndebug ---------------------\n";
+        Abstract1.print Format.std_formatter p1;
+        print_newline ();
+        Abstract1.print Format.std_formatter p2;
+        print_newline ();
+        Abstract1.print Format.std_formatter p;
         (* p = widening *)
         let p = Abstract1.to_lincons_array manager p in
         (* converting p into set of constraints *)
@@ -493,8 +499,10 @@ module Affine (B : PARTITION) : FUNCTION = struct
         if 1 = List.length !f (* if there is only one constraint on # *) then (
           let f = Lincons1.get_linexpr1 (List.hd !f) in
           Linexpr1.set_coeff f v (Coeff.s_of_int 0);
+          Printf.printf "\nIN --------------------- \n";
           Fun f (* defined widening function *))
-        else Top (* otherwise *)
+        else
+          (Printf.printf "\nOUT --------------------- \n"; Top) (* otherwise *)
     | Bot, _ -> f2
     | _, Bot -> f1
     | _ -> Top
@@ -552,8 +560,8 @@ module Affine (B : PARTITION) : FUNCTION = struct
           try if not (Coeff.is_zero (Lincons1.get_coeff c v)) then f := c :: !f
           with _ -> ()
         done;
-        (* f = list of constraints on special variable # *)
-        if 1 <= List.length !f (* if there is at least one constraint on # *)
+        (* f = # *)
+        if 1 <= List.length !f (* if there list of constraints on special variable is at least one constraint on # *)
         then
           let f =
             List.map
