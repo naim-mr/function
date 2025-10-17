@@ -1,13 +1,12 @@
-(* 
+(*
    Integer intervals.
 
    Copyright (C) 2011 Antoine Miné
 *)
 
-open Banal_datatypes
+open Bot
+open Datatypes
 open Apron
-module Int = Banal_int
-module Intinf = Banal_intinf
 
 (************************************************************************)
 (* TYPES *)
@@ -28,9 +27,9 @@ let sanitize (i : t) : t =
   | _, INF | MINF, _ -> invalid_arg "Itv_int.sanitize"
   | _ -> i
 
-let check_bot (i : t) : t bot =
+let check_bot (i : t) : t with_bot =
   match i with
-  | Finite a, Finite b -> if I.leq a b then Nb i else Bot
+  | Finite a, Finite b -> if I.leq a b then Nb i else BOT
   | MINF, INF -> Nb i
   | _ -> invalid_arg "Itv_int.check_bot"
 
@@ -72,8 +71,8 @@ let pp_print f x = Format.pp_print_string f (to_string x)
 
 let to_apron ((l, h) : t) : Interval.t =
   {
-    Interval.inf = Scalar.Mpqf (B.to_mpqf l);
-    Interval.sup = Scalar.Mpqf (B.to_mpqf h);
+    Interval.inf = B.to_apron l;
+    Interval.sup = B.to_apron h;
   }
 
 let of_apron (i : Interval.t) : t =
@@ -94,9 +93,9 @@ let join ((l1, h1) : t) ((l2, h2) : t) : t = (B.min l1 l2, B.max h1 h2)
 
 (* returns None if the set-union cannot be exactly represented *)
 let union ((l1, h1) : t) ((l2, h2) : t) : t option =
-  if B.leq l1 h2 && B.leq l2 h1 then Some (B.min l1 l2, B.max h1 h2) else None
+  if B.leq l1 h2 && B.leq l2 (B.succ h1) then Some (B.min l1 l2, B.max h1 h2) else None
 
-let meet ((l1, h1) : t) ((l2, h2) : t) : t bot =
+let meet ((l1, h1) : t) ((l2, h2) : t) : t with_bot =
   check_bot (B.max l1 l2, B.min h1 h2)
 
 let hull (x : B.t) (y : B.t) : t = (B.min x y, B.max x y)
@@ -157,12 +156,12 @@ let div_trunc_nonzero ((l1, h1) : t) ((l2, h2) : t) : t =
 
 (* C integer division: division with truncation *)
 (* return valid values + possible division by zero *)
-let div_trunc (i1 : t) (i2 : t) : t bot * bool =
+let div_trunc (i1 : t) (i2 : t) : t with_bot * bool =
   (* split into positive and negative dividends *)
-  let pos = (lift_bot (div_trunc_nonzero i1)) (meet i2 positive_strict)
-  and neg = (lift_bot (div_trunc_nonzero i1)) (meet i2 negative_strict) in
+  let pos = (bot_lift1 (div_trunc_nonzero i1)) (meet i2 positive_strict)
+  and neg = (bot_lift1 (div_trunc_nonzero i1)) (meet i2 negative_strict) in
   (* joins the result *)
-  (join_bot2 join pos neg, contains i2 I.zero)
+  (bot_neutral2 join pos neg, contains i2 I.zero)
 
 (* helper *)
 let fourway op1 op2 (l1, h1) (l2, h2) =
@@ -174,22 +173,21 @@ let div_nonzero (i1 : t) (i2 : t) : t =
   fourway (bound_div I.fdiv) (bound_div I.cdiv) i1 i2
 
 (* over-approximation of the real division (outwards rounding) *)
-let div (i1 : t) (i2 : t) : t bot * bool =
+let div (i1 : t) (i2 : t) : t with_bot * bool =
   (* split into positive and negative dividends *)
-  let pos = (lift_bot (div_nonzero i1)) (meet i2 positive_strict)
-  and neg = (lift_bot (div_nonzero i1)) (meet i2 negative_strict) in
+  let pos = (bot_lift1 (div_nonzero i1)) (meet i2 positive_strict)
+  and neg = (bot_lift1 (div_nonzero i1)) (meet i2 negative_strict) in
   (* joins the result *)
-  (join_bot2 join pos neg, contains i2 I.zero)
+  (bot_neutral2 join pos neg, contains i2 I.zero)
 
 (* C % operator *)
-let rem ((l1, h1) : t) (i2 : t) : t bot * bool =
+let rem ((l1, h1) : t) (i2 : t) : t with_bot * bool =
   (* a % b = a % |b| *)
   let l2, h2 = abs i2 in
   (* i2 = [0;0] => _|_, error *)
-  if h2 = B.zero then (Bot, true)
-  else if
-    (* max |i1| < min |i2| => i1, no-error *)
-    B.lt (snd (abs (l1, h1))) l2
+  if h2 = B.zero then (BOT, true)
+  else if (* max |i1| < min |i2| => i1, no-error *)
+          B.lt (snd (abs (l1, h1))) l2
   then (Nb (l1, h1), false)
   else if
     (* singleton => singleton, no-error *)
@@ -204,12 +202,9 @@ let rem ((l1, h1) : t) (i2 : t) : t bot * bool =
     let b, z = (B.pred h2, B.sign l2 = 0) in
     (* i1 >= 0 => [0; max |i2|-1] *)
     if B.sign l1 >= 0 then (Nb (B.zero, b), z)
-    else if
-      (* i1 <= 0 => [-max |i2|+1; 0] *)
-      B.sign h1 <= 0
-    then (Nb (B.neg b, B.zero), z)
-    else
-      (* other cases [-max |i2|+1; max |i2|-1] *)
+    else if (* i1 <= 0 => [-max |i2|+1; 0] *)
+            B.sign h1 <= 0 then (Nb (B.neg b, B.zero), z)
+    else (* other cases [-max |i2|+1; max |i2|-1] *)
       (Nb (B.neg b, b), z)
 
 (* put back i into [l;h] by modular arithmetics *)
@@ -238,33 +233,33 @@ let magnitude ((l, h) : t) : B.t = B.max (B.abs l) (B.abs h)
 (* BACKWARD OVER-APPROXIMATED ARITHMETICS *)
 (************************************************************************)
 
-(* filters return an overapproximation of the subset of the arguments 
-   satisfying the test 
- *)
+(* filters return an overapproximation of the subset of the arguments
+   satisfying the test
+*)
 
-let filter_leq ((l1, h1) : t) ((l2, h2) : t) : (t * t) bot =
-  merge_bot2 (check_bot (l1, B.min h1 h2)) (check_bot (B.max l1 l2, h2))
+let filter_leq ((l1, h1) : t) ((l2, h2) : t) : (t * t) with_bot =
+  bot_merge2 (check_bot (l1, B.min h1 h2)) (check_bot (B.max l1 l2, h2))
 
-let filter_lt ((l1, h1) : t) ((l2, h2) : t) : (t * t) bot =
-  merge_bot2
+let filter_lt ((l1, h1) : t) ((l2, h2) : t) : (t * t) with_bot =
+  bot_merge2
     (check_bot (l1, B.min h1 (B.pred h2)))
     (check_bot (B.max (B.succ l1) l2, h2))
 
-let filter_geq ((l1, h1) : t) ((l2, h2) : t) : (t * t) bot =
-  merge_bot2 (check_bot (B.max l1 l2, h1)) (check_bot (l2, B.min h1 h2))
+let filter_geq ((l1, h1) : t) ((l2, h2) : t) : (t * t) with_bot =
+  bot_merge2 (check_bot (B.max l1 l2, h1)) (check_bot (l2, B.min h1 h2))
 
-let filter_gt ((l1, h1) : t) ((l2, h2) : t) : (t * t) bot =
-  merge_bot2
+let filter_gt ((l1, h1) : t) ((l2, h2) : t) : (t * t) with_bot =
+  bot_merge2
     (check_bot (B.max l1 (B.succ l2), h1))
     (check_bot (l2, B.min (B.pred h1) h2))
 
-let filter_eq (i1 : t) (i2 : t) : (t * t) bot =
-  lift_bot (fun x -> (x, x)) (meet i1 i2)
+let filter_eq (i1 : t) (i2 : t) : (t * t) with_bot =
+  bot_lift1 (fun x -> (x, x)) (meet i1 i2)
 
-let filter_neq ((l1, h1) as i1 : t) ((l2, h2) as i2 : t) : (t * t) bot =
+let filter_neq ((l1, h1) as i1 : t) ((l2, h2) as i2 : t) : (t * t) with_bot =
   (* remove singleton at end of interval *)
   match (is_singleton i1, is_singleton i2) with
-  | true, true -> if B.equal l1 l2 then Bot else Nb (i1, i2)
+  | true, true -> if B.equal l1 l2 then BOT else Nb (i1, i2)
   | true, false ->
       if B.equal l1 l2 then Nb (i1, (B.succ l2, h2))
       else if B.equal l2 h2 then Nb (i1, (l2, B.pred h2))
@@ -275,13 +270,13 @@ let filter_neq ((l1, h1) as i1 : t) ((l2, h2) as i2 : t) : (t * t) bot =
       else Nb (i1, i2)
   | false, false -> Nb (i1, i2)
 
-(* given the argument(s) i and the refined result r, returns refined arguments 
+(* given the argument(s) i and the refined result r, returns refined arguments
 *)
 
-let bwd_neg (i : t) (r : t) : t bot = meet i (neg r)
+let bwd_neg (i : t) (r : t) : t with_bot = meet i (neg r)
 
-let bwd_add (i1 : t) (i2 : t) (r : t) : (t * t) bot =
-  merge_bot2 (meet i1 (sub r i2)) (meet i2 (sub r i1))
+let bwd_add (i1 : t) (i2 : t) (r : t) : (t * t) with_bot =
+  bot_merge2 (meet i1 (sub r i2)) (meet i2 (sub r i1))
 
-let bwd_sub (i1 : t) (i2 : t) (r : t) : (t * t) bot =
-  merge_bot2 (meet i1 (add i2 r)) (meet i2 (sub i1 r))
+let bwd_sub (i1 : t) (i2 : t) (r : t) : (t * t) with_bot =
+  bot_merge2 (meet i1 (add i2 r)) (meet i2 (sub i1 r))

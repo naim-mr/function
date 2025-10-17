@@ -1,11 +1,10 @@
-(* 
+(*
    Floating-point arithmetics, with various rounding direction and precision.
 
    Copyright (C) 2011 Antoine Miné
 *)
 
 open Apron
-module Int = Banal_int
 
 (* sets FPU rounding mode towards +oo, once and for all *)
 external init : unit -> unit = "ml_float_init"
@@ -41,7 +40,7 @@ module Generic = struct
 
   (* TODO: replace with of_string_up / of_string_down
      TODO: precision-dependent versions
-   *)
+  *)
   let of_string x = float_of_string x
   let to_string x = string_of_float x
 
@@ -50,6 +49,7 @@ module Generic = struct
   let sprint () x = to_string x
   let bprint b x = Buffer.add_string b (to_string x)
   let pp_print f x = Format.pp_print_string f (to_string x)
+  let pp = pp_print
 
   type kind = NAN | INF | MINF | NORMAL
 
@@ -75,6 +75,11 @@ module Generic = struct
   let neg (x : t) : t = -.x
   let abs (x : t) : t = abs_float x
   let to_apron x = Scalar.Float x
+
+  let t_of_yojson s =
+    match s with `Float x -> x | _ -> failwith "failed to deserialize a float"
+
+  let yojson_of_t x = `Float x
 end
 
 include Generic
@@ -154,23 +159,20 @@ end
 module Single = struct
   include Generic
 
-  external round_flt : float -> float = "ml_round_flt" "ml_round_flt_f"
-  [@@unboxed] [@@noalloc]
+  external round_flt : float -> float = "ml_round_flt" "ml_round_flt_f" [@@unboxed] [@@noalloc]
+  external of_int_flt : int32 -> float = "ml_of_int_flt" "ml_of_int_flt_f" [@@unboxed] [@@noalloc]
 
-  external of_int_flt : int -> float = "ml_of_int_flt" "ml_of_int_flt_f"
-  [@@noalloc]
+  external add_flt : float -> float -> float
+    = "ml_add_flt" "ml_add_flt_f" [@@unboxed] [@@noalloc]
 
-  external add_flt : float -> float -> float = "ml_add_flt" "ml_add_flt_f"
-  [@@unboxed] [@@noalloc]
+  external sub_flt : float -> float -> float
+    = "ml_sub_flt" "ml_sub_flt_f" [@@unboxed] [@@noalloc]
 
-  external sub_flt : float -> float -> float = "ml_sub_flt" "ml_sub_flt_f"
-  [@@unboxed] [@@noalloc]
+  external mul_flt : float -> float -> float
+    = "ml_mul_flt" "ml_mul_flt_f" [@@unboxed] [@@noalloc]
 
-  external mul_flt : float -> float -> float = "ml_mul_flt" "ml_mul_flt_f"
-  [@@unboxed] [@@noalloc]
-
-  external div_flt : float -> float -> float = "ml_div_flt" "ml_div_flt_f"
-  [@@unboxed] [@@noalloc]
+  external div_flt : float -> float -> float
+    = "ml_div_flt" "ml_div_flt_f" [@@unboxed] [@@noalloc]
 
   let round a = round_flt a
   let of_int_up a = round (Int.to_float a)

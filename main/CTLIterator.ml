@@ -98,10 +98,10 @@ let program_of_prog (prog : AbstractSyntax.prog)
   let mainFunction = StringMap.find main functions in
   let dummyExtent = (Lexing.dummy_pos, Lexing.dummy_pos) in
   let exitLabel = A_label ("exit", dummyExtent) in
-  let id = ref (-1) in
+  let id = ref Z.minus_one in
   let nextId () =
     let i = !id in
-    id := i - 1;
+    id := Z.(-) i Z.one;
     i
   in
   let rec addTerminationStmt (block : block) =

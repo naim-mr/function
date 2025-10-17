@@ -1,8 +1,6 @@
 (library
  (name utils)
- (libraries frontend yojson str unix)
- (flags
-  (:standard -open Frontend)))
+ (libraries yojson str unix apron zarith))
 
 (env
  (dev

@@ -1,4 +1,4 @@
-(* 
+(*
    Mathematical integers.
 
    Copyright (C) 2011 Antoine Miné
@@ -11,6 +11,14 @@ let to_float_up (x : t) = to_float x
 let to_float_down (x : t) = -.to_float (neg x)
 let of_float_up (x : float) : t = of_float (ceil x)
 let of_float_down (x : float) : t = of_float (floor x)
+let yojson_of_t x = `String (Z.to_string x)
+
+let t_of_yojson s =
+  match s with
+  | `String s -> Z.of_string s
+  | _ -> failwith "failed to deserialize an integer"
+
+let pp = pp_print
 
 (* apron and mlgmpidl *)
 (* ****************** *)

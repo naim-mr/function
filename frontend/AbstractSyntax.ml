@@ -11,12 +11,18 @@ open IntermediateSyntax
 (* types *)
 type typ = A_INT | A_PTR
 
+
 let typ_print fmt = function
   | A_INT -> Format.fprintf fmt "int"
   | A_PTR -> Format.fprintf fmt "int*"
 
 (* variables *)
 type var = { varId : string; varName : string; varTyp : typ }
+
+module VarSet = Set.Make (struct
+type t = var
+let compare = fun x y -> String.compare x.varId y.varId
+end)
 
 let var_print fmt v = Format.fprintf fmt "%s{%s}" v.varId v.varName
 
@@ -271,7 +277,7 @@ type stmt =
   | A_recall of string * stmt annotated list (* recursive call *)
 
 and block = A_empty of label | A_block of label * stmt annotated * block
-and label = int
+and label = Z.t
 
 type statements = stmt annotated list
 
@@ -316,7 +322,7 @@ and block_print ind fmt b =
         (block_print ind) b
 
 and label_print fmt l =
-  if l < 10 then Format.fprintf fmt "[ %i:]" l else Format.fprintf fmt "[%i:]" l
+  if Z.compare l (Z.of_int 10) = 0 then Format.fprintf fmt "[ %i:]" (Z.to_int l) else Format.fprintf fmt "[%i:]" (Z.to_int l)
 
 let label_of_block (block : block) : label =
   match block with A_empty l -> l | A_block (l, _, _) -> l

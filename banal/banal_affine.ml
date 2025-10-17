@@ -4,7 +4,7 @@
    Copyright (C) 2011 Antoine Miné
 *)
 
-open Banal_datatypes
+open Utils.Datatypes
 open Banal_mathtypes
 open Utils.Apron_utils
 module Itv_int = Banal_itv_int
@@ -232,6 +232,6 @@ end
 (* instantiations *)
 (* ************** *)
 
-module IntAffine (V : VAR) = Make (V) (Itv_int)
-module RatAffine (V : VAR) = Make (V) (Itv_rat)
-module FloatAffine (V : VAR) = Make (V) (Itv_float)
+module IntAffine (V : VAR) = Make (V) (Utils.Itv_int)
+module RatAffine (V : VAR) = Make (V) (Utils.Itv_rat)
+module FloatAffine (V : VAR) = Make (V) (Utils.Itv_float)

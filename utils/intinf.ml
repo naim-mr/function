@@ -1,16 +1,14 @@
-(* 
+(*
    Mathematical integers with infinites.
 
    Copyright (C) 2011 Antoine Miné
 *)
 
-open Banal_datatypes
+open Datatypes
 open Apron
-module Int = Banal_int
-module Float = Banal_float
 
-type base = Int.t
-type t = base inf
+type base = Int.t [@@deriving yojson,show]
+type t = base inf [@@deriving yojson,show]
 
 (* useful constants *)
 
@@ -35,6 +33,9 @@ let of_float_up (x : float) : t =
 let of_float_down (x : float) : t =
   try Finite (Int.of_float (floor x)) with Int.Overflow -> MINF
 
+let to_int_opt (x : t) : Int.t option =
+  match x with INF | MINF -> None | Finite x -> Some x
+
 let to_float_up (x : t) =
   match x with
   | INF -> Float.inf
@@ -51,6 +52,11 @@ let to_string = function
   | Finite x -> Int.to_string x
   | INF -> "+oo"
   | MINF -> "-oo"
+
+let of_string = function
+  | "+oo" | "+inf" -> INF
+  | "-oo" | "-inf" -> MINF
+  | s -> Finite (Int.of_string s)
 
 (* printing *)
 let output chan x = output_string chan (to_string x)

@@ -1,13 +1,10 @@
-(* 
+(*
    Mathematical rationals.
 
    Copyright (C) 2011 Antoine Miné
 *)
 
 open Apron
-module Int = Banal_int
-module Intinf = Banal_intinf
-module Datatypes = Banal_datatypes
 include Q
 
 type base = t
@@ -51,6 +48,13 @@ let of_apron_up = function
   | _ -> invalid_arg "Rat: unsupported Scalar type"
 
 let of_apron_down = of_apron_up
+
+let of_coeff_opt = function
+  | Coeff.Interval { inf; sup } ->
+    let inf, sup = of_apron_down inf, of_apron_up sup in
+    if inf = sup then Some inf else None
+  | Coeff.Scalar s -> Some (of_apron_down s)
+
 
 let of_intinf = function
   | Datatypes.MINF -> minus_inf

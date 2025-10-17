@@ -10,11 +10,10 @@
 (*                                                 *)
 (***************************************************)
 
-open AbstractSyntax
+open Typed_syntax
 open Apron
 open Partition
 open Functions
-open Vulnerability
 
 module type RANKING_FUNCTION = sig
   module B : PARTITION
@@ -29,14 +28,14 @@ module type RANKING_FUNCTION = sig
   val meet : kind -> t -> t -> t
   val widen : ?jokers:int -> t -> t -> t
   val dual_widen : t -> t -> t
-  val defined : ?condition:bExp -> t -> bool
+  val defined : ?condition:expr typed -> t -> bool
   val complement : t -> t
 
   val bwdAssign :
-    ?domain:B.t -> ?taint:bool -> ?underapprox:bool -> t -> aExp * aExp -> t
+    ?domain:B.t -> ?taint:bool -> ?underapprox:bool -> t -> expr typed * expr typed -> t
 
-  val filter : ?taint:bool -> ?domain:B.t -> ?underapprox:bool -> t -> bExp -> t
-  val reset : ?mask:t -> t -> bExp -> t
+  val filter : ?taint:bool -> ?domain:B.t -> ?underapprox:bool -> t -> expr typed -> t
+  val reset : ?mask:t -> t -> expr typed -> t
   val until : t -> t -> t -> t
   val refine : t -> B.t -> t
   val mask : t -> t -> t
@@ -44,7 +43,6 @@ module type RANKING_FUNCTION = sig
   val conflict : t -> B.t list
   val reinit : t -> t
   val compress : t -> t
-  (* val vulnerable : t -> Polka.strict Polka.t Vulnerability.t list *)
   val merge_after : t -> t
   val print : Format.formatter -> t -> unit
   val output_json : var list -> t -> Yojson.Safe.t

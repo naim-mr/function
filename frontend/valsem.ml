@@ -1,18 +1,8 @@
-(*   
-   Semantic definitions and utilities
-
-   Copyright (C) 2011 Antoine Miné
-*)
-
-open Utils.Datatypes
-open Utils
-open Banal_typed_syntax
-module Int = Utils.Int
-module Float = Utils.Float
-module Itv_int = Utils.Itv_int
-module Itv_float = Utils.Itv_float
-
 (* value domain of each type *)
+open Utils.Datatypes
+open Abstract_syntax
+open Utils
+open Typed_syntax
 
 let signed_set bsize =
   ( Finite (Int.neg (Int.shift_left Int.one (bsize - 1))),
@@ -33,6 +23,12 @@ let int_type_set (t : int_type) (s : int_sign) : Itv_int.t =
   | A_LONG, A_UNSIGNED -> unsigned_set 64
   | A_INTEGER, A_SIGNED -> (MINF, INF)
   | A_INTEGER, A_UNSIGNED -> (Finite Int.zero, INF)
+  | A_DYNINT (l,h), A_SIGNED -> (Finite (Int.of_string l), Finite (Int.of_string h))
+  | A_DYNINT (l,h), A_UNSIGNED -> (Finite (Int.of_string l |> Int.max Int.zero), Finite (Int.of_string h |> Int.max Int.zero))
+
+let const_fit_in_type (t : int_type) (s : int_sign) (c : Intinf.t) : bool =
+  let l, h = int_type_set t s in
+  Intinf.geq c l && Intinf.leq c h
 
 let float_type_set (t : float_type) : Itv_float.t =
   match t with

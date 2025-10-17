@@ -4,8 +4,7 @@
    Copyright (C) 2011 Antoine Miné
 *)
 
-open Banal_datatypes
-open Banal_abstract_syntax
+open Utils.Datatypes
 open Banal_typed_syntax
 
 type assign_dst = STRONG of var | WEAK of var list

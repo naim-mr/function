@@ -6,11 +6,12 @@
    Copyright (C) 2011 Antoine Miné
 *)
 
-open Banal_datatypes
+open Utils.Datatypes
+open Utils.Bot
 open Apron
-module Int = Banal_int
-module Float = Banal_float
-module Intinf = Banal_intinf
+module Int = Utils.Int
+module Float = Utils.Float
+module Intinf = Utils.Intinf
 
 (* floats *)
 (* ****** *)
@@ -115,9 +116,9 @@ module type INTERVAL = sig
   val add : t -> t -> t
   val sub : t -> t -> t
   val mul : t -> t -> t
-  val div : t -> t -> t bot * bool
+  val div : t -> t -> t with_bot * bool
   val join : t -> t -> t
-  val meet : t -> t -> t bot
+  val meet : t -> t -> t with_bot
   val equal : t -> t -> bool
   val subseteq : t -> t -> bool
   val contains : t -> elem -> bool

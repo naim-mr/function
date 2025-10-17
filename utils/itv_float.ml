@@ -1,14 +1,11 @@
-(* 
+(*
    Floating-point intervals.
 
    Copyright (C) 2011 Antoine Miné
 *)
 
-open Banal_datatypes
+open Bot
 open Apron
-module Float = Banal_float
-module Intinf = Banal_intinf
-module Int = Banal_int
 
 (************************************************************************)
 (* TYPES *)
@@ -29,7 +26,7 @@ let sanitize ((l, h) : t) : t =
       invalid_arg "Itv_float_sanitize"
   | _ -> if D.gt l h then invalid_arg "Itv_rat.sanitize" else (l, h)
 
-let check_bot ((l, h) : t) : t bot = if D.leq l h then Nb (l, h) else Bot
+let check_bot ((l, h) : t) : t with_bot = if D.leq l h then Nb (l, h) else BOT
 
 (************************************************************************)
 (* CONSTRUCTORS AND CONSTANTS *)
@@ -87,7 +84,7 @@ let join ((l1, h1) : t) ((l2, h2) : t) : t = (D.min l1 l2, D.max h1 h2)
 let union ((l1, h1) : t) ((l2, h2) : t) : t option =
   if D.leq l1 h2 && D.leq l2 h1 then Some (D.min l1 l2, D.max h1 h2) else None
 
-let meet ((l1, h1) : t) ((l2, h2) : t) : t bot =
+let meet ((l1, h1) : t) ((l2, h2) : t) : t with_bot =
   check_bot (D.max l1 l2, D.min h1 h2)
 
 let hull (x : D.t) (y : D.t) : t = (D.min x y, D.max x y)
@@ -132,12 +129,12 @@ let div_sign (i1 : t) (i2 : t) : t =
   fourway (bound_div D.div_down) (bound_div D.div_up) i1 i2
 
 (* return valid values + possible division by zero *)
-let div (i1 : t) (i2 : t) : t bot * bool =
+let div (i1 : t) (i2 : t) : t with_bot * bool =
   (* split into positive and negative dividends *)
-  let pos = (lift_bot (div_sign i1)) (meet i2 positive)
-  and neg = (lift_bot (div_sign i1)) (meet i2 negative) in
+  let pos = (bot_lift1 (div_sign i1)) (meet i2 positive)
+  and neg = (bot_lift1 (div_sign i1)) (meet i2 negative) in
   (* joins the result *)
-  (join_bot2 join pos neg, contains i2 D.zero)
+  (bot_neutral2 join pos neg, contains i2 D.zero)
 
 (* defaults to the non-infinite bound, or zero *)
 let mean ((l, h) : t) : D.t =

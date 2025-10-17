@@ -10,10 +10,11 @@
 *)
 
 open Banal_datatypes
-open Banal_abstract_syntax
 module Float = Banal_float
 module Intinf = Banal_intinf
-
+include Frontend.Abstract_syntax
+include Frontend.Typed_syntax
+(* 
 (************************************************************************)
 (* TYPES *)
 (************************************************************************)
@@ -256,4 +257,4 @@ let print_prog fmt (init, funcs, vars) =
 (* name of specially inserted labels *)
 
 let break_label (id, _) = string_of_id "break#" id
-let return_label id = string_of_id "return#" id
+let return_label id = string_of_id "return#" id *)

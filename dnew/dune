@@ -1,0 +1,18 @@
+(library
+ (name dnew)
+ (libraries
+  utils
+  frontend
+  banal
+  apron
+  apron.boxMPQ
+  apron.octMPQ
+  apron.polkaMPQ
+  yojson)
+ (flags
+  (:standard -open Utils -open Banal -open Frontend -open Apron)))
+
+(env
+ (dev
+  (flags
+   (:standard -w -9-27-32-33-35 -warn-error -A))))

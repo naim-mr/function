@@ -1,13 +1,12 @@
-(* 
+(*
    Rational intervals.
 
    Copyright (C) 2011 Antoine Miné
 *)
 
-open Banal_datatypes
+open Bot
 open Apron
-module Rat = Banal_rat
-module Int = Banal_int
+open Datatypes
 
 (************************************************************************)
 (* TYPES *)
@@ -27,7 +26,7 @@ let sanitize ((l, h) : t) : t =
       invalid_arg "Itv_rat.sanitize"
   | _ -> if R.gt l h then invalid_arg "Itv_rat.sanitize" else (l, h)
 
-let check_bot ((l, h) : t) : t bot = if R.leq l h then Nb (l, h) else Bot
+let check_bot ((l, h) : t) : t with_bot = if R.leq l h then Nb (l, h) else BOT
 
 (************************************************************************)
 (* CONSTRUCTORS AND CONSTANTS *)
@@ -69,6 +68,17 @@ let to_apron ((l, h) : t) : Interval.t =
     Interval.sup = Scalar.Mpqf (Rat.to_mpqf h);
   }
 
+let to_rat_opt (l,h:t) : Rat.t option =
+  if Rat.equal l h then Some l else None
+
+(* convert an interval to an integer if it is a integer singleton,
+   otherwise return `None` *)
+let to_int_exact_opt (itv:t) : Int.t option =
+  let* r = to_rat_opt itv in if r.den = Z.one then Some r.num else None
+
+let to_int_floor_opt (itv:t) : Int.t option =
+  let* r = to_rat_opt itv in Some (Z.div r.num r.den)
+
 let of_apron (i : Interval.t) : t =
   (R.of_apron_down i.Interval.inf, R.of_apron_up i.Interval.sup)
 
@@ -89,7 +99,7 @@ let join ((l1, h1) : t) ((l2, h2) : t) : t = (R.min l1 l2, R.max h1 h2)
 let union ((l1, h1) : t) ((l2, h2) : t) : t option =
   if R.leq l1 h2 && R.leq l2 h1 then Some (R.min l1 l2, R.max h1 h2) else None
 
-let meet ((l1, h1) : t) ((l2, h2) : t) : t bot =
+let meet ((l1, h1) : t) ((l2, h2) : t) : t with_bot =
   check_bot (R.max l1 l2, R.min h1 h2)
 
 let hull (x : R.t) (y : R.t) : t = (R.min x y, R.max x y)
@@ -133,12 +143,12 @@ let div_sign ((l1, h1) : t) ((l2, h2) : t) : t =
     (hull (bound_div l1 h2) (bound_div h1 l2))
 
 (* return valid values + possible division by zero *)
-let div (i1 : t) (i2 : t) : t bot * bool =
+let div (i1 : t) (i2 : t) : t with_bot * bool =
   (* split into positive and negative dividends *)
-  let pos = (lift_bot (div_sign i1)) (meet i2 positive)
-  and neg = (lift_bot (div_sign i1)) (meet i2 negative) in
+  let pos = (bot_lift1 (div_sign i1)) (meet i2 positive)
+  and neg = (bot_lift1 (div_sign i1)) (meet i2 negative) in
   (* joins the result *)
-  (join_bot2 join pos neg, contains i2 R.zero)
+  (bot_neutral2 join pos neg, contains i2 R.zero)
 
 (* defaults to the non-infinite bound, or zero *)
 let mean ((l, h) : t) : R.t =
@@ -155,23 +165,23 @@ let magnitude ((l, h) : t) : R.t = R.max (R.abs l) (R.abs h)
 (* BACKWARD OVER-APPROXIMATED ARITHMETICS *)
 (************************************************************************)
 
-let filter_leq ((l1, h1) : t) ((l2, h2) : t) : (t * t) bot =
-  merge_bot2 (check_bot (l1, R.min h1 h2)) (check_bot (R.max l1 l2, h2))
+let filter_leq ((l1, h1) : t) ((l2, h2) : t) : (t * t) with_bot =
+  bot_merge2 (check_bot (l1, R.min h1 h2)) (check_bot (R.max l1 l2, h2))
 
-let filter_geq ((l1, h1) : t) ((l2, h2) : t) : (t * t) bot =
-  merge_bot2 (check_bot (R.max l1 l2, h1)) (check_bot (l2, R.min h1 h2))
+let filter_geq ((l1, h1) : t) ((l2, h2) : t) : (t * t) with_bot =
+  bot_merge2 (check_bot (R.max l1 l2, h1)) (check_bot (l2, R.min h1 h2))
 
-let filter_lt ((l1, _) as i1 : t) ((l2, _) as i2 : t) : (t * t) bot =
-  if is_singleton i1 && is_singleton i2 && R.equal l1 l2 then Bot
+let filter_lt ((l1, _) as i1 : t) ((l2, _) as i2 : t) : (t * t) with_bot =
+  if is_singleton i1 && is_singleton i2 && R.equal l1 l2 then BOT
   else filter_leq i1 i2
 
-let filter_gt ((l1, _) as i1 : t) ((l2, _) as i2 : t) : (t * t) bot =
-  if is_singleton i1 && is_singleton i2 && R.equal l1 l2 then Bot
+let filter_gt ((l1, _) as i1 : t) ((l2, _) as i2 : t) : (t * t) with_bot =
+  if is_singleton i1 && is_singleton i2 && R.equal l1 l2 then BOT
   else filter_geq i1 i2
 
-let filter_eq (i1 : t) (i2 : t) : (t * t) bot =
-  lift_bot (fun x -> (x, x)) (meet i1 i2)
+let filter_eq (i1 : t) (i2 : t) : (t * t) with_bot =
+  bot_lift1 (fun x -> (x, x)) (meet i1 i2)
 
-let filter_neq ((l1, _) as i1 : t) ((l2, _) as i2 : t) : (t * t) bot =
-  if is_singleton i1 && is_singleton i2 && R.equal l1 l2 then Bot
+let filter_neq ((l1, _) as i1 : t) ((l2, _) as i2 : t) : (t * t) with_bot =
+  if is_singleton i1 && is_singleton i2 && R.equal l1 l2 then BOT
   else Nb (i1, i2)

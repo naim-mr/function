@@ -6,10 +6,10 @@
 
 open Banal_datatypes
 open Banal_mathtypes
-open Banal_abstract_syntax
-open Banal_typed_syntax
 open Banal_semantics
 open Banal_domain
+open Frontend.Abstract_syntax
+open Frontend.Typed_syntax
 module Affine = Banal_affine
 
 module Var = struct

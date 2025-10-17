@@ -9,8 +9,11 @@
 (***************************************************)
 
 open Cda
+
 open Config
-open Semantics
+open Semantics  
+open C_Frontend
+open Typed_syntax
 
 let parseFile filename =
   let f = open_in filename in
@@ -333,11 +336,54 @@ let get_ast_prop itast =
       (program, Semantics.Ctl property, None)
   | _ -> raise (Invalid_argument "Unknown Analysis")
 
+module B: (Dnew.Partition.PARTITION) =  Dnew.Numerical.B 
+module ForwardIteratorB = ForwardNew.ForwardIterator (B)
 let doit () =
   (* Parsing cli args -> into Config ref variables *)
   parse_args ();
   check_args ();
   (* Get the iterator for the demanded analysis *)
+  
+  (* parse the program *)
+  let prog = C_Frontend.parse_file !Config.filename in
+
+  let open Apron in 
+  let rec init_env xs env =
+    match xs with
+    | [] -> env
+    | x :: xs ->
+        init_env xs (Environment.add env [| Var.of_string (Z.to_string x.var_id) |] [||])
+  in
+  let block,funcmap,varmap = prog in
+  let open Utils.Datatypes in 
+  let f = StringMap.find !Config.main funcmap in
+  let v1 = snd (List.split (IdMap.bindings varmap)) in
+  let v1 = v1 @ f.func_args @ (match f.func_return with None -> [] | Some v -> [v]) in
+  Printf.printf "debug list";
+  List.iter (fun v -> Printf.printf "var %s" v.var_name) v1;
+  let v1set = VarSet.of_list v1 in
+  let env = init_env v1 (Environment.make [||] [||]) in
+  let s = f.func_body in
+  (* TODO: handle functions calls *)
+  (* Forward Analysis *)
+  if !tracefwd && not !minimal then
+    Format.fprintf !fmt "\nForward Analysis Trace:\n";
+  let startfwd = Sys.time () in
+  Typed_syntax.pp_prog Format.std_formatter prog;
+  let _ =
+    ForwardIteratorB.fwdBlk funcmap env v1
+      (ForwardIteratorB.fwdBlk funcmap env v1 (B.top env v1) block)
+      s
+  in
+  let stopfwd = Sys.time () in
+    if not !minimal then 
+      if !timefwd then
+        Format.fprintf !fmt "\nForward Analysis (Time: %f s):\n"
+          (stopfwd -. startfwd)
+      else Format.fprintf !fmt "\nForward Analysis numerical:\n";
+      ForwardIteratorB.fwdMap_print !fmt !ForwardIteratorB.fwdInvMap B.print;
+      
+(*   
   let semantic = get_semantic () in
   (* Property and filename must be given (except for termination property) *)
   (* Parsing the property and the file to an intermediate ast *)
@@ -378,7 +424,7 @@ let doit () =
     in
     Vulnerability.analyse S.D.vulnerable varlist func !S.bwdInvMap;
     Format.fprintf !fmt " \n %s \n"
-      (Yojson.Safe.pretty_to_string !Config.vuln_res));
+      (Yojson.Safe.pretty_to_string !Config.vuln_res)); *)
   if !Config.json_output then Regression.output_json ()
-
-let _ = doit ()
+  
+let _ = doit (); Printf.printf "done"

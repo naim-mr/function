@@ -12,12 +12,12 @@ open IntermediateSyntax
 open AbstractSyntax
 
 (* labeling *)
-let id = ref 0
-let dummyId = -1
-let zeroId () = id := 0
+let id = ref Z.zero 
+let dummyId = Z.minus_one
+let zeroId () = id := Z.zero
 
 let newId () =
-  id := !id + 1;
+  id := Z.(+) Z.one !id;
   !id
 
 (* exceptions *)
@@ -544,7 +544,7 @@ let declarator_itoa ctx (* ctx *) gs (* var StringMap.t *) ls
       ((x (* string *), xa), exp (* Isyntax.exp annotated option *)) =
   let v =
     {
-      varId = "$" ^ string_of_int (newId ());
+      varId = "$" ^ Z.to_string (newId ());
       varName = x;
       varTyp = typ_itoa typ;
     }
@@ -606,7 +606,7 @@ let globalDecl_itoa ctx (* ctx *) env (* env *) scope stmts
     vmss decls
 
 let arg_itoa (typ (* Isyntax.typ annotated *), (x (* string *), xa)) =
-  { varId = "$" ^ string_of_int (newId ()); varName = x; varTyp = typ_itoa typ }
+  { varId = "$" ^ Z.to_string (newId ()); varName = x; varTyp = typ_itoa typ }
 
 (* statements *)
 let rec stmt_itoa (ctx : ctx) (* calling context *)
@@ -870,8 +870,8 @@ let functionDecl_itoa env
           let i = newId () in
           let v =
             {
-              varId = "$" ^ string_of_int i;
-              varName = "$" ^ string_of_int i;
+              varId = "$" ^ Z.to_string i;
+              varName = "$" ^ Z.to_string i;
               varTyp = typ_itoa typ;
             }
           in

@@ -4,15 +4,15 @@
    Copyright (C) 2011 Antoine Miné
 *)
 
-open Banal_datatypes
-open Banal_abstract_syntax
-open Banal_typed_syntax
+open Utils.Datatypes
 open Banal_semantics
 open Banal_domain
 open Utils.Apron_utils
+open Frontend.Abstract_syntax
+open Frontend.Typed_syntax
 open Apron
 
-module Itv_rat = Banal_itv_rat
+module Itv_rat = Utils.Itv_rat
 module Linearization = Banal_linearization
 
 let trace_remove = false
@@ -27,7 +27,7 @@ module type NUMERICAL = sig
   val manager : lib Manager.t
 end
 
-module Lin = Linearization.Make (Itv_rat)
+module Lin = Linearization.Make (Utils.Itv_rat)
 
 module ApronDomain (Param : NUMERICAL) = struct
   let man = Param.manager
@@ -39,7 +39,7 @@ module ApronDomain (Param : NUMERICAL) = struct
   (*************)
 
   (* apron name of a variable *)
-  let apron_of_var (v : var) : Var.t = Var.of_string v.var_id
+  let apron_of_var (v : var) : Var.t = Var.of_string (Z.to_string v.var_id)
 
   let add_var_to_env env v =
     let i, r =

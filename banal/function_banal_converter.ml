@@ -1,4 +1,3 @@
-open Banal_abstract_syntax
 open Banal_typed_syntax
 open Banal_datatypes
 module FAS = AbstractSyntax
@@ -16,7 +15,7 @@ let var_to_banal (v : FAS.var) : var =
     var_name = name;
     var_extent = dummy_extent;
     var_typ = int_type;
-    var_id = id;
+    var_id = (Z.of_string id);
     var_synthetic = false;
     var_scope = T_LOCAL;
   }
@@ -25,11 +24,11 @@ let rec of_aExp_aux (aExp : FAS.aExp) : expr =
   match aExp with
   | FAS.A_var v -> T_var (var_to_banal v)
   | FAS.A_const i ->
-      let i = Banal_intinf.of_base @@ Banal_int.of_int i in
+      let i = Utils.Intinf.of_base @@ Utils.Int.of_int i in
       T_int_const (i, i)
   | FAS.A_interval (i1, i2) ->
-      let i1 = Banal_intinf.of_base @@ Banal_int.of_int i1 in
-      let i2 = Banal_intinf.of_base @@ Banal_int.of_int i2 in
+      let i1 = Utils.Intinf.of_base @@ Utils.Int.of_int i1 in
+      let i2 = Utils.Intinf.of_base @@ Utils.Int.of_int i2 in
       T_int_const (i1, i2)
   | FAS.A_aunary (op, (e, _)) ->
       let expr = (of_aExp_aux e, int_type, dummy_extent) in
@@ -47,7 +46,7 @@ let rec of_aExp_aux (aExp : FAS.aExp) : expr =
       in
       T_binary (binOp, expr1, expr2)
   | FAS.A_RANDOM | FAS.A_INPUT ->
-      T_int_const (Banal_intinf.minus_inf, Banal_intinf.inf)
+      T_int_const (Utils.Intinf.minus_inf, Utils.Intinf.inf)
 
 let of_aExp (aExp : FAS.aExp) : expr typed =
   (of_aExp_aux aExp, int_type, dummy_extent)
