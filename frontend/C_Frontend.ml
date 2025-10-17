@@ -304,7 +304,6 @@ let rec convert_expr (st : state) ((kind, typ, _) : C_AST.expr) :
    simply implemented as a comparison with non-zero *)
 let expr_to_guard (st : state) (e : C_AST.expr) : Abstract_syntax.expr =
   let e, hint = convert_expr st e in
-
   match hint with
   | H_BOOL -> e
   | H_INT ->
@@ -501,31 +500,6 @@ let parse_file (f : string) : Typed_syntax.prog =
         Format.fprintf fmt "%s, " var;
         proc_vars l
   in
-  let rec proc_fdecl = function
-    | [] -> ()
-    | ((var, _), (t, _)) :: [] ->
-        Format.fprintf fmt "%a %s " Abstract_syntax.pp_typ t var
-    | ((var, _), (t, _)) :: l ->
-        Format.fprintf fmt "%a %s " Abstract_syntax.pp_typ t var;
-        proc_fdecl l
-  in
-
-  List.iter
-    (fun a ->
-      match a with
-      | Abstract_syntax.A_global ((v, _), _) ->
-          Printf.printf "\nfuncs glob: ";
-          let _, v = v in
-          proc_vars v
-      | Abstract_syntax.A_function (f, _) ->
-          Printf.printf "\nfuncs decl: ";
-          let t, (name, _), f, _ = f in
-
-          Format.fprintf fmt "%a %s " Abstract_syntax.pp_typ
-            (fst (Option.get t))
-            name;
-          ())
-    funcs;
 
   (* declaration of global variables both from the program and
      for input variables
@@ -551,21 +525,4 @@ let parse_file (f : string) : Typed_syntax.prog =
       !(st.input_vars)
   in
   let ps = input_decl @ global_decl @ funcs |> attach_position in
-
-  List.iter
-    (fun a ->
-      match a with
-      | Abstract_syntax.A_global ((v, _), _) ->
-          Printf.printf "\nfuncs glob: ";
-          let _, v = v in
-          proc_vars v
-      | Abstract_syntax.A_function (f, _) ->
-          Printf.printf "\nfuncs decl: ";
-          let t, (name, _), f, _ = f in
-
-          Format.fprintf fmt "%a %s " Abstract_syntax.pp_typ
-            (fst (Option.get t))
-            name;
-          ())
-    (input_decl @ global_decl @ funcs);
-  Abstract_to_typed_syntax.translate_program [ps]
+  Abstract_to_typed_syntax.translate_program [ ps ]

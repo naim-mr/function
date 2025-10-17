@@ -38,15 +38,27 @@ functor
       Printf.printf "in initblock\n";
       Typed_syntax.pp_block Format.std_formatter block;
       match block with
-      | T_empty (l, _) -> Printf.printf "in initblock empty\n";env
+      | T_empty (l, _) ->
+          Printf.printf "in initblock empty\n";
+          env
       | T_stat ((l, _), (s, _), b) ->
-        Printf.printf "in initStat\n";
-        Typed_syntax.pp_stat "" Format.std_formatter s;
-        print_endline "";
+          Printf.printf "in initStat\n";
+          Typed_syntax.pp_stat "" Format.std_formatter s;
+          print_endline "";
           let env =
             match s with
-            | T_add_var (v, _) when not @@ Environment.mem_var env (Var.of_string (Z.to_string v.var_id)) -> Printf.printf "\n assign to %s at print env\n" v.var_name; B.add_var_to_env env v
-            | T_assign ((v,_), _) when not @@ Environment.mem_var env (Var.of_string (Z.to_string v.var_id)) -> Printf.printf "\n assign to %s at print env\n" v.var_name; B.add_var_to_env env v
+            | T_add_var (v, _)
+              when not
+                   @@ Environment.mem_var env
+                        (Var.of_string (Z.to_string v.var_id)) ->
+                Printf.printf "\n assign to %s at print env\n" v.var_name;
+                B.add_var_to_env env v
+            | T_assign ((v, _), _)
+              when not
+                   @@ Environment.mem_var env
+                        (Var.of_string (Z.to_string v.var_id)) ->
+                Printf.printf "\n assign to %s at print env\n" v.var_name;
+                B.add_var_to_env env v
             | _ -> env
           in
           initBlock b env
@@ -168,4 +180,43 @@ functor
 
     and addFwdTaint l (a : VarSet.t) =
       fwdTaintMap := InvMap.add l a !fwdTaintMap
+
+    let analyze prog =
+      let rec init_env xs env =
+        match xs with
+        | [] -> env
+        | x :: xs ->
+            if Environment.mem_var env (Var.of_string (Z.to_string x.var_id))
+            then init_env xs env
+            else
+              init_env xs
+                (Environment.add env
+                   [| Var.of_string (Z.to_string x.var_id) |]
+                   [||])
+      in
+      let block, funcmap, varmap = prog in
+      let f = StringMap.find !Config.main funcmap in
+      let v1 = snd (List.split (IdMap.bindings varmap)) in
+      let v1 = v1 @ f.func_args in
+      Printf.printf "debug list";
+      List.iter (fun v -> Printf.printf "var %s" v.var_name) v1;
+      let v1set = VarSet.of_list v1 in
+      let env = Environment.make [||] [||] |> initBlock block |> initBlock f.func_body |> init_env v1 in
+      let s = f.func_body in
+      if !tracefwd && not !minimal then
+        Format.fprintf !fmt "\nForward Analysis Trace:\n";
+      let startfwd = Sys.time () in
+      Typed_syntax.pp_prog Format.std_formatter prog;
+      Printf.printf "\n";
+      let _ =
+        fwdBlk funcmap env v1 (fwdBlk funcmap env v1 (B.top env v1) block) s
+      in
+      let stopfwd = Sys.time () in
+      if not !minimal then
+        if !timefwd then
+          Format.fprintf !fmt "\nForward Analysis (Time: %f s):\n"
+            (stopfwd -. startfwd)
+        else Format.fprintf !fmt "\nForward Analysis numerical:\n";
+      fwdMap_print !fmt !fwdInvMap B.print;
+      ()
   end

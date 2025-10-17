@@ -346,46 +346,8 @@ let doit () =
   
   (* parse the program *)
   let prog = C_Frontend.parse_file !Config.filename in
-
-  let open Apron in 
-  let rec init_env xs env =
-    match xs with
-    | [] -> env
-    | x :: xs ->
-      if Environment.mem_var env (Var.of_string (Z.to_string x.var_id)) then 
-        init_env xs env
-    else
-        init_env xs (Environment.add env [| Var.of_string (Z.to_string x.var_id) |] [||])
-  in
-  let block,funcmap,varmap = prog in
-  let open Utils.Datatypes in 
-  let f = StringMap.find !Config.main funcmap in
-  let v1 = snd (List.split (IdMap.bindings varmap)) in
-  let v1 = v1 @ f.func_args in
-  Printf.printf "debug list";
-  List.iter (fun v -> Printf.printf "var %s" v.var_name) v1;
-  let v1set = VarSet.of_list v1 in
-  let env = (Environment.make [||] [||]) |> ForwardIteratorB.initBlock block |>  init_env v1 in
-  let s = f.func_body in
-  (* TODO: handle functions calls *)
-  (* Forward Analysis *)
-  if !tracefwd && not !minimal then
-    Format.fprintf !fmt "\nForward Analysis Trace:\n";
-  let startfwd = Sys.time () in
-  Typed_syntax.pp_prog Format.std_formatter prog;
-  Printf.printf "\n";
-  let _ =
-    ForwardIteratorB.fwdBlk funcmap env v1
-      (ForwardIteratorB.fwdBlk funcmap env v1 (B.top env v1) block)
-      s
-  in
-  let stopfwd = Sys.time () in
-    if not !minimal then 
-      if !timefwd then
-        Format.fprintf !fmt "\nForward Analysis (Time: %f s):\n"
-          (stopfwd -. startfwd)
-      else Format.fprintf !fmt "\nForward Analysis numerical:\n";
-      ForwardIteratorB.fwdMap_print !fmt !ForwardIteratorB.fwdInvMap B.print;
+  ForwardIteratorB.analyze prog;
+  
       
 (*   
   let semantic = get_semantic () in

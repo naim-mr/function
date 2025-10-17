@@ -18,7 +18,7 @@ let rec exp_to_apron (e,t,ext:expr typed) =
   | T_unary (A_UNARY_MINUS, e) -> 
     let e = exp_to_apron e in
     Texpr1.Unop (Texpr1.Neg, e, Texpr1.Int, Texpr1.Zero)
-  | T_unary (A_cast _, e) -> 
+  | T_unary (A_UNARY_PLUS, e) -> 
     exp_to_apron e 
   | T_binary (o, e1, e2) -> (
       let e1 = exp_to_apron e1 in
