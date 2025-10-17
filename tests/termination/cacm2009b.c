@@ -7,12 +7,19 @@ suggested parameters:
 - backward widening delay = 3
 */
 
-void main() {
-  int x, y;
+int f() {
+    int x, y;
   while (x > 0 && y > 0)
-    if (?) {
+    if (rand()) {
       x = x - 1;
       y = rand();
     } else
       y = y - 1;
+
+  return 1;
+}
+
+
+int main() {
+  return f();
 }

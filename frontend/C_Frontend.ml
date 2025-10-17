@@ -456,44 +456,82 @@ let parse_file (f : string) : Typed_syntax.prog =
   let ctx = create_context "project" target in
   parse_file "clang" (!Config.filename) [ "-fbracket-depth=512" ] false false false false ctx [];
   let prj = link_project ctx in
+  
+  (* C_print.print_project stdout prj; *)
   let st = { input_vars=ref [] } in
   (* StringMap.to_seq returns the functions in random order. This may
      cause some problems as a function calling another one may be
      analyzed first, causing the typed_syntax translator to fail.
      Heuristic -> delay `main` to the end *)
-  let funcs =
-    C_AST.StringMap.to_seq prj.proj_funcs
-    |> Seq.map (fun (_, f) -> f)
-    |> Seq.filter (fun f ->
+  
+  Printf.printf "print clang funcs decl";
+  C_AST.StringMap.iter (fun s f -> print_endline s)  prj.proj_funcs;
+    let funcs =
+    prj.proj_funcs
+    |> C_AST.StringMap.bindings     
+    |> List.map (fun (_,f) -> f)
+    |> List.filter (fun f ->
            not (StringSet.mem C_AST.(f.func_org_name) skip_funcs))
-    |> Seq.filter (fun f -> C_AST.(f.func_org_name <> "main"))
-    |> Seq.filter_map (convert_func st)
-    |> Seq.map attach_position
-    |> Seq.map (fun f -> Abstract_syntax.A_function f)
-    |> List.of_seq
+    |> List.filter (fun f -> C_AST.(f.func_org_name <> "main"))
+    |> List.filter_map (convert_func st)
+    |> List.map attach_position
+    |> List.map (fun f -> Abstract_syntax.A_function f)
   in
   let funcs =
-    funcs
-    @ [
+     funcs
+     @
+     [
         ( C_AST.StringMap.find "main" prj.proj_funcs
         |> (convert_func st) |> Option.get |> attach_position
         |> fun f -> Abstract_syntax.A_function f );
       ]
+    
   in
+  let fmt = Format.std_formatter in 
+  let rec proc_vars = function
+        | [] -> ()
+        | ((var, _), Some (e, _)) :: [] ->
+            Format.fprintf fmt "%s = %a" var Abstract_syntax.pp_expr e
+        | ((var, _), Some (e, _)) :: l ->
+            Format.fprintf fmt "%s = %a, " var Abstract_syntax.pp_expr e;
+            proc_vars l
+        | ((var, _), None) :: [] -> Format.fprintf fmt "%s" var
+        | ((var, _), None) :: l ->
+            Format.fprintf fmt "%s, " var;
+            proc_vars l
+      in
+   let rec proc_fdecl = function
+      | [] -> ()
+      | ((var,_), (t,_)):: [] ->
+          Format.fprintf fmt "%a %s " Abstract_syntax.pp_typ t var
+      | ((var,_), (t,_)):: l ->
+          Format.fprintf fmt "%a %s " Abstract_syntax.pp_typ t var;
+          proc_fdecl l
+  in
+     
+  List.iter (fun a -> 
+       match a with 
+      |Abstract_syntax.A_global ((v,_),_)  ->  Printf.printf "\nfuncs glob: ";   
+                                              let _,v = v in 
+                                              proc_vars v
+      |Abstract_syntax.A_function (f,_) ->  Printf.printf "\nfuncs decl: "; 
+                                            let t,(name,_),f,_ = f in 
+
+                                            Format.fprintf fmt "%a %s " Abstract_syntax.pp_typ (fst (Option.get t)) name;
+                                            ())   funcs;
 
   (* declaration of global variables both from the program and
      for input variables
    *)
   let global_decl =
-    C_AST.StringMap.to_seq prj.proj_vars
-    |> Seq.map (fun (_, v) -> v)
-    |> Seq.map (fun var ->
+    C_AST.StringMap.bindings prj.proj_vars
+    |> List.map (fun (_, v) -> v)
+    |> List.map (fun var ->
            Abstract_syntax.A_global
              ( ( var_typ var |> attach_position,
                  [ (var_name var |> attach_position, var_init_expr st var) ] )
                |> attach_position,
                Abstract_syntax.A_VARIABLE ))
-    |> List.of_seq
   in
   let input_decl = 
     List.map (fun (typ, v, init) ->
@@ -501,5 +539,16 @@ let parse_file (f : string) : Typed_syntax.prog =
     )
     !(st.input_vars)
   in
-  let ps = [ input_decl @ global_decl @ funcs |> attach_position ] in
+  let ps = input_decl @ global_decl @ funcs  |> attach_position in
+
+  List.iter (fun a -> 
+    match a with 
+   |Abstract_syntax.A_global ((v,_),_)  ->  Printf.printf "\nfuncs glob: ";   
+                                           let _,v = v in 
+                                           proc_vars v
+   |Abstract_syntax.A_function (f,_) ->  Printf.printf "\nfuncs decl: "; 
+                                         let t,(name,_),f,_ = f in 
+
+                                         Format.fprintf fmt "%a %s " Abstract_syntax.pp_typ (fst (Option.get t)) name;
+                                         ())   (input_decl @ global_decl @ funcs );
   Abstract_to_typed_syntax.translate_program ps

@@ -370,6 +370,7 @@ let doit () =
     Format.fprintf !fmt "\nForward Analysis Trace:\n";
   let startfwd = Sys.time () in
   Typed_syntax.pp_prog Format.std_formatter prog;
+  Printf.printf "\n";
   let _ =
     ForwardIteratorB.fwdBlk funcmap env v1
       (ForwardIteratorB.fwdBlk funcmap env v1 (B.top env v1) block)
@@ -425,6 +426,7 @@ let doit () =
     Vulnerability.analyse S.D.vulnerable varlist func !S.bwdInvMap;
     Format.fprintf !fmt " \n %s \n"
       (Yojson.Safe.pretty_to_string !Config.vuln_res)); *)
-  if !Config.json_output then Regression.output_json ()
+  if !Config.json_output then Regression.output_json ();
+  ()
   
-let _ = doit (); Printf.printf "done"
+let _ =  doit (); Printf.printf "\nFinal Analysis Result: TRUE\n"

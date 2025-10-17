@@ -27,19 +27,20 @@ let error x = Printf.ksprintf (fun s -> raise (Translate_error (x, s)))
 
 (* relative size of int / float *)
 
-let int_rank i s = match i with
+let int_rank i s =
+  match i with
   | A_CHAR -> 1
   | A_SHORT -> 3
   | A_INT -> 5
   | A_LONG -> 7
   | A_INTEGER -> 99
   | A_DYNINT _ ->
-    let itv = Valsem.int_type_set i s in
-    if Itv_int.subseteq itv (Valsem.int_type_set A_CHAR s) then 0 else
-    if Itv_int.subseteq itv (Valsem.int_type_set A_SHORT s) then 2 else
-    if Itv_int.subseteq itv (Valsem.int_type_set A_INT s) then 4 else
-    if Itv_int.subseteq itv (Valsem.int_type_set A_LONG s) then 6 else 8
-
+      let itv = Valsem.int_type_set i s in
+      if Itv_int.subseteq itv (Valsem.int_type_set A_CHAR s) then 0
+      else if Itv_int.subseteq itv (Valsem.int_type_set A_SHORT s) then 2
+      else if Itv_int.subseteq itv (Valsem.int_type_set A_INT s) then 4
+      else if Itv_int.subseteq itv (Valsem.int_type_set A_LONG s) then 6
+      else 8
 
 let float_rank = function A_FLOAT -> 1 | A_DOUBLE -> 2 | A_REAL -> 99
 
@@ -103,8 +104,7 @@ let cast ((e, t, _) as ee) t' x =
     match (e, t') with
     (* don't cast constants if they fit the target type *)
     | T_int_const (i1, i2), A_int (c, s)
-      when Valsem.const_fit_in_type c s i1
-           && Valsem.const_fit_in_type c s i2 ->
+      when Valsem.const_fit_in_type c s i1 && Valsem.const_fit_in_type c s i2 ->
         ee
     | _ -> (T_unary (A_cast (t', x), ee), t', x))
 
@@ -139,9 +139,11 @@ let promote_compatible ((_, t1, x1) as ee1) ((_, t2, x2) as ee2) x =
     | A_int _, A_float _ -> t2
     | A_int (i1, s1), A_int (i2, s2) ->
         let i1, s1 =
-          if int_rank i1 s1 < int_rank A_INT A_SIGNED then (A_INT, A_SIGNED) else (i1, s1)
+          if int_rank i1 s1 < int_rank A_INT A_SIGNED then (A_INT, A_SIGNED)
+          else (i1, s1)
         and i2, s2 =
-          if int_rank i2 s2 < int_rank A_INT A_SIGNED then (A_INT, A_SIGNED) else (i2, s2)
+          if int_rank i2 s2 < int_rank A_INT A_SIGNED then (A_INT, A_SIGNED)
+          else (i2, s2)
         in
         if int_rank i1 s1 < int_rank i2 s2 then A_int (i2, s2)
         else if int_rank i1 s1 > int_rank i2 s2 then A_int (i1, s1)
@@ -277,6 +279,11 @@ let rec pure_expr env pre post (e, x) =
         post )
 
 and call (s, sx) args env pre post x =
+  Printf.printf "\nbefore call \n";
+  print_endline "---------";
+  StringMap.iter (fun s _ -> Printf.printf "func: %s \n" s) env.env_funcs;
+  StringMap.iter (fun s _ -> Printf.printf "glob: %s \n" s) env.env_globals;
+  print_endline "---------";
   (* resolve identifier *)
   let f = get_func env s sx in
   (* translate & bind actual arguments *)
@@ -335,10 +342,10 @@ and add_var env (t, _) (s, sx) i scope =
       env with
       env_locals =
         (if scope = T_LOCAL then StringMap.add s v env.env_locals
-        else env.env_locals);
+         else env.env_locals);
       env_globals =
         (if scope <> T_LOCAL then StringMap.add s v env.env_globals
-        else env.env_globals);
+         else env.env_globals);
       env_vars = IdMap.add v.var_id v env.env_vars;
     }
   in
@@ -536,18 +543,16 @@ let decl env d =
 (************************************************************************)
 
 (* translation entry point *)
-let translate_program (ps : decl list ext list) : prog =
-  let x = snd (List.hd ps) in
+let translate_program (ps : decl list ext) : prog =
+  let x = snd ps in
+  let dl = fst ps in
   let env, rstats, rfuncs =
     List.fold_left
-      (fun (env, rstats, rfuncs) (p, _) ->
-        List.fold_left
-          (fun (env, rstats, rfuncs) d ->
-            let env, stats, funcs = decl env d in
-            let stats = add_lbl stats in
-            (env, List.rev_append stats rstats, List.rev_append funcs rfuncs))
-          (env, rstats, rfuncs) p)
-      (empty_env, [], []) ps
+      (fun (env, rstats, rfuncs) d ->
+        let env, stats, funcs = decl env d in
+        let stats = add_lbl stats in
+        (env, List.rev_append stats rstats, List.rev_append funcs rfuncs))
+      (empty_env, [], []) dl
   in
   let init = mk_block (List.rev rstats) [] x in
   let funcs =

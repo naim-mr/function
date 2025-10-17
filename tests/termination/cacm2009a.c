@@ -7,10 +7,11 @@ suggested parameters:
 - backward widening delay = 2 [default]
 */
 
+
 void main() {
-  int x, y;
+  int x, y,b;
   while (x > 0 && y > 0)
-    if (?) {
+    if (b) {
       x = x - 1;
       y = y + 1;
     } else
