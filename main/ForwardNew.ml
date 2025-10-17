@@ -16,85 +16,107 @@ open Utils.Datatypes
 open VarSet
 open Taint
 
-module ForwardIterator = functor (B : PARTITION) ->  struct
-  let fwdMap_print fmt m fprint =
-    InvMap.iter
-      (fun l a -> Format.fprintf fmt "%a: %a\n" label_print l fprint a)
-      m
+module ForwardIterator =
+functor
+  (B : PARTITION)
+  ->
+  struct
+    let fwdMap_print fmt m fprint =
+      InvMap.iter
+        (fun l a -> Format.fprintf fmt "%a: %a\n" label_print l fprint a)
+        m
 
-  let fwdMap_print fmt m fprint =
-    InvMap.iter
-      (fun l a -> Format.fprintf fmt "%a: %a\n" label_print l fprint a)
-      m
+    let fwdMap_print fmt m fprint =
+      InvMap.iter
+        (fun l a -> Format.fprintf fmt "%a: %a\n" label_print l fprint a)
+        m
 
-  let fwdInvMap = ref InvMap.empty
-  let addFwdInv l (a : B.t) = fwdInvMap := InvMap.add l a !fwdInvMap
+    let fwdInvMap = ref InvMap.empty
+    let addFwdInv l (a : B.t) = fwdInvMap := InvMap.add l a !fwdInvMap
 
-  (* compute invariant map based on forward analysis *)
-  let rec compute (vars, stmts, funcs) p main env =
-    let f = StringMap.find main funcs in
-    let s = f.func_body in
-    let _ = fwdBlk funcs env vars (fwdBlk funcs env vars p stmts) s in
-    !fwdInvMap
+    let rec initBlock block env =
+      Printf.printf "in initblock\n";
+      Typed_syntax.pp_block Format.std_formatter block;
+      match block with
+      | T_empty (l, _) -> Printf.printf "in initblock empty\n";env
+      | T_stat ((l, _), (s, _), b) ->
+        Printf.printf "in initStat\n";
+        Typed_syntax.pp_stat "" Format.std_formatter s;
+        print_endline "";
+          let env =
+            match s with
+            | T_add_var (v, _) when not @@ Environment.mem_var env (Var.of_string (Z.to_string v.var_id)) -> Printf.printf "\n assign to %s at print env\n" v.var_name; B.add_var_to_env env v
+            | T_assign ((v,_), _) when not @@ Environment.mem_var env (Var.of_string (Z.to_string v.var_id)) -> Printf.printf "\n assign to %s at print env\n" v.var_name; B.add_var_to_env env v
+            | _ -> env
+          in
+          initBlock b env
 
-  and fwdStm funcs env vars p s =
-    match s with
-    | T_label _ | T_print _ 
-    | T_add_var (_, None) 
-    | T_del_var _-> p
-    | T_RETURN -> B.bot env vars
-    | T_add_var (v, Some (e,t,ext)) -> B.fwdAssign p ((T_var v,v.var_typ,ext), (e,t,ext))
-    | T_assign ((v,l), e) -> B.fwdAssign p ((T_var v,v.var_typ,l), e)
-    | T_assert (b,l) -> B.filter p b
-    | T_if (b, s1, s2) ->
-        let p1 = fwdBlk funcs env vars (B.filter p b) s1 in
-        let p2 =
-          fwdBlk funcs env vars (B.filter p (neg_bexp b)) s2
-        in
-        B.join p1 p2
-    | T_while ((l,_), b, s) ->
-        let rec aux i p2 n =
-          let i' = B.join p p2 in
-          if !tracefwd && not !minimal then (
-            Format.fprintf !fmt "### %a:%i ###:\n" label_print l n;
-            Format.fprintf !fmt "p: %a\n" B.print p;
-            Format.fprintf !fmt "i: %a\n" B.print i;
-            Format.fprintf !fmt "p2: %a\n" B.print p2;
-            Format.fprintf !fmt "i': %a\n" B.print i');
-          if B.isLeq i' i then i
-          else
-            let i'' = if n <= !joinfwd then i' else B.widen i i' in
-            if !tracefwd && not !minimal then
-              Format.fprintf !fmt "i'': %a\n" B.print i'';
-            aux i'' (fwdBlk funcs env vars (B.filter i'' b) s) (n + 1)
-        in
-        let i = B.bot env vars in
-        let p2 = fwdBlk funcs env vars (B.filter i b) s in
-        let p = aux i p2 1 in
-        addFwdInv l p;
+    (* compute invariant map based on forward analysis *)
+    let rec compute (vars, stmts, funcs) p main env =
+      let f = StringMap.find main funcs in
+      let s = f.func_body in
+      let _ = fwdBlk funcs env vars (fwdBlk funcs env vars p stmts) s in
+      !fwdInvMap
 
-        B.filter p (neg_bexp b)
-    | T_call (f, ss) ->
-        (* let p =
+    and fwdStm funcs env vars p s =
+      match s with
+      | T_label _ | T_print _ | T_add_var (_, None) | T_del_var _ -> p
+      | T_RETURN -> B.bot env vars
+      | T_add_var (v, Some (e, t, ext)) ->
+          Environment.print Format.std_formatter env;
+          B.fwdAssign p ((T_var v, v.var_typ, ext), (e, t, ext))
+      | T_assign ((v, l), e) -> B.fwdAssign p ((T_var v, v.var_typ, l), e)
+      | T_assert (b, l) -> B.filter p b
+      | T_if (b, s1, s2) ->
+          let p1 = fwdBlk funcs env vars (B.filter p b) s1 in
+          let p2 = fwdBlk funcs env vars (B.filter p (neg_bexp b)) s2 in
+          B.join p1 p2
+      | T_while ((l, _), b, s) ->
+          let rec aux i p2 n =
+            let i' = B.join p p2 in
+            if !tracefwd && not !minimal then (
+              Format.fprintf !fmt "### %a:%i ###:\n" label_print l n;
+              Format.fprintf !fmt "p: %a\n" B.print p;
+              Format.fprintf !fmt "i: %a\n" B.print i;
+              Format.fprintf !fmt "p2: %a\n" B.print p2;
+              Format.fprintf !fmt "i': %a\n" B.print i');
+            if B.isLeq i' i then i
+            else
+              let i'' = if n <= !joinfwd then i' else B.widen i i' in
+              if !tracefwd && not !minimal then
+                Format.fprintf !fmt "i'': %a\n" B.print i'';
+              aux i'' (fwdBlk funcs env vars (B.filter i'' b) s) (n + 1)
+          in
+          let i = B.bot env vars in
+          let p2 = fwdBlk funcs env vars (B.filter i b) s in
+          let p = aux i p2 1 in
+          addFwdInv l p;
+
+          B.filter p (neg_bexp b)
+      | T_call (f, ss) ->
+          (* let p =
           List.fold_left (fun ap (s, _) -> fwdStm funcs env vars p s) p f.
         in *)
-        fwdBlk funcs env vars p f.func_body
-    |_ -> Typed_syntax.pp_stat "" Format.std_formatter s; failwith "nyi block"
-  and fwdBlk funcs env vars (p : B.t) (b : block) : B.t =
-    match b with
-    | T_empty (l,_) ->
-        if !tracefwd && not !minimal then
-          Format.fprintf !fmt "### %a ###: %a\n" label_print l B.print p;
-        addFwdInv l p;
-        p
-    | T_stat ((l,_), (s, _), b) ->
-        if !tracefwd && not !minimal then
-          Format.fprintf !fmt "### %a ###: %a\n" label_print l B.print p;
-        addFwdInv l p;
-        fwdBlk funcs env vars (fwdStm funcs env vars p s) b
+          fwdBlk funcs env vars p f.func_body
+      | _ ->
+          Typed_syntax.pp_stat "" Format.std_formatter s;
+          failwith "nyi block"
 
-  (* Assgined block: return set of variables assigned in a block (only syntactic) *)
-  (* let rec fwdTStm funcs p s =
+    and fwdBlk funcs env vars (p : B.t) (b : block) : B.t =
+      match b with
+      | T_empty (l, _) ->
+          if !tracefwd && not !minimal then
+            Format.fprintf !fmt "### %a ###: %a\n" label_print l B.print p;
+          addFwdInv l p;
+          p
+      | T_stat ((l, _), (s, _), b) ->
+          if !tracefwd && not !minimal then
+            Format.fprintf !fmt "### %a ###: %a\n" label_print l B.print p;
+          addFwdInv l p;
+          fwdBlk funcs env vars (fwdStm funcs env vars p s) b
+
+    (* Assgined block: return set of variables assigned in a block (only syntactic) *)
+    (* let rec fwdTStm funcs p s =
     let open Taint in
     match s with
     | A_label _ -> p
@@ -142,6 +164,8 @@ module ForwardIterator = functor (B : PARTITION) ->  struct
         addFwdTaint l p;
         fwdTBlk funcs p' b *)
 
-  and fwdTaintMap : VarSet.t InvMap.t ref = ref InvMap.empty
-  and addFwdTaint l (a : VarSet.t) = fwdTaintMap := InvMap.add l a !fwdTaintMap
-end
+    and fwdTaintMap : VarSet.t InvMap.t ref = ref InvMap.empty
+
+    and addFwdTaint l (a : VarSet.t) =
+      fwdTaintMap := InvMap.add l a !fwdTaintMap
+  end

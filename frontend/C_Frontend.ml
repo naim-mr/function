@@ -29,24 +29,21 @@ let nondet_func_type_hint =
        (Abstract_syntax.(A_int (A_INT, A_UNSIGNED)), H_INT)
   |> StringMap.add "__VERIFIER_nondet_int"
        (Abstract_syntax.(A_int (A_INT, A_SIGNED)), H_INT)
-  |> StringMap.add "rand"
-       (Abstract_syntax.(A_int (A_INT, A_SIGNED)), H_INT)
+  |> StringMap.add "rand" (Abstract_syntax.(A_int (A_INT, A_SIGNED)), H_INT)
   |> StringMap.add "__VERIFIER_nondet_uinteger"
        (Abstract_syntax.(A_int (A_INTEGER, A_UNSIGNED)), H_INT)
   |> StringMap.add "__VERIFIER_nondet_integer"
        (Abstract_syntax.(A_int (A_INTEGER, A_SIGNED)), H_INT)
-  |> StringMap.add "?"
-       (Abstract_syntax.(A_int (A_INTEGER, A_SIGNED)), H_INT)
+  |> StringMap.add "?" (Abstract_syntax.(A_int (A_INTEGER, A_SIGNED)), H_INT)
   |> StringMap.add "__VERIFIER_nondet_float"
        (Abstract_syntax.A_float A_FLOAT, H_INT)
   |> StringMap.add "__VERIFIER_nondet_double"
        (Abstract_syntax.A_float A_DOUBLE, H_INT)
-  |> StringMap.add "__VERIFIER_nondet_bool"
-       (Abstract_syntax.A_BOOL, H_BOOL)
+  |> StringMap.add "__VERIFIER_nondet_bool" (Abstract_syntax.A_BOOL, H_BOOL)
 
 type state = {
   (* list of statements to place in the input block *)
-  input_vars: (Abstract_syntax.typ * string * Abstract_syntax.expr) list ref;
+  input_vars : (Abstract_syntax.typ * string * Abstract_syntax.expr) list ref;
 }
 
 (** HELPERS *)
@@ -176,7 +173,7 @@ let typ_to_hint (typ : C_AST.typ) : kind_hint =
   | T_void -> H_VOID
   | _ -> raise (UnsupportedConversion "unsupported type in typ_to_hint")
 
-let rec convert_expr (st: state) ((kind, typ, _) : C_AST.expr) :
+let rec convert_expr (st : state) ((kind, typ, _) : C_AST.expr) :
     Abstract_syntax.expr * kind_hint =
   match kind with
   | C_AST.E_variable var ->
@@ -190,7 +187,7 @@ let rec convert_expr (st: state) ((kind, typ, _) : C_AST.expr) :
       let e, e_hint = convert_expr st e in
       let e = cast_if_necessary e_hint (un_op_in_hint op) e in
 
-      (Abstract_syntax.A_unary (convert_un_op op, e |> attach_position),
+      ( Abstract_syntax.A_unary (convert_un_op op, e |> attach_position),
         un_op_out_hint op )
   | C_AST.E_binary (op, e1, e2) ->
       let e1, e1_hint = convert_expr st e1 in
@@ -201,7 +198,7 @@ let rec convert_expr (st: state) ((kind, typ, _) : C_AST.expr) :
       ( Abstract_syntax.A_binary
           (convert_bin_op op, e1 |> attach_position, e2 |> attach_position),
         bin_op_out_hint op )
-  | C_AST.E_cast ((_, e_typ, _) as ee, _) ->
+  | C_AST.E_cast (((_, e_typ, _) as ee), _) ->
       let e_typ = convert_type_qual e_typ in
       let ee = convert_expr st ee |> fst in
       let cast_typ = convert_type_qual typ in
@@ -239,40 +236,43 @@ let rec convert_expr (st: state) ((kind, typ, _) : C_AST.expr) :
       in
 
       (* hook the non determinisitc assignement *)
-      if StringMap.mem func_name nondet_func_type_hint then begin
+      if StringMap.mem func_name nondet_func_type_hint then (
         (* create a fresh input variable to be placed in the init block*)
-        let input_v_name = Format.sprintf "nondet_in_%d" (List.length !(st.input_vars) +1) in
+        let input_v_name =
+          Format.sprintf "nondet_in_%d" (List.length !(st.input_vars) + 1)
+        in
 
         (* get the range of the input variable and the hint type *)
         let typ, hint = StringMap.find func_name nondet_func_type_hint in
-        let assign_expr, hint = if Array.length args = 0 then
-          Abstract_syntax.A_nondet typ, hint
-        else (
-          assert (Array.length args = 2);
-          assert (StringMap.find func_name nondet_func_type_hint |> snd = H_INT);
-          match (convert_expr st args.(0), convert_expr st args.(1)) with
-          | ( (Abstract_syntax.A_int_const l, _),
-              (Abstract_syntax.A_int_const h, _) ) ->
-              ( Abstract_syntax.A_int_itv
-                  (l |> attach_position, h |> attach_position),
-                H_INT )
-          | ( (Abstract_syntax.A_float_const l, _),
-              (Abstract_syntax.A_float_const h, _) ) ->
-              ( Abstract_syntax.A_float_itv
-                  (l |> attach_position, h |> attach_position),
-                H_INT )
-          | _ ->
-              raise
-                (UnsupportedConversion
-                   "unexpected kind of arguments of nondet func"))
-          in
+        let assign_expr, hint =
+          if Array.length args = 0 then (Abstract_syntax.A_nondet typ, hint)
+          else (
+            assert (Array.length args = 2);
+            assert (
+              StringMap.find func_name nondet_func_type_hint |> snd = H_INT);
+            match (convert_expr st args.(0), convert_expr st args.(1)) with
+            | ( (Abstract_syntax.A_int_const l, _),
+                (Abstract_syntax.A_int_const h, _) ) ->
+                ( Abstract_syntax.A_int_itv
+                    (l |> attach_position, h |> attach_position),
+                  H_INT )
+            | ( (Abstract_syntax.A_float_const l, _),
+                (Abstract_syntax.A_float_const h, _) ) ->
+                ( Abstract_syntax.A_float_itv
+                    (l |> attach_position, h |> attach_position),
+                  H_INT )
+            | _ ->
+                raise
+                  (UnsupportedConversion
+                     "unexpected kind of arguments of nondet func"))
+        in
 
-          (* collect the input variable with its type and initialization *)
-          st.input_vars := (typ, input_v_name, assign_expr) :: !(st.input_vars);
+        (* collect the input variable with its type and initialization *)
+        st.input_vars := (typ, input_v_name, assign_expr) :: !(st.input_vars);
 
-          (* return the variable *)
-          Abstract_syntax.A_identifier input_v_name, hint
-      end else
+        (* return the variable *)
+        (Abstract_syntax.A_identifier input_v_name, hint))
+      else
         let args =
           List.map
             (fun arg -> convert_expr st arg |> fst |> attach_position)
@@ -289,7 +289,9 @@ let rec convert_expr (st: state) ((kind, typ, _) : C_AST.expr) :
       in
 
       ( A_assign
-          (attach_position lfs, None, convert_expr st rhs |> fst |> attach_position),
+          ( attach_position lfs,
+            None,
+            convert_expr st rhs |> fst |> attach_position ),
         H_VOID )
   | C_AST.E_address_of _ -> raise (UnsupportedFeature "pointer")
   | C_AST.E_array_subscript _ -> raise (UnsupportedFeature "array")
@@ -300,7 +302,7 @@ let rec convert_expr (st: state) ((kind, typ, _) : C_AST.expr) :
    In C there is not boolean type, thus int expressions are freely used as
    IF/LOOP conditions. In Banal we need to perform a int -> bool. This is
    simply implemented as a comparison with non-zero *)
-let expr_to_guard (st:state) (e : C_AST.expr) : Abstract_syntax.expr =
+let expr_to_guard (st : state) (e : C_AST.expr) : Abstract_syntax.expr =
   let e, hint = convert_expr st e in
 
   match hint with
@@ -312,7 +314,7 @@ let expr_to_guard (st:state) (e : C_AST.expr) : Abstract_syntax.expr =
           Abstract_syntax.A_int_const "0" |> attach_position )
   | H_VOID -> raise (UnsupportedConversion "unexpected hint in expr_to_guard")
 
-let var_init_expr (st:state) (var : C_AST.variable) :
+let var_init_expr (st : state) (var : C_AST.variable) :
     Abstract_syntax.expr Abstract_syntax.ext option =
   Option.bind var.var_init (fun init ->
       match init with
@@ -320,7 +322,8 @@ let var_init_expr (st:state) (var : C_AST.variable) :
       | C_AST.I_init_list _ -> raise (UnsupportedFeature "array")
       | _ -> raise (UnsupportedConversion "unknown variable init"))
 
-let rec convert_stmt (st: state) ((stmt, _) : C_AST.statement) : Abstract_syntax.stat =
+let rec convert_stmt (st : state) ((stmt, _) : C_AST.statement) :
+    Abstract_syntax.stat =
   match stmt with
   | C_AST.S_local_declaration var ->
       A_local
@@ -422,11 +425,12 @@ let rec convert_stmt (st: state) ((stmt, _) : C_AST.statement) : Abstract_syntax
   | C_AST.S_target (C_AST.S_label _) -> A_SKIP
   | _ -> raise (UnsupportedConversion "unsupported stat kind")
 
-and convert_block (st: state) (block : C_AST.block) : Abstract_syntax.stat =
+and convert_block (st : state) (block : C_AST.block) : Abstract_syntax.stat =
   A_block
     (List.map (fun s -> convert_stmt st s |> attach_position) block.blk_stmts)
 
-let convert_func (st: state) (func : C_AST.func) : Abstract_syntax.fundecl option =
+let convert_func (st : state) (func : C_AST.func) :
+    Abstract_syntax.fundecl option =
   (* MOPSA handles functions without a return value with the special
      type `void` (as in C), but in Banal we return an `None` optional.
      Handle this special case explicitly, for the other types
@@ -454,22 +458,21 @@ let convert_func (st: state) (func : C_AST.func) : Abstract_syntax.fundecl optio
 let parse_file (f : string) : Typed_syntax.prog =
   let target = get_target_info (get_default_target_options ()) in
   let ctx = create_context "project" target in
-  parse_file "clang" (!Config.filename) [ "-fbracket-depth=512" ] false false false false ctx [];
+  parse_file "clang" !Config.filename [ "-fbracket-depth=512" ] false false
+    false false ctx [];
   let prj = link_project ctx in
-  
+
   (* C_print.print_project stdout prj; *)
-  let st = { input_vars=ref [] } in
+  let st = { input_vars = ref [] } in
   (* StringMap.to_seq returns the functions in random order. This may
      cause some problems as a function calling another one may be
      analyzed first, causing the typed_syntax translator to fail.
      Heuristic -> delay `main` to the end *)
-  
   Printf.printf "print clang funcs decl";
-  C_AST.StringMap.iter (fun s f -> print_endline s)  prj.proj_funcs;
-    let funcs =
-    prj.proj_funcs
-    |> C_AST.StringMap.bindings     
-    |> List.map (fun (_,f) -> f)
+  C_AST.StringMap.iter (fun s f -> print_endline s) prj.proj_funcs;
+  let funcs =
+    prj.proj_funcs |> C_AST.StringMap.bindings
+    |> List.map (fun (_, f) -> f)
     |> List.filter (fun f ->
            not (StringSet.mem C_AST.(f.func_org_name) skip_funcs))
     |> List.filter (fun f -> C_AST.(f.func_org_name <> "main"))
@@ -478,47 +481,51 @@ let parse_file (f : string) : Typed_syntax.prog =
     |> List.map (fun f -> Abstract_syntax.A_function f)
   in
   let funcs =
-     funcs
-     @
-     [
+    funcs
+    @ [
         ( C_AST.StringMap.find "main" prj.proj_funcs
-        |> (convert_func st) |> Option.get |> attach_position
+        |> convert_func st |> Option.get |> attach_position
         |> fun f -> Abstract_syntax.A_function f );
       ]
-    
   in
-  let fmt = Format.std_formatter in 
+  let fmt = Format.std_formatter in
   let rec proc_vars = function
-        | [] -> ()
-        | ((var, _), Some (e, _)) :: [] ->
-            Format.fprintf fmt "%s = %a" var Abstract_syntax.pp_expr e
-        | ((var, _), Some (e, _)) :: l ->
-            Format.fprintf fmt "%s = %a, " var Abstract_syntax.pp_expr e;
-            proc_vars l
-        | ((var, _), None) :: [] -> Format.fprintf fmt "%s" var
-        | ((var, _), None) :: l ->
-            Format.fprintf fmt "%s, " var;
-            proc_vars l
-      in
-   let rec proc_fdecl = function
-      | [] -> ()
-      | ((var,_), (t,_)):: [] ->
-          Format.fprintf fmt "%a %s " Abstract_syntax.pp_typ t var
-      | ((var,_), (t,_)):: l ->
-          Format.fprintf fmt "%a %s " Abstract_syntax.pp_typ t var;
-          proc_fdecl l
+    | [] -> ()
+    | ((var, _), Some (e, _)) :: [] ->
+        Format.fprintf fmt "%s = %a" var Abstract_syntax.pp_expr e
+    | ((var, _), Some (e, _)) :: l ->
+        Format.fprintf fmt "%s = %a, " var Abstract_syntax.pp_expr e;
+        proc_vars l
+    | ((var, _), None) :: [] -> Format.fprintf fmt "%s" var
+    | ((var, _), None) :: l ->
+        Format.fprintf fmt "%s, " var;
+        proc_vars l
   in
-     
-  List.iter (fun a -> 
-       match a with 
-      |Abstract_syntax.A_global ((v,_),_)  ->  Printf.printf "\nfuncs glob: ";   
-                                              let _,v = v in 
-                                              proc_vars v
-      |Abstract_syntax.A_function (f,_) ->  Printf.printf "\nfuncs decl: "; 
-                                            let t,(name,_),f,_ = f in 
+  let rec proc_fdecl = function
+    | [] -> ()
+    | ((var, _), (t, _)) :: [] ->
+        Format.fprintf fmt "%a %s " Abstract_syntax.pp_typ t var
+    | ((var, _), (t, _)) :: l ->
+        Format.fprintf fmt "%a %s " Abstract_syntax.pp_typ t var;
+        proc_fdecl l
+  in
 
-                                            Format.fprintf fmt "%a %s " Abstract_syntax.pp_typ (fst (Option.get t)) name;
-                                            ())   funcs;
+  List.iter
+    (fun a ->
+      match a with
+      | Abstract_syntax.A_global ((v, _), _) ->
+          Printf.printf "\nfuncs glob: ";
+          let _, v = v in
+          proc_vars v
+      | Abstract_syntax.A_function (f, _) ->
+          Printf.printf "\nfuncs decl: ";
+          let t, (name, _), f, _ = f in
+
+          Format.fprintf fmt "%a %s " Abstract_syntax.pp_typ
+            (fst (Option.get t))
+            name;
+          ())
+    funcs;
 
   (* declaration of global variables both from the program and
      for input variables
@@ -533,22 +540,32 @@ let parse_file (f : string) : Typed_syntax.prog =
                |> attach_position,
                Abstract_syntax.A_VARIABLE ))
   in
-  let input_decl = 
-    List.map (fun (typ, v, init) ->
-      Abstract_syntax.A_global ((typ |> attach_position, [v |> attach_position, Some (init |> attach_position)]) |> attach_position, Abstract_syntax.A_INPUT)
-    )
-    !(st.input_vars)
+  let input_decl =
+    List.map
+      (fun (typ, v, init) ->
+        Abstract_syntax.A_global
+          ( ( typ |> attach_position,
+              [ (v |> attach_position, Some (init |> attach_position)) ] )
+            |> attach_position,
+            Abstract_syntax.A_INPUT ))
+      !(st.input_vars)
   in
-  let ps = input_decl @ global_decl @ funcs  |> attach_position in
+  let ps = input_decl @ global_decl @ funcs |> attach_position in
 
-  List.iter (fun a -> 
-    match a with 
-   |Abstract_syntax.A_global ((v,_),_)  ->  Printf.printf "\nfuncs glob: ";   
-                                           let _,v = v in 
-                                           proc_vars v
-   |Abstract_syntax.A_function (f,_) ->  Printf.printf "\nfuncs decl: "; 
-                                         let t,(name,_),f,_ = f in 
+  List.iter
+    (fun a ->
+      match a with
+      | Abstract_syntax.A_global ((v, _), _) ->
+          Printf.printf "\nfuncs glob: ";
+          let _, v = v in
+          proc_vars v
+      | Abstract_syntax.A_function (f, _) ->
+          Printf.printf "\nfuncs decl: ";
+          let t, (name, _), f, _ = f in
 
-                                         Format.fprintf fmt "%a %s " Abstract_syntax.pp_typ (fst (Option.get t)) name;
-                                         ())   (input_decl @ global_decl @ funcs );
-  Abstract_to_typed_syntax.translate_program ps
+          Format.fprintf fmt "%a %s " Abstract_syntax.pp_typ
+            (fst (Option.get t))
+            name;
+          ())
+    (input_decl @ global_decl @ funcs);
+  Abstract_to_typed_syntax.translate_program [ps]

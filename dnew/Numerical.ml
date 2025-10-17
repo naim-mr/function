@@ -462,6 +462,10 @@ module Numerical (N : NUMERICAL) (C : CONSTRAINT) : PARTITION = struct
 
   (**)
 
+  let add_var_to_env = BanalApron.add_var_to_env 
+    
+
+ 
   let fwdAssign b ((x, t, ext), e) =
     match x with
     | T_var x ->
@@ -567,8 +571,7 @@ module Numerical (N : NUMERICAL) (C : CONSTRAINT) : PARTITION = struct
       | T_unary (A_NOT, e) ->
           let e = neg_bexp e in
           f manager b e
-      | T_unary (A_cast (t,_), e) -> 
-        b
+      | T_unary (A_cast (t, _), e) -> b
       | T_binary (o, e1, e2) -> (
           let b1 = f manager b e1 and b2 = f manager b e2 in
           match o with
@@ -605,7 +608,7 @@ module Numerical (N : NUMERICAL) (C : CONSTRAINT) : PARTITION = struct
               | A_LESS ->
                   let e =
                     Texpr1.of_expr env
-                      (exp_to_apron (T_binary (A_MINUS, e2, e1),t,ext))
+                      (exp_to_apron (T_binary (A_MINUS, e2, e1), t, ext))
                   in
                   let c = Tcons1.make e Tcons1.SUP in
                   let a = Tcons1.array_make env 1 in
@@ -620,7 +623,7 @@ module Numerical (N : NUMERICAL) (C : CONSTRAINT) : PARTITION = struct
               | A_LESS_EQUAL ->
                   let e =
                     Texpr1.of_expr env
-                      (exp_to_apron (T_binary (A_MINUS, e2, e1),t,ext))
+                      (exp_to_apron (T_binary (A_MINUS, e2, e1), t, ext))
                   in
                   let c = Tcons1.make e Tcons1.SUPEQ in
                   let a = Tcons1.array_make env 1 in
@@ -635,7 +638,7 @@ module Numerical (N : NUMERICAL) (C : CONSTRAINT) : PARTITION = struct
               | A_GREATER ->
                   let e =
                     Texpr1.of_expr env
-                      (exp_to_apron (T_binary (A_MINUS, e1, e2),t,ext))
+                      (exp_to_apron (T_binary (A_MINUS, e1, e2), t, ext))
                   in
                   let c = Tcons1.make e Tcons1.SUP in
                   let a = Tcons1.array_make env 1 in
@@ -650,7 +653,7 @@ module Numerical (N : NUMERICAL) (C : CONSTRAINT) : PARTITION = struct
               | A_GREATER_EQUAL ->
                   let e =
                     Texpr1.of_expr env
-                      (exp_to_apron (T_binary (A_MINUS, e1, e2),t,ext))
+                      (exp_to_apron (T_binary (A_MINUS, e1, e2), t, ext))
                   in
                   let c = Tcons1.make e Tcons1.SUPEQ in
                   let a = Tcons1.array_make env 1 in
@@ -663,25 +666,20 @@ module Numerical (N : NUMERICAL) (C : CONSTRAINT) : PARTITION = struct
                   done;
                   { constraints = !cs; env; vars }
               | _ -> raise (Invalid_argument "Filter only boolean expression")))
-      | T_int_const _
-      | T_bool_const _ 
-      | T_var _ -> 
-        let env = b.env in
-        let vars = b.vars in
-        let e =
-          Texpr1.of_expr env  (exp_to_apron (e,t,ext))
-        in
-        let c = Tcons1.make e Tcons1.SUPEQ in
-        let a = Tcons1.array_make env 1 in
-        Tcons1.array_set a 0 c;
-        let b = Abstract1.of_tcons_array manager env a in
-        let a = Abstract1.to_lincons_array manager b in
-        let cs = ref [] in
-        for i = 0 to Lincons1.array_length a - 1 do
-          cs := Lincons1.array_get a i :: !cs (*TODO: normalization *)
-        done;
-        { constraints = !cs; env; vars }
-
+      | T_int_const _ | T_bool_const _ | T_var _ ->
+          let env = b.env in
+          let vars = b.vars in
+          let e = Texpr1.of_expr env (exp_to_apron (e, t, ext)) in
+          let c = Tcons1.make e Tcons1.SUPEQ in
+          let a = Tcons1.array_make env 1 in
+          Tcons1.array_set a 0 c;
+          let b = Abstract1.of_tcons_array manager env a in
+          let a = Abstract1.to_lincons_array manager b in
+          let cs = ref [] in
+          for i = 0 to Lincons1.array_length a - 1 do
+            cs := Lincons1.array_get a i :: !cs (*TODO: normalization *)
+          done;
+          { constraints = !cs; env; vars }
     in
     let b1 = f manager b (e, t, ext) in
     if !Config.resilience && !Config.domain = "polyhedra" then

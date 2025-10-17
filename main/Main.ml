@@ -352,17 +352,20 @@ let doit () =
     match xs with
     | [] -> env
     | x :: xs ->
+      if Environment.mem_var env (Var.of_string (Z.to_string x.var_id)) then 
+        init_env xs env
+    else
         init_env xs (Environment.add env [| Var.of_string (Z.to_string x.var_id) |] [||])
   in
   let block,funcmap,varmap = prog in
   let open Utils.Datatypes in 
   let f = StringMap.find !Config.main funcmap in
   let v1 = snd (List.split (IdMap.bindings varmap)) in
-  let v1 = v1 @ f.func_args @ (match f.func_return with None -> [] | Some v -> [v]) in
+  let v1 = v1 @ f.func_args in
   Printf.printf "debug list";
   List.iter (fun v -> Printf.printf "var %s" v.var_name) v1;
   let v1set = VarSet.of_list v1 in
-  let env = init_env v1 (Environment.make [||] [||]) in
+  let env = (Environment.make [||] [||]) |> ForwardIteratorB.initBlock block |>  init_env v1 in
   let s = f.func_body in
   (* TODO: handle functions calls *)
   (* Forward Analysis *)

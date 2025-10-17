@@ -30,6 +30,7 @@ module type PARTITION = sig
   val join : t -> t -> t
   val widen : t -> t -> t
   val meet : t -> t -> t
+  val add_var_to_env: Environment.t -> var -> Environment.t
   val fwdAssign : t -> expr typed * expr typed -> t
   val bwdAssign : t -> expr typed * expr typed -> t
   val bwdAssign_underapprox : t -> expr typed * expr typed -> t
