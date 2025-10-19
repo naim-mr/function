@@ -18,7 +18,7 @@ int main()  {
   if (y > 0) {
     step = -step;
   }
-  while(y < -1 || y > 1) {
+  while(y < 1 || y > 1) {
     y = y + step;
   }
   return 0;

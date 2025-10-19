@@ -6,11 +6,14 @@ suggested parameters:
 - function abstract domain = affine [default]
 - backward widening delay = 2 [default]
 */
-
-int main(int x) {
+int f(int x);
+int f(int x){
 	if (x <= 0) {
 		return 0;
 	} else {
-		main(x - 1);
-	}
+		f(x - 1);
+	}}
+int main(int x) {
+	f(x);
+	return 1;
 }

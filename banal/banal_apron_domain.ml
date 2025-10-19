@@ -39,7 +39,7 @@ module ApronDomain (Param : NUMERICAL) = struct
   (*************)
 
   (* apron name of a variable *)
-  let apron_of_var (v : var) : Var.t = Var.of_string (Z.to_string v.var_id)
+  let apron_of_var (v : var) : Var.t = Var.of_string ((Z.to_string v.var_id)^"$"^v.var_name)
 
   let add_var_to_env env v =
     let i, r =
@@ -891,7 +891,6 @@ module ApronDomain (Param : NUMERICAL) = struct
     let cpool1 = lincons_list_of_abs post2 in
     let rpool1 = List.map neg_generator (generator_list_of_abs post2) in
     let mid1 = do_constraint post1 cpool1 rpool1 c1 in
-
     if trace_bwd then Format.printf "** bwd_filter post2 %a@\n" print post2;
     if trace_bwd then
       Format.printf "** bwd_filter false %s@\n" (Lin.cons_to_string c2);

@@ -9,7 +9,7 @@
 (***************************************************)
 
 open Cda
-
+open TerminationNew
 open Config
 open Semantics  
 open C_Frontend
@@ -234,23 +234,23 @@ let run_analysis analysis_function program () =
     Format.fprintf !fmt "\nThe Analysis Timed Out!\n";
     Format.fprintf !fmt "\nDone.\n"
 
-let termination_iterator () : (module SEMANTIC) =
-  let open TerminationIterator in
+(* let termination_iterator () : (module SEMANTIC) =
+  let open TerminationNew in
   let module S =
     (val match !domain with
          | "boxes" ->
-             if !ordinals then (module TerminationIterator (DecisionTree.TSOB))
-             else (module TerminationIterator (DecisionTree.TSAB))
+             if !ordinals then (module TerminationNew (Dnew.DecisionTree.TSOB))
+             else (module TerminationNew (Dnew.DecisionTree.TSAB))
          | "octagons" ->
-             if !ordinals then (module TerminationIterator (DecisionTree.TSOO))
-             else (module TerminationIterator (DecisionTree.TSAO))
+             if !ordinals then (module TerminationNew (Dnew.DecisionTree.TSOO))
+             else (module TerminationNew (Dnew.DecisionTree.TSAO))
          | "polyhedra" ->
-             if !ordinals then (module TerminationIterator (DecisionTree.TSOP))
-             else (module TerminationIterator (DecisionTree.TSAP))
+             if !ordinals then (module TerminationNew (Dnew.DecisionTree.TSOP))
+             else (module TerminationNew (Dnew.DecisionTree.TSAP))
          | _ -> raise (Invalid_argument "Unknown Abstract Domain")
         : SEMANTIC)
   in
-  (module S)
+  (module S) *)
 
 let ctl_iterator () : (module SEMANTIC) =
   let open CTLIterator in
@@ -314,7 +314,7 @@ let run_cda s : (module Cda.CDA_ITERATOR) =
 
 let get_semantic () =
   match !analysis with
-  | "termination" -> termination_iterator ()
+  (* | "termination" -> termination_iterator () *)
   | "ctl" -> ctl_iterator ()
   | _ -> raise (Invalid_argument "Unknown Analysis")
 
@@ -336,7 +336,7 @@ let get_ast_prop itast =
       (program, Semantics.Ctl property, None)
   | _ -> raise (Invalid_argument "Unknown Analysis")
 
-module B: (Dnew.Partition.PARTITION) =  Dnew.Numerical.B 
+module B: (Dnew.Partition.PARTITION) =  Dnew.Numerical.P
 module ForwardIteratorB = ForwardNew.ForwardIterator (B)
 let doit () =
   (* Parsing cli args -> into Config ref variables *)
@@ -346,8 +346,15 @@ let doit () =
   
   (* parse the program *)
   let prog = C_Frontend.parse_file !Config.filename in
+  Typed_syntax.pp_prog Format.std_formatter prog;
   ForwardIteratorB.analyze prog;
-  
+  (* let module S = TerminationNew.TerminationIterator (Dnew.DecisionTree.TSAP) in 
+  let b = S.analyze prog in 
+  if b then 
+     Printf.printf "\nFinal Analysis Result: TRUE\n" 
+else 
+    Printf.printf "\nFinal Analysis Result: UNKNOW\n";
+   *)
       
 (*   
   let semantic = get_semantic () in
@@ -394,4 +401,4 @@ let doit () =
   if !Config.json_output then Regression.output_json ();
   ()
   
-let _ =  doit (); Printf.printf "\nFinal Analysis Result: TRUE\n"
+let _ =  doit ()

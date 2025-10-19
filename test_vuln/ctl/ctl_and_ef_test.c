@@ -3,7 +3,7 @@
 
 int main() {
   int x;
-  if (?) {
+ if (rand()){
     x = 2;
   } else {
     x = 3;

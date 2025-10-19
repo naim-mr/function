@@ -1317,7 +1317,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
         | A_NOT ->
             let e = neg_bexp e in
             filter ~taint ?domain:pre ~underapprox t e
-        | _ -> raise (Invalid_argument ("Filter should be on boolean operation")))
+        | _ -> failwith "nyi")
     | T_binary (op,e1,e2) -> (
         let joinType =
           if underapprox && not !resilience then COMPUTATIONAL
@@ -1329,7 +1329,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
         and t2 = filter ~taint ?domain:pre ~underapprox t e2 in
         match op with
         | A_AND -> meet joinType t1 t2
-        | A_OR -> join joinType t1 t2)
+        | A_OR -> join joinType t1 t2
         | op -> 
           let bp =
             match post with
@@ -1344,7 +1344,8 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
               (B.constraints (b_filter bp (e,typ,ext)))
             in
             let bs = List.sort L.compare bs in
-          { domain = pre; tree = aux t.tree bs []; env; vars }
+          { domain = pre; tree = aux t.tree bs []; env; vars })
+        |_ -> t
 
   (* 
     Check if all partitions in the decision tree are defined i.e. have a ranking function assigned to them.

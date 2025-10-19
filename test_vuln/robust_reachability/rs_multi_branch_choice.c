@@ -10,7 +10,7 @@
 int main() {
     int x;
 
-    if (?) {
+   if (rand()){
         x = 1;
     } else {
         x = -1;

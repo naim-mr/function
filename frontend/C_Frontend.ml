@@ -460,14 +460,12 @@ let parse_file (f : string) : Typed_syntax.prog =
   parse_file "clang" !Config.filename [ "-fbracket-depth=512" ] false false
     false false ctx [];
   let prj = link_project ctx in
-
-  (* C_print.print_project stdout prj; *)
+  (* C_print.print_project stdout prj;  *)
   let st = { input_vars = ref [] } in
   (* StringMap.to_seq returns the functions in random order. This may
      cause some problems as a function calling another one may be
      analyzed first, causing the typed_syntax translator to fail.
      Heuristic -> delay `main` to the end *)
-  Printf.printf "print clang funcs decl";
   C_AST.StringMap.iter (fun s f -> print_endline s) prj.proj_funcs;
   let funcs =
     prj.proj_funcs |> C_AST.StringMap.bindings
@@ -487,20 +485,6 @@ let parse_file (f : string) : Typed_syntax.prog =
         |> fun f -> Abstract_syntax.A_function f );
       ]
   in
-  let fmt = Format.std_formatter in
-  let rec proc_vars = function
-    | [] -> ()
-    | ((var, _), Some (e, _)) :: [] ->
-        Format.fprintf fmt "%s = %a" var Abstract_syntax.pp_expr e
-    | ((var, _), Some (e, _)) :: l ->
-        Format.fprintf fmt "%s = %a, " var Abstract_syntax.pp_expr e;
-        proc_vars l
-    | ((var, _), None) :: [] -> Format.fprintf fmt "%s" var
-    | ((var, _), None) :: l ->
-        Format.fprintf fmt "%s, " var;
-        proc_vars l
-  in
-
   (* declaration of global variables both from the program and
      for input variables
    *)

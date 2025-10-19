@@ -11,7 +11,7 @@ int main() {
     //i = 0; a = 0; b = 0; n = __VERIFIER_nondet_int();
     if (!(n >= 0 && n <= 1000000)) return 0;
     while (i < n) {
-        if (?) {
+       if (rand()){
             a = a + 1;
             b = b + 2;
         } else {

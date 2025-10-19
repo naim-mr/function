@@ -6,7 +6,7 @@ int main() {
     int x;
     int y;
 
-    if (?) {
+   if (rand()){
         // loop invariant: x >= y
         while (x > y) {
             x = x - 1;

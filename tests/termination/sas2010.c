@@ -10,8 +10,8 @@ suggested parameters:
 int main() {
   int x1, x2;
   while (x1 >= 0 && x2 >= 0) {
-    if (?) {
-      while (x2 <= 10 && ?) {
+   if (rand()){
+      while (x2 <= 10 && rand()) {
         x2 = x2 + 1;
       }
       x1 = x1 - 1;

@@ -124,7 +124,7 @@ module Constraint : CONSTRAINT = struct
     | _ -> false
 
   let var v c =
-    let v = Var.of_string (Z.to_string v.var_id) in
+    let v = Var.of_string (Z.to_string v.var_id ^ "$" ^ v.var_name) in
     let c = Lincons1.get_coeff c v in
     compareCoeff c (Coeff.s_of_int 0) != 0
 
@@ -285,12 +285,16 @@ module Constraint : CONSTRAINT = struct
         try
           let x =
             List.find
-              (fun y -> String.compare (Var.to_string x) (Z.to_string y.var_id) = 0)
+              (fun y ->
+                String.compare (Var.to_string x)
+                  (Z.to_string y.var_id ^ "$" ^ y.var_name)
+                = 0)
               vars
           in
-          Format.fprintf Format.str_formatter "%s{%s}"  (Z.to_string x.var_id) x.var_name;
+          Format.fprintf Format.str_formatter "%s{%s}" (Z.to_string x.var_id)
+            x.var_name;
           aux v (Format.flush_str_formatter ())
-        with Not_found -> ())
+        with Not_found -> failwith "tjrs")
       c;
     let k = Coeff.neg (Lincons1.get_cst c) in
     if !first then Format.fprintf fmt "0";

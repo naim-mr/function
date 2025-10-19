@@ -8,7 +8,7 @@ int main() {
     if (x*x < y*y + 3*x*y) { 
         // here we use non-linear expression that can't be expressed 
         // in any of the domains to validate if FILTER underapproximates correctly
-        if (?) {
+       if (rand()){
             r = 1;
         } 
     }

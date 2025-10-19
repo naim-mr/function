@@ -10,7 +10,7 @@ suggested parameters:
 int main() {
   int x1, x2;
   while (x1 >= 0 && x2 >= 0) {
-    if (?) {
+   if (rand()){
       while (x2 <= 10 && ?) {
         x2 = x2 + 1;
       }

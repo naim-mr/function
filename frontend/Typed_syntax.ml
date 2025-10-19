@@ -369,7 +369,9 @@ let neg_bexp (b,t,x) =
     match b with
     | T_bool_const True -> T_bool_const False,t,x    
     | T_bool_const Maybe -> T_bool_const Maybe,t,x
-    | T_bool_const False -> T_bool_const False,t,x
+    | T_bool_const False -> T_bool_const True,t,x
+    | T_var _
+    | T_int_const _->  T_binary (A_NOT_EQUAL, (b,t,x), (T_int_const (Intinf.zero,Intinf.zero),t,x)),t,x
     | T_binary (op,e1,e2) -> invert_comp_expr (b,t,x)
     | T_unary (A_NOT,e) -> e
     | _ -> raise (Invalid_argument "Unexpected rvalue")

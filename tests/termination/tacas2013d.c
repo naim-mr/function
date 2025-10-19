@@ -10,9 +10,9 @@ suggested parameters:
 int main() {
   int x1, x2, x3;
   while (x1 > 0 && x2 > 0 && x3 > 0)
-    if (?) {
+   if (rand()){
       x1 = x1 - 1;
-    } else if (?) {
+    }else if (rand()){
       x2 = x2 - 1;
       x3 = ?;
     } else {

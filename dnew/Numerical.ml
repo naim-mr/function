@@ -10,7 +10,7 @@
 
 open Typed_syntax
 open Apron
-open Apron_converter
+open Tast_to_texpr
 open Partition
 open Constraints
 
@@ -236,7 +236,7 @@ module Numerical (N : NUMERICAL) (C : CONSTRAINT) : PARTITION = struct
               occ))
     in
     (* creating an APRON variable *)
-    let v = Var.of_string x.var_name in
+    let v = Var.of_string (Z.to_string x.var_id ^ "$" ^ x.var_name) in
     (* creating an APRON polyhedra *)
     let a = Lincons1.array_make env (List.length b.constraints) in
     let i = ref 0 in
@@ -480,7 +480,7 @@ module Numerical (N : NUMERICAL) (C : CONSTRAINT) : PARTITION = struct
         let b = Abstract1.of_lincons_array manager env a in
         let b =
           Abstract1.assign_texpr manager b
-            (Var.of_string (Z.to_string x.var_id))
+            (Var.of_string (Z.to_string x.var_id ^ "$" ^ x.var_name))
             e None
         in
         let a = Abstract1.to_lincons_array manager b in
@@ -526,7 +526,7 @@ module Numerical (N : NUMERICAL) (C : CONSTRAINT) : PARTITION = struct
           let b = Abstract1.of_lincons_array manager env a in
           let b =
             Abstract1.substitute_texpr manager b
-              (Var.of_string (Z.to_string x.var_id))
+              (Var.of_string (Z.to_string x.var_id ^ "$" ^ x.var_name))
               e None
           in
           let a = Abstract1.to_lincons_array manager b in
@@ -566,16 +566,72 @@ module Numerical (N : NUMERICAL) (C : CONSTRAINT) : PARTITION = struct
       | T_bool_const True -> b
       | T_bool_const Maybe -> b
       | T_bool_const False -> bot b.env b.vars
+      | T_int_const _ | T_var _ ->
+          let env = b.env in
+          let e = exp_to_apron (e, t, ext) in
+          let e1 = Texpr1.of_expr env e in
+          let vars = b.vars in
+          let a = Lincons1.array_make env (List.length b.constraints) in
+          let i = ref 0 in
+          List.iter
+            (fun c ->
+              Lincons1.array_set a !i c;
+              i := !i + 1)
+            b.constraints;
+          let b = Abstract1.of_lincons_array manager env a in
+          let c1 = Tcons1.make e1 Tcons1.SUPEQ in
+          let eneg =
+            Texpr1.of_expr env
+              (Texpr1.Unop (Texpr1.Neg, e, Texpr1.Int, Texpr1.Zero))
+          in
+          let c2 = Tcons1.make eneg Tcons1.SUPEQ in
+          let a = Tcons1.array_make env 2 in
+          Tcons1.array_set a 0 c1;
+          Tcons1.array_set a 1 c2;
+          let b = Abstract1.meet_tcons_array manager b a in
+          let a = Abstract1.to_lincons_array manager b in
+          let cs = ref [] in
+          for i = 0 to Lincons1.array_length a - 1 do
+            cs := Lincons1.array_get a i :: !cs (*TODO: normalization *)
+          done;
+          { constraints = !cs; env; vars }
       | T_unary (A_cast (t, _), e) ->
-          raise (Invalid_argument "unsupported cast")
-      | T_unary (A_NOT, e) -> 
-              let e = neg_bexp e in
-              f manager b e
+          f manager b e
+      | T_unary (A_NOT, e) ->
+          let e = neg_bexp e in
+          f manager b e
+      | T_unary (A_UNARY_PLUS, e) ->
+            f manager b e
+      | T_unary (A_UNARY_MINUS, e) ->
+          let env = b.env in
+          let e = exp_to_apron e in
+          let vars = b.vars in
+          let a = Lincons1.array_make env (List.length b.constraints) in
+          let i = ref 0 in
+          List.iter
+            (fun c ->
+              Lincons1.array_set a !i c;
+              i := !i + 1)
+            b.constraints;
+          let b = Abstract1.of_lincons_array manager env a in
+          let eneg =
+            Texpr1.of_expr env
+              (Texpr1.Unop (Texpr1.Neg, e, Texpr1.Int, Texpr1.Zero))
+          in
+          let c = Tcons1.make eneg Tcons1.SUPEQ in
+          let a = Tcons1.array_make env 1 in
+          Tcons1.array_set a 0 c;
+          let b = Abstract1.meet_tcons_array manager b a in
+          let a = Abstract1.to_lincons_array manager b in
+          let cs = ref [] in
+          for i = 0 to Lincons1.array_length a - 1 do
+            cs := Lincons1.array_get a i :: !cs (*TODO: normalization *)
+          done;
+          { constraints = !cs; env; vars }
       | T_binary (o, e1, e2) -> (
-          let b1 = f manager b e1 and b2 = f manager b e2 in
           match o with
-          | A_AND -> meet b1 b2
-          | A_OR -> join b1 b2
+          | A_AND -> let b1 = f manager b e1 and b2 = f manager b e2 in meet b1 b2
+          | A_OR -> let b1 = f manager b e1 and b2 = f manager b e2 in join b1 b2
           | A_EQUAL ->
               let bop =
                 T_binary
@@ -665,9 +721,7 @@ module Numerical (N : NUMERICAL) (C : CONSTRAINT) : PARTITION = struct
                   done;
                   { constraints = !cs; env; vars }
               | _ -> raise (Invalid_argument "Filter only boolean expression")))
-      | T_int_const _ | T_var _ ->
-          b
-      |  _ -> raise (Invalid_argument "Unsupported float")
+      | _ -> raise (Invalid_argument "Unsupported float")
     in
     let b1 = f manager b (e, t, ext) in
     if !Config.resilience && !Config.domain = "polyhedra" then

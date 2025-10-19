@@ -279,11 +279,6 @@ let rec pure_expr env pre post (e, x) =
         post )
 
 and call (s, sx) args env pre post x =
-  Printf.printf "\nbefore call %s\n" s;
-  print_endline "---------";
-  StringMap.iter (fun s _ -> Printf.printf "func: %s \n" s) env.env_funcs;
-  StringMap.iter (fun s _ -> Printf.printf "glob: %s \n" s) env.env_globals;
-  print_endline "---------";
   (* resolve identifier *)
   let f = get_func env s sx in
   (* translate & bind actual arguments *)
@@ -543,25 +538,23 @@ let decl env d =
 (************************************************************************)
 
 (* translation entry point *)
-let translate_program (ps:decl list ext list) : prog =
+let translate_program (ps : decl list ext list) : prog =
   let x = snd (List.hd ps) in
   let env, rstats, rfuncs =
     List.fold_left
-      (fun (env,rstats,rfuncs) (p,_) ->
+      (fun (env, rstats, rfuncs) (p, _) ->
         List.fold_left
-          (fun (env,rstats,rfuncs) d ->
+          (fun (env, rstats, rfuncs) d ->
             let env, stats, funcs = decl env d in
             let stats = add_lbl stats in
-            env, List.rev_append stats rstats, List.rev_append funcs rfuncs
-          )
-          (env,rstats,rfuncs) p
-      )
-      (empty_env,[],[]) ps
+            (env, List.rev_append stats rstats, List.rev_append funcs rfuncs))
+          (env, rstats, rfuncs) p)
+      (empty_env, [], []) ps
   in
   let init = mk_block (List.rev rstats) [] x in
   let funcs =
     List.fold_left
-      (fun acc f -> StringMap.add f.func_name f acc) StringMap.empty rfuncs
+      (fun acc f -> StringMap.add f.func_name f acc)
+      StringMap.empty rfuncs
   in
-  init,funcs,env.env_vars
-
+  (init, funcs, env.env_vars)

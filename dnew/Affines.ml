@@ -7,7 +7,7 @@ open Typed_syntax
 open Apron
 open Partition
 open Functions
-open Apron_converter
+open Tast_to_texpr
 open Numerical
 open Utils
 open Apron_utils
@@ -666,7 +666,7 @@ module Affine (B : PARTITION) : FUNCTION = struct
             Lincons1.array_set a 0 (Lincons1.make f Lincons1.SUPEQ);
             let p = Abstract1.of_lincons_array manager env a in
             let p =
-              Abstract1.substitute_texpr manager p (Var.of_string (Z.to_string x.var_id)) e
+              Abstract1.substitute_texpr manager p (Var.of_string ((Z.to_string x.var_id)^"$"^x.var_name)) e
                 None
             in
             let a = Abstract1.to_lincons_array manager p in

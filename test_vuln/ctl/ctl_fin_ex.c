@@ -10,7 +10,7 @@ void main() {
         n--;
     }
 
-    if (?) {
+   if (rand()){
         while (n == 0) {
             n++;
             n--;
