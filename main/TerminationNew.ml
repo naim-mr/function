@@ -20,7 +20,7 @@ open ForwardNew
 open VarSet
 open Utils.Datatypes
 
-module TerminationIterator =
+module TerminationIteratorNew =
 functor
   (D : RANKING_FUNCTION)
   ->
@@ -48,6 +48,7 @@ functor
       | T_label _ | T_print _ | T_add_var (_, None) | T_del_var _ -> p
       | T_RETURN -> D.zero ?domain env vars
       | T_BREAK -> failwith "nyi"
+      | T_add_var (v, Some (exp, typ, ext)) 
       | T_assign ((v, _), (exp, typ, ext)) ->
           D.bwdAssign ?domain ~taint:true ~underapprox:false p
             ((T_var v, typ, ext), (exp, typ, ext))

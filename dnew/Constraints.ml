@@ -294,7 +294,7 @@ module Constraint : CONSTRAINT = struct
           Format.fprintf Format.str_formatter "%s{%s}" (Z.to_string x.var_id)
             x.var_name;
           aux v (Format.flush_str_formatter ())
-        with Not_found -> failwith "tjrs")
+        with Not_found -> ())
       c;
     let k = Coeff.neg (Lincons1.get_cst c) in
     if !first then Format.fprintf fmt "0";

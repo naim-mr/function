@@ -201,16 +201,16 @@ module ForwardIterator (B : PARTITION) = struct
     let s = f.func_body in
     if !tracefwd && not !minimal then
       Format.fprintf !fmt "\nForward Analysis Trace:\n";
-    let startfwd = Sys.time () in
+    (* let startfwd = Sys.time () in *)
     let _ =
       fwdBlk funcmap env v1 (fwdBlk funcmap env v1 (B.top env v1) block) s
     in
-    let stopfwd = Sys.time () in
+    (* let stopfwd = Sys.time () in
     if not !minimal then
       if !timefwd then
         Format.fprintf !fmt "\nForward Analysis (Time: %f s):\n"
           (stopfwd -. startfwd)
       else Format.fprintf !fmt "\nForward Analysis numerical:\n";
-    fwdMap_print !fmt !fwdInvMap B.print;
+    fwdMap_print !fmt !fwdInvMap B.print; *)
     ()
 end

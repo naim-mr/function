@@ -1318,7 +1318,10 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
             let e = neg_bexp e in
             filter ~taint ?domain:pre ~underapprox t e
         | _ -> failwith "nyi")
-    | T_binary (op,e1,e2) -> (
+    | T_binary ((A_AND as op),e1,e2)
+    | T_binary ((A_OR as op),e1,e2)   -> (
+      Printf.printf "debug filter dtree binary \n";
+      Typed_syntax.pp_expr Format.std_formatter e;
         let joinType =
           if underapprox && not !resilience then COMPUTATIONAL
           else if !resilience then
@@ -1329,8 +1332,13 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
         and t2 = filter ~taint ?domain:pre ~underapprox t e2 in
         match op with
         | A_AND -> meet joinType t1 t2
-        | A_OR -> join joinType t1 t2
-        | op -> 
+        | A_OR -> join joinType t1 t2)
+    | _ -> 
+      Printf.printf "debug filter dtree ELSE \n";
+      print_tree vars Format.std_formatter t.tree;
+      print_endline "";
+      Typed_syntax.pp_expr Format.std_formatter e;
+      
           let bp =
             match post with
             | None -> B.inner env vars []
@@ -1344,8 +1352,13 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
               (B.constraints (b_filter bp (e,typ,ext)))
             in
             let bs = List.sort L.compare bs in
-          { domain = pre; tree = aux t.tree bs []; env; vars })
-        |_ -> t
+            let t = aux t.tree bs [] in 
+            Printf.printf "Result\n constraint added: \n" ;
+            List.iter (fun (c,nc) -> Format.printf "%a , %a -" Lincons1.print  c  Lincons1.print  nc ) bs;
+            print_endline "";
+            print_tree vars Format.std_formatter t;
+          { domain = pre; tree = t; env; vars }
+      
 
   (* 
     Check if all partitions in the decision tree are defined i.e. have a ranking function assigned to them.
