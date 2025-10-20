@@ -358,7 +358,7 @@ let doit () =
     let module Sem =
       TerminationNew.TerminationIteratorNew (Dnew.DecisionTree.TSAP) in
     let b = Sem.analyze prog in
-    if b then Printf.printf "\Final Analaysis Result: TRUE\n"
+    if b then Printf.printf "\nFinal Analaysis Result: TRUE\n"
     else
       let ntprog, labels = Typed_syntax.nt_prog prog in
       let nonterm label =
@@ -378,13 +378,13 @@ let doit () =
             Some (CTLProperty.OR (nonterm l, Option.get (create_prop q)))
       in
       match create_prop (List.map fst labels) with
-      | None -> Printf.printf "\Final Analaysis Result: UNKNOWN\n"
+      | None -> Printf.printf "\nFinal Analaysis Result: UNKNOWN\n"
       | Some p ->
           let module Nonterm = CTLIteratorNew (Dnew.DecisionTree.TSAP) in
           if Nonterm.analyze p ntprog then
             Printf.printf "\n Final Analysis Result: false(TERM)\n"
-          else Printf.printf "\Final Analaysis Result: UNKNOWN\n"
-  with _ -> Printf.printf "\Final Analaysis Result: UNKNOWN\n"
+          else Printf.printf "\nFinal Analaysis Result: UNKNOWN\n"
+  with _ -> Printf.printf "\nFinal Analaysis Result: UNKNOWN\n"
 
 (* let semantic = get_semantic () in
   (* Property and filename must be given (except for termination property) *)
