@@ -124,7 +124,7 @@ module Constraint : CONSTRAINT = struct
     | _ -> false
 
   let var v c =
-    let v = Var.of_string (Z.to_string v.var_id ^ "$" ^ v.var_name) in
+    let v = Var.of_string (Z.to_string v.var_id) in
     let c = Lincons1.get_coeff c v in
     compareCoeff c (Coeff.s_of_int 0) != 0
 
@@ -287,7 +287,7 @@ module Constraint : CONSTRAINT = struct
             List.find
               (fun y ->
                 String.compare (Var.to_string x)
-                  (Z.to_string y.var_id ^ "$" ^ y.var_name)
+                  (Z.to_string y.var_id)
                 = 0)
               vars
           in

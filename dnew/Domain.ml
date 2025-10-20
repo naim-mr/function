@@ -29,6 +29,7 @@ module type RANKING_FUNCTION = sig
   val widen : ?jokers:int -> t -> t -> t
   val dual_widen : t -> t -> t
   val defined : ?condition:expr typed -> t -> bool
+  val partially_defined : ?condition:expr typed -> t -> bool
   val complement : t -> t
 
   val bwdAssign :

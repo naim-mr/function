@@ -1102,8 +1102,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
     let post = t.domain in
     let env = t.env in
     let vars = t.vars in
-    let random = ref false
-    in
+    let random = ref false in
     let merge t1 t2 cs =
       let rec aux (t1, t2) cs =
         match (t1, t2) with
@@ -1146,7 +1145,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
           if B.isBot (B.inner env vars cs) then Bot else Leaf (F.bwdAssign f e)
       | Node ((c, nc), l, r) -> (
           match fst e with
-          | T_var variable,t,ext ->
+          | T_var variable, t, ext ->
               if C.var variable c then
                 let filter_constraints cs dom =
                   List.fold_left
@@ -1306,22 +1305,17 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
                 let r = aux t xs (x :: cs) in
                 match r with Bot -> Bot | _ -> Node ((nx, x), Bot, r)))
     in
-    let e,typ,ext = e in 
+    let e, typ, ext = e in
     match e with
-    | T_bool_const (True) 
-    | T_bool_const (Maybe) ->
+    | T_bool_const True | T_bool_const Maybe ->
         { domain = pre; tree = aux t.tree [] []; env; vars }
-    | T_bool_const (False) -> { domain = pre; tree = Bot; env; vars }
-    | T_unary (o, e) -> (
-        match o with
-        | A_NOT ->
-            let e = neg_bexp e in
-            filter ~taint ?domain:pre ~underapprox t e
-        | _ -> failwith "nyi")
-    | T_binary ((A_AND as op),e1,e2)
-    | T_binary ((A_OR as op),e1,e2)   -> (
-      Printf.printf "debug filter dtree binary \n";
-      Typed_syntax.pp_expr Format.std_formatter e;
+    | T_bool_const False -> { domain = pre; tree = Bot; env; vars }
+    | T_unary (A_NOT, e) ->
+        let e = neg_bexp e in
+        filter ~taint ?domain:pre ~underapprox t e
+    | T_binary ((A_AND as op), e1, e2) | T_binary ((A_OR as op), e1, e2) -> (
+        (* Printf.printf "debug filter dtree binary \n";
+      Typed_syntax.pp_expr Format.std_formatter e; *)
         let joinType =
           if underapprox && not !resilience then COMPUTATIONAL
           else if !resilience then
@@ -1333,32 +1327,31 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
         match op with
         | A_AND -> meet joinType t1 t2
         | A_OR -> join joinType t1 t2)
-    | _ -> 
-      Printf.printf "debug filter dtree ELSE \n";
+    | _ ->
+        (* Printf.printf "debug filter dtree ELSE \n";
       print_tree vars Format.std_formatter t.tree;
       print_endline "";
       Typed_syntax.pp_expr Format.std_formatter e;
-      
-          let bp =
-            match post with
-            | None -> B.inner env vars []
-            | Some post -> B.meet (B.inner env vars []) post
-            in
-            let bs =
-              List.map
-              (fun c ->
-                let nc = C.negate c in
-                (c, nc))
-              (B.constraints (b_filter bp (e,typ,ext)))
-            in
-            let bs = List.sort L.compare bs in
-            let t = aux t.tree bs [] in 
-            Printf.printf "Result\n constraint added: \n" ;
+       *)
+        let bp =
+          match post with
+          | None -> B.inner env vars []
+          | Some post -> B.meet (B.inner env vars []) post
+        in
+        let bs =
+          List.map
+            (fun c ->
+              let nc = C.negate c in
+              (c, nc))
+            (B.constraints (b_filter bp (e, typ, ext)))
+        in
+        let bs = List.sort L.compare bs in
+        let t = aux t.tree bs [] in
+        (* Printf.printf "Result\n constraint added: \n" ;
             List.iter (fun (c,nc) -> Format.printf "%a , %a -" Lincons1.print  c  Lincons1.print  nc ) bs;
             print_endline "";
-            print_tree vars Format.std_formatter t;
-          { domain = pre; tree = t; env; vars }
-      
+            print_tree vars Format.std_formatter t; *)
+        { domain = pre; tree = t; env; vars }
 
   (* 
     Check if all partitions in the decision tree are defined i.e. have a ranking function assigned to them.
@@ -1402,7 +1395,51 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
       | None -> t
     in
     aux t.tree []
+  
+  (* 
+    Check if at least one partitions in the decision tree is defined i.e. have a ranking function assigned to it.
 
+    Optionally, a boolean expression condition can be passed to limit the check to only those partitions that 
+    satisfy the expression. This can be used to check if a decision tree is defined under a given assumption.
+  *)
+  let partially_defined ?condition t =
+    let domain = t.domain in
+    let env = t.env in
+    let vars = t.vars in
+    let rec aux t cs =
+      match t with
+      | Bot -> (
+          match condition with
+          | None ->
+              let b =
+                match domain with
+                | None -> B.inner env vars cs
+                | Some domain -> B.meet (B.inner env vars cs) domain
+              in
+              B.isBot b
+          | Some _ ->
+              true
+              (* when given a condition, we first filter the tree and ignore NIL leafs *)
+          )
+      | Leaf f -> (
+          match domain with
+          | None -> F.defined f || B.isBot (B.inner env vars cs)
+          | Some domain ->
+              F.defined f || B.isBot (B.meet (B.inner env vars cs) domain))
+      | Node ((c, nc), l, r) -> aux l (c :: cs) || aux r (nc :: cs)
+    in
+    let t =
+      match condition with
+      | Some b ->
+          (* replace all NIL leafs with 'bottom' leafs to ensure that we don't confuse actual 
+           NIL leafs with NIL leafs introduces by filer *)
+          let t' = tree_map (Leaf (F.bot t.env t.vars)) (fun f -> Leaf f) t in
+          filter t' b (* filte tree with optional condition *)
+      | None -> t
+    in
+    aux t.tree []
+
+  
   (* NOTE: reset underapproximates the filter operation to guarantee soundness. 
      Currently this limits the set of supported domains to polyhedra *)
 
@@ -1859,8 +1896,6 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
       | Node (c, l, r) -> Node (c, aux l, aux r)
     in
     { domain; tree = aux t.tree; env; vars }
-
-
 
   (* Compute the vulnerability analysis, right now the algorithm is naif and doesnot implement the dynamic programming *)
   (* let vulnerable t : Polka.strict Polka.t Vulnerability.t list =

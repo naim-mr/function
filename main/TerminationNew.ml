@@ -47,12 +47,12 @@ functor
       match s with
       | T_label _ | T_print _ | T_add_var (_, None) | T_del_var _ -> p
       | T_RETURN -> D.zero ?domain env vars
-      | T_BREAK -> failwith "nyi"
+      | T_BREAK -> D.top env vars (* TODO handle break *)
       | T_add_var (v, Some (exp, typ, ext)) 
       | T_assign ((v, _), (exp, typ, ext)) ->
           D.bwdAssign ?domain ~taint:true ~underapprox:false p
             ((T_var v, typ, ext), (exp, typ, ext))
-      | T_assert (b, _) | T_assume b -> D.filter ?domain p b
+      | T_assert (b, _) | T_assume b -> D.filter ?domain p b 
       | T_if ((b, typ, ba), s1, s2) ->
           let uap = false in
           let p1 = bwdBlk funcs env vars p s1 in
@@ -121,17 +121,7 @@ functor
           addBwdInv l p;
           if !refine then D.refine p a else p
       | T_call (f, ss) -> bwdRec funcs env vars p f.func_body
-      | _ -> Printf.printf "debug:\n";Typed_syntax.pp_stat "" Format.std_formatter s; failwith "nyi block term"
-    (* | T_recall (f, ss) -> failwith "Recursive function call are not supported" *)
-    (* (match domain with
-       | None ->
-         List.fold_left (fun (ap, ar, aflag) (s, _) ->
-             bwdStm funcs env vars (ap, ar, aflag) s tvl
-           ) (D.join APPROXIMATION p r, r, true) ss
-       | Some domain ->
-         List.fold_left (fun (ap, ar, aflag) (s, _) ->
-             bwdStm ~domain:domain funcs env vars (ap, ar, aflag) s tvl
-           ) (r, r, true) ss) *)
+      | T_expr e ->  D.top env vars (* todo handle this *)
 
     and bwdBlk ?property funcs env vars p (b : block) : D.t =
       let result_print l p =
@@ -189,12 +179,12 @@ functor
         | x :: xs ->
             if
               Environment.mem_var env
-                (Var.of_string (Z.to_string x.var_id ^ "$" ^ x.var_name))
+                (Var.of_string (Z.to_string x.var_id))
             then init_env xs env
             else
               init_env xs
                 (Environment.add env
-                   [| Var.of_string (Z.to_string x.var_id ^ "$" ^ x.var_name) |]
+                   [| Var.of_string (Z.to_string x.var_id) |]
                    [||])
       in
       let block, funcmap, varmap = prog in

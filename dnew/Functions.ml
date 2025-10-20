@@ -11,15 +11,16 @@ type kind = APPROXIMATION | COMPUTATIONAL | RESILIENCE
 
 module type FUNCTION = sig
   module B : PARTITION
-
+  type a = Bot | Fun of Linexpr1.t | Top
   type f
-
+  
   val env : f -> Environment.t
   val vars : f -> var list
   val reinit : f -> f
   val bot : Environment.t -> var list -> f
   val zero : Environment.t -> var list -> f
   val top : Environment.t -> var list -> f
+  val ranking : f -> a
   val isBot : f -> bool
   val defined : f -> bool
   val isTop : f -> bool

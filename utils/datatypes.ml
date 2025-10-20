@@ -179,4 +179,5 @@ type run_params = { domain: string; date: string; version: string; params: anal_
 (* ********** *)
 exception UnsupportedConversion of string
 exception UnsupportedFeature of string
+exception Unexpected of string
 exception Timeout

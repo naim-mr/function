@@ -475,12 +475,6 @@ module Affine (B : PARTITION) : FUNCTION = struct
         let p2 = Abstract1.of_lincons_array manager env a2 in
         (* p2 = polyhedra represented by a2 *)
         let p = Abstract1.widening manager p1 p2 in
-        Printf.printf "\ndebug ---------------------\n";
-        Abstract1.print Format.std_formatter p1;
-        print_newline ();
-        Abstract1.print Format.std_formatter p2;
-        print_newline ();
-        Abstract1.print Format.std_formatter p;
         (* p = widening *)
         let p = Abstract1.to_lincons_array manager p in
         (* converting p into set of constraints *)
@@ -500,10 +494,8 @@ module Affine (B : PARTITION) : FUNCTION = struct
         if 1 = List.length !f (* if there is only one constraint on # *) then (
           let f = Lincons1.get_linexpr1 (List.hd !f) in
           Linexpr1.set_coeff f v (Coeff.s_of_int 0);
-          Printf.printf "\nIN --------------------- \n";
           Fun f (* defined widening function *))
-        else
-          (Printf.printf "\nOUT --------------------- \n"; Top) (* otherwise *)
+        else Top (* otherwise *)
     | Bot, _ -> f2
     | _, Bot -> f1
     | _ -> Top
@@ -562,8 +554,10 @@ module Affine (B : PARTITION) : FUNCTION = struct
           with _ -> ()
         done;
         (* f = # *)
-        if 1 <= List.length !f (* if there list of constraints on special variable is at least one constraint on # *)
-        then
+        if
+          1 <= List.length !f
+          (* if there list of constraints on special variable is at least one constraint on # *)
+        then (
           let f =
             List.map
               (fun c ->
@@ -577,7 +571,7 @@ module Affine (B : PARTITION) : FUNCTION = struct
                 Fun c)
               !f
           in
-          List.fold_left (join_ranking COMPUTATIONAL b2) (List.hd f) (List.tl f)
+          List.fold_left (join_ranking COMPUTATIONAL b2) (List.hd f) (List.tl f))
         else Top (* otherwise *)
     | _ -> f2
 
@@ -653,7 +647,7 @@ module Affine (B : PARTITION) : FUNCTION = struct
   let successor f =
     { ranking = successor_ranking f.ranking; env = f.env; vars = f.vars }
 
-  let bwdAssign_ranking f ((x,t,ext), e) =
+  let bwdAssign_ranking f ((x, t, ext), e) =
     match x with
     | T_var x -> (
         match f with
@@ -666,8 +660,9 @@ module Affine (B : PARTITION) : FUNCTION = struct
             Lincons1.array_set a 0 (Lincons1.make f Lincons1.SUPEQ);
             let p = Abstract1.of_lincons_array manager env a in
             let p =
-              Abstract1.substitute_texpr manager p (Var.of_string ((Z.to_string x.var_id)^"$"^x.var_name)) e
-                None
+              Abstract1.substitute_texpr manager p
+                (Var.of_string (Z.to_string x.var_id))
+                e None
             in
             let a = Abstract1.to_lincons_array manager p in
             if 1 = Lincons1.array_length a then (
@@ -723,10 +718,12 @@ module Affine (B : PARTITION) : FUNCTION = struct
             try
               let x =
                 List.find
-                  (fun y -> String.compare (Var.to_string x) (Z.to_string y.var_id) = 0)
+                  (fun y ->
+                    String.compare (Var.to_string x) (Z.to_string y.var_id) = 0)
                   vars
               in
-              Format.fprintf Format.str_formatter "%s{%s}" (Z.to_string x.var_id) x.var_name;
+              Format.fprintf Format.str_formatter "%s{%s}"
+                (Z.to_string x.var_id) x.var_name;
               aux v (Format.flush_str_formatter ())
             with Not_found -> ())
           f;

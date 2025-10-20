@@ -12,15 +12,15 @@ open Functions
 module OrdinalValued (F : FUNCTION) : FUNCTION = struct
   module B = F.B
 
-  (**)
-
+  (**) 
+  type a =  Bot | Fun of Linexpr1.t | Top
   type f = F.f * F.f list
 
   let env (f, _) = F.env f
   let vars (f, _) = F.vars f
 
   (**)
-
+  let ranking f = Obj.magic f
   let bot e vs = (F.bot e vs, [])
   let zero e vs = (F.zero e vs, [])
   let top e vs = (F.top e vs, [])

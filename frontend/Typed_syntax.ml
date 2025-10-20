@@ -9,21 +9,21 @@
    Copyright (C) 2011 Antoine Miné
 *)
 
-
 open Abstract_syntax
 open Utils
 open Utils.Datatypes
+
 (************************************************************************)
 (* TYPES *)
 (************************************************************************)
 
 (* constant sets *)
-type int_set = Intinf.t * Intinf.t [@@deriving yojson,show] (* interval *)
-type float_set = Float.t * Float.t [@@deriving yojson,show] (* interval *)
-type bool_set = tbool [@@deriving yojson,show] (* 3-valued logic *)
+type int_set = Intinf.t * Intinf.t [@@deriving yojson, show] (* interval *)
+type float_set = Float.t * Float.t [@@deriving yojson, show] (* interval *)
+type bool_set = tbool [@@deriving yojson, show] (* 3-valued logic *)
 
 (* expression nodes have type and source location *)
-type 'a typed = 'a * typ * extent [@@deriving yojson,show]
+type 'a typed = 'a * typ * extent [@@deriving yojson, show]
 
 (* side-effect free, typed expressions *)
 type expr =
@@ -43,18 +43,16 @@ and var = {
   var_synthetic : bool; (* added by translation? *)
   var_scope : var_scope;
 }
-[@@deriving yojson,show]
+[@@deriving yojson, show]
 
 and var_scope = T_GLOBAL | T_LOCAL | T_INPUT | T_VOLATILE
 
-
-
-
 (* statements *)
 type label = id * position [@@deriving yojson]
-let label_print fmt l =
-  if Z.compare l (Z.of_int 10) = 0 then Format.fprintf fmt "[ %i:]" (Z.to_int l) else Format.fprintf fmt "[%i:]" (Z.to_int l)
 
+let label_print fmt l =
+  if Z.compare l (Z.of_int 10) = 0 then Format.fprintf fmt "[ %i:]" (Z.to_int l)
+  else Format.fprintf fmt "[%i:]" (Z.to_int l)
 
 type stat =
   | T_expr of expr typed
@@ -83,17 +81,19 @@ and func = {
   func_body : block;
 }
 
-
 module VarSet = Set.Make (struct
-type t = var
-let compare = fun x y -> compare_id x.var_id y.var_id
+  type t = var
+
+  let compare = fun x y -> compare_id x.var_id y.var_id
 end)
 
 (* whole program *)
 
 type prog =
-  block * (* global variable creation and initialization *)
-  func StringMap.t * (* function declarations *)
+  block
+  * (* global variable creation and initialization *)
+  func StringMap.t
+  * (* function declarations *)
   var IdMap.t (* variables *)
 
 (************************************************************************)
@@ -164,14 +164,14 @@ let string_of_float_set (a, b) =
   if a = b then Float.to_string a
   else Printf.sprintf "[%a;%a]" Float.sprint a Float.sprint b
 
-let rec pp_expr_ext fmt ((e, _, _): expr typed) =
+let rec pp_expr_ext fmt ((e, _, _) : expr typed) =
   match e with
-  | T_unary (op, ((e1,_,_) as ee1)) ->
+  | T_unary (op, ((e1, _, _) as ee1)) ->
       Format.pp_print_string fmt (string_of_unary_op op);
       if expr_precedence e1 <= expr_precedence e then
         Format.fprintf fmt " (%a)" pp_expr_ext ee1
       else Format.fprintf fmt " %a" pp_expr_ext ee1
-  | T_binary (op, ((e1,_,_) as ee1), ((e2,_,_) as ee2)) ->
+  | T_binary (op, ((e1, _, _) as ee1), ((e2, _, _) as ee2)) ->
       if expr_precedence e1 < expr_precedence e then
         Format.fprintf fmt "(%a) " pp_expr_ext ee1
       else Format.fprintf fmt "%a " pp_expr_ext ee1;
@@ -186,12 +186,12 @@ let rec pp_expr_ext fmt ((e, _, _): expr typed) =
 
 let rec pp_expr fmt e =
   match e with
-  | T_unary (op, (e1,_,_)) ->
+  | T_unary (op, (e1, _, _)) ->
       Format.pp_print_string fmt (string_of_unary_op op);
       if expr_precedence e1 <= expr_precedence e then
         Format.fprintf fmt " (%a)" pp_expr e1
       else Format.fprintf fmt " %a" pp_expr e1
-  | T_binary (op, (e1,_,_), (e2,_,_)) ->
+  | T_binary (op, (e1, _, _), (e2, _, _)) ->
       if expr_precedence e1 < expr_precedence e then
         Format.fprintf fmt "(%a) " pp_expr e1
       else Format.fprintf fmt "%a " pp_expr e1;
@@ -239,8 +239,7 @@ let rec pp_stat ind fmt s =
   | T_BREAK -> Format.pp_print_string fmt "break"
   | T_label (s, _) -> Format.fprintf fmt "%s:" s
   | T_assert (e, lbl) ->
-      Format.fprintf fmt "assert (%a) FALSE_LABEL=%a" pp_expr_ext e pp_label
-        lbl
+      Format.fprintf fmt "assert (%a) FALSE_LABEL=%a" pp_expr_ext e pp_label lbl
   | T_assume e -> Format.fprintf fmt "assume (%a)" pp_expr_ext e
   | T_print l ->
       Format.fprintf fmt "print (%a)"
@@ -352,32 +351,81 @@ let prog_contains_loops ((b, funcs, _) : prog) : bool =
 (* MODIFIERS *)
 (************************************************************************)
 
-(* invert a comparison expression *)
-let rec invert_comp_expr ((e,t,x) as ee: expr typed) : expr typed =
-  let e = match e with
-  | T_binary (A_EQUAL, e1, e2) -> T_binary (A_NOT_EQUAL, e1, e2)
-  | T_binary (A_NOT_EQUAL, e1, e2) -> T_binary (A_EQUAL, e1, e2)
-  | T_binary (A_LESS, e1, e2) -> T_binary (A_GREATER_EQUAL, e1, e2)
-  | T_binary (A_LESS_EQUAL, e1, e2) -> T_binary (A_GREATER, e1, e2)
-  | T_binary (A_GREATER, e1, e2) -> T_binary (A_LESS_EQUAL, e1, e2)
-  | T_binary (A_GREATER_EQUAL, e1, e2) -> T_binary (A_LESS, e1, e2)
-  | T_binary (A_AND, e1, e2) -> T_binary (A_OR, invert_comp_expr e1, invert_comp_expr e2)
-  | T_binary (A_OR, e1, e2) -> T_binary (A_AND, invert_comp_expr e1, invert_comp_expr e2)
-  | _ -> failwith (Format.asprintf "%s: not comparison op in expr: %a" __LOC__ pp_expr_ext ee)
-  in e,t,x
-let neg_bexp (b,t,x) =
+let nt_prog ((b, funcs, v) : prog) : prog * label list=
+  let lnew = ref [] in
+  let rec nt_stat (s : stat) : stat =
+    match s with
+    | T_expr _ | T_assign _ | T_call _ | T_add_var _ | T_del_var _ | T_RETURN
+    | T_BREAK | T_assert _ | T_assume _ | T_print _ | T_label _ ->
+        s
+    | T_if (e, b1, b2) ->
+        let b1 = nt_block b1 in
+        let b2 = nt_block b2 in
+        T_if (e, b1, b2)
+    | T_while (l, e, b) ->
+        let b = nt_block b in
+        let id = new_id () in
+        let label = (id, position_unknown) in
+        lnew := label :: !lnew;
+        let block =
+          T_stat
+            ( label,
+              (T_label (Z.to_string id, extent_unknown), extent_unknown),
+              b )
+        in
+        T_while (l, e, block)
+  and nt_block (b : block) : block =
     match b with
-    | T_bool_const True -> T_bool_const False,t,x    
-    | T_bool_const Maybe -> T_bool_const Maybe,t,x
-    | T_bool_const False -> T_bool_const True,t,x
-    | T_var _
-    | T_int_const _->  T_binary (A_NOT_EQUAL, (b,t,x), (T_int_const (Intinf.zero,Intinf.zero),t,x)),t,x
-    | T_binary (op,e1,e2) -> invert_comp_expr (b,t,x)
-    | T_unary (A_NOT,e) -> e
-    | _ -> raise (Invalid_argument "Unexpected rvalue")
-  
-  
-  
+    | T_empty _ -> b
+    | T_stat (l, (s, ext), b) ->
+        let s = nt_stat s in
+        let b = nt_block b in
+        T_stat (l, (s, ext), b)
+  in
+  let f =
+    StringMap.map (fun f -> { f with func_body = nt_block f.func_body }) funcs
+  in
+  let p : prog = (b, f, v) in
+  (p, !lnew)
+
+(* invert a comparison expression *)
+let rec invert_comp_expr ((e, t, x) as ee : expr typed) : expr typed =
+  let e =
+    match e with
+    | T_binary (A_EQUAL, e1, e2) -> T_binary (A_NOT_EQUAL, e1, e2)
+    | T_binary (A_NOT_EQUAL, e1, e2) -> T_binary (A_EQUAL, e1, e2)
+    | T_binary (A_LESS, e1, e2) -> T_binary (A_GREATER_EQUAL, e1, e2)
+    | T_binary (A_LESS_EQUAL, e1, e2) -> T_binary (A_GREATER, e1, e2)
+    | T_binary (A_GREATER, e1, e2) -> T_binary (A_LESS_EQUAL, e1, e2)
+    | T_binary (A_GREATER_EQUAL, e1, e2) -> T_binary (A_LESS, e1, e2)
+    | T_binary (A_AND, e1, e2) ->
+        T_binary (A_OR, invert_comp_expr e1, invert_comp_expr e2)
+    | T_binary (A_OR, e1, e2) ->
+        T_binary (A_AND, invert_comp_expr e1, invert_comp_expr e2)
+    | _ ->
+        raise
+          (Invalid_argument
+             (Format.asprintf "%s: not comparison op in expr: %a" __LOC__
+                pp_expr_ext ee))
+  in
+  (e, t, x)
+
+let neg_bexp (b, t, x) =
+  match b with
+  | T_bool_const True -> (T_bool_const False, t, x)
+  | T_bool_const Maybe -> (T_bool_const Maybe, t, x)
+  | T_bool_const False -> (T_bool_const True, t, x)
+  | T_var _ | T_int_const _ ->
+      ( T_binary
+          ( A_NOT_EQUAL,
+            (b, t, x),
+            (T_int_const (Intinf.zero, Intinf.zero), t, x) ),
+        t,
+        x )
+  | T_binary (op, e1, e2) -> invert_comp_expr (b, t, x)
+  | T_unary (A_NOT, e) -> e
+  | _ -> raise (Invalid_argument "Unexpected rvalue")
+
 (************************************************************************)
 (* MISC *)
 (************************************************************************)
@@ -387,7 +435,7 @@ let neg_bexp (b,t,x) =
 let break_label (id, _) = string_of_id "break#" id
 let return_label id = string_of_id "return#" id
 let assert_label (id, _) = string_of_id "assert_false#" id
-
 let prog_literals = ref IdSet.empty
 
-let add_prog_literal (cst: Int.t) = prog_literals := IdSet.add cst !prog_literals
+let add_prog_literal (cst : Int.t) =
+  prog_literals := IdSet.add cst !prog_literals

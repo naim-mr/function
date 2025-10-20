@@ -10,6 +10,7 @@
 
 open Cda
 open TerminationNew
+open CTLIteratorNew
 open Config
 open Semantics  
 open C_Frontend
@@ -348,22 +349,43 @@ let doit () =
   let prog = C_Frontend.parse_file !Config.filename in
   Typed_syntax.pp_prog Format.std_formatter prog;
   let module Sem = TerminationNew.TerminationIteratorNew (Dnew.DecisionTree.TSAP) in 
-  let b = Sem.analyze prog in 
-  if b then 
-     Printf.printf "\nFinal Analysis Result: TRUE\n" 
-  else 
-    Printf.printf "\nFinal Analysis Result: UNKNOW\n";
-  let semantic = get_semantic () in
+    let b = Sem.analyze prog in 
+    if b then 
+       Printf.printf "\nTermination Analysis Result: TRUE\n" 
+    else 
+      Printf.printf "\nTermination Analysis Result: UNKNOWN\n";
+  let ntprog,labels = Typed_syntax.nt_prog prog in 
+  Typed_syntax.pp_prog Format.std_formatter ntprog;
+  let nonterm label = CTLProperty.AG (CTLProperty.AF (CTLProperty.Atomic (  (Typed_syntax.T_bool_const True, Abstract_syntax.A_BOOL, Abstract_syntax.extent_unknown )  ,(Some (Z.to_string label)  )) )) in
+  let rec create_prop label = 
+    match label with 
+    | [] -> None
+    | l::[] -> Some (nonterm l)
+    | l::q -> Some (CTLProperty.OR (nonterm l, Option.get (create_prop q)))
+  in
+  match create_prop (List.map fst labels) with 
+  | None -> Printf.printf "\n Non-termination Result: UNKNOWN\n";
+  | Some p -> 
+    let module Nonterm = CTLIteratorNew (Dnew.DecisionTree.TSAP) in
+    if Nonterm.analyze p ntprog then 
+      Printf.printf "\n Non-termination Result: false(TERM)\n"
+    else
+      Printf.printf "\n Non-termination Result: UNKNOWN\n"
+    ;
+
+  
+  (* let semantic = get_semantic () in
   (* Property and filename must be given (except for termination property) *)
   (* Parsing the property and the file to an intermediate ast *)
-  let itast = parseFile !filename in
+  (* let itast = parseFile !filename in *)
   (* Get the ast and the properties*)
-  let program, property, prop = get_ast_prop itast in
+  (* let program, property, prop = get_ast_prop itast in *)
+  
   (* A program is a map of variable, a block (see: AbstractSyntax.ml) and a map of functions *)
   let vars, b, funcs = program in
   (* Get the main function and the variables as a list *)
   let func = AbstractSyntax.StringMap.find !main funcs in
-  let module S = (val semantic : SEMANTIC) in
+  (*let module S = (val semantic : SEMANTIC) in
   (* Launch the analysis and get the returned output "true" or "unknow" *)
   (if !Config.cda then
      let module C = (val run_cda semantic : CDA_ITERATOR) in
@@ -385,7 +407,7 @@ let doit () =
            (match property with
            | Semantics.Ctl p -> p
            | _ -> raise (Invalid_argument "Impossible to reach"))
-     | _ -> raise (Invalid_argument "Unknown Analysis"));
+     | _ -> raise (Invalid_argument "Unknown Analysis")); *)
   (* if !Config.vulnerability then (
     (* Launch the vulnerability analysisand output the infered variables *)
     let varlist =
@@ -393,7 +415,7 @@ let doit () =
     in
     Vulnerability.analyse S.D.vulnerable varlist func !S.bwdInvMap;
     Format.fprintf !fmt " \n %s \n"
-      (Yojson.Safe.pretty_to_string !Config.vuln_res));  *)
+      (Yojson.Safe.pretty_to_string !Config.vuln_res));  *) *)
   if !Config.json_output then Regression.output_json ();
   ()
   

@@ -236,7 +236,7 @@ module Numerical (N : NUMERICAL) (C : CONSTRAINT) : PARTITION = struct
               occ))
     in
     (* creating an APRON variable *)
-    let v = Var.of_string (Z.to_string x.var_id ^ "$" ^ x.var_name) in
+    let v = Var.of_string (Z.to_string x.var_id) in
     (* creating an APRON polyhedra *)
     let a = Lincons1.array_make env (List.length b.constraints) in
     let i = ref 0 in
@@ -480,7 +480,7 @@ module Numerical (N : NUMERICAL) (C : CONSTRAINT) : PARTITION = struct
         let b = Abstract1.of_lincons_array manager env a in
         let b =
           Abstract1.assign_texpr manager b
-            (Var.of_string (Z.to_string x.var_id ^ "$" ^ x.var_name))
+            (Var.of_string (Z.to_string x.var_id))
             e None
         in
         let a = Abstract1.to_lincons_array manager b in
@@ -526,7 +526,7 @@ module Numerical (N : NUMERICAL) (C : CONSTRAINT) : PARTITION = struct
           let b = Abstract1.of_lincons_array manager env a in
           let b =
             Abstract1.substitute_texpr manager b
-              (Var.of_string (Z.to_string x.var_id ^ "$" ^ x.var_name))
+              (Var.of_string (Z.to_string x.var_id))
               e None
           in
           let a = Abstract1.to_lincons_array manager b in
@@ -630,6 +630,7 @@ module Numerical (N : NUMERICAL) (C : CONSTRAINT) : PARTITION = struct
           { constraints = !cs; env; vars }
       | T_binary (o, e1, e2) -> (
           match o with
+          | A_MODULO -> top b.env b.vars
           | A_AND -> let b1 = f manager b e1 and b2 = f manager b e2 in meet b1 b2
           | A_OR -> let b1 = f manager b e1 and b2 = f manager b e2 in join b1 b2
           | A_EQUAL ->

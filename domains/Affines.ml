@@ -255,9 +255,7 @@ module Affine (B : PARTITION) : FUNCTION = struct
                 in
                 Linexpr1.set_coeff f v (Coeff.s_of_int 0);
                 Fun f (* defined join function *))
-              else
-                let _ = Printf.printf "\nraise top \n \n" in
-                Top (* otherwise *)
+              else Top (* otherwise *)
           | _ ->
               let p = Abstract1.join manager p1 p2 in
               (* p = convex-hull *)
@@ -474,12 +472,6 @@ module Affine (B : PARTITION) : FUNCTION = struct
         let p2 = Abstract1.of_lincons_array manager env a2 in
         (* p2 = polyhedra represented by a2 *)
         let p = Abstract1.widening manager p1 p2 in
-        Printf.printf "\ndebug ---------------------\n";
-        Abstract1.print Format.std_formatter p1;
-        print_newline ();
-        Abstract1.print Format.std_formatter p2;
-        print_newline ();
-        Abstract1.print Format.std_formatter p;
         (* p = widening *)
         let p = Abstract1.to_lincons_array manager p in
         (* converting p into set of constraints *)
@@ -499,10 +491,8 @@ module Affine (B : PARTITION) : FUNCTION = struct
         if 1 = List.length !f (* if there is only one constraint on # *) then (
           let f = Lincons1.get_linexpr1 (List.hd !f) in
           Linexpr1.set_coeff f v (Coeff.s_of_int 0);
-          Printf.printf "\nIN --------------------- \n";
           Fun f (* defined widening function *))
-        else
-          (Printf.printf "\nOUT --------------------- \n"; Top) (* otherwise *)
+        else Top (* otherwise *)
     | Bot, _ -> f2
     | _, Bot -> f1
     | _ -> Top
@@ -561,7 +551,9 @@ module Affine (B : PARTITION) : FUNCTION = struct
           with _ -> ()
         done;
         (* f = # *)
-        if 1 <= List.length !f (* if there list of constraints on special variable is at least one constraint on # *)
+        if
+          1 <= List.length !f
+          (* if there list of constraints on special variable is at least one constraint on # *)
         then
           let f =
             List.map

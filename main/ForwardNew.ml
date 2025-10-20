@@ -35,12 +35,12 @@ module ForwardIterator (B : PARTITION) = struct
     | T_add_var (v, _)
       when not
            @@ Environment.mem_var env
-                (Var.of_string (Z.to_string v.var_id ^ "$" ^ v.var_name)) ->
+                (Var.of_string (Z.to_string v.var_id)) ->
         (B.add_var_to_env env v, v :: vars)
     | T_assign ((v, _), _)
       when not
            @@ Environment.mem_var env
-                (Var.of_string (Z.to_string v.var_id ^ "$" ^ v.var_name)) ->
+                (Var.of_string (Z.to_string v.var_id)) ->
         (B.add_var_to_env env v, v :: vars)
     | T_if (b, s1, s2) ->
         let env, vars = initBlock s1 (env, vars) in
@@ -101,9 +101,7 @@ module ForwardIterator (B : PARTITION) = struct
         B.filter p (neg_bexp b)
     | T_call (f, ss) -> fwdBlk funcs env vars p f.func_body
     | _ ->
-        Typed_syntax.pp_stat "" Format.std_formatter s;
-        failwith "nyi block"
-
+       B.top env vars
   and fwdBlk funcs env vars (p : B.t) (b : block) : B.t =
     match b with
     | T_empty (l, _) ->
@@ -176,12 +174,12 @@ module ForwardIterator (B : PARTITION) = struct
       | x :: xs ->
           if
             Environment.mem_var env
-              (Var.of_string (Z.to_string x.var_id ^ "$" ^ x.var_name))
+              (Var.of_string (Z.to_string x.var_id))
           then init_env xs env
           else
             init_env xs
               (Environment.add env
-                 [| Var.of_string (Z.to_string x.var_id ^ "$" ^ x.var_name) |]
+                 [| Var.of_string (Z.to_string x.var_id) |]
                  [||])
     in
     let block, funcmap, varmap = prog in

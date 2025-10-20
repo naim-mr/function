@@ -231,8 +231,8 @@ let rec convert_expr (st : state) ((kind, typ, _) : C_AST.expr) :
         | C_AST.E_cast ((e, _, _), _) -> (
             match e with
             | C_AST.E_function func -> (func.func_org_name, func.func_return)
-            | _ -> failwith "unexpected expr_kind in E_call/E_cast")
-        | _ -> failwith "unexpected expr_kind in E_call"
+            | _ -> raise (Unexpected "unexpected expr_kind in E_call/E_cast"))
+        | _ -> raise (Unexpected "unexpected expr_kind in E_call")
       in
 
       (* hook the non determinisitc assignement *)
@@ -348,7 +348,7 @@ let rec convert_stmt (st : state) ((stmt, _) : C_AST.statement) :
       let old_body_stmts =
         match convert_block st body with
         | Abstract_syntax.A_block stmts -> stmts
-        | _ -> failwith "convert_block returned a non-A_block"
+        | _ -> raise (Invalid_argument "convert_block returned a non-A_block")
       in
 
       let new_body =
@@ -452,7 +452,7 @@ let convert_func (st : state) (func : C_AST.func) :
   Option.bind func.func_body (fun stmts ->
       match convert_block st stmts with
       | Abstract_syntax.A_block stmts -> Some (return_typ, name, args, stmts)
-      | _ -> failwith "convert_block returned a non-A_block")
+      | _ -> raise (Invalid_argument "convert_block returned a non-A_block"))
 
 let parse_file (f : string) : Typed_syntax.prog =
   let target = get_target_info (get_default_target_options ()) in
@@ -460,7 +460,7 @@ let parse_file (f : string) : Typed_syntax.prog =
   parse_file "clang" !Config.filename [ "-fbracket-depth=512" ] false false
     false false ctx [];
   let prj = link_project ctx in
-  (* C_print.print_project stdout prj;  *)
+  C_print.print_project stdout prj; 
   let st = { input_vars = ref [] } in
   (* StringMap.to_seq returns the functions in random order. This may
      cause some problems as a function calling another one may be
