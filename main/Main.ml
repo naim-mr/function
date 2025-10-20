@@ -137,6 +137,9 @@ let parse_args () =
       ( "-meetbwd",
         Arg.Int (fun i -> Config.meetbwd := i),
         "Dual widening delay in backward analysis" );
+        ( "--version",
+        Arg.Unit (fun _ -> Format.printf "\n tool version:  v0.31\n"),
+        "Output analysis result only" );
       ( "-minimal",
         Arg.Unit (fun _ -> Config.minimal := true),
         "Output analysis result only" );
@@ -353,7 +356,7 @@ let doit () =
 
   (* parse the program *)
   let prog = C_Frontend.parse_file !Config.filename in
-  Typed_syntax.pp_prog Format.std_formatter prog;
+  if not !minimal then Typed_syntax.pp_prog Format.std_formatter prog;
   try
     let module Sem =
       TerminationNew.TerminationIteratorNew (Dnew.DecisionTree.TSAP) in

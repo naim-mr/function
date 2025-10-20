@@ -248,11 +248,6 @@ module CTLIteratorNew (D : RANKING_FUNCTION) = struct
           let pre_dom =
             if !refine then Some (fwdInv (blockLabel, ext)) else None
           in
-          Format.printf "\n at %a " (pp_stat "") stmt;
-          Printf.printf "\n debug try to find %d in\n" (Z.to_int blockLabel);
-          InvMap.iter
-            (fun id a -> Format.printf "label %d : %a" (Z.to_int id) D.print a)
-            inv_keep;
           let invBlockKeep = InvMap.find blockLabel inv_keep in
           let invBlockReset = InvMap.find blockLabel inv_reset in
           let d_until = fun t -> D.until t invBlockKeep invBlockReset in

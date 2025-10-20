@@ -460,13 +460,11 @@ let parse_file (f : string) : Typed_syntax.prog =
   parse_file "clang" !Config.filename [ "-fbracket-depth=512" ] false false
     false false ctx [];
   let prj = link_project ctx in
-  C_print.print_project stdout prj; 
   let st = { input_vars = ref [] } in
   (* StringMap.to_seq returns the functions in random order. This may
      cause some problems as a function calling another one may be
      analyzed first, causing the typed_syntax translator to fail.
      Heuristic -> delay `main` to the end *)
-  C_AST.StringMap.iter (fun s f -> print_endline s) prj.proj_funcs;
   let funcs =
     prj.proj_funcs |> C_AST.StringMap.bindings
     |> List.map (fun (_, f) -> f)
