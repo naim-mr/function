@@ -1,3 +1,0 @@
-{
-    "property": "AND{AND{AG{AF{assert1: n <= 60}}}{AG{AF{assert2: m == 60}}}}{AG{AF{assert3: n == 60}}}"
-}
