@@ -12,7 +12,7 @@ open Cda
 open TerminationNew
 open CTLIteratorNew
 open Config
-open Semantics  
+open Semantics
 open C_Frontend
 open Typed_syntax
 
@@ -115,7 +115,6 @@ let parseCTLPropertyString (property : string) =
   CTLProperty.map (fun p -> fst (parsePropertyString p))
   @@ parseCTLPropertyString_plain property
 
-
 let parse_args () =
   Arg.parse
     [
@@ -176,7 +175,12 @@ let parse_args () =
       ( "-timebwd",
         Arg.Unit (fun _ -> Config.timefwd := true),
         "Track backward analysis time" );
-      ("-ctl", Arg.String (fun s -> Config.analysis := "ctl"; Config.property := s), "CTL analysis");
+      ( "-ctl",
+        Arg.String
+          (fun s ->
+            Config.analysis := "ctl";
+            Config.property := s),
+        "CTL analysis" );
       ( "-dot",
         Arg.Unit (fun _ -> Config.dot := true),
         "Output decision trees in dot format" );
@@ -315,7 +319,7 @@ let run_cda s : (module Cda.CDA_ITERATOR) =
 
 let get_semantic () =
   match !analysis with
-  | "termination" -> termination_iterator () 
+  | "termination" -> termination_iterator ()
   | "ctl" -> ctl_iterator ()
   | _ -> raise (Invalid_argument "Unknown Analysis")
 
@@ -337,44 +341,52 @@ let get_ast_prop itast =
       (program, Semantics.Ctl property, None)
   | _ -> raise (Invalid_argument "Unknown Analysis")
 
-module B: (Dnew.Partition.PARTITION) =  Dnew.Numerical.P
+module B : Dnew.Partition.PARTITION = Dnew.Numerical.P
 module ForwardIteratorB = ForwardNew.ForwardIterator (B)
+
 let doit () =
   (* Parsing cli args -> into Config ref variables *)
   parse_args ();
   check_args ();
+
   (* Get the iterator for the demanded analysis *)
-  
+
   (* parse the program *)
   let prog = C_Frontend.parse_file !Config.filename in
   Typed_syntax.pp_prog Format.std_formatter prog;
-  let module Sem = TerminationNew.TerminationIteratorNew (Dnew.DecisionTree.TSAP) in 
-    let b = Sem.analyze prog in 
-    if b then 
-       Printf.printf "\nTermination Analysis Result: TRUE\n" 
-    else 
-      Printf.printf "\nTermination Analysis Result: UNKNOWN\n";
-  let ntprog,labels = Typed_syntax.nt_prog prog in 
-  Typed_syntax.pp_prog Format.std_formatter ntprog;
-  let nonterm label = CTLProperty.AG (CTLProperty.AF (CTLProperty.Atomic (  (Typed_syntax.T_bool_const True, Abstract_syntax.A_BOOL, Abstract_syntax.extent_unknown )  ,(Some (Z.to_string label)  )) )) in
-  let rec create_prop label = 
-    match label with 
-    | [] -> None
-    | l::[] -> Some (nonterm l)
-    | l::q -> Some (CTLProperty.OR (nonterm l, Option.get (create_prop q)))
-  in
-  match create_prop (List.map fst labels) with 
-  | None -> Printf.printf "\n Non-termination Result: UNKNOWN\n";
-  | Some p -> 
-    let module Nonterm = CTLIteratorNew (Dnew.DecisionTree.TSAP) in
-    if Nonterm.analyze p ntprog then 
-      Printf.printf "\n Non-termination Result: false(TERM)\n"
+  try
+    let module Sem =
+      TerminationNew.TerminationIteratorNew (Dnew.DecisionTree.TSAP) in
+    let b = Sem.analyze prog in
+    if b then Printf.printf "\Final Analaysis Result: TRUE\n"
     else
-      Printf.printf "\n Non-termination Result: UNKNOWN\n"
-    ;
+      let ntprog, labels = Typed_syntax.nt_prog prog in
+      let nonterm label =
+        CTLProperty.AG
+          (CTLProperty.AF
+             (CTLProperty.Atomic
+                ( ( Typed_syntax.T_bool_const True,
+                    Abstract_syntax.A_BOOL,
+                    Abstract_syntax.extent_unknown ),
+                  Some (Z.to_string label) )))
+      in
+      let rec create_prop label =
+        match label with
+        | [] -> None
+        | l :: [] -> Some (nonterm l)
+        | l :: q ->
+            Some (CTLProperty.OR (nonterm l, Option.get (create_prop q)))
+      in
+      match create_prop (List.map fst labels) with
+      | None -> Printf.printf "\Final Analaysis Result: UNKNOWN\n"
+      | Some p ->
+          let module Nonterm = CTLIteratorNew (Dnew.DecisionTree.TSAP) in
+          if Nonterm.analyze p ntprog then
+            Printf.printf "\n Final Analysis Result: false(TERM)\n"
+          else Printf.printf "\Final Analaysis Result: UNKNOWN\n"
+  with _ -> Printf.printf "\Final Analaysis Result: UNKNOWN\n"
 
-  
-  (* let semantic = get_semantic () in
+(* let semantic = get_semantic () in
   (* Property and filename must be given (except for termination property) *)
   (* Parsing the property and the file to an intermediate ast *)
   (* let itast = parseFile !filename in *)
@@ -416,7 +428,7 @@ let doit () =
     Vulnerability.analyse S.D.vulnerable varlist func !S.bwdInvMap;
     Format.fprintf !fmt " \n %s \n"
       (Yojson.Safe.pretty_to_string !Config.vuln_res));  *) *)
-  if !Config.json_output then Regression.output_json ();
-  ()
-  
-let _ =  doit ()
+(* if !Config.json_output then Regression.output_json ();
+  () *)
+
+let _ = doit ()
