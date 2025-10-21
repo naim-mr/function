@@ -67,11 +67,8 @@ module ForwardIterator (B : PARTITION) = struct
     | T_label _ | T_print _ | T_add_var (_, None) | T_del_var _ -> p
     | T_RETURN -> B.bot env vars
     | T_add_var (v, Some (e, t, ext)) ->
-        Environment.print Format.std_formatter env;
         B.fwdAssign p ((T_var v, v.var_typ, ext), (e, t, ext))
     | T_assign ((v, l), e) ->
-        Typed_syntax.pp_stat "debug:" Format.std_formatter s;
-        print_endline "";
         B.fwdAssign p ((T_var v, v.var_typ, l), e)
     | T_assert (b, l) -> B.filter p b
     | T_if (b, s1, s2) ->
