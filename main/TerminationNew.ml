@@ -42,17 +42,22 @@ functor
         (fun l a -> Format.fprintf fmt "%a: %a\n" label_print l D.print a)
         m
 
+    let blockLabel b =
+      Format.printf "\n in blocklabel %a \n" Typed_syntax.pp_block b;
+      match b with T_empty (l, _) -> l | T_stat ((l, _), _, _) ->  l
+      
+
     (*Backward Iterator + Recursion *)
-    let rec bwdStm ?property ?domain funcs env vars p s  =
+    let rec bwdStm ?property ?domain funcs env vars p s =
       match s with
       | T_label _ | T_print _ | T_add_var (_, None) | T_del_var _ -> p
       | T_RETURN -> D.zero ?domain env vars
-      | T_BREAK -> D.top env vars (* TODO handle break *)
-      | T_add_var (v, Some (exp, typ, ext)) 
-      | T_assign ((v, _), (exp, typ, ext)) ->
+      | T_BREAK -> raise (UnsupportedFeature "break")
+      | T_add_var (v, Some (exp, typ, ext)) | T_assign ((v, _), (exp, typ, ext))
+        ->
           D.bwdAssign ?domain ~taint:true ~underapprox:false p
             ((T_var v, typ, ext), (exp, typ, ext))
-      | T_assert (b, _) | T_assume b -> D.filter ?domain p b 
+      | T_assert (b, _) | T_assume b -> D.filter ?domain p b
       | T_if ((b, typ, ba), s1, s2) ->
           let uap = false in
           let p1 = bwdBlk funcs env vars p s1 in
@@ -120,8 +125,13 @@ functor
           let p = aux i p2' 1 in
           addBwdInv l p;
           if !refine then D.refine p a else p
-      | T_call (f, ss) -> bwdRec funcs env vars p f.func_body
-      | T_expr e ->  D.top env vars (* todo handle this *)
+      | T_call (f, ss) ->
+            let zero = D.domain_zero p in 
+            Format.printf "\n zero: %a \n" D.print zero;
+            let p' =  bwdRec funcs env vars zero f.func_body in
+            let b = InvMap.find (Z.succ (blockLabel f.func_body)) !fwdInvMap in
+            D.meet APPROXIMATION (D.refine p b ) p'
+      | T_expr e -> D.top env vars (* todo handle this *)
 
     and bwdBlk ?property funcs env vars p (b : block) : D.t =
       let result_print l p =
@@ -143,7 +153,7 @@ functor
             (* let tvl = InvMap.find l !fwdTaintMap in *)
             let p =
               if !refine then bwdStm ~domain:a funcs env vars b s
-              else bwdStm funcs env vars b s 
+              else bwdStm funcs env vars b s
             in
             let p = if !refine then D.refine p a else p in
             if !tracebwd && not !minimal then result_print l p;
@@ -177,9 +187,7 @@ functor
         match xs with
         | [] -> env
         | x :: xs ->
-            if
-              Environment.mem_var env
-                (Var.of_string (Z.to_string x.var_id))
+            if Environment.mem_var env (Var.of_string (Z.to_string x.var_id))
             then init_env xs env
             else
               init_env xs
@@ -249,5 +257,6 @@ functor
         else Format.fprintf !fmt "\nBackward Analysis:\n";
         bwdMap_print !fmt !bwdInvMap);
       tree := D.output_json vars i;
-      D.defined i
+      Config.result := D.defined i;
+      !Config.result
   end

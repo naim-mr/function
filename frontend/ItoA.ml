@@ -12,12 +12,12 @@ open IntermediateSyntax
 open AbstractSyntax
 
 (* labeling *)
-let id = ref Z.zero 
+let id = ref Z.zero
 let dummyId = Z.minus_one
 let zeroId () = id := Z.zero
 
 let newId () =
-  id := Z.(+) Z.one !id;
+  id := Z.( + ) Z.one !id;
   !id
 
 (* exceptions *)
@@ -286,10 +286,12 @@ let rec exp_itoa (ctx : ctx) (* calling context *) (env : env) (* environment *)
         match (e1, e2) with
         | A_arithmetic (A_RANDOM, _), A_arithmetic (A_RANDOM, _) ->
             (A_boolean (A_MAYBE, a), env, pre, post)
-        | A_arithmetic (A_RANDOM, _), A_boolean (e2, _) ->
-            (A_boolean (e2, a), env, pre, post)
-        | A_boolean (e1, _), A_arithmetic (A_RANDOM, _) ->
-            (A_boolean (e1, a), env, pre, post)
+        | A_arithmetic (A_RANDOM, _), A_boolean (e, _)
+        | A_boolean (e, _), A_arithmetic (A_RANDOM, _) ->
+            ( A_boolean ((A_bbinary (A_AND, (e, a), (A_MAYBE, a)),a)),
+              env,
+              pre,
+              post )
         | A_arithmetic (e1, a1), A_boolean (e2, a2) ->
             let cmp1 =
               A_rbinary (A_LESS_EQUAL, (e1, a1), annotate (A_const (-1)))
@@ -543,11 +545,7 @@ let declarator_itoa ctx (* ctx *) gs (* var StringMap.t *) ls
     (* Isyntax.typ annotated *)
       ((x (* string *), xa), exp (* Isyntax.exp annotated option *)) =
   let v =
-    {
-      varId = "$" ^ Z.to_string (newId ());
-      varName = x;
-      varTyp = typ_itoa typ;
-    }
+    { varId = "$" ^ Z.to_string (newId ()); varName = x; varTyp = typ_itoa typ }
   in
   let vm =
     if scope then StringMap.add x v ls

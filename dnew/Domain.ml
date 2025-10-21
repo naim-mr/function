@@ -23,6 +23,7 @@ module type RANKING_FUNCTION = sig
   val bot : ?domain:B.t -> Environment.t -> var list -> t
   val zero : ?domain:B.t -> Environment.t -> var list -> t
   val top : ?domain:B.t -> Environment.t -> var list -> t
+  val domain_zero : t-> t
   val isLeq : kind -> t -> t -> bool
   val join : kind -> t -> t -> t
   val meet : kind -> t -> t -> t

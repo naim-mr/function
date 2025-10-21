@@ -423,6 +423,15 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
     { domain; tree = Leaf (F.top e vs); env = e; vars = vs }
 
   (** BINARY OPERATORS *)
+  let domain_zero t =
+    let rec aux tree =
+      match tree with
+      | Bot -> tree
+      | Leaf f when not (F.defined f) -> tree
+      | Leaf _ -> Leaf (F.zero t.env t.vars)
+      | Node ((c, nc), l, r) -> Node ((c, nc), aux l, aux r)
+    in
+    { t with tree = aux t.tree }
 
   let tree_unification_aux t1 t2 env vars cs =
     let rec aux (t1, t2) cs =
@@ -1309,30 +1318,37 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
     match e with
     | T_bool_const True | T_bool_const Maybe ->
         { domain = pre; tree = aux t.tree [] []; env; vars }
+    | (T_binary (_, (T_var v, _, _), _) | T_binary (_, _, (T_var v, _, _)))
+      when String.starts_with ~prefix:"nondet_" v.var_name ->
+        { domain = pre; tree = aux t.tree [] []; env; vars }
+    | T_binary (A_EQUAL, e1, e2) ->
+        let bop =
+          T_binary
+            ( A_AND,
+              (T_binary (A_GREATER_EQUAL, e1, e2), typ, ext),
+              (T_binary (A_GREATER_EQUAL, e2, e1), typ, ext) )
+        in
+        filter ~taint ?domain:pre ~underapprox t (bop, typ, ext)
+    | T_binary (A_NOT_EQUAL, e1, e2) ->
+        let bop =
+          T_binary
+            ( A_OR,
+              (T_binary (A_GREATER, e1, e2), typ, ext),
+              (T_binary (A_LESS, e1, e2), typ, ext) )
+        in
+        filter ~taint ?domain:pre ~underapprox t (bop, typ, ext)
     | T_bool_const False -> { domain = pre; tree = Bot; env; vars }
     | T_unary (A_NOT, e) ->
         let e = neg_bexp e in
         filter ~taint ?domain:pre ~underapprox t e
     | T_binary ((A_AND as op), e1, e2) | T_binary ((A_OR as op), e1, e2) -> (
-        (* Printf.printf "debug filter dtree binary \n";
-      Typed_syntax.pp_expr Format.std_formatter e; *)
-        let joinType =
-          if underapprox && not !resilience then COMPUTATIONAL
-          else if !resilience then
-            if taint then APPROXIMATION else APPROXIMATION
-          else APPROXIMATION
-        in
+        let joinType = if underapprox then COMPUTATIONAL else APPROXIMATION in
         let t1 = filter ~taint ?domain:pre ~underapprox t e1
         and t2 = filter ~taint ?domain:pre ~underapprox t e2 in
         match op with
         | A_AND -> meet joinType t1 t2
         | A_OR -> join joinType t1 t2)
     | _ ->
-        (* Printf.printf "debug filter dtree ELSE \n";
-      print_tree vars Format.std_formatter t.tree;
-      print_endline "";
-      Typed_syntax.pp_expr Format.std_formatter e;
-       *)
         let bp =
           match post with
           | None -> B.inner env vars []
@@ -1347,10 +1363,6 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
         in
         let bs = List.sort L.compare bs in
         let t = aux t.tree bs [] in
-        (* Printf.printf "Result\n constraint added: \n" ;
-            List.iter (fun (c,nc) -> Format.printf "%a , %a -" Lincons1.print  c  Lincons1.print  nc ) bs;
-            print_endline "";
-            print_tree vars Format.std_formatter t; *)
         { domain = pre; tree = t; env; vars }
 
   (* 
@@ -1395,7 +1407,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
       | None -> t
     in
     aux t.tree []
-  
+
   (* 
     Check if at least one partitions in the decision tree is defined i.e. have a ranking function assigned to it.
 
@@ -1439,7 +1451,6 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
     in
     aux t.tree []
 
-  
   (* NOTE: reset underapproximates the filter operation to guarantee soundness. 
      Currently this limits the set of supported domains to polyhedra *)
 

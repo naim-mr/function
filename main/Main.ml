@@ -137,7 +137,7 @@ let parse_args () =
       ( "-meetbwd",
         Arg.Int (fun i -> Config.meetbwd := i),
         "Dual widening delay in backward analysis" );
-        ( "--version",
+      ( "--version",
         Arg.Unit (fun _ -> Format.printf "\n tool version:  v0.31\n"),
         "Output analysis result only" );
       ( "-minimal",
@@ -203,13 +203,15 @@ let parse_args () =
             Config.resilience := true),
         "Termination Resilience analysis" );
       ( "-json_output",
-        Arg.Unit (fun _ -> Config.json_output := true),
-        "Summary of the analysis in a json" );
-      ( "-json_output",
         Arg.String
           (fun s ->
             Config.json_output := true;
             Config.output_dir := s),
+        "Summary of the analysis in a json" );
+      ( "-json_output",
+        Arg.Unit
+          (fun _ ->
+            Config.json_output := true),
         "Summary of the analysis in a json" );
     ]
     (fun s -> Config.filename := s)
@@ -353,17 +355,17 @@ let doit () =
   check_args ();
 
   (* Get the iterator for the demanded analysis *)
-
-  (* parse the program *)
+(* parse the program*)
   let prog = C_Frontend.parse_file !Config.filename in
   if not !minimal then Typed_syntax.pp_prog Format.std_formatter prog;
   try
     let module Sem =
       TerminationNew.TerminationIteratorNew (Dnew.DecisionTree.TSAP) in
     let b = Sem.analyze prog in
+    if !Config.json_output then Regression.output_json ();
     if b then Printf.printf "\nFinal Analaysis Result: TRUE\n"
-    else
-      let ntprog, labels = Typed_syntax.nt_prog prog in
+    else Printf.printf "\nFinal Analaysis Result: UNKNOWN\n"
+    (* let ntprog, labels = Typed_syntax.nt_prog prog in
       let nonterm label =
         CTLProperty.AG
           (CTLProperty.AF
@@ -386,21 +388,21 @@ let doit () =
           let module Nonterm = CTLIteratorNew (Dnew.DecisionTree.TSAP) in
           if Nonterm.analyze p ntprog then
             Printf.printf "\n Final Analysis Result: false(TERM)\n"
-          else Printf.printf "\nFinal Analaysis Result: UNKNOWN\n"
-  with _ -> Printf.printf "\nFinal Analaysis Result: UNKNOWN\n"
+          else Printf.printf "\nFinal Analaysis Result: UNKNOWN\n" *)
+  with _ -> Printf.printf "\nFinal Analaysis Result: UNKNOWN\n" 
 
-(* let semantic = get_semantic () in
+  (* let semantic = get_semantic () in
   (* Property and filename must be given (except for termination property) *)
   (* Parsing the property and the file to an intermediate ast *)
-  (* let itast = parseFile !filename in *)
+  let itast = parseFile !filename in 
   (* Get the ast and the properties*)
-  (* let program, property, prop = get_ast_prop itast in *)
+  let program, property, prop = get_ast_prop itast in 
   
   (* A program is a map of variable, a block (see: AbstractSyntax.ml) and a map of functions *)
   let vars, b, funcs = program in
   (* Get the main function and the variables as a list *)
   let func = AbstractSyntax.StringMap.find !main funcs in
-  (*let module S = (val semantic : SEMANTIC) in
+  let module S = (val semantic : SEMANTIC) in
   (* Launch the analysis and get the returned output "true" or "unknow" *)
   (if !Config.cda then
      let module C = (val run_cda semantic : CDA_ITERATOR) in
@@ -422,7 +424,7 @@ let doit () =
            (match property with
            | Semantics.Ctl p -> p
            | _ -> raise (Invalid_argument "Impossible to reach"))
-     | _ -> raise (Invalid_argument "Unknown Analysis")); *)
+     | _ -> raise (Invalid_argument "Unknown Analysis"));  *)
   (* if !Config.vulnerability then (
     (* Launch the vulnerability analysisand output the infered variables *)
     let varlist =
@@ -430,8 +432,8 @@ let doit () =
     in
     Vulnerability.analyse S.D.vulnerable varlist func !S.bwdInvMap;
     Format.fprintf !fmt " \n %s \n"
-      (Yojson.Safe.pretty_to_string !Config.vuln_res));  *) *)
-(* if !Config.json_output then Regression.output_json ();
+      (Yojson.Safe.pretty_to_string !Config.vuln_res));  *) 
+(*
   () *)
 
 let _ = doit ()

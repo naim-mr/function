@@ -29,6 +29,8 @@ module ForwardIterator (B : PARTITION) = struct
 
   let fwdInvMap = ref InvMap.empty
   let addFwdInv l (a : B.t) = fwdInvMap := InvMap.add l a !fwdInvMap
+  let blockLabel b =
+    match b with T_empty (l, _) -> l | T_stat ((l, _), _, _) ->  l
 
   let rec initStat s (env, vars) =
     match s with
@@ -96,7 +98,10 @@ module ForwardIterator (B : PARTITION) = struct
         let p = aux i p2 1 in
         addFwdInv l p;
         B.filter p (neg_bexp b)
-    | T_call (f, ss) -> fwdBlk funcs env vars p f.func_body
+    | T_call (f, ss) -> 
+          let _ = fwdBlk funcs env vars p f.func_body in
+          InvMap.find (Z.succ (blockLabel f.func_body)) !fwdInvMap 
+
     | _ ->
        B.top env vars
   and fwdBlk funcs env vars (p : B.t) (b : block) : B.t =
