@@ -171,6 +171,9 @@ let parse_args () =
       ( "-termination",
         Arg.Unit (fun _ -> Config.analysis := "termination"),
         "Termination analysis" );
+      ( "-nontermination",
+        Arg.Unit (fun _ -> Config.analysis := "nontermination"),
+        "Non-termination analysis" );
       ("-time", Arg.Unit (fun _ -> Config.time := true), "Track analysis time");
       ( "-timefwd",
         Arg.Unit (fun _ -> Config.timefwd := true),
@@ -207,10 +210,10 @@ let parse_args () =
           (fun s ->
             Config.json_output := true;
             Config.output_dir := s),
-        "Summary of the analysis in a json" );
-      ( "-json_output",
+        "Summary of the analysis in a json file" );
+      ( "-json_output_std",
         Arg.Unit (fun _ -> Config.json_output := true),
-        "Summary of the analysis in a json" );
+        "Summary of the analysis as a json in stdout" );
     ]
     (fun s -> Config.filename := s)
     ""
@@ -242,7 +245,48 @@ let run_analysis analysis_function program () =
     Format.fprintf !fmt "\nThe Analysis Timed Out!\n";
     Format.fprintf !fmt "\nDone.\n"
 
-let termination_iterator () : (module SEMANTIC) =
+let termination_iterator_new () : (module SemanticsNew.SEMANTIC) =
+  let open TerminationNew in
+  let open Dnew in
+  let module S =
+    (val match !domain with
+         | "boxes" ->
+             if !ordinals then
+               (module TerminationIteratorNew (DecisionTree.TSOB))
+             else (module TerminationIteratorNew (DecisionTree.TSAB))
+         | "octagons" ->
+             if !ordinals then
+               (module TerminationIteratorNew (DecisionTree.TSOO))
+             else (module TerminationIteratorNew (DecisionTree.TSAO))
+         | "polyhedra" ->
+             if !ordinals then
+               (module TerminationIteratorNew (DecisionTree.TSOP))
+             else (module TerminationIteratorNew (DecisionTree.TSAP))
+         | _ -> raise (Invalid_argument "Unknown Abstract Domain")
+        : SemanticsNew.SEMANTIC)
+  in
+  (module S)
+
+let ctl_iterator_new () : (module SemanticsNew.SEMANTIC) =
+  let open Dnew in
+  let module S =
+    (val match !domain with
+         | "boxes" ->
+             if !ordinals then (module CTLIteratorNew (DecisionTree.TSOB))
+             else (module CTLIteratorNew (DecisionTree.TSAB))
+         | "octagons" ->
+             if !ordinals then (module CTLIteratorNew (DecisionTree.TSOO))
+             else (module CTLIteratorNew (DecisionTree.TSAO))
+         | "polyhedra" ->
+             if !ordinals then
+               (module TerminationIteratorNew (DecisionTree.TSOP))
+             else (module CTLIteratorNew (DecisionTree.TSAP))
+         | _ -> raise (Invalid_argument "Unknown Abstract Domain")
+        : SemanticsNew.SEMANTIC)
+  in
+  (module S)
+
+let termination_iterator () : (module Semantics.SEMANTIC) =
   let open TerminationIterator in
   let module S =
     (val match !domain with
@@ -294,6 +338,54 @@ let run_termination (module S : SEMANTIC) program =
   in
   run_analysis analysis_function program ()
 
+let run_termination_new program =
+  let module S = (val termination_iterator_new ()) in
+  try
+    if not !minimal then (
+      Format.fprintf !fmt "\nAbstract typed Syntax:\n";
+      Typed_syntax.pp_prog !fmt program);
+    Config.result := S.analyze program;
+    if !Config.result then Format.printf "\nFinal Analaysis Result: TRUE\n"
+    else Format.printf "\nFinal Analaysis Result: UNKNOWN\n"
+  with Config.Timeout ->
+    Format.fprintf !fmt "\nThe Analysis Timed Out!\n";
+    Format.fprintf !fmt "\nDone.\n"
+(* TODO: precondition analysis *)
+
+let run_non_termination program =
+  let ntprog, labels = Typed_syntax.nt_prog program in
+  let nonterm label =
+    CTLProperty.AG
+      (CTLProperty.AF
+         (CTLProperty.Atomic
+            ( ( Typed_syntax.T_bool_const True,
+                Abstract_syntax.A_BOOL,
+                Abstract_syntax.extent_unknown ),
+              Some (Z.to_string label) )))
+  in
+  let rec create_prop label =
+    match label with
+    | [] -> None
+    | l :: [] -> Some (nonterm l)
+    | l :: q -> Some (CTLProperty.OR (nonterm l, Option.get (create_prop q)))
+  in
+  if not !minimal then (
+    Format.fprintf !fmt "\nAbstract typed Syntax:\n";
+    Typed_syntax.pp_prog !fmt program);
+  match create_prop (List.map fst labels) with
+  | None -> Format.printf "\nFinal Analaysis Result: UNKNOWN\n"
+  | Some p -> (
+      try
+        let module Nonterm = (val ctl_iterator_new ()) in
+        if Nonterm.analyze ~property:(SemanticsNew.Ctl p) ntprog then
+          if !Config.result then
+            Format.printf "\nFinal Analaysis Result: false(TERM)\n"
+          else Format.printf "\nFinal Analaysis Result: UNKNOWN\n"
+      with Config.Timeout ->
+        Format.fprintf !fmt "\nThe Analysis Timed Out!\n";
+        Format.fprintf !fmt "\nDone.\n")
+(* TODO: precondition analysis *)
+
 let run_ctl_ast (module S : SEMANTIC) prog property =
   let starttime = Sys.time () in
   let parsedPrecondition = parsePropertyString !precondition in
@@ -344,50 +436,21 @@ let get_ast_prop itast =
       (program, Semantics.Ctl property, None)
   | _ -> raise (Invalid_argument "Unknown Analysis")
 
-module B : Dnew.Partition.PARTITION = Dnew.Numerical.P
-module ForwardIteratorB = ForwardNew.ForwardIterator (B)
-
 let doit () =
   (* Parsing cli args -> into Config ref variables *)
   parse_args ();
   check_args ();
-
   (* Get the iterator for the demanded analysis *)
   (* parse the program*)
   let prog = C_Frontend.parse_file !Config.filename in
   if not !minimal then Typed_syntax.pp_prog Format.std_formatter prog;
-
-  let module Sem = TerminationNew.TerminationIteratorNew (Dnew.DecisionTree.TSAP) in
-  let b = Sem.analyze prog in
+  run_termination_new prog ;
+  Format.print_newline ();
   if !Config.json_output then Regression.output_json ();
-  if b then Printf.printf "\nFinal Analaysis Result: TRUE\n"
-  else Printf.printf "\nFinal Analaysis Result: UNKNOWN\n";
-
-  (* let ntprog, labels = Typed_syntax.nt_prog prog in
-      let nonterm label =
-        CTLProperty.AG
-          (CTLProperty.AF
-             (CTLProperty.Atomic
-                ( ( Typed_syntax.T_bool_const True,
-                    Abstract_syntax.A_BOOL,
-                    Abstract_syntax.extent_unknown ),
-                  Some (Z.to_string label) )))
-      in
-      let rec create_prop label =
-        match label with
-        | [] -> None
-        | l :: [] -> Some (nonterm l)
-        | l :: q ->
-            Some (CTLProperty.OR (nonterm l, Option.get (create_prop q)))
-      in
-      match create_prop (List.map fst labels) with
-      | None -> Printf.printf "\nFinal Analaysis Result: UNKNOWN\n"
-      | Some p ->
-          let module Nonterm = CTLIteratorNew (Dnew.DecisionTree.TSAP) in
-          if Nonterm.analyze p ntprog then
-            Printf.printf "\n Final Analysis Result: false(TERM)\n"
-          else Printf.printf "\nFinal Analaysis Result: UNKNOWN\n" *)
-(*    
+  Config.analysis := "non-termination";
+  run_non_termination prog ;
+  if !Config.json_output then Regression.output_json ();
+  (*    
   let semantic = get_semantic () in
   (* Property and filename must be given (except for termination property) *)
   (* Parsing the property and the file to an intermediate ast *)
@@ -423,8 +486,8 @@ let doit () =
            | _ -> raise (Invalid_argument "Impossible to reach"))
      | _ -> raise (Invalid_argument "Unknown Analysis"));   *)
   (* if !Config.vulnerability then ( *)
-    (* Launch the vulnerability analysisand output the infered variables *)
-   (* let varlist =
+  (* Launch the vulnerability analysisand output the infered variables *)
+  (* let varlist =
       List.map snd @@ List.of_seq @@ AbstractSyntax.StringMap.to_seq vars
     in
     Vulnerability.analyse S.D.vulnerable varlist func !S.bwdInvMap;

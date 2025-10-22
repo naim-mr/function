@@ -12,7 +12,7 @@ open VarSet
 open Utils
 open Datatypes
 open Utils.InvMap
-
+open SemanticsNew
 (* type for CTL properties, instantiated with bExp for atomic propositions *)
 type ctl_property = Typed_syntax.expr typed CTLProperty.generic_property
 
@@ -153,7 +153,7 @@ let prog_of_program (program : program) : prog =
   in
   (program.globalBlock, funcMap, varMap)
 
-module CTLIteratorNew (D : RANKING_FUNCTION) = struct
+module CTLIteratorNew (D : RANKING_FUNCTION): SemanticsNew.SEMANTIC = struct
   (*
      Fixed Point Computation:
 
@@ -172,6 +172,7 @@ module CTLIteratorNew (D : RANKING_FUNCTION) = struct
 
   (* We use fwdInvMap but not the bwd, necessaray for now to match SEMANTIC module type *)
   let fwdInvMap = ref InvMap.empty
+  let fwdTaintMap = ref InvMap.empty
   let bwdInvMap = ref InvMap.empty
 
   (* 
@@ -184,6 +185,7 @@ module CTLIteratorNew (D : RANKING_FUNCTION) = struct
   type r = inv
 
   (* dummy_prop to give a default value to optional (due to termination iterator) parameter ?property *)
+  let dummy_prop = Exp StringMap.empty
   (* Also to match module type: to remove in the future *)
   let initStm env vars s = ()
   let initBlk env vars b = ()
@@ -709,18 +711,19 @@ module CTLIteratorNew (D : RANKING_FUNCTION) = struct
     inv property
 
   (* Function called by cda same as analyze *)
-  let bwdRec property func env (vars : var list) _ b : D.t =
+  let bwdRec ?(property = dummy_prop) func env (vars : var list) _ b : D.t =
     let f = StringMap.find !Config.main func in
     let p =
       { environment = env; variables = vars; mainFunction = f; globalBlock = b }
     in
-    let i = compute p property in
+    let i = compute p (SemanticsNew.get_ctl property) in
     let initialLabel = block_label p.mainFunction.func_body in
     let programInvariant = InvMap.find initialLabel i in
     bwdInvMap := i;
     programInvariant
 
-  let analyze property prog =
+  let analyze  ?(precondition = Some (T_bool_const True)) ?(property = dummy_prop) prog =
+    let property = get_ctl property in
     let program = program_of_prog prog !Config.main in
     if !Config.refine then (* Run forward analysis if 'refine' flag is set *)
       ForwardIteratorB.analyze prog;

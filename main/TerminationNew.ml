@@ -14,16 +14,13 @@ open Config
 open Apron
 open Dnew.Domain
 open Dnew.Functions
-open Semantics
+open SemanticsNew
 open Dnew.DecisionTree
 open ForwardNew
 open VarSet
 open Utils.Datatypes
 
-module TerminationIteratorNew =
-functor
-  (D : RANKING_FUNCTION)
-  ->
+module TerminationIteratorNew (D : RANKING_FUNCTION) : SEMANTIC =
   struct
     type r = D.t
 
@@ -31,7 +28,7 @@ functor
     module B = D.B
     module ForwardIteratorB = ForwardIterator (B)
 
-    let dummy_prop = Ctl (CTLIterator.atomic_property_of_bexp A_TRUE)
+    let dummy_prop = Exp StringMap.empty
     let fwdInvMap = ref InvMap.empty
     let fwdTaintMap = ref InvMap.empty
     let bwdInvMap = ref InvMap.empty
@@ -181,7 +178,7 @@ functor
           initStm env vars s;
           initBlk env vars b
 
-    let analyze ?(precondition = Some (T_bool_const True)) ?property prog =
+    let analyze ?(precondition = Some (T_bool_const True)) ?property (prog: Typed_syntax.prog) =
       let rec init_env xs env =
         match xs with
         | [] -> env
