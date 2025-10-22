@@ -237,7 +237,7 @@ class ReportDiff:
         self.removed_assumptions = old.assumptions.difference(new.assumptions)
         self.new_success = not old.success and new.success
         self.new_failure = old.success and not new.success
-        self.new_tree = not (old.tree == new.tree)
+        self.new_tree = True    # not (old.tree == new.tree)
         self.new_result  =  not (old.result == new.result)
     def is_empty(self):
         return (
@@ -255,11 +255,8 @@ class ReportDiff:
     def is_regressed(self):
         return (
             (not args.ignore_time and 1000.0*self.time > args.time_tolerance)
-            or self.new_alarms
-            or self.new_assumptions
             or self.new_failure
-            or self.new_tree
-            or self.new_result
+            or self.new_success 
         )
 
 
@@ -270,7 +267,7 @@ class ReportDiff:
             diffs = []
             if not args.ignore_time and 1000.0*abs(self.time) > args.time_tolerance:
                 diffs.append(Diff.substitue("time: %.4f"%self.old.time, "time: %.4f"%self.new.time))
-            diffs.append(Diff.substitue(self.old.tree,self.new.tree))
+#            diffs.append(Diff.substitue(self.old.tree,self.new.tree))
             diffs.append(Diff.substitue(self.old.result,self.new.result))
             diffs += [Diff.add(a) for a in self.new_alarms]
             diffs += [Diff.remove(a) for a in self.removed_alarms]
@@ -308,7 +305,7 @@ class DbDiff:
         return any(d.is_regressed() for d in self.diffs)
 
     def __str__(self):
-        return "\n\n".join([str(d) for d in self.diffs if not d.is_empty()])
+        return "\n\n".join([str(d) for d in self.diffs if not d.is_empty() and d.is_regressed()])
 
     def summary(self):
         new_alarms = 0

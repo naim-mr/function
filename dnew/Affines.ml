@@ -722,7 +722,7 @@ module Affine (B : PARTITION) : FUNCTION = struct
                     String.compare (Var.to_string x) (Z.to_string y.var_id) = 0)
                   vars
               in
-              Format.fprintf Format.str_formatter "%s{%s}"
+              Format.fprintf Format.str_formatter "$%s{%s}"
                 (Z.to_string x.var_id) x.var_name;
               aux v (Format.flush_str_formatter ())
             with Not_found -> ())

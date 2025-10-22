@@ -29,20 +29,19 @@ module ForwardIterator (B : PARTITION) = struct
 
   let fwdInvMap = ref InvMap.empty
   let addFwdInv l (a : B.t) = fwdInvMap := InvMap.add l a !fwdInvMap
+
   let blockLabel b =
-    match b with T_empty (l, _) -> l | T_stat ((l, _), _, _) ->  l
+    match b with T_empty (l, _) -> l | T_stat ((l, _), _, _) -> l
 
   let rec initStat s (env, vars) =
     match s with
     | T_add_var (v, _)
-      when not
-           @@ Environment.mem_var env
-                (Var.of_string (Z.to_string v.var_id)) ->
+      when not @@ Environment.mem_var env (Var.of_string (Z.to_string v.var_id))
+      ->
         (B.add_var_to_env env v, v :: vars)
     | T_assign ((v, _), _)
-      when not
-           @@ Environment.mem_var env
-                (Var.of_string (Z.to_string v.var_id)) ->
+      when not @@ Environment.mem_var env (Var.of_string (Z.to_string v.var_id))
+      ->
         (B.add_var_to_env env v, v :: vars)
     | T_if (b, s1, s2) ->
         let env, vars = initBlock s1 (env, vars) in
@@ -70,9 +69,9 @@ module ForwardIterator (B : PARTITION) = struct
     | T_RETURN -> B.bot env vars
     | T_add_var (v, Some (e, t, ext)) ->
         B.fwdAssign p ((T_var v, v.var_typ, ext), (e, t, ext))
-    | T_assign ((v, l), e) ->
-        B.fwdAssign p ((T_var v, v.var_typ, l), e)
+    | T_assign ((v, l), e) -> B.fwdAssign p ((T_var v, v.var_typ, l), e)
     | T_assert (b, l) -> B.filter p b
+    | T_expr _ | T_assume _ -> p
     | T_if (b, s1, s2) ->
         let p1 = fwdBlk funcs env vars (B.filter p b) s1 in
         let p2 = fwdBlk funcs env vars (B.filter p (neg_bexp b)) s2 in
@@ -98,12 +97,12 @@ module ForwardIterator (B : PARTITION) = struct
         let p = aux i p2 1 in
         addFwdInv l p;
         B.filter p (neg_bexp b)
-    | T_call (f, ss) -> 
-          let _ = fwdBlk funcs env vars p f.func_body in
-          InvMap.find (Z.succ (blockLabel f.func_body)) !fwdInvMap 
+    | T_recall (f, ss) -> raise (Invalid_argument "bwdStm:T_recall")
+    | T_call (f, ss) ->
+        let _ = fwdBlk funcs env vars p f.func_body in
+        InvMap.find (Z.succ (blockLabel f.func_body)) !fwdInvMap
+    | T_BREAK -> raise (Invalid_argument "bwdStm:T_BREAK")
 
-    | _ ->
-       B.top env vars
   and fwdBlk funcs env vars (p : B.t) (b : block) : B.t =
     match b with
     | T_empty (l, _) ->
@@ -174,10 +173,8 @@ module ForwardIterator (B : PARTITION) = struct
       match xs with
       | [] -> env
       | x :: xs ->
-          if
-            Environment.mem_var env
-              (Var.of_string (Z.to_string x.var_id))
-          then init_env xs env
+          if Environment.mem_var env (Var.of_string (Z.to_string x.var_id)) then
+            init_env xs env
           else
             init_env xs
               (Environment.add env
@@ -196,8 +193,8 @@ module ForwardIterator (B : PARTITION) = struct
     let v1 = snd (List.split (IdMap.bindings varmap)) in
     let v1 = v1 @ f.func_args @ retvars in
     let env = Environment.make [||] [||] in
-    let env, vars = initBlock block (env,v1) |>  initBlock f.func_body  in
-    let env = init_env v1 env in 
+    let env, vars = initBlock block (env, v1) |> initBlock f.func_body in
+    let env = init_env v1 env in
     let s = f.func_body in
     if !tracefwd && not !minimal then
       Format.fprintf !fmt "\nForward Analysis Trace:\n";

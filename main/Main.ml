@@ -209,9 +209,7 @@ let parse_args () =
             Config.output_dir := s),
         "Summary of the analysis in a json" );
       ( "-json_output",
-        Arg.Unit
-          (fun _ ->
-            Config.json_output := true),
+        Arg.Unit (fun _ -> Config.json_output := true),
         "Summary of the analysis in a json" );
     ]
     (fun s -> Config.filename := s)
@@ -355,17 +353,17 @@ let doit () =
   check_args ();
 
   (* Get the iterator for the demanded analysis *)
-(* parse the program*)
+  (* parse the program*)
   let prog = C_Frontend.parse_file !Config.filename in
   if not !minimal then Typed_syntax.pp_prog Format.std_formatter prog;
-  try
-    let module Sem =
-      TerminationNew.TerminationIteratorNew (Dnew.DecisionTree.TSAP) in
-    let b = Sem.analyze prog in
-    if !Config.json_output then Regression.output_json ();
-    if b then Printf.printf "\nFinal Analaysis Result: TRUE\n"
-    else Printf.printf "\nFinal Analaysis Result: UNKNOWN\n"
-    (* let ntprog, labels = Typed_syntax.nt_prog prog in
+
+  let module Sem = TerminationNew.TerminationIteratorNew (Dnew.DecisionTree.TSAP) in
+  let b = Sem.analyze prog in
+  if !Config.json_output then Regression.output_json ();
+  if b then Printf.printf "\nFinal Analaysis Result: TRUE\n"
+  else Printf.printf "\nFinal Analaysis Result: UNKNOWN\n";
+
+  (* let ntprog, labels = Typed_syntax.nt_prog prog in
       let nonterm label =
         CTLProperty.AG
           (CTLProperty.AF
@@ -389,9 +387,8 @@ let doit () =
           if Nonterm.analyze p ntprog then
             Printf.printf "\n Final Analysis Result: false(TERM)\n"
           else Printf.printf "\nFinal Analaysis Result: UNKNOWN\n" *)
-  with _ -> Printf.printf "\nFinal Analaysis Result: UNKNOWN\n" 
-
-  (* let semantic = get_semantic () in
+(*    
+  let semantic = get_semantic () in
   (* Property and filename must be given (except for termination property) *)
   (* Parsing the property and the file to an intermediate ast *)
   let itast = parseFile !filename in 
@@ -424,16 +421,15 @@ let doit () =
            (match property with
            | Semantics.Ctl p -> p
            | _ -> raise (Invalid_argument "Impossible to reach"))
-     | _ -> raise (Invalid_argument "Unknown Analysis"));  *)
-  (* if !Config.vulnerability then (
+     | _ -> raise (Invalid_argument "Unknown Analysis"));   *)
+  (* if !Config.vulnerability then ( *)
     (* Launch the vulnerability analysisand output the infered variables *)
-    let varlist =
+   (* let varlist =
       List.map snd @@ List.of_seq @@ AbstractSyntax.StringMap.to_seq vars
     in
     Vulnerability.analyse S.D.vulnerable varlist func !S.bwdInvMap;
     Format.fprintf !fmt " \n %s \n"
-      (Yojson.Safe.pretty_to_string !Config.vuln_res));  *) 
-(*
-  () *)
+      (Yojson.Safe.pretty_to_string !Config.vuln_res));  *)
+  ()
 
 let _ = doit ()

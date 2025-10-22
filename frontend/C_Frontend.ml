@@ -241,7 +241,6 @@ let rec convert_expr (st : state) ((kind, typ, _) : C_AST.expr) :
         let input_v_name =
           Format.sprintf "nondet_in_%d" (List.length !(st.input_vars) + 1)
         in
-
         (* get the range of the input variable and the hint type *)
         let typ, hint = StringMap.find func_name nondet_func_type_hint in
         let assign_expr, hint =
@@ -266,10 +265,8 @@ let rec convert_expr (st : state) ((kind, typ, _) : C_AST.expr) :
                   (UnsupportedConversion
                      "unexpected kind of arguments of nondet func"))
         in
-
         (* collect the input variable with its type and initialization *)
         st.input_vars := (typ, input_v_name, assign_expr) :: !(st.input_vars);
-
         (* return the variable *)
         (Abstract_syntax.A_identifier input_v_name, hint))
       else
@@ -413,6 +410,26 @@ let rec convert_stmt (st : state) ((stmt, _) : C_AST.statement) :
       assert (Array.length args = 0);
       Abstract_syntax.A_assert
         (Abstract_syntax.A_bool_const false |> attach_position)
+  | C_AST.S_expression
+      ( C_AST.E_call
+          ((C_AST.E_cast ((C_AST.E_function func, _, _), _), _, _), args),
+        _,
+        _ )
+    when func.func_unique_name = "exit" ->
+      assert (Array.length args = 1);
+      Abstract_syntax.A_return
+        (Option.bind None (fun e ->
+             convert_expr st e |> fst |> attach_position |> Option.some))
+  | C_AST.S_expression
+      ( C_AST.E_call
+          ((C_AST.E_cast ((C_AST.E_function func, _, _), _), _, _), args),
+        _,
+        _ )
+    when func.func_unique_name = "abort" ->
+      assert (Array.length args = 0);
+      Abstract_syntax.A_return
+        (Option.bind None (fun e ->
+             convert_expr st e |> fst |> attach_position |> Option.some))
   | C_AST.S_expression e ->
       Abstract_syntax.A_expr (convert_expr st e |> fst |> attach_position)
   | C_AST.S_jump (C_AST.S_return (ret_val, _)) ->
@@ -421,7 +438,7 @@ let rec convert_stmt (st : state) ((stmt, _) : C_AST.statement) :
              convert_expr st e |> fst |> attach_position |> Option.some))
   | C_AST.S_jump (C_AST.S_break _) -> Abstract_syntax.A_BREAK
   | C_AST.S_jump (C_AST.S_goto _) -> raise (UnsupportedFeature "goto")
-  | C_AST.S_target (C_AST.S_label _) -> A_SKIP
+  | C_AST.S_target (C_AST.S_label s) -> A_label (s |> attach_position)
   | _ -> raise (UnsupportedConversion "unsupported stat kind")
 
 and convert_block (st : state) (block : C_AST.block) : Abstract_syntax.stat =
@@ -460,6 +477,7 @@ let parse_file (f : string) : Typed_syntax.prog =
   parse_file "clang" !Config.filename [ "-fbracket-depth=512" ] false false
     false false ctx [];
   let prj = link_project ctx in
+  C_print.print_project stdout prj;
   let st = { input_vars = ref [] } in
   (* StringMap.to_seq returns the functions in random order. This may
      cause some problems as a function calling another one may be
@@ -506,5 +524,4 @@ let parse_file (f : string) : Typed_syntax.prog =
             Abstract_syntax.A_INPUT ))
       !(st.input_vars)
   in
-  let ps = input_decl @ global_decl @ funcs |> attach_position in
-  Abstract_to_typed_syntax.translate_program [ ps ]
+  Abstract_to_typed_syntax.translate_program input_decl global_decl funcs

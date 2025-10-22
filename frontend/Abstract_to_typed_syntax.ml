@@ -298,10 +298,19 @@ and call (s, sx) args env pre post x =
   match f.func_return with
   | None ->
       (* function without return *)
-      (None, pre @ pre' @ [ (T_call (f, sx), x) ] @ post', post)
+      let node =
+        if String.compare f.func_name s = 0 then (T_call (f, sx), x)
+        else (T_recall (f, sx), x)
+      in
+
+      (None, pre @ pre' @ [ node ] @ post', post)
   | Some v ->
       (* function with return value *)
       let v1 = new_var "__returned" true x v.var_typ T_LOCAL in
+      let node =
+        if String.compare f.func_name s = 0 then (T_call (f, sx), x)
+        else (T_recall (f, sx), x)
+      in
       (* note: all the formal argument and return variables are deleted
          just after the call;
          the actual argument is copied into a temporary v1 to be used by the
@@ -314,7 +323,7 @@ and call (s, sx) args env pre post x =
         @ [
             (T_add_var (v1, None), x);
             (T_add_var (v, None), x);
-            (T_call (f, sx), x);
+            (node);
             (T_assign ((v1, x), (T_var v, v.var_typ, x)), x);
             (T_del_var v, x);
           ]
@@ -439,7 +448,8 @@ let rec stat env (e, x) =
           (env, [], []) l
       in
       (env, add_lbl (List.rev rstats), locs)
-  | A_label _ -> failwith "FIXME: A_label unsupported"
+  | A_label (s,e) -> 
+    (env, [ (new_id (), T_label (s,e), x) ], [])
   | A_assert e ->
       let ee, pre, post = pure_expr env [] [] e in
       let ((_, _, xx) as ee) = as_bool ee in
@@ -538,7 +548,45 @@ let decl env d =
 (************************************************************************)
 
 (* translation entry point *)
-let translate_program (ps : decl list ext list) : prog =
+let translate_program (input_vars : decl list) (global: decl list) (funcs: decl list): prog =
+  let ps = [(input_vars @ global @ funcs ) , (Lexing.dummy_pos,Lexing.dummy_pos)]  in 
+  let env =  
+  List.fold_left (fun env d -> 
+    match d with
+    | A_global (((t, l), _), kind) ->
+        env
+    | A_function ((r, (s, sx), args, body), x) ->
+      let fid = new_id () in
+      let ret =
+        match r with
+        | None -> None
+        | Some (t, _) -> Some (new_var "__return" true x t T_LOCAL)
+      in
+      let env_body = { env with env_return = ret } in
+      let args, env_body =
+        List.fold_left
+          (fun (args, env) ((s, sx), (t, _)) ->
+            let v = new_var s false sx t T_LOCAL in
+            ( v :: args,
+              {
+                env with
+                env_locals = StringMap.add s v env.env_locals;
+                env_vars = IdMap.add v.var_id v env.env_vars;
+              } ))
+          ([], env_body) (List.rev args)
+      in
+      let f = {
+        func_name = s;
+        func_extent = sx;
+        func_id = fid;
+        func_return = ret;
+        func_args = args;
+        func_body = T_empty (dummy_id, Lexing.dummy_pos);
+      }
+      
+    in
+      {env with env_funcs = StringMap.add s f env.env_funcs; }) empty_env funcs
+  in
   let x = snd (List.hd ps) in
   let env, rstats, rfuncs =
     List.fold_left
@@ -549,7 +597,7 @@ let translate_program (ps : decl list ext list) : prog =
             let stats = add_lbl stats in
             (env, List.rev_append stats rstats, List.rev_append funcs rfuncs))
           (env, rstats, rfuncs) p)
-      (empty_env, [], []) ps
+      (env, [], []) ps
   in
   let init = mk_block (List.rev rstats) [] x in
   let funcs =

@@ -43,7 +43,6 @@ functor
         m
 
     let blockLabel b =
-      Format.printf "\n in blocklabel %a \n" Typed_syntax.pp_block b;
       match b with T_empty (l, _) -> l | T_stat ((l, _), _, _) ->  l
       
 
@@ -125,9 +124,9 @@ functor
           let p = aux i p2' 1 in
           addBwdInv l p;
           if !refine then D.refine p a else p
+      | T_recall (f, ss) -> raise (UnsupportedConversion ("bwdStmt: T_Recall"))
       | T_call (f, ss) ->
             let zero = D.domain_zero p in 
-            Format.printf "\n zero: %a \n" D.print zero;
             let p' =  bwdRec funcs env vars zero f.func_body in
             let b = InvMap.find (Z.succ (blockLabel f.func_body)) !fwdInvMap in
             D.meet APPROXIMATION (D.refine p b ) p'

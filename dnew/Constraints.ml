@@ -291,7 +291,7 @@ module Constraint : CONSTRAINT = struct
                 = 0)
               vars
           in
-          Format.fprintf Format.str_formatter "%s{%s}" (Z.to_string x.var_id)
+          Format.fprintf Format.str_formatter "$%s{%s}" (Z.to_string x.var_id)
             x.var_name;
           aux v (Format.flush_str_formatter ())
         with Not_found -> ())

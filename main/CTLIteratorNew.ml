@@ -365,6 +365,7 @@ module CTLIteratorNew (D : RANKING_FUNCTION) = struct
                   Format.printf "\n add %d %a" (Z.to_int f.func_id) D.print t
                 in
                 t
+            | T_recall (f, ss) -> raise (Invalid_argument "bwdStm:T_recall")
             | T_BREAK -> raise (Invalid_argument "bwdStm:T_BREAK")
             (* | A_recall (f, ss) -> raise (Invalid_argument "bwdStm:A_recall") *)
           in
@@ -510,6 +511,7 @@ module CTLIteratorNew (D : RANKING_FUNCTION) = struct
                 (* compute fixed point for while-loop starting with current 'in' state at loop-head *)
                 addInv (fst l) final_in_state
             | T_call (f, ss) -> bwd out f.func_body
+            | T_recall (f, ss) -> raise (Invalid_argument "bwdStm:T_recall")
             | T_BREAK -> raise (Invalid_argument "bwdStm:T_BREAK")
             (* | A_recall (f, ss) -> raise (Invalid_argument "bwdStm:A_recall") *)
           in
