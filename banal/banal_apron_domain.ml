@@ -5,14 +5,12 @@
 *)
 
 open Utils.Datatypes
-open Banal_semantics
+open Valsem
 open Banal_domain
 open Utils.Apron_utils
 open Frontend.Abstract_syntax
 open Frontend.Typed_syntax
 open Apron
-
-module Itv_rat = Utils.Itv_rat
 module Linearization = Banal_linearization
 
 let trace_remove = false
@@ -39,7 +37,7 @@ module ApronDomain (Param : NUMERICAL) = struct
   (*************)
 
   (* apron name of a variable *)
-  let apron_of_var (v : var) : Var.t = Var.of_string ((Z.to_string v.var_id))
+  let apron_of_var (v : var) : Var.t = Var.of_string (Z.to_string v.var_id)
 
   let add_var_to_env env v =
     let i, r =
@@ -294,9 +292,7 @@ module ApronDomain (Param : NUMERICAL) = struct
         (* for each constraint oldc in a *)
         for i = 0 to Lincons1.array_length ar - 1 do
           let oldc = Lincons1.array_get ar i in
-          if
-            lincons1_cmp c oldc = 0
-          then (
+          if lincons1_cmp c oldc = 0 then (
             (* try to replace oldc with c *)
             Lincons1.array_set ar i c;
             let aa = Abstract1.of_lincons_array man env ar in
@@ -308,7 +304,7 @@ module ApronDomain (Param : NUMERICAL) = struct
       (pool @ [ c ]);
     (* now, remove c *)
     let l = list_of_lincons_array ar in
-    let ll = List.filter (fun cc -> lincons1_cmp c cc = 0 ) l in
+    let ll = List.filter (fun cc -> lincons1_cmp c cc = 0) l in
     if trace_remove && List.length l <> List.length ll then
       Format.printf "### remove_constraint remove: %a ###@\n" Lincons1.print c;
     abs_of_lincons_list env ll

@@ -7,9 +7,6 @@
 open Utils.Datatypes
 open Banal_mathtypes
 open Utils.Apron_utils
-module Itv_int = Banal_itv_int
-module Itv_float = Banal_itv_float
-module Itv_rat = Banal_itv_rat
 
 module type VAR = sig
   type t

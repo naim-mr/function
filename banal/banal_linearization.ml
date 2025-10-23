@@ -6,7 +6,7 @@
 
 open Banal_datatypes
 open Banal_mathtypes
-open Banal_semantics
+open Valsem
 open Banal_domain
 open Frontend.Abstract_syntax
 open Frontend.Typed_syntax

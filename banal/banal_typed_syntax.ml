@@ -10,8 +10,6 @@
 *)
 
 open Banal_datatypes
-module Float = Banal_float
-module Intinf = Banal_intinf
 include Frontend.Abstract_syntax
 include Frontend.Typed_syntax
 (* 
