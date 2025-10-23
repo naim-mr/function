@@ -2,9 +2,9 @@ open Typed_syntax
 open Apron
 open Dnew.Partition
 open Utils.Datatypes
-module type ENVINIT = sig 
-  val env: Typed_syntax.prog -> Environment.t * var list
 
+module type ENVINIT = sig
+  val env : Typed_syntax.prog -> Environment.t * var list
 end
 
 module Make (B : PARTITION) : ENVINIT = struct
@@ -61,5 +61,5 @@ module Make (B : PARTITION) : ENVINIT = struct
     let v1 = v1 @ f.func_args @ retvars in
     let env = Environment.make [||] [||] in
     let env, vars = initBlock block (env, v1) |> initBlock f.func_body in
-    initEnv v1 env,vars
+    (initEnv v1 env, vars)
 end

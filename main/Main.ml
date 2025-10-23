@@ -278,8 +278,7 @@ let ctl_iterator_new () : (module SemanticsNew.SEMANTIC) =
              if !ordinals then (module CTLIteratorNew (DecisionTree.TSOO))
              else (module CTLIteratorNew (DecisionTree.TSAO))
          | "polyhedra" ->
-             if !ordinals then
-               (module CTLIteratorNew (DecisionTree.TSOP))
+             if !ordinals then (module CTLIteratorNew (DecisionTree.TSOP))
              else (module CTLIteratorNew (DecisionTree.TSAP))
          | _ -> raise (Invalid_argument "Unknown Abstract Domain")
         : SemanticsNew.SEMANTIC)
@@ -446,10 +445,11 @@ let doit () =
   run_termination_new prog;
   Format.print_newline ();
   if !Config.json_output then Regression.output_json ();
-  if not !Config.result then (
+
+  (* if not !Config.result then (
     Config.analysis := "non-termination";
        run_non_termination prog;
-    if !Config.json_output then Regression.output_json ());
+    if !Config.json_output then Regression.output_json ()); *)
 
   (*    
   let semantic = get_semantic () in

@@ -31,6 +31,7 @@ type expr =
   | T_binary of binary_op * expr typed * expr typed
   | T_float_const of float_set
   | T_int_const of int_set
+  | T_INPUT
   | T_bool_const of bool_set
   | T_var of var
 
@@ -183,6 +184,7 @@ let rec pp_expr_ext fmt ((e, _, _) : expr typed) =
   | T_float_const f -> Format.pp_print_string fmt (string_of_float_set f)
   | T_int_const i -> Format.pp_print_string fmt (string_of_int_set i)
   | T_bool_const b -> Format.pp_print_string fmt (string_of_tbool b)
+  | T_INPUT -> Format.print_string "input()"
   | T_var v -> print_var_name fmt v
 
 let rec pp_expr fmt e =
@@ -203,6 +205,7 @@ let rec pp_expr fmt e =
   | T_float_const f -> Format.pp_print_string fmt (string_of_float_set f)
   | T_int_const i -> Format.pp_print_string fmt (string_of_int_set i)
   | T_bool_const b -> Format.pp_print_string fmt (string_of_tbool b)
+  | T_INPUT -> Format.print_string "input()"
   | T_var v -> print_var_name fmt v
 
 let rec pp_stat ind fmt s =

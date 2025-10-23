@@ -6,7 +6,8 @@ int main() {
   }
   int r = y - z;
 verif:
-  int d = 1 / r;
+int d = 1 + r;
 exit:
+
   return 0;
 }

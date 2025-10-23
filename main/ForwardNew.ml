@@ -22,37 +22,57 @@ module ForwardIterator (B : PARTITION) = struct
       (fun l a -> Format.fprintf fmt "%a: %a\n" label_print l fprint a)
       m
 
-  let fwdMap_print fmt m fprint =
-    InvMap.iter
-      (fun l a -> Format.fprintf fmt "%a: %a\n" label_print l fprint a)
-      m
+  let fwdMap_print fmt m iter printkey =
+    iter (fun l a -> Format.fprintf fmt "%a: %a\n" printkey l B.print a) m
 
   let fwdInvMap = ref InvMap.empty
+  let fwdSummaryMap = ref StringMap.empty
   let addFwdInv l (a : B.t) = fwdInvMap := InvMap.add l a !fwdInvMap
 
   let blockLabel b =
     match b with T_empty (l, _) -> l | T_stat ((l, _), _, _) -> l
 
-
+  type ctx = {
+    env : Environment.t;
+    vars : var list;
+    global : Typed_syntax.block;
+    funcs : func StringMap.t;
+    prog : Typed_syntax.prog;
+    f_cur : func;
+    summary : bool;
+  }
   (* compute invariant map based on forward analysis *)
-  let rec compute (vars, stmts, funcs) p main env =
-    let f = StringMap.find main funcs in
-    let s = f.func_body in
-    let _ = fwdBlk funcs env vars (fwdBlk funcs env vars p stmts) s in
-    !fwdInvMap
 
-  and fwdStm funcs env vars p s =
+  let rec fwdStm ctx p s =
     match s with
     | T_label _ | T_print _ | T_add_var (_, None) | T_del_var _ -> p
-    | T_RETURN -> B.bot env vars
+    | T_RETURN ->
+        if ctx.summary then
+          if not (StringMap.mem ctx.f_cur.func_name !fwdSummaryMap) then
+            fwdSummaryMap := StringMap.add ctx.f_cur.func_name p !fwdSummaryMap
+          else
+            fwdSummaryMap :=
+              StringMap.update ctx.f_cur.func_name
+                (Option.map (fun (prev : B.t) -> B.join prev p))
+                !fwdSummaryMap;
+        B.bot ctx.env ctx.vars
     | T_add_var (v, Some (e, t, ext)) ->
         B.fwdAssign p ((T_var v, v.var_typ, ext), (e, t, ext))
     | T_assign ((v, l), e) -> B.fwdAssign p ((T_var v, v.var_typ, l), e)
     | T_assert (b, l) -> B.filter p b
     | T_expr _ | T_assume _ -> p
     | T_if (b, s1, s2) ->
-        let p1 = fwdBlk funcs env vars (B.filter p b) s1 in
-        let p2 = fwdBlk funcs env vars (B.filter p (neg_bexp b)) s2 in
+        let p1 = fwdBlk ctx (B.filter p b) s1 in
+
+        let p2 = fwdBlk ctx (B.filter p (neg_bexp b)) s2 in
+
+        if ctx.summary then (
+          Format.fprintf !fmt "neg b: %a\n" Typed_syntax.pp_expr_ext
+            (neg_bexp b);
+          Format.fprintf !fmt "p: %a\n" B.print p;
+          Format.fprintf !fmt "p1: %a\n" B.print p1;
+          Format.fprintf !fmt "p2: %a\n" B.print p2;
+          Format.fprintf !fmt "join p1 p2: %a\n" B.print (B.join p1 p2));
         B.join p1 p2
     | T_while ((l, _), b, s) ->
         let rec aux i p2 n =
@@ -68,31 +88,29 @@ module ForwardIterator (B : PARTITION) = struct
             let i'' = if n <= !joinfwd then i' else B.widen i i' in
             if !tracefwd && not !minimal then
               Format.fprintf !fmt "i'': %a\n" B.print i'';
-            aux i'' (fwdBlk funcs env vars (B.filter i'' b) s) (n + 1)
+            aux i'' (fwdBlk ctx (B.filter i'' b) s) (n + 1)
         in
-        let i = B.bot env vars in
-        let p2 = fwdBlk funcs env vars (B.filter i b) s in
+        let i = B.bot ctx.env ctx.vars in
+        let p2 = fwdBlk ctx (B.filter i b) s in
         let p = aux i p2 1 in
         addFwdInv l p;
         B.filter p (neg_bexp b)
     | T_recall (f, ss) -> raise (Invalid_argument "bwdStm:T_recall")
-    | T_call (f, ss) ->
-        let _ = fwdBlk funcs env vars p f.func_body in
-        InvMap.find (Z.succ (blockLabel f.func_body)) !fwdInvMap
+    | T_call (f, ss) -> fwdBlk ctx p f.func_body
     | T_BREAK -> raise (Invalid_argument "bwdStm:T_BREAK")
 
-  and fwdBlk funcs env vars (p : B.t) (b : block) : B.t =
+  and fwdBlk ctx (p : B.t) (b : block) : B.t =
     match b with
     | T_empty (l, _) ->
         if !tracefwd && not !minimal then
           Format.fprintf !fmt "### %a ###: %a\n" label_print l B.print p;
-        addFwdInv l p;
+        if not ctx.summary then addFwdInv l p;
         p
     | T_stat ((l, _), (s, _), b) ->
         if !tracefwd && not !minimal then
           Format.fprintf !fmt "### %a ###: %a\n" label_print l B.print p;
-        addFwdInv l p;
-        fwdBlk funcs env vars (fwdStm funcs env vars p s) b
+        if not ctx.summary then addFwdInv l p;
+        fwdBlk ctx (fwdStm ctx p s) b
 
   (* Assgined block: return set of variables assigned in a block (only syntactic) *)
   (* let rec fwdTStm funcs p s =
@@ -161,16 +179,38 @@ module ForwardIterator (B : PARTITION) = struct
     let s = f.func_body in
     if !tracefwd && not !minimal then
       Format.fprintf !fmt "\nForward Analysis Trace:\n";
-    let startfwd = Sys.time () in 
-    let _ =
-      fwdBlk funcmap env v1 (fwdBlk funcmap env v1 (B.top env v1) block) s
+    let startfwd = Sys.time () in
+    let ctx =
+      {
+        env;
+        global = block;
+        vars = v1;
+        funcs = funcmap;
+        prog;
+        f_cur = f;
+        summary = true;
+      }
     in
+    StringMap.iter
+      (fun _ f ->
+        Printf.printf "\n iter f.func_name %s <> %s %b \n" f.func_name
+          !Config.main
+          (f.func_name <> !Config.main);
+        if f.func_name <> !Config.main then
+          let _ = fwdBlk { ctx with f_cur = f } (B.top env v1) f.func_body in
+          ())
+      ctx.funcs;
+    let ctx = { ctx with summary = false } in
+    let _ = fwdBlk ctx (fwdBlk ctx (B.top env v1) block) s in
     let stopfwd = Sys.time () in
+    Format.fprintf !fmt "\nForward Summary :\n";
+    fwdMap_print !fmt !fwdSummaryMap StringMap.iter (fun fmt ->
+        Format.fprintf fmt "%s");
     if not !minimal then
       if !timefwd then
         Format.fprintf !fmt "\nForward Analysis (Time: %f s):\n"
           (stopfwd -. startfwd)
       else Format.fprintf !fmt "\nForward Analysis numerical:\n";
-    fwdMap_print !fmt !fwdInvMap B.print; 
+    fwdMap_print !fmt !fwdInvMap InvMap.iter label_print;
     ()
 end

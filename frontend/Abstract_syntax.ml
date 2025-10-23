@@ -99,6 +99,7 @@ and expr =
   | A_assign of lvalue ext * binary_assign_op option * expr ext
   | A_increment of lvalue ext * incr * prepost
   | A_call of string ext * expr ext list
+  | A_INPUT
   | A_identifier of string
   | A_float_const of string
   | A_int_const of string
@@ -272,6 +273,7 @@ let rec pp_expr fmt e =
   | A_identifier v -> Format.fprintf fmt "%s" v
   | A_float_const f -> Format.fprintf fmt "%s" f
   | A_int_const z -> Format.fprintf fmt "%s" z
+  | A_INPUT -> Format.fprintf fmt "input"
   | A_bool_const b -> Format.fprintf fmt "%s" (Bool.to_string b)
   | A_float_itv ((f1, _), (f2, _)) -> Format.fprintf fmt "[%s, %s]" f1 f2
   | A_int_itv ((z1, _), (z2, _)) -> Format.fprintf fmt "[%s, %s]" z1 z2

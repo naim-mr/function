@@ -35,7 +35,7 @@ module StringSet = Set.Make (struct
   let compare = compare
 end)
 
-module StringMap = Mapext.Make (struct
+module StringMap = Map.Make (struct
   type t = string
 
   let compare = compare

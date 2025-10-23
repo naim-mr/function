@@ -1145,7 +1145,13 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
     let post = t.domain in
     let env = t.env in
     let vars = t.vars in
+    let e' : expr typed = snd e in
     let random = ref false in
+    let _ =
+      match e' with
+      | Typed_syntax.T_INPUT, typ, ext -> random := true
+      | _ -> random := false
+    in
     let merge t1 t2 cs =
       let rec aux (t1, t2) cs =
         match (t1, t2) with

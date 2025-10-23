@@ -79,7 +79,7 @@ module TerminationIteratorNew (D : RANKING_FUNCTION) : SEMANTIC = struct
               Format.fprintf !fmt "p2: %a\n" D.print p2;
               Format.fprintf !fmt "i': %a\n" D.print i');
             let jokers =
-               max 0 ((!retrybwd * (!Config.ordmax + 1)) - n + !joinbwd)
+              max 0 ((!retrybwd * (!Config.ordmax + 1)) - n + !joinbwd)
             in
             if D.isLeq COMPUTATIONAL i' i then (
               if D.isLeq APPROXIMATION i' i then (
@@ -172,8 +172,8 @@ module TerminationIteratorNew (D : RANKING_FUNCTION) : SEMANTIC = struct
       (prog : Typed_syntax.prog) =
     let block, funcmap, varmap = prog in
     let f = StringMap.find !Config.main funcmap in
-    let module Init = EnvInit.Make (B) in 
-    let env,vars = Init.env prog in 
+    let module Init = EnvInit.Make (B) in
+    let env, vars = Init.env prog in
     let s = f.func_body in
     initBlk env vars block;
     initBlk env vars s;
@@ -181,12 +181,12 @@ module TerminationIteratorNew (D : RANKING_FUNCTION) : SEMANTIC = struct
     (* Forward Analysis *)
     if !tracefwd && not !minimal then
       Format.fprintf !fmt "\nForward Analysis Trace:\n";
-    let _ = ForwardIteratorB.analyze env prog in
-    fwdInvMap := !ForwardIteratorB.fwdInvMap;
-    fwdTaintMap := !ForwardIteratorB.fwdTaintMap;
-      (* Format.fprintf !fmt "\nForward Analysis taint: size %d\n"
+    (let _ = ForwardIteratorB.analyze env prog in
+     fwdInvMap := !ForwardIteratorB.fwdInvMap;
+     fwdTaintMap := !ForwardIteratorB.fwdTaintMap)
+    (* Format.fprintf !fmt "\nForward Analysis taint: size %d\n"
         (InvMap.cardinal !fwdTaintMap); *)
-      (* InvMap.iter
+    (* InvMap.iter
         (fun l a ->
           Format.printf "%a: %s\n" label_print l
             (VarSet.fold

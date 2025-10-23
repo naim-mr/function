@@ -1,36 +1,60 @@
 {
   "Config": {
     "filename": "tests/termination/zune.c",
-    "analysis_type": "termination",
+    "analysis_type": "non-termination",
     "property": "",
-    "result": "UKNOWN",
+    "result": "TRUE",
     "domain": "polyhedra",
-    "time": 0.16172900000100002
+    "time": 0
   },
   "tree": {
     "Node": {
-      "constraint": "$4{isLeapYear} >= 1",
+      "constraint": "$9{isLeapYear} >= 1",
       "left": {
         "Node": {
-          "constraint": "$2{days} >= 733",
-          "left": { "Leaf": "top" },
+          "constraint": "$5{days} >= 1099",
+          "left": { "Leaf": "bottom" },
           "right": {
             "Node": {
-              "constraint": "$2{days} >= 732",
-              "left": { "Leaf": "bottom" },
+              "constraint": "$5{days} >= 1098",
+              "left": { "Leaf": "1." },
               "right": {
                 "Node": {
-                  "constraint": "$2{days} >= 731",
-                  "left": { "Leaf": "8" },
+                  "constraint": "$5{days} >= 1097",
+                  "left": { "Leaf": "bottom" },
                   "right": {
                     "Node": {
-                      "constraint": "$2{days} >= 367",
-                      "left": { "Leaf": "8" },
+                      "constraint": "$5{days} >= 1096",
+                      "left": { "Leaf": "bottom" },
                       "right": {
                         "Node": {
-                          "constraint": "$2{days} >= 366",
+                          "constraint": "$5{days} >= 733",
                           "left": { "Leaf": "bottom" },
-                          "right": { "Leaf": "3" }
+                          "right": {
+                            "Node": {
+                              "constraint": "$5{days} >= 732",
+                              "left": { "Leaf": "1." },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$5{days} >= 731",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$5{days} >= 367",
+                                      "left": { "Leaf": "bottom" },
+                                      "right": {
+                                        "Node": {
+                                          "constraint": "$5{days} >= 366",
+                                          "left": { "Leaf": "1." },
+                                          "right": { "Leaf": "bottom" }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
                         }
                       }
                     }
@@ -43,41 +67,71 @@
       },
       "right": {
         "Node": {
-          "constraint": "$4{isLeapYear} >= 0",
+          "constraint": "$9{isLeapYear} >= 0",
           "left": {
             "Node": {
-              "constraint": "$2{days} >= 731",
-              "left": { "Leaf": "top" },
+              "constraint": "$5{days} >= 1096",
+              "left": { "Leaf": "bottom" },
               "right": {
                 "Node": {
-                  "constraint": "$2{days} >= 366",
-                  "left": { "Leaf": "7" },
-                  "right": { "Leaf": "3" }
+                  "constraint": "$5{days} >= 731",
+                  "left": { "Leaf": "bottom" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$5{days} >= 366",
+                      "left": { "Leaf": "bottom" },
+                      "right": { "Leaf": "bottom" }
+                    }
+                  }
                 }
               }
             }
           },
           "right": {
             "Node": {
-              "constraint": "$2{days} >= 733",
-              "left": { "Leaf": "top" },
+              "constraint": "$5{days} >= 1099",
+              "left": { "Leaf": "bottom" },
               "right": {
                 "Node": {
-                  "constraint": "$2{days} >= 732",
-                  "left": { "Leaf": "bottom" },
+                  "constraint": "$5{days} >= 1098",
+                  "left": { "Leaf": "1." },
                   "right": {
                     "Node": {
-                      "constraint": "$2{days} >= 731",
-                      "left": { "Leaf": "8" },
+                      "constraint": "$5{days} >= 1097",
+                      "left": { "Leaf": "bottom" },
                       "right": {
                         "Node": {
-                          "constraint": "$2{days} >= 367",
-                          "left": { "Leaf": "8" },
+                          "constraint": "$5{days} >= 1096",
+                          "left": { "Leaf": "bottom" },
                           "right": {
                             "Node": {
-                              "constraint": "$2{days} >= 366",
+                              "constraint": "$5{days} >= 733",
                               "left": { "Leaf": "bottom" },
-                              "right": { "Leaf": "3" }
+                              "right": {
+                                "Node": {
+                                  "constraint": "$5{days} >= 732",
+                                  "left": { "Leaf": "1." },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$5{days} >= 731",
+                                      "left": { "Leaf": "bottom" },
+                                      "right": {
+                                        "Node": {
+                                          "constraint": "$5{days} >= 367",
+                                          "left": { "Leaf": "bottom" },
+                                          "right": {
+                                            "Node": {
+                                              "constraint": "$5{days} >= 366",
+                                              "left": { "Leaf": "1." },
+                                              "right": { "Leaf": "bottom" }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
                             }
                           }
                         }

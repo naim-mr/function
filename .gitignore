@@ -5,6 +5,7 @@
 function
 test
 depend
+diff/
 frontend/Lexer.ml
 frontend/Parser.ml
 frontend/Parser.mli

@@ -265,10 +265,13 @@ let rec convert_expr (st : state) ((kind, typ, _) : C_AST.expr) :
                   (UnsupportedConversion
                      "unexpected kind of arguments of nondet func"))
         in
+
         (* collect the input variable with its type and initialization *)
         st.input_vars := (typ, input_v_name, assign_expr) :: !(st.input_vars);
         (* return the variable *)
         (Abstract_syntax.A_identifier input_v_name, hint))
+      else if String.compare func_name "input" = 0 then
+        (Abstract_syntax.A_INPUT, H_INT)
       else
         let args =
           List.map
