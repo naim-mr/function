@@ -288,7 +288,7 @@ let rec exp_itoa (ctx : ctx) (* calling context *) (env : env) (* environment *)
             (A_boolean (A_MAYBE, a), env, pre, post)
         | A_arithmetic (A_RANDOM, _), A_boolean (e, _)
         | A_boolean (e, _), A_arithmetic (A_RANDOM, _) ->
-            ( A_boolean ((A_bbinary (A_AND, (e, a), (A_MAYBE, a)),a)),
+            ( A_boolean (A_bbinary (A_AND, (e, a), (A_MAYBE, a)), a),
               env,
               pre,
               post )

@@ -478,6 +478,7 @@ module Numerical (N : NUMERICAL) (C : CONSTRAINT) : PARTITION = struct
             i := !i + 1)
           b.constraints;
         let b = Abstract1.of_lincons_array manager env a in
+
         let b =
           Abstract1.assign_texpr manager b
             (Var.of_string (Z.to_string x.var_id))
@@ -595,13 +596,11 @@ module Numerical (N : NUMERICAL) (C : CONSTRAINT) : PARTITION = struct
             cs := Lincons1.array_get a i :: !cs (*TODO: normalization *)
           done;
           { constraints = !cs; env; vars }
-      | T_unary (A_cast (t, _), e) ->
-          f manager b e
+      | T_unary (A_cast (t, _), e) -> f manager b e
       | T_unary (A_NOT, e) ->
           let e = neg_bexp e in
           f manager b e
-      | T_unary (A_UNARY_PLUS, e) ->
-            f manager b e
+      | T_unary (A_UNARY_PLUS, e) -> f manager b e
       | T_unary (A_UNARY_MINUS, e) ->
           let env = b.env in
           let e = exp_to_apron e in
@@ -631,8 +630,12 @@ module Numerical (N : NUMERICAL) (C : CONSTRAINT) : PARTITION = struct
       | T_binary (o, e1, e2) -> (
           match o with
           | A_MODULO -> top b.env b.vars
-          | A_AND -> let b1 = f manager b e1 and b2 = f manager b e2 in meet b1 b2
-          | A_OR -> let b1 = f manager b e1 and b2 = f manager b e2 in join b1 b2
+          | A_AND ->
+              let b1 = f manager b e1 and b2 = f manager b e2 in
+              meet b1 b2
+          | A_OR ->
+              let b1 = f manager b e1 and b2 = f manager b e2 in
+              join b1 b2
           | A_EQUAL ->
               let bop =
                 T_binary
@@ -646,7 +649,7 @@ module Numerical (N : NUMERICAL) (C : CONSTRAINT) : PARTITION = struct
                 T_binary
                   ( A_OR,
                     (T_binary (A_GREATER, e1, e2), t, ext),
-                    (T_binary (A_LESS, e2, e1), t, ext) )
+                    (T_binary (A_LESS, e1, e2), t, ext) )
               in
               f manager b (bop, t, ext)
           | o -> (

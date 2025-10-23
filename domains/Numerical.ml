@@ -55,8 +55,9 @@ module Numerical (N : NUMERICAL) (C : CONSTRAINT) : PARTITION = struct
   (** The current list of variables in the APRON environment. *)
   let vars b = b.vars
 
-  (** Creates an APRON manager depending on the numerical abstract domain. *)
   type lib = N.lib
+  (** Creates an APRON manager depending on the numerical abstract domain. *)
+
   let manager = N.manager
 
   (**)

@@ -1352,7 +1352,10 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
     match e with
     | T_bool_const True | T_bool_const Maybe ->
         { domain = pre; tree = aux t.tree [] []; env; vars }
-    | (T_binary (_, (T_var v, _, _), _) | T_binary (_, _, (T_var v, _, _)))
+    | T_binary (_, (T_var v, _, _), _)
+      when String.starts_with ~prefix:"nondet_" v.var_name ->
+        { domain = pre; tree = aux t.tree [] []; env; vars }
+    | T_binary (_, _, (T_var v, _, _))
       when String.starts_with ~prefix:"nondet_" v.var_name ->
         { domain = pre; tree = aux t.tree [] []; env; vars }
     | T_binary (A_EQUAL, e1, e2) ->
@@ -1381,7 +1384,8 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
         and t2 = filter ~taint ?domain:pre ~underapprox t e2 in
         match op with
         | A_AND -> meet joinType t1 t2
-        | A_OR -> join joinType t1 t2)
+        | A_OR -> join joinType t1 t2
+        | _ -> raise (Invalid_argument "This cases are impossible to reach"))
     | _ ->
         let bp =
           match post with
@@ -1454,24 +1458,13 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
     let vars = t.vars in
     let rec aux t cs =
       match t with
-      | Bot -> (
-          match condition with
-          | None ->
-              let b =
-                match domain with
-                | None -> B.inner env vars cs
-                | Some domain -> B.meet (B.inner env vars cs) domain
-              in
-              B.isBot b
-          | Some _ ->
-              true
-              (* when given a condition, we first filter the tree and ignore NIL leafs *)
-          )
+      | Bot -> false
       | Leaf f -> (
           match domain with
-          | None -> F.defined f || B.isBot (B.inner env vars cs)
+          | None -> F.defined f && not (B.isBot (B.inner env vars cs))
           | Some domain ->
-              F.defined f || B.isBot (B.meet (B.inner env vars cs) domain))
+              F.defined f && not (B.isBot (B.meet (B.inner env vars cs) domain))
+          )
       | Node ((c, nc), l, r) -> aux l (c :: cs) || aux r (nc :: cs)
     in
     let t =

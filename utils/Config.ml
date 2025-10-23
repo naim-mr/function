@@ -10,7 +10,7 @@ let domain = ref "boxes"
 let filename = ref ""
 let main = ref "main"
 let minimal = ref false
-let compress = ref true (* false *)
+let compress = ref false (* false *)
 let ordinals = ref false
 let ordmax = ref 2
 let cda = ref false
@@ -50,9 +50,7 @@ let vuln_res : Yojson.Safe.t ref = ref @@ `String "Not analyzed"
 let from_json filename =
   let json = Yojson.Safe.from_file filename in
   match json with
-  | `Assoc
-      [ ("analysis", `String a); ("domain", `String d) ]
-    ->
+  | `Assoc [ ("analysis", `String a); ("domain", `String d) ] ->
       analysis := a;
       domain := d
   | _ -> raise (Invalid_argument "Wrong config json format.")

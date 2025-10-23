@@ -15,8 +15,10 @@ open Constraints
 (** Signature for a single partition of the domain of a ranking function. *)
 module type PARTITION = sig
   module C : CONSTRAINT
+
   type t
   type lib
+
   val manager : lib Manager.t
   val constraints : t -> C.t list
   val env : t -> Environment.t
@@ -30,7 +32,7 @@ module type PARTITION = sig
   val join : t -> t -> t
   val widen : t -> t -> t
   val meet : t -> t -> t
-  val add_var_to_env: Environment.t -> var -> Environment.t
+  val add_var_to_env : Environment.t -> var -> Environment.t
   val fwdAssign : t -> expr typed * expr typed -> t
   val bwdAssign : t -> expr typed * expr typed -> t
   val bwdAssign_underapprox : t -> expr typed * expr typed -> t

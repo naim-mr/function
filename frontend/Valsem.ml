@@ -23,8 +23,11 @@ let int_type_set (t : int_type) (s : int_sign) : Itv_int.t =
   | A_LONG, A_UNSIGNED -> unsigned_set 64
   | A_INTEGER, A_SIGNED -> (MINF, INF)
   | A_INTEGER, A_UNSIGNED -> (Finite Int.zero, INF)
-  | A_DYNINT (l,h), A_SIGNED -> (Finite (Int.of_string l), Finite (Int.of_string h))
-  | A_DYNINT (l,h), A_UNSIGNED -> (Finite (Int.of_string l |> Int.max Int.zero), Finite (Int.of_string h |> Int.max Int.zero))
+  | A_DYNINT (l, h), A_SIGNED ->
+      (Finite (Int.of_string l), Finite (Int.of_string h))
+  | A_DYNINT (l, h), A_UNSIGNED ->
+      ( Finite (Int.of_string l |> Int.max Int.zero),
+        Finite (Int.of_string h |> Int.max Int.zero) )
 
 let const_fit_in_type (t : int_type) (s : int_sign) (c : Intinf.t) : bool =
   let l, h = int_type_set t s in

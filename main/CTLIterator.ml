@@ -101,7 +101,7 @@ let program_of_prog (prog : AbstractSyntax.prog)
   let id = ref Z.minus_one in
   let nextId () =
     let i = !id in
-    id := Z.(-) i Z.one;
+    id := Z.( - ) i Z.one;
     i
   in
   let rec addTerminationStmt (block : block) =

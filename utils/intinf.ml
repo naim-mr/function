@@ -7,8 +7,8 @@
 open Datatypes
 open Apron
 
-type base = Int.t [@@deriving yojson,show]
-type t = base inf [@@deriving yojson,show]
+type base = Int.t [@@deriving yojson, show]
+type t = base inf [@@deriving yojson, show]
 
 (* useful constants *)
 

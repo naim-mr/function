@@ -1,5 +1,3 @@
-
-
 (* invariant map that assigns values to program labels *)
 
 module InvMap = Map.Make (struct

@@ -4,8 +4,6 @@
    Copyright (C) 2011 Antoine Miné
 *)
 
-
-
 (* unique identifiers *)
 (* ****************** *)
 
@@ -17,7 +15,6 @@ let id_of_yojson = function
 
 let yojson_of_id x = `String (Z.to_string x)
 let cur_id = ref Z.zero
-
 let pp_id = Int.pp
 
 let new_id () =
@@ -63,8 +60,8 @@ let ( >>= ) = Option.bind
 let ( >>| ) = Option.map
 let ( let* ) = Option.bind
 
-let option_or (a: 'a option) (b: 'a option) : 'a option =
-  match a, b with
+let option_or (a : 'a option) (b : 'a option) : 'a option =
+  match (a, b) with
   | Some a, _ -> Some a
   | None, Some b -> Some b
   | None, None -> None
@@ -72,7 +69,7 @@ let option_or (a: 'a option) (b: 'a option) : 'a option =
 (* 3-valued logic *)
 (* ************** *)
 
-type tbool = True | False | Maybe [@@deriving yojson,show]
+type tbool = True | False | Maybe [@@deriving yojson, show]
 
 let tnot = function True -> False | False -> True | Maybe -> Maybe
 
@@ -103,7 +100,7 @@ type 'a inf =
   | INF
   (* +oo *)
   | MINF (* -oo *)
-[@@deriving yojson,show]
+[@@deriving yojson, show]
 
 (* see Intinf for operators on Int.t inf *)
 
@@ -111,36 +108,33 @@ type 'a inf =
 (* ******************** *)
 
 (* anal timeout setting *)
-type anal_timeout = 
-  | NO_TIMEOUT
-  | TIMEOUT of float
-[@@deriving yojson,show]
+type anal_timeout = NO_TIMEOUT | TIMEOUT of float [@@deriving yojson, show]
 
 (* anal mode *)
 type anal_mode =
   | SUFFICIENT (* sufficient preconditions for assertion success *)
   | COUNTER (* sufficient preconditions for assertion failure *)
-[@@deriving yojson,show]
+[@@deriving yojson, show]
 
 (* anal params *)
 type anal_params = {
-  input_path: string;
-  mode: anal_mode;
-  expect_alarm: bool option [@default None]; (* only used in sufficient mode *)
-  with_term: bool option [@default None];
-  timeout: anal_timeout option [@default None];
-  unroll: int option [@default None];
-  join: int option [@default None];
-  down: int option [@default None];
-  meet: int option [@default None];
-  colored_loop_iterator: bool option [@default None];
-  verbose_init: bool option [@default None];
-  verbose_fwd: bool option [@default None];
-  verbose_bwd: bool option [@default None];
-  verbose_term: bool option [@default None];
-  entry: string option [@default None]
+  input_path : string;
+  mode : anal_mode;
+  expect_alarm : bool option; [@default None] (* only used in sufficient mode *)
+  with_term : bool option; [@default None]
+  timeout : anal_timeout option; [@default None]
+  unroll : int option; [@default None]
+  join : int option; [@default None]
+  down : int option; [@default None]
+  meet : int option; [@default None]
+  colored_loop_iterator : bool option; [@default None]
+  verbose_init : bool option; [@default None]
+  verbose_fwd : bool option; [@default None]
+  verbose_bwd : bool option; [@default None]
+  verbose_term : bool option; [@default None]
+  entry : string option; [@default None]
 }
-[@@deriving yojson,show]
+[@@deriving yojson, show]
 
 (*type regression_res = {
   improv : A.point list;
@@ -172,8 +166,13 @@ type anal_res = {
 }*)
 
 (* run params *)
-type run_params = { domain: string; date: string; version: string; params: anal_params list }
-[@@deriving yojson,show]
+type run_params = {
+  domain : string;
+  date : string;
+  version : string;
+  params : anal_params list;
+}
+[@@deriving yojson, show]
 
 (* exceptions *)
 (* ********** *)

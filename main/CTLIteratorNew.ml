@@ -13,6 +13,7 @@ open Utils
 open Datatypes
 open Utils.InvMap
 open SemanticsNew
+
 (* type for CTL properties, instantiated with bExp for atomic propositions *)
 type ctl_property = Typed_syntax.expr typed CTLProperty.generic_property
 
@@ -153,7 +154,7 @@ let prog_of_program (program : program) : prog =
   in
   (program.globalBlock, funcMap, varMap)
 
-module CTLIteratorNew (D : RANKING_FUNCTION): SemanticsNew.SEMANTIC = struct
+module CTLIteratorNew (D : RANKING_FUNCTION) : SemanticsNew.SEMANTIC = struct
   (*
      Fixed Point Computation:
 
@@ -186,6 +187,7 @@ module CTLIteratorNew (D : RANKING_FUNCTION): SemanticsNew.SEMANTIC = struct
 
   (* dummy_prop to give a default value to optional (due to termination iterator) parameter ?property *)
   let dummy_prop = Exp StringMap.empty
+
   (* Also to match module type: to remove in the future *)
   let initStm env vars s = ()
   let initBlk env vars b = ()
@@ -258,10 +260,12 @@ module CTLIteratorNew (D : RANKING_FUNCTION): SemanticsNew.SEMANTIC = struct
           (* compute 'in' state for this statement *)
           let in_state =
             match stmt with
-            | T_expr _ | T_label _ | T_add_var _ | T_del_var _ | T_print _ ->
+            | T_expr _ | T_label _
+            | T_add_var (_, None)
+            | T_del_var _ | T_print _ ->
                 out_state
             | T_RETURN -> bot
-            | T_assign ((l, _), e) ->
+            | T_add_var (l, Some e) | T_assign ((l, _), e) ->
                 bwd_assign ?domain:pre_dom out_state
                   ((T_var l, l.var_typ, l.var_extent), e)
             | T_assert (b, _) | T_assume b ->
@@ -438,10 +442,19 @@ module CTLIteratorNew (D : RANKING_FUNCTION): SemanticsNew.SEMANTIC = struct
           (* recursively process the rest of the program, this gives us the 'out' state for this statement *)
           let new_in =
             match stmt with
-            | T_expr _ | T_label _ | T_add_var _ | T_del_var _ | T_print _ ->
+            | T_expr _ | T_label _
+            | T_add_var (_, None)
+            | T_del_var _ | T_print _ ->
                 out_state
             | T_RETURN -> if use_sink_state then zero else bot
-            | T_assign ((l, _), e) ->
+            | T_add_var (l, Some e) | T_assign ((l, _), e) ->
+                Format.fprintf !fmt "\n in assign current_in: %a\n" D.print
+                  current_in;
+                let t =
+                  bwd_assign ?domain:pre_dom out_state
+                    ((T_var l, l.var_typ, l.var_extent), e)
+                in
+                Format.fprintf !fmt "\n first assign current_in: %a\n" D.print t;
                 D.mask current_in
                   (bwd_assign ?domain:pre_dom out_state
                      ((T_var l, l.var_typ, l.var_extent), e))
@@ -490,6 +503,8 @@ module CTLIteratorNew (D : RANKING_FUNCTION): SemanticsNew.SEMANTIC = struct
                     let fixed_point = current_in in
                     if !tracebwd && not !minimal then
                       Format.fprintf !fmt "Fixed-Point reached \n";
+                    Format.fprintf !fmt "RETURN current_in: %a\n" D.print
+                      current_in;
                     fixed_point)
                   else
                     let updated_in' =
@@ -510,6 +525,9 @@ module CTLIteratorNew (D : RANKING_FUNCTION): SemanticsNew.SEMANTIC = struct
                 in
                 (* process loop body with current 'in' state at loop-head *)
                 let final_in_state = aux current_in initial_out_enter 1 in
+                Format.fprintf !fmt "RETURN final_in at label (%s ): %a\n"
+                  (Z.to_string (fst l))
+                  D.print final_in_state;
                 (* compute fixed point for while-loop starting with current 'in' state at loop-head *)
                 addInv (fst l) final_in_state
             | T_call (f, ss) -> bwd out f.func_body
@@ -570,7 +588,7 @@ module CTLIteratorNew (D : RANKING_FUNCTION): SemanticsNew.SEMANTIC = struct
               let s = branch_join sFall sJump in
               addInv blockLabel s;
               aux whileBlock blockState ()
-          | T_assign ((l, _), e) ->
+          | T_add_var (l, Some e) | T_assign ((l, _), e) ->
               let s =
                 bwd_assign nextBlockState ((T_var l, l.var_typ, l.var_extent), e)
               in
@@ -722,17 +740,19 @@ module CTLIteratorNew (D : RANKING_FUNCTION): SemanticsNew.SEMANTIC = struct
     bwdInvMap := i;
     programInvariant
 
-  let analyze  ?(precondition = Some (T_bool_const True)) ?(property = dummy_prop) prog =
+  let analyze ?(precondition = Some (T_bool_const True))
+      ?(property = dummy_prop) prog =
     let property = get_ctl property in
     let program = program_of_prog prog !Config.main in
     if !Config.refine then (* Run forward analysis if 'refine' flag is set *)
-      ForwardIteratorB.analyze prog;
+      ForwardIteratorB.analyze program.environment prog;
     fwdInvMap := !ForwardIteratorB.fwdInvMap;
     let inv = compute program property in
     let initialLabel = block_label program.mainFunction.func_body in
     let programInvariant = InvMap.find initialLabel inv in
     bwdInvMap := inv;
     tree := D.output_json program.variables programInvariant;
+    Format.printf "\n final tree: %a" D.print (D.compress programInvariant);
     Config.result := D.partially_defined programInvariant;
     !Config.result
 end

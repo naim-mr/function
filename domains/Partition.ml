@@ -18,6 +18,7 @@ module type PARTITION = sig
 
   type t
   type lib
+
   val manager : lib Manager.t
   val constraints : t -> C.t list
   val env : t -> Environment.t

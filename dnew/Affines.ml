@@ -557,7 +557,7 @@ module Affine (B : PARTITION) : FUNCTION = struct
         if
           1 <= List.length !f
           (* if there list of constraints on special variable is at least one constraint on # *)
-        then (
+        then
           let f =
             List.map
               (fun c ->
@@ -571,7 +571,7 @@ module Affine (B : PARTITION) : FUNCTION = struct
                 Fun c)
               !f
           in
-          List.fold_left (join_ranking COMPUTATIONAL b2) (List.hd f) (List.tl f))
+          List.fold_left (join_ranking COMPUTATIONAL b2) (List.hd f) (List.tl f)
         else Top (* otherwise *)
     | _ -> f2
 

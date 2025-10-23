@@ -34,11 +34,7 @@ module Taint = struct
       | A_rbinary (_, a1, a2) ->
           let vl1 = avars a1 in
           let vl2 = avars a2 in
-          if
-            is_bot (meet tvl vl1)
-            || is_bot (meet tvl vl2)
-          then true
-          else false
+          if is_bot (meet tvl vl1) || is_bot (meet tvl vl2) then true else false
     in
     aux e
 
@@ -46,8 +42,7 @@ module Taint = struct
     let rec aux stmt acc =
       match stmt with
       | A_assign ((A_var x, _), (_, _)) -> add x acc
-      | A_if ((b, ba), s1, s2) ->
-          join (aux_block s1 acc) (aux_block s2 acc)
+      | A_if ((b, ba), s1, s2) -> join (aux_block s1 acc) (aux_block s2 acc)
       | A_while (l, (b, ba), s) -> aux_block s acc
       | _ -> acc
     and aux_block s acc =

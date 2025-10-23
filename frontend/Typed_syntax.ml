@@ -390,7 +390,7 @@ let nt_prog ((b, funcs, v) : prog) : prog * label list =
   (p, !lnew)
 
 (* invert a comparison expression *)
-let rec invert_comp_expr ((e, t, x) as ee : expr typed) : expr typed =
+let invert_comp_expr ((e, t, x) as ee : expr typed) : expr typed =
   let e =
     match e with
     | T_binary (A_EQUAL, e1, e2) -> T_binary (A_NOT_EQUAL, e1, e2)
@@ -419,8 +419,7 @@ let rec neg_bexp (b, t, x) =
             (T_int_const (Intinf.zero, Intinf.zero), t, x) ),
         t,
         x )
-  | T_binary (A_AND, e1, e2) ->
-      (T_binary (A_OR, neg_bexp e1, neg_bexp e2), t, x)
+  | T_binary (A_AND, e1, e2) -> (T_binary (A_OR, neg_bexp e1, neg_bexp e2), t, x)
   | T_binary (A_OR, e1, e2) -> (T_binary (A_AND, neg_bexp e1, neg_bexp e2), t, x)
   | T_binary (op, e1, e2) -> invert_comp_expr (b, t, x)
   | T_unary (A_NOT, e) -> e

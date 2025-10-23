@@ -7,8 +7,6 @@ open Apron
 open Affines
 open Functions
 
-
-
 module OrdinalValued (F : FUNCTION) : FUNCTION = struct
   module B = F.B
 
@@ -211,7 +209,8 @@ module OrdinalValued (F : FUNCTION) : FUNCTION = struct
       let f = if i > 0 then F.widen b f1 f2 else f2 in
       if F.isTop f then
         let ff = aux (i - 1) ff1 (succ ff2) in
-        if List.length ff > !Config.ordmax then top env vars else (F.zero env vars, ff)
+        if List.length ff > !Config.ordmax then top env vars
+        else (F.zero env vars, ff)
       else if F.defined f then
         let ff = aux (i - 1) ff1 ff2 in
         if List.length ff > !Config.ordmax then top env vars else (f, ff)
@@ -268,7 +267,8 @@ module OrdinalValued (F : FUNCTION) : FUNCTION = struct
       then (f, []) (* f = Bot *)
       else (* f = Top *)
         let ff = aux 1 ff in
-        if List.length ff > !Config.ordmax then (f, []) else (F.zero env vars, ff)
+        if List.length ff > !Config.ordmax then (f, [])
+        else (F.zero env vars, ff)
     else (f, [])
 
   let filter (f, ff) e = (F.filter f e, ff)

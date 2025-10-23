@@ -68,16 +68,18 @@ let to_apron ((l, h) : t) : Interval.t =
     Interval.sup = Scalar.Mpqf (Rat.to_mpqf h);
   }
 
-let to_rat_opt (l,h:t) : Rat.t option =
+let to_rat_opt ((l, h) : t) : Rat.t option =
   if Rat.equal l h then Some l else None
 
 (* convert an interval to an integer if it is a integer singleton,
    otherwise return `None` *)
-let to_int_exact_opt (itv:t) : Int.t option =
-  let* r = to_rat_opt itv in if r.den = Z.one then Some r.num else None
+let to_int_exact_opt (itv : t) : Int.t option =
+  let* r = to_rat_opt itv in
+  if r.den = Z.one then Some r.num else None
 
-let to_int_floor_opt (itv:t) : Int.t option =
-  let* r = to_rat_opt itv in Some (Z.div r.num r.den)
+let to_int_floor_opt (itv : t) : Int.t option =
+  let* r = to_rat_opt itv in
+  Some (Z.div r.num r.den)
 
 let of_apron (i : Interval.t) : t =
   (R.of_apron_down i.Interval.inf, R.of_apron_up i.Interval.sup)

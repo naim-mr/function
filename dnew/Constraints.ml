@@ -286,9 +286,7 @@ module Constraint : CONSTRAINT = struct
           let x =
             List.find
               (fun y ->
-                String.compare (Var.to_string x)
-                  (Z.to_string y.var_id)
-                = 0)
+                String.compare (Var.to_string x) (Z.to_string y.var_id) = 0)
               vars
           in
           Format.fprintf Format.str_formatter "$%s{%s}" (Z.to_string x.var_id)

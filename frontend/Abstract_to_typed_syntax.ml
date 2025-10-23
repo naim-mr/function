@@ -61,6 +61,8 @@ let new_var name synthetic x typ scope =
 (************************************************************************)
 
 type env = {
+  (* Function in which we are to detect recursive calls *)
+  env_call_ctx : lvalue;
   (* note: synthetic variables are not in env *)
   env_locals : var StringMap.t;
   env_globals : var StringMap.t;
@@ -73,6 +75,7 @@ type env = {
 
 let empty_env =
   {
+    env_call_ctx = "init";
     env_locals = StringMap.empty;
     env_globals = StringMap.empty;
     env_funcs = StringMap.empty;
@@ -234,6 +237,7 @@ let rec pure_expr env pre post (e, x) =
           let e1, e2 = (as_bool e1, as_bool e2) in
           ((T_binary (op, e1, e2), A_BOOL, x), pre, post))
   | A_call ((s, sx), args) -> (
+      Printf.printf "\n check %s\n" env.env_call_ctx;
       let ee, pre, post = call (s, sx) args env pre post x in
       match ee with
       | None -> error x "function %s has no return value" s
@@ -299,7 +303,7 @@ and call (s, sx) args env pre post x =
   | None ->
       (* function without return *)
       let node =
-        if String.compare f.func_name s = 0 then (T_call (f, sx), x)
+        if String.compare env.env_call_ctx s <> 0 then (T_call (f, sx), x)
         else (T_recall (f, sx), x)
       in
 
@@ -308,7 +312,7 @@ and call (s, sx) args env pre post x =
       (* function with return value *)
       let v1 = new_var "__returned" true x v.var_typ T_LOCAL in
       let node =
-        if String.compare f.func_name s = 0 then (T_call (f, sx), x)
+        if String.compare env.env_call_ctx s <> 0 then (T_call (f, sx), x)
         else (T_recall (f, sx), x)
       in
       (* note: all the formal argument and return variables are deleted
@@ -323,7 +327,7 @@ and call (s, sx) args env pre post x =
         @ [
             (T_add_var (v1, None), x);
             (T_add_var (v, None), x);
-            (node);
+            node;
             (T_assign ((v1, x), (T_var v, v.var_typ, x)), x);
             (T_del_var v, x);
           ]
@@ -379,6 +383,8 @@ let rec stat env (e, x) =
   match e with
   | A_SKIP -> (env, [], [])
   | A_expr (A_call ((s, sx), args), x) ->
+      Format.printf "\n here in %a \n " Abstract_syntax.pp_stat e;
+      let env = { env with env_call_ctx = s } in
       (* unlike pure_expr, does not fail if there is no return value *)
       let _, pre, post = call (s, sx) args env [] [] x in
       (env, add_lbl (pre @ post), [])
@@ -448,8 +454,7 @@ let rec stat env (e, x) =
           (env, [], []) l
       in
       (env, add_lbl (List.rev rstats), locs)
-  | A_label (s,e) -> 
-    (env, [ (new_id (), T_label (s,e), x) ], [])
+  | A_label (s, e) -> (env, [ (new_id (), T_label (s, e), x) ], [])
   | A_assert e ->
       let ee, pre, post = pure_expr env [] [] e in
       let ((_, _, xx) as ee) = as_bool ee in
@@ -507,7 +512,7 @@ let decl env d =
         | None -> None
         | Some (t, _) -> Some (new_var "__return" true x t T_LOCAL)
       in
-      let env_body = { env with env_return = ret } in
+      let env_body = { env with env_return = ret; env_call_ctx = s } in
       let args, env_body =
         List.fold_left
           (fun (args, env) ((s, sx), (t, _)) ->
@@ -548,44 +553,48 @@ let decl env d =
 (************************************************************************)
 
 (* translation entry point *)
-let translate_program (input_vars : decl list) (global: decl list) (funcs: decl list): prog =
-  let ps = [(input_vars @ global @ funcs ) , (Lexing.dummy_pos,Lexing.dummy_pos)]  in 
-  let env =  
-  List.fold_left (fun env d -> 
-    match d with
-    | A_global (((t, l), _), kind) ->
-        env
-    | A_function ((r, (s, sx), args, body), x) ->
-      let fid = new_id () in
-      let ret =
-        match r with
-        | None -> None
-        | Some (t, _) -> Some (new_var "__return" true x t T_LOCAL)
-      in
-      let env_body = { env with env_return = ret } in
-      let args, env_body =
-        List.fold_left
-          (fun (args, env) ((s, sx), (t, _)) ->
-            let v = new_var s false sx t T_LOCAL in
-            ( v :: args,
+let translate_program (input_vars : decl list) (global : decl list)
+    (funcs : decl list) : prog =
+  let ps =
+    [ (input_vars @ global @ funcs, (Lexing.dummy_pos, Lexing.dummy_pos)) ]
+  in
+  let env =
+    List.fold_left
+      (fun env d ->
+        match d with
+        | A_global (((t, l), _), kind) -> env
+        | A_function ((r, (s, sx), args, body), x) ->
+            let fid = new_id () in
+            let ret =
+              match r with
+              | None -> None
+              | Some (t, _) -> Some (new_var "__return" true x t T_LOCAL)
+            in
+            let env_body = { env with env_return = ret } in
+            let args, env_body =
+              List.fold_left
+                (fun (args, env) ((s, sx), (t, _)) ->
+                  let v = new_var s false sx t T_LOCAL in
+                  ( v :: args,
+                    {
+                      env with
+                      env_locals = StringMap.add s v env.env_locals;
+                      env_vars = IdMap.add v.var_id v env.env_vars;
+                    } ))
+                ([], env_body) (List.rev args)
+            in
+            let f =
               {
-                env with
-                env_locals = StringMap.add s v env.env_locals;
-                env_vars = IdMap.add v.var_id v env.env_vars;
-              } ))
-          ([], env_body) (List.rev args)
-      in
-      let f = {
-        func_name = s;
-        func_extent = sx;
-        func_id = fid;
-        func_return = ret;
-        func_args = args;
-        func_body = T_empty (dummy_id, Lexing.dummy_pos);
-      }
-      
-    in
-      {env with env_funcs = StringMap.add s f env.env_funcs; }) empty_env funcs
+                func_name = s;
+                func_extent = sx;
+                func_id = fid;
+                func_return = ret;
+                func_args = args;
+                func_body = T_empty (dummy_id, Lexing.dummy_pos);
+              }
+            in
+            { env with env_funcs = StringMap.add s f env.env_funcs })
+      empty_env funcs
   in
   let x = snd (List.hd ps) in
   let env, rstats, rfuncs =

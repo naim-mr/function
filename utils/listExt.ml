@@ -19,132 +19,134 @@
 (*                                                                          *)
 (****************************************************************************)
 
-(**
-  ListExt - Adds a few useful functions to OCaml lists
- *)
+(** ListExt - Adds a few useful functions to OCaml lists *)
 
+include List
+(** Import everything from List *)
 
- include List
- (** Import everything from List *)
- 
- 
- (** {2 Operations} *)
- 
- let rec last = function
-   | [] -> invalid_arg "listUtil.last: empty list"
-   | [a] -> a
-   | a::b -> last b
- (** Last eleemnt of a list. Raises invalid_arg if the list is empty. *)
- 
- let map_tail f l = rev (rev_map f l)
- (** Tail-recursive version of map. Useful for large lists. *)
- 
- let append_tail a b = rev_append (List.rev a) b
- (** Tail-recursive version of append. Useful if the first list is large.. *)
- 
- let map_merge (f:'a -> 'b list) (l:'a list) : 'b list =
-   List.rev
-     (List.fold_left (fun acc x -> List.rev_append (f x) acc) [] l)
- (** Maps [e1;e2;...;en] to (f e1)@(f e2)@...@(f en) *)
- 
- let map_filter (f:'a -> 'b option) (l: 'a list) : 'b list =
-   let rec doit acc l = match l with
-     | [] -> rev acc
-     | a::r -> doit (match f a with Some x -> x::acc | None -> acc) r
-   in
-   doit [] l
- (** Applies f to every element of the list and kepp only those that return some value.
-     The order of the argument list is preserved.
-  *)
- 
- let split (l:'a list) : 'a list * 'a list =
-   let rec doit acc l nb =
-     if nb <= 0 then (List.rev acc), l
-     else doit ((List.hd l)::acc) (List.tl l) (nb-1)
-   in
-   doit [] l ((List.length l + 1) / 2)
- (** [split l] cuts the list [l] into two halves.
-     Either the two halves have the same size, or the first list is
-     one element larger.
-     If [a,b = split l], then [l = a @ b].
-  *)
- 
-  let[@tail_mod_cons] rec map3 f l1 l2 l3 =
-   match (l1, l2, l3) with
-     ([], [], []) -> []
-   | ([a1], [b1], [c1]) ->
-       let r1 = f a1 b1 c1 in
-       [r1]
-   | (a1::a2::l1, b1::b2::l2, c1::c2::l3) ->
-       let r1 = f a1 b1 c1 in
-       let r2 = f a2 b2 c2 in
-       r1::r2::map3 f l1 l2 l3
-   | (_, _, _) -> invalid_arg "List.map3"
- 
- (** {2 Printing} *)
- 
- type list_printer = {
-     print_empty: string; (** Special text for empty lists *)
-     print_begin: string; (** Text before the first element. *)
-     print_sep: string;   (** Text between two elements *)
-     print_end: string;   (** Text after the last element *)
-   }
- (** Tells how to print a list. *)
- 
- let printer_plain = { print_empty=""; print_begin=""; print_sep=" "; print_end=""; }
- (** Print as a space-sparated list, no delimiters. *)
- 
- let printer_list = { print_empty="[]"; print_begin="["; print_sep=";"; print_end="]"; }
- (** Print as OCaml list: [a;b;c]. *)
- 
- let printer_tuple = { print_empty="()"; print_begin="("; print_sep=","; print_end=")"; }
- (** Print as OCaml tuple: (a,b,c). *)
- 
- let printer_set = { print_empty="{}"; print_begin="{"; print_sep=";"; print_end="}"; }
- (** Print as set: {a;b;c}. *)
- 
- let print_gen o printer elem ch l =
-   match l with
-   | [] -> o ch printer.print_empty
-   | a::rest ->
+(** {2 Operations} *)
+
+(** Last eleemnt of a list. Raises invalid_arg if the list is empty. *)
+let rec last = function
+  | [] -> invalid_arg "listUtil.last: empty list"
+  | [ a ] -> a
+  | a :: b -> last b
+
+(** Tail-recursive version of map. Useful for large lists. *)
+let map_tail f l = rev (rev_map f l)
+
+(** Tail-recursive version of append. Useful if the first list is large.. *)
+let append_tail a b = rev_append (List.rev a) b
+
+(** Maps [e1;e2;...;en] to (f e1)@(f e2)@...@(f en) *)
+let map_merge (f : 'a -> 'b list) (l : 'a list) : 'b list =
+  List.rev (List.fold_left (fun acc x -> List.rev_append (f x) acc) [] l)
+
+(** Applies f to every element of the list and kepp only those that return some
+    value. The order of the argument list is preserved. *)
+let map_filter (f : 'a -> 'b option) (l : 'a list) : 'b list =
+  let rec doit acc l =
+    match l with
+    | [] -> rev acc
+    | a :: r -> doit (match f a with Some x -> x :: acc | None -> acc) r
+  in
+  doit [] l
+
+(** [split l] cuts the list [l] into two halves. Either the two halves have the
+    same size, or the first list is one element larger. If [a,b = split l], then
+    [l = a @ b]. *)
+let split (l : 'a list) : 'a list * 'a list =
+  let rec doit acc l nb =
+    if nb <= 0 then (List.rev acc, l)
+    else doit (List.hd l :: acc) (List.tl l) (nb - 1)
+  in
+  doit [] l ((List.length l + 1) / 2)
+
+let[@tail_mod_cons] rec map3 f l1 l2 l3 =
+  match (l1, l2, l3) with
+  | [], [], [] -> []
+  | [ a1 ], [ b1 ], [ c1 ] ->
+      let r1 = f a1 b1 c1 in
+      [ r1 ]
+  | a1 :: a2 :: l1, b1 :: b2 :: l2, c1 :: c2 :: l3 ->
+      let r1 = f a1 b1 c1 in
+      let r2 = f a2 b2 c2 in
+      r1 :: r2 :: map3 f l1 l2 l3
+  | _, _, _ -> invalid_arg "List.map3"
+
+(** {2 Printing} *)
+
+type list_printer = {
+  print_empty : string;  (** Special text for empty lists *)
+  print_begin : string;  (** Text before the first element. *)
+  print_sep : string;  (** Text between two elements *)
+  print_end : string;  (** Text after the last element *)
+}
+(** Tells how to print a list. *)
+
+(** Print as a space-sparated list, no delimiters. *)
+let printer_plain =
+  { print_empty = ""; print_begin = ""; print_sep = " "; print_end = "" }
+
+(** Print as OCaml list: [a;b;c]. *)
+let printer_list =
+  { print_empty = "[]"; print_begin = "["; print_sep = ";"; print_end = "]" }
+
+(** Print as OCaml tuple: (a,b,c). *)
+let printer_tuple =
+  { print_empty = "()"; print_begin = "("; print_sep = ","; print_end = ")" }
+
+(** Print as set: {a;b;c}. *)
+let printer_set =
+  { print_empty = "{}"; print_begin = "{"; print_sep = ";"; print_end = "}" }
+
+let print_gen o printer elem ch l =
+  match l with
+  | [] -> o ch printer.print_empty
+  | a :: rest ->
       o ch printer.print_begin;
       elem ch a;
-      List.iter (fun e -> o ch printer.print_sep; elem ch e) rest;
+      List.iter
+        (fun e ->
+          o ch printer.print_sep;
+          elem ch e)
+        rest;
       o ch printer.print_end
- (* internal printing helper *)
- 
- let print printer elem ch l =
-   print_gen output_string printer elem ch l
- 
- let bprint printer elem ch l =
-   print_gen Buffer.add_string printer elem ch l
- 
- let fprint printer elem ch l =
-   print_gen (fun fmt s -> Format.fprintf fmt "%s@," s) printer elem ch l
- 
- let to_string printer elem l =
-   let b = Buffer.create 10 in
-   print_gen (fun () s -> Buffer.add_string b s) printer (fun () e -> elem e) () l;
-   Buffer.contents b
- 
- let rec compare cmp a b = match a,b with
-   | [],[] -> 0
-   | [],_ -> 1
-   | _,[] -> -1
-   | x::s, y::t ->
-      let r =  cmp x y in
+(* internal printing helper *)
+
+let print printer elem ch l = print_gen output_string printer elem ch l
+let bprint printer elem ch l = print_gen Buffer.add_string printer elem ch l
+
+let fprint printer elem ch l =
+  print_gen (fun fmt s -> Format.fprintf fmt "%s@," s) printer elem ch l
+
+let to_string printer elem l =
+  let b = Buffer.create 10 in
+  print_gen
+    (fun () s -> Buffer.add_string b s)
+    printer
+    (fun () e -> elem e)
+    () l;
+  Buffer.contents b
+
+let rec compare cmp a b =
+  match (a, b) with
+  | [], [] -> 0
+  | [], _ -> 1
+  | _, [] -> -1
+  | x :: s, y :: t ->
+      let r = cmp x y in
       if r = 0 then compare cmp s t else r
- 
- let rec mem_compare cmp e l = match l with
-   | p::q when cmp p e = 0 -> true
-   | p::q -> mem_compare cmp e q
-   | [] -> false
- 
- 
- 
- (** {2 Parallel functions} *)
- 
-         (*
+
+let rec mem_compare cmp e l =
+  match l with
+  | p :: q when cmp p e = 0 -> true
+  | p :: q -> mem_compare cmp e q
+  | [] -> false
+
+(** {2 Parallel functions} *)
+
+(*
  Disabled for now.
  Not used, yet causes compiler warnings about threading...
  
@@ -188,10 +190,6 @@
      | None -> ()
      | Some x -> raise x (* rethrow exception from thread *)
           *)
- (**
-    As List.iter, but in parallel using nb_threads threads.
-    As threads are used, this only makes sense if the iterated function
-    calls a C function that temporarily lifts the global interpreter lock
-    (e.g., the Clang parser)
-  *)
- 
+(** As List.iter, but in parallel using nb_threads threads. As threads are used,
+    this only makes sense if the iterated function calls a C function that
+    temporarily lifts the global interpreter lock (e.g., the Clang parser) *)

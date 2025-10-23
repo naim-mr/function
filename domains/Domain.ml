@@ -44,6 +44,7 @@ module type RANKING_FUNCTION = sig
   val conflict : t -> B.t list
   val reinit : t -> t
   val compress : t -> t
+
   (* val vulnerable : t -> Polka.strict Polka.t Vulnerability.t list *)
   val merge_after : t -> t
   val print : Format.formatter -> t -> unit

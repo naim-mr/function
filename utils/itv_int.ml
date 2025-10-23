@@ -70,10 +70,7 @@ let bprint b x = Buffer.add_string b (to_string x)
 let pp_print f x = Format.pp_print_string f (to_string x)
 
 let to_apron ((l, h) : t) : Interval.t =
-  {
-    Interval.inf = B.to_apron l;
-    Interval.sup = B.to_apron h;
-  }
+  { Interval.inf = B.to_apron l; Interval.sup = B.to_apron h }
 
 let of_apron (i : Interval.t) : t =
   (B.of_apron_down i.Interval.inf, B.of_apron_up i.Interval.sup)
@@ -93,7 +90,8 @@ let join ((l1, h1) : t) ((l2, h2) : t) : t = (B.min l1 l2, B.max h1 h2)
 
 (* returns None if the set-union cannot be exactly represented *)
 let union ((l1, h1) : t) ((l2, h2) : t) : t option =
-  if B.leq l1 h2 && B.leq l2 (B.succ h1) then Some (B.min l1 l2, B.max h1 h2) else None
+  if B.leq l1 h2 && B.leq l2 (B.succ h1) then Some (B.min l1 l2, B.max h1 h2)
+  else None
 
 let meet ((l1, h1) : t) ((l2, h2) : t) : t with_bot =
   check_bot (B.max l1 l2, B.min h1 h2)
@@ -186,8 +184,9 @@ let rem ((l1, h1) : t) (i2 : t) : t with_bot * bool =
   let l2, h2 = abs i2 in
   (* i2 = [0;0] => _|_, error *)
   if h2 = B.zero then (BOT, true)
-  else if (* max |i1| < min |i2| => i1, no-error *)
-          B.lt (snd (abs (l1, h1))) l2
+  else if
+    (* max |i1| < min |i2| => i1, no-error *)
+    B.lt (snd (abs (l1, h1))) l2
   then (Nb (l1, h1), false)
   else if
     (* singleton => singleton, no-error *)
@@ -202,8 +201,10 @@ let rem ((l1, h1) : t) (i2 : t) : t with_bot * bool =
     let b, z = (B.pred h2, B.sign l2 = 0) in
     (* i1 >= 0 => [0; max |i2|-1] *)
     if B.sign l1 >= 0 then (Nb (B.zero, b), z)
-    else if (* i1 <= 0 => [-max |i2|+1; 0] *)
-            B.sign h1 <= 0 then (Nb (B.neg b, B.zero), z)
+    else if
+      (* i1 <= 0 => [-max |i2|+1; 0] *)
+      B.sign h1 <= 0
+    then (Nb (B.neg b, B.zero), z)
     else (* other cases [-max |i2|+1; max |i2|-1] *)
       (Nb (B.neg b, b), z)
 

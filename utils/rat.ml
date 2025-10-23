@@ -51,10 +51,9 @@ let of_apron_down = of_apron_up
 
 let of_coeff_opt = function
   | Coeff.Interval { inf; sup } ->
-    let inf, sup = of_apron_down inf, of_apron_up sup in
-    if inf = sup then Some inf else None
+      let inf, sup = (of_apron_down inf, of_apron_up sup) in
+      if inf = sup then Some inf else None
   | Coeff.Scalar s -> Some (of_apron_down s)
-
 
 let of_intinf = function
   | Datatypes.MINF -> minus_inf

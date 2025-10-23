@@ -341,12 +341,9 @@ let run_termination (module S : SEMANTIC) program =
 let run_termination_new program =
   let module S = (val termination_iterator_new ()) in
   try
-    if not !minimal then (
-      Format.fprintf !fmt "\nAbstract typed Syntax:\n";
-      Typed_syntax.pp_prog !fmt program);
     Config.result := S.analyze program;
-    if !Config.result then Format.printf "\nFinal Analaysis Result: TRUE\n"
-    else Format.printf "\nFinal Analaysis Result: UNKNOWN\n"
+    if !Config.result then Format.printf "\nFinal Analysis Result: TRUE\n"
+    else Format.printf "\nFinal Analysis Result: UNKNOWN\n"
   with Config.Timeout ->
     Format.fprintf !fmt "\nThe Analysis Timed Out!\n";
     Format.fprintf !fmt "\nDone.\n"
@@ -354,6 +351,9 @@ let run_termination_new program =
 
 let run_non_termination program =
   let ntprog, labels = Typed_syntax.nt_prog program in
+  if not !minimal then (
+    Format.printf "\nAbstract typed Syntax:\n ";
+    Typed_syntax.pp_prog !fmt ntprog);
   let nonterm label =
     CTLProperty.AG
       (CTLProperty.AF
@@ -369,18 +369,16 @@ let run_non_termination program =
     | l :: [] -> Some (nonterm l)
     | l :: q -> Some (CTLProperty.OR (nonterm l, Option.get (create_prop q)))
   in
-  if not !minimal then (
-    Format.fprintf !fmt "\nAbstract typed Syntax:\n";
-    Typed_syntax.pp_prog !fmt program);
+
   match create_prop (List.map fst labels) with
-  | None -> Format.printf "\nFinal Analaysis Result: UNKNOWN\n"
+  | None -> Format.printf "\nFinal Analysis Result: UNKNOWN\n"
   | Some p -> (
       try
         let module Nonterm = (val ctl_iterator_new ()) in
-        if Nonterm.analyze ~property:(SemanticsNew.Ctl p) ntprog then
-          if !Config.result then
-            Format.printf "\nFinal Analaysis Result: false(TERM)\n"
-          else Format.printf "\nFinal Analaysis Result: UNKNOWN\n"
+        Config.result := Nonterm.analyze ~property:(SemanticsNew.Ctl p) ntprog;
+        if !Config.result then
+          Format.printf "\nFinal Analysis Result: false(TERM)\n"
+        else Format.printf "\nFinal Analysis Result: UNKNOWN\n"
       with Config.Timeout ->
         Format.fprintf !fmt "\nThe Analysis Timed Out!\n";
         Format.fprintf !fmt "\nDone.\n")
@@ -443,13 +441,17 @@ let doit () =
   (* Get the iterator for the demanded analysis *)
   (* parse the program*)
   let prog = C_Frontend.parse_file !Config.filename in
-  if not !minimal then Typed_syntax.pp_prog Format.std_formatter prog;
-  run_termination_new prog ;
+  if not !minimal then (
+    Format.fprintf !fmt "\nAbstract typed Syntax:\n";
+    Typed_syntax.pp_prog !fmt prog);
+  run_termination_new prog;
   Format.print_newline ();
   if !Config.json_output then Regression.output_json ();
-  Config.analysis := "non-termination";
-  run_non_termination prog ;
-  if !Config.json_output then Regression.output_json ();
+  if not !Config.result then (
+    Config.analysis := "non-termination";
+       run_non_termination prog;
+    if !Config.json_output then Regression.output_json ());
+
   (*    
   let semantic = get_semantic () in
   (* Property and filename must be given (except for termination property) *)

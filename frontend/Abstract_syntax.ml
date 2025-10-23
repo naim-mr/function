@@ -33,17 +33,20 @@ let position_of_yojson = function
       { pos_fname; pos_lnum; pos_bol; pos_cnum }
   | _ -> failwith "failed to deserialize `position`"
 
-let pp_position fmt pos = Format.fprintf fmt "{
-    pos_fname: %s
-    pos_lnum: %d
-    pos_bol: %d
-    pos_cnum: %d
-  }" pos.pos_fname pos.pos_lnum pos.pos_bol pos.pos_cnum
+let pp_position fmt pos =
+  Format.fprintf fmt
+    "{\n\
+    \    pos_fname: %s\n\
+    \    pos_lnum: %d\n\
+    \    pos_bol: %d\n\
+    \    pos_cnum: %d\n\
+    \  }"
+    pos.pos_fname pos.pos_lnum pos.pos_bol pos.pos_cnum
 
-type extent = position * position [@@deriving yojson,show] (* start/end *)
+type extent = position * position [@@deriving yojson, show] (* start/end *)
 
 (* tree nodes are tagged with a source position *)
-type 'a ext = 'a * extent [@@deriving yojson,show]
+type 'a ext = 'a * extent [@@deriving yojson, show]
 
 type int_type =
   | A_CHAR (* 8-bit *)
@@ -51,7 +54,9 @@ type int_type =
   | A_INT (* 32-bit *)
   | A_LONG (* 64-bit *)
   | A_INTEGER (* arbitrary precision *)
-  | A_DYNINT of string * string (* integer with the specificed minimum and maximum values *)
+  | A_DYNINT of
+      string
+      * string (* integer with the specificed minimum and maximum values *)
 [@@deriving yojson]
 
 type int_sign = A_SIGNED | A_UNSIGNED [@@deriving yojson]
@@ -200,7 +205,7 @@ let pp_typ fmt t =
       | A_INT -> Format.fprintf fmt "%sint" s
       | A_LONG -> Format.fprintf fmt "%slong" s
       | A_INTEGER -> Format.fprintf fmt "%sinteger" s
-      | A_DYNINT (l,h) -> Format.fprintf fmt "%sdynint(%s,%s)" s l h)
+      | A_DYNINT (l, h) -> Format.fprintf fmt "%sdynint(%s,%s)" s l h)
 
 let string_of_typ = pp_to_string pp_typ
 

@@ -88,7 +88,7 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
               Format.fprintf !fmt "p2: %a\n" D.print p2;
               Format.fprintf !fmt "i': %a\n" D.print i');
             let jokers =
-              max 0 ((!retrybwd * (!Config.ordmax + 1)) - n + !joinbwd) 
+              max 0 ((!retrybwd * (!Config.ordmax + 1)) - n + !joinbwd)
             in
             if D.isLeq COMPUTATIONAL i' i then (
               if D.isLeq APPROXIMATION i' i then (
@@ -124,8 +124,7 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
         let f = StringMap.find f funcs in
         let p = bwdRec funcs env vars p f.funcBody in
         List.fold_left
-          (fun ap (s, _) ->
-            bwdStm ?domain funcs env vars ap s tvl)
+          (fun ap (s, _) -> bwdStm ?domain funcs env vars ap s tvl)
           p ss
     | A_recall (f, ss) -> failwith "Recursive function call are not supported"
   (* (match domain with
@@ -167,7 +166,6 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
 
   and bwdRec ?property funcs env vars (p : D.t) (b : block) : D.t =
     bwdBlk funcs env vars p b
-    
 
   (* Analyzer *)
   let rec initStm env vars s =

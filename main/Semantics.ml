@@ -37,12 +37,12 @@ module type SEMANTIC = sig
       different iterators *)
 
   val dummy_prop : 'a p
- 
+
   val fwdInvMap : B.t InvMap.t ref
   (** [fwdInvMap]: a map from the label of the program to an associated the
       over-approximating numerical abstraction computed in a forward analysis *)
 
-  val fwdTaintMap : VarSet.t InvMap.t ref 
+  val fwdTaintMap : VarSet.t InvMap.t ref
 
   val bwdInvMap : D.t InvMap.t ref
   (** [bwdInvMap]: a map from the label of the program to an associated a

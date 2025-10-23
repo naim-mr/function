@@ -1075,7 +1075,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
       in
       aux [] lbl (t1, t2) [] []
     in
-    
+
     if !tracebwd then (
       Format.fprintf !Config.fmt "WIDENING\n";
       Format.fprintf !Config.fmt "t1: %a\n" (print_tree vars) t1;
@@ -1883,8 +1883,6 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
       | Node (c, l, r) -> Node (c, aux l, aux r)
     in
     { domain; tree = aux t.tree; env; vars }
-
-
 
   (* Compute the vulnerability analysis, right now the algorithm is naif and doesnot implement the dynamic programming *)
   let vulnerable t : Polka.strict Polka.t Vulnerability.t list =

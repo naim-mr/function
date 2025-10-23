@@ -47,6 +47,10 @@ module ForwardIterator (B : PARTITION) = struct
         let env, vars = initBlock s1 (env, vars) in
         initBlock s2 (env, vars)
     | T_while ((l, _), b, s) -> initBlock s (env, vars)
+    | T_call (f, ss)
+      when not
+           @@ Environment.mem_var env (Var.of_string (Z.to_string f.func_id)) ->
+        initBlock f.func_body (env, vars)
     | _ -> (env, vars)
 
   and initBlock block (env, vars) =
@@ -99,6 +103,7 @@ module ForwardIterator (B : PARTITION) = struct
         B.filter p (neg_bexp b)
     | T_recall (f, ss) -> raise (Invalid_argument "bwdStm:T_recall")
     | T_call (f, ss) ->
+        Printf.printf "\n call to %s \n" f.func_name;
         let _ = fwdBlk funcs env vars p f.func_body in
         InvMap.find (Z.succ (blockLabel f.func_body)) !fwdInvMap
     | T_BREAK -> raise (Invalid_argument "bwdStm:T_BREAK")
@@ -168,19 +173,7 @@ module ForwardIterator (B : PARTITION) = struct
   and fwdTaintMap : VarSet.t InvMap.t ref = ref InvMap.empty
   and addFwdTaint l (a : VarSet.t) = fwdTaintMap := InvMap.add l a !fwdTaintMap
 
-  let analyze prog =
-    let rec init_env xs env =
-      match xs with
-      | [] -> env
-      | x :: xs ->
-          if Environment.mem_var env (Var.of_string (Z.to_string x.var_id)) then
-            init_env xs env
-          else
-            init_env xs
-              (Environment.add env
-                 [| Var.of_string (Z.to_string x.var_id) |]
-                 [||])
-    in
+  let analyze env prog =
     let block, funcmap, varmap = prog in
     let f = StringMap.find !Config.main funcmap in
     let retvars =
@@ -192,9 +185,6 @@ module ForwardIterator (B : PARTITION) = struct
     in
     let v1 = snd (List.split (IdMap.bindings varmap)) in
     let v1 = v1 @ f.func_args @ retvars in
-    let env = Environment.make [||] [||] in
-    let env, vars = initBlock block (env, v1) |> initBlock f.func_body in
-    let env = init_env v1 env in
     let s = f.func_body in
     if !tracefwd && not !minimal then
       Format.fprintf !fmt "\nForward Analysis Trace:\n";

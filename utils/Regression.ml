@@ -27,15 +27,12 @@ let json_string filename time analysis property result domain time =
     filename analysis property result domain time
 
 let output_json () =
-  if !Config.resilience then 
-    Config.analysis := !analysis ^ "-resilience";
+  if !Config.resilience then Config.analysis := !analysis ^ "-resilience";
   let dirname = !output_dir ^ Filename.dirname !filename in
   let rec mkdir_p filename =
     let parent_dir = Filename.dirname filename in
-    if not (Sys.file_exists parent_dir) then 
-      mkdir_p parent_dir
-    else
-      Unix.mkdir filename 0o755 
+    if not (Sys.file_exists parent_dir) then mkdir_p parent_dir
+    else Unix.mkdir filename 0o755
   in
   if not (Sys.file_exists dirname) then mkdir_p dirname;
   let jsonfile =

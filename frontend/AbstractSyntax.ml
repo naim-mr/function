@@ -11,7 +11,6 @@ open IntermediateSyntax
 (* types *)
 type typ = A_INT | A_PTR
 
-
 let typ_print fmt = function
   | A_INT -> Format.fprintf fmt "int"
   | A_PTR -> Format.fprintf fmt "int*"
@@ -20,8 +19,9 @@ let typ_print fmt = function
 type var = { varId : string; varName : string; varTyp : typ }
 
 module VarSet = Set.Make (struct
-type t = var
-let compare = fun x y -> String.compare x.varId y.varId
+  type t = var
+
+  let compare = fun x y -> String.compare x.varId y.varId
 end)
 
 let var_print fmt v = Format.fprintf fmt "%s{%s}" v.varId v.varName
@@ -322,7 +322,8 @@ and block_print ind fmt b =
         (block_print ind) b
 
 and label_print fmt l =
-  if Z.compare l (Z.of_int 10) = 0 then Format.fprintf fmt "[ %i:]" (Z.to_int l) else Format.fprintf fmt "[%i:]" (Z.to_int l)
+  if Z.compare l (Z.of_int 10) = 0 then Format.fprintf fmt "[ %i:]" (Z.to_int l)
+  else Format.fprintf fmt "[%i:]" (Z.to_int l)
 
 let label_of_block (block : block) : label =
   match block with A_empty l -> l | A_block (l, _, _) -> l
