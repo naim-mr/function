@@ -279,7 +279,7 @@ let ctl_iterator_new () : (module SemanticsNew.SEMANTIC) =
              else (module CTLIteratorNew (DecisionTree.TSAO))
          | "polyhedra" ->
              if !ordinals then
-               (module TerminationIteratorNew (DecisionTree.TSOP))
+               (module CTLIteratorNew (DecisionTree.TSOP))
              else (module CTLIteratorNew (DecisionTree.TSAP))
          | _ -> raise (Invalid_argument "Unknown Abstract Domain")
         : SemanticsNew.SEMANTIC)
@@ -369,7 +369,6 @@ let run_non_termination program =
     | l :: [] -> Some (nonterm l)
     | l :: q -> Some (CTLProperty.OR (nonterm l, Option.get (create_prop q)))
   in
-
   match create_prop (List.map fst labels) with
   | None -> Format.printf "\nFinal Analysis Result: UNKNOWN\n"
   | Some p -> (
