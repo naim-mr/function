@@ -364,13 +364,7 @@ module CTLIteratorNew (D : RANKING_FUNCTION) : SemanticsNew.SEMANTIC = struct
                 (* compute fixed point for loop-head *)
                 let ret = addInv (fst l) final_in_state in
                 if !refine then D.refine ret (Option.get pre_dom) else ret
-            | T_call (f, ss) ->
-                let t = bwd out f.func_body in
-                let _ = addInv f.func_id t in
-                let _ =
-                  Format.printf "\n add %d %a" (Z.to_int f.func_id) D.print t
-                in
-                t
+            | T_call (f, ss) -> bwd out f.func_body |> addInv f.func_id
             | T_recall (f, ss) -> raise (Invalid_argument "bwdStm:T_recall")
             | T_BREAK -> raise (Invalid_argument "bwdStm:T_BREAK")
             (* | A_recall (f, ss) -> raise (Invalid_argument "bwdStm:A_recall") *)
@@ -448,18 +442,11 @@ module CTLIteratorNew (D : RANKING_FUNCTION) : SemanticsNew.SEMANTIC = struct
                 out_state
             | T_RETURN -> if use_sink_state then zero else bot
             | T_add_var (l, Some e) | T_assign ((l, _), e) ->
-                Format.fprintf !fmt "\n in assign current_in: %a\n" D.print
-                  current_in;
-                let t =
-                  bwd_assign ?domain:pre_dom out_state
-                    ((T_var l, l.var_typ, l.var_extent), e)
-                in
-                Format.fprintf !fmt "\n first assign current_in: %a\n" D.print t;
                 D.mask current_in
-                  (bwd_assign ?domain:pre_dom out_state
-                     ((T_var l, l.var_typ, l.var_extent), e))
+                @@ bwd_assign ?domain:pre_dom out_state
+                @@ ((T_var l, l.var_typ, l.var_extent), e)
             | T_assert (b, _) | T_assume b ->
-                D.mask current_in (bwd_filter ?domain:pre_dom out_state b)
+                D.mask current_in @@ bwd_filter ?domain:pre_dom out_state b
             | T_if (b, s1, s2) ->
                 let out_if = bwd_filter ?domain:pre_dom (bwd out_state s1) b in
                 (* compute 'out' state for if-block*)
@@ -503,8 +490,6 @@ module CTLIteratorNew (D : RANKING_FUNCTION) : SemanticsNew.SEMANTIC = struct
                     let fixed_point = current_in in
                     if !tracebwd && not !minimal then
                       Format.fprintf !fmt "Fixed-Point reached \n";
-                    Format.fprintf !fmt "RETURN current_in: %a\n" D.print
-                      current_in;
                     fixed_point)
                   else
                     let updated_in' =
@@ -525,9 +510,6 @@ module CTLIteratorNew (D : RANKING_FUNCTION) : SemanticsNew.SEMANTIC = struct
                 in
                 (* process loop body with current 'in' state at loop-head *)
                 let final_in_state = aux current_in initial_out_enter 1 in
-                Format.fprintf !fmt "RETURN final_in at label (%s ): %a\n"
-                  (Z.to_string (fst l))
-                  D.print final_in_state;
                 (* compute fixed point for while-loop starting with current 'in' state at loop-head *)
                 addInv (fst l) final_in_state
             | T_call (f, ss) -> bwd out f.func_body
@@ -743,7 +725,18 @@ module CTLIteratorNew (D : RANKING_FUNCTION) : SemanticsNew.SEMANTIC = struct
   let analyze ?(precondition = Some (T_bool_const True))
       ?(property = dummy_prop) prog =
     let property = get_ctl property in
-    let program = program_of_prog prog !Config.main in
+    let module Init = EnvInit.Make (B) in
+    let env, vars = Init.env prog in
+    let block, funcmap, _ = prog in
+    let f = StringMap.find !Config.main funcmap in
+    let program =
+      {
+        mainFunction = f;
+        globalBlock = block;
+        environment = env;
+        variables = vars;
+      }
+    in
     if !Config.refine then (* Run forward analysis if 'refine' flag is set *)
       ForwardIteratorB.analyze program.environment prog;
     fwdInvMap := !ForwardIteratorB.fwdInvMap;
@@ -752,7 +745,6 @@ module CTLIteratorNew (D : RANKING_FUNCTION) : SemanticsNew.SEMANTIC = struct
     let programInvariant = InvMap.find initialLabel inv in
     bwdInvMap := inv;
     tree := D.output_json program.variables programInvariant;
-    Format.printf "\n final tree: %a" D.print (D.compress programInvariant);
     Config.result := D.partially_defined programInvariant;
     !Config.result
 end

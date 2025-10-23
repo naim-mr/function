@@ -33,32 +33,6 @@ module ForwardIterator (B : PARTITION) = struct
   let blockLabel b =
     match b with T_empty (l, _) -> l | T_stat ((l, _), _, _) -> l
 
-  let rec initStat s (env, vars) =
-    match s with
-    | T_add_var (v, _)
-      when not @@ Environment.mem_var env (Var.of_string (Z.to_string v.var_id))
-      ->
-        (B.add_var_to_env env v, v :: vars)
-    | T_assign ((v, _), _)
-      when not @@ Environment.mem_var env (Var.of_string (Z.to_string v.var_id))
-      ->
-        (B.add_var_to_env env v, v :: vars)
-    | T_if (b, s1, s2) ->
-        let env, vars = initBlock s1 (env, vars) in
-        initBlock s2 (env, vars)
-    | T_while ((l, _), b, s) -> initBlock s (env, vars)
-    | T_call (f, ss)
-      when not
-           @@ Environment.mem_var env (Var.of_string (Z.to_string f.func_id)) ->
-        initBlock f.func_body (env, vars)
-    | _ -> (env, vars)
-
-  and initBlock block (env, vars) =
-    match block with
-    | T_empty (l, _) -> (env, vars)
-    | T_stat ((l, _), (s, _), b) ->
-        let env, vars = initStat s (env, vars) in
-        initBlock b (env, vars)
 
   (* compute invariant map based on forward analysis *)
   let rec compute (vars, stmts, funcs) p main env =
@@ -103,7 +77,6 @@ module ForwardIterator (B : PARTITION) = struct
         B.filter p (neg_bexp b)
     | T_recall (f, ss) -> raise (Invalid_argument "bwdStm:T_recall")
     | T_call (f, ss) ->
-        Printf.printf "\n call to %s \n" f.func_name;
         let _ = fwdBlk funcs env vars p f.func_body in
         InvMap.find (Z.succ (blockLabel f.func_body)) !fwdInvMap
     | T_BREAK -> raise (Invalid_argument "bwdStm:T_BREAK")
@@ -188,16 +161,16 @@ module ForwardIterator (B : PARTITION) = struct
     let s = f.func_body in
     if !tracefwd && not !minimal then
       Format.fprintf !fmt "\nForward Analysis Trace:\n";
-    (* let startfwd = Sys.time () in *)
+    let startfwd = Sys.time () in 
     let _ =
       fwdBlk funcmap env v1 (fwdBlk funcmap env v1 (B.top env v1) block) s
     in
-    (* let stopfwd = Sys.time () in
+    let stopfwd = Sys.time () in
     if not !minimal then
       if !timefwd then
         Format.fprintf !fmt "\nForward Analysis (Time: %f s):\n"
           (stopfwd -. startfwd)
       else Format.fprintf !fmt "\nForward Analysis numerical:\n";
-    fwdMap_print !fmt !fwdInvMap B.print; *)
+    fwdMap_print !fmt !fwdInvMap B.print; 
     ()
 end

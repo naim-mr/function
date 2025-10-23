@@ -170,61 +170,20 @@ module TerminationIteratorNew (D : RANKING_FUNCTION) : SEMANTIC = struct
 
   let analyze ?(precondition = Some (T_bool_const True)) ?property
       (prog : Typed_syntax.prog) =
-    let rec init_env xs env =
-      match xs with
-      | [] -> env
-      | x :: xs ->
-          if Environment.mem_var env (Var.of_string (Z.to_string x.var_id)) then
-            init_env xs env
-          else
-            init_env xs
-              (Environment.add env
-                 [| Var.of_string (Z.to_string x.var_id) |]
-                 [||])
-    in
     let block, funcmap, varmap = prog in
     let f = StringMap.find !Config.main funcmap in
-    let retvars =
-      StringMap.bindings funcmap
-      |> List.fold_left (fun acc (_, f) -> f.func_return :: acc) []
-      |> List.fold_left
-           (fun acc ret -> match ret with None -> acc | Some v -> v :: acc)
-           []
-    in
-    let v1 = snd (List.split (IdMap.bindings varmap)) in
-    let v1 = v1 @ f.func_args @ retvars in
-    let env = Environment.make [||] [||] in
-    Format.printf "\n --- print vars --- \n";
-    List.iter
-      (fun v -> Format.printf "$%d{%s}" (Z.to_int v.var_id) v.var_name)
-      v1;
-    let env, vars =
-      ForwardIteratorB.initBlock block (env, v1)
-      |> ForwardIteratorB.initBlock f.func_body
-    in
-    let env = init_env v1 env in
+    let module Init = EnvInit.Make (B) in 
+    let env,vars = Init.env prog in 
     let s = f.func_body in
     initBlk env vars block;
     initBlk env vars s;
-    Format.printf "\n Print of env : \n";
-    Environment.print Format.std_formatter env;
-    Format.print_newline ();
-
     (* TODO: handle functions calls *)
     (* Forward Analysis *)
     if !tracefwd && not !minimal then
       Format.fprintf !fmt "\nForward Analysis Trace:\n";
-    let startfwd = Sys.time () in
     let _ = ForwardIteratorB.analyze env prog in
     fwdInvMap := !ForwardIteratorB.fwdInvMap;
     fwdTaintMap := !ForwardIteratorB.fwdTaintMap;
-    let stopfwd = Sys.time () in
-    if not !minimal then (
-      if !timefwd then
-        Format.fprintf !fmt "\nForward Analysis (Time: %f s):\n"
-          (stopfwd -. startfwd)
-      else Format.fprintf !fmt "\nForward Analysis numerical:\n";
-      ForwardIteratorB.fwdMap_print !fmt !fwdInvMap B.print
       (* Format.fprintf !fmt "\nForward Analysis taint: size %d\n"
         (InvMap.cardinal !fwdTaintMap); *)
       (* InvMap.iter
@@ -233,7 +192,7 @@ module TerminationIteratorNew (D : RANKING_FUNCTION) : SEMANTIC = struct
             (VarSet.fold
                (fun x acc -> acc ^ "" ^ x.var_id ^ "{" ^ x.var_name ^ "}")
                a ""))
-        !fwdTaintMap); *));
+        !fwdTaintMap); *);
     (* Backward Analysis *)
     if !tracebwd && not !minimal then
       Format.fprintf !fmt "\nBackward Analysis Trace:\n";
