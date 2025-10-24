@@ -444,12 +444,12 @@ let doit () =
     Typed_syntax.pp_prog !fmt prog);
   run_termination_new prog;
   Format.print_newline ();
-  if !Config.json_output then Regression.output_json ();
+  if !Config.json_output then Regression.output_json (); 
 
-  (* if not !Config.result then (
+  if not !Config.result then (
     Config.analysis := "non-termination";
        run_non_termination prog;
-    if !Config.json_output then Regression.output_json ()); *)
+    if !Config.json_output then Regression.output_json ()); 
 
   (*    
   let semantic = get_semantic () in

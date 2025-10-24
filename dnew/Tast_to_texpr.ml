@@ -26,6 +26,12 @@ let rec exp_to_apron ((e, t, ext) : expr typed) =
   | T_bool_const True -> Texpr1.Cst (Coeff.s_of_int 1)
   | T_bool_const False -> Texpr1.Cst (Coeff.s_of_int 0)
   | T_bool_const Maybe -> Texpr1.Cst (Coeff.i_of_int 0 1)
+  | T_var x when String.starts_with ~prefix:"nondet_" x.var_name -> (
+      match x.var_typ with
+      | A_int (_, _) ->
+          exp_to_apron (T_int_const (Valsem.int_type_set A_INT A_SIGNED), t, ext)
+      | A_BOOL -> exp_to_apron (T_bool_const Maybe, t, ext)
+      | _ -> raise (Invalid_argument "Float not handle yet"))
   | T_var x -> Texpr1.Var (Var.of_string (Z.to_string x.var_id))
   | T_float_const _ -> raise (Invalid_argument "Float not handle yet")
   | T_unary (A_UNARY_MINUS, e) ->
