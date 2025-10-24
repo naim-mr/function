@@ -33,6 +33,7 @@ let dot = ref false (* output trees in graphviz dot format *)
 let abort = ref false
 let vulnerability = ref false
 let resilience = ref false
+let nowrap = ref false
 
 exception Abort
 exception Timeout

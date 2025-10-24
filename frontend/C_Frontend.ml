@@ -57,28 +57,29 @@ let convert_type_qual ((typ, _) : C_AST.type_qual) : Abstract_syntax.typ =
   | C_AST.T_bool -> Abstract_syntax.A_BOOL
   | C_AST.T_integer int_type -> (
       match int_type with
-      | C_AST.Char signedness ->
-          if signedness = C_AST.UNSIGNED then
-            A_int (Abstract_syntax.A_CHAR, Abstract_syntax.A_SIGNED)
-          else A_int (Abstract_syntax.A_CHAR, Abstract_syntax.A_UNSIGNED)
       | C_AST.SIGNED_CHAR ->
           A_int (Abstract_syntax.A_CHAR, Abstract_syntax.A_SIGNED)
-      | C_AST.UNSIGNED_CHAR ->
-          A_int (Abstract_syntax.A_CHAR, Abstract_syntax.A_UNSIGNED)
       | C_AST.SIGNED_SHORT ->
           A_int (Abstract_syntax.A_SHORT, Abstract_syntax.A_SIGNED)
-      | C_AST.UNSIGNED_SHORT ->
-          A_int (Abstract_syntax.A_SHORT, Abstract_syntax.A_UNSIGNED)
       | C_AST.SIGNED_INT ->
           A_int (Abstract_syntax.A_INT, Abstract_syntax.A_SIGNED)
-      | C_AST.UNSIGNED_INT ->
-          A_int (Abstract_syntax.A_INT, Abstract_syntax.A_UNSIGNED)
       | C_AST.SIGNED_LONG ->
           A_int (Abstract_syntax.A_LONG, Abstract_syntax.A_SIGNED)
-      | C_AST.UNSIGNED_LONG ->
-          A_int (Abstract_syntax.A_LONG, Abstract_syntax.A_UNSIGNED)
       | C_AST.SIGNED_LONG_LONG | C_AST.UNSIGNED_LONG_LONG ->
           raise (UnsupportedFeature "long long")
+      | C_AST.UNSIGNED_LONG 
+          (* A_int (Abstract_syntax.A_LONG, Abstract_syntax.A_UNSIGNED) *)
+      | C_AST.UNSIGNED_SHORT
+          (* A_int (Abstract_syntax.A_SHORT, Abstract_syntax.A_UNSIGNED) *)
+      | C_AST.UNSIGNED_CHAR 
+          (* A_int (Abstract_syntax.A_CHAR, Abstract_syntax.A_UNSIGNED) *)
+      | C_AST.UNSIGNED_INT  ->
+          (* A_int (Abstract_syntax.A_INT, Abstract_syntax.A_UNSIGNED) *)
+          raise (UnsupportedConversion "Unsigned integer are supported")
+      | C_AST.Char signedness ->
+          if signedness = C_AST.UNSIGNED then
+            A_int (Abstract_syntax.A_CHAR, Abstract_syntax.A_UNSIGNED)
+          else A_int (Abstract_syntax.A_CHAR, Abstract_syntax.A_SIGNED)
       | _ -> raise (UnsupportedConversion "unsupported int type"))
   | C_AST.T_float float_type -> (
       match float_type with

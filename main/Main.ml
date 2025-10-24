@@ -124,6 +124,9 @@ let parse_args () =
       ( "-domain",
         Arg.String (fun s -> Config.domain := s),
         "Numerical Abstract Domain used" );
+        ( "-nowrap",
+        Arg.Unit (fun _ -> Config.nowrap := true),
+        "Refine the backward analysis" );
       ( "-timeout",
         Arg.Float (fun d -> Config.timeout := d),
         "Maximal analysis time in seconds" );
