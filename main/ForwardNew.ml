@@ -47,14 +47,14 @@ module ForwardIterator (B : PARTITION) = struct
     match s with
     | T_label _ | T_print _ | T_add_var (_, None) | T_del_var _ -> p
     | T_RETURN ->
-        if ctx.summary then
+        (* if ctx.summary then
           if not (StringMap.mem ctx.f_cur.func_name !fwdSummaryMap) then
             fwdSummaryMap := StringMap.add ctx.f_cur.func_name p !fwdSummaryMap
           else
             fwdSummaryMap :=
               StringMap.update ctx.f_cur.func_name
                 (Option.map (fun (prev : B.t) -> B.join prev p))
-                !fwdSummaryMap;
+                !fwdSummaryMap; *)
         B.bot ctx.env ctx.vars
     | T_add_var (v, Some (e, t, ext)) ->
         B.fwdAssign p ((T_var v, v.var_typ, ext), (e, t, ext))
@@ -95,7 +95,6 @@ module ForwardIterator (B : PARTITION) = struct
         let p = aux i p2 1 in
         addFwdInv l p;
         B.filter p (neg_bexp b)
-    | T_recall (f, ss) -> raise (Invalid_argument "bwdStm:T_recall")
     | T_call (f, ss) -> fwdBlk ctx p f.func_body
     | T_BREAK -> raise (Invalid_argument "bwdStm:T_BREAK")
 
@@ -191,7 +190,7 @@ module ForwardIterator (B : PARTITION) = struct
         summary = true;
       }
     in
-    StringMap.iter
+    (* StringMap.iter
       (fun _ f ->
         Printf.printf "\n iter f.func_name %s <> %s %b \n" f.func_name
           !Config.main
@@ -199,7 +198,7 @@ module ForwardIterator (B : PARTITION) = struct
         if f.func_name <> !Config.main then
           let _ = fwdBlk { ctx with f_cur = f } (B.top env v1) f.func_body in
           ())
-      ctx.funcs;
+      ctx.funcs; *)
     let ctx = { ctx with summary = false } in
     let _ = fwdBlk ctx (fwdBlk ctx (B.top env v1) block) s in
     let stopfwd = Sys.time () in

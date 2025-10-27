@@ -42,27 +42,39 @@ module TerminationIteratorNew (D : RANKING_FUNCTION) : SEMANTIC = struct
     match b with T_empty (l, _) -> l | T_stat ((l, _), _, _) -> l
 
   (*Backward Iterator + Recursion *)
-  let rec bwdStm ?property ?domain funcs env vars p s =
+  let rec bwdStm ?property ?domain ?(visited : string Seq.t = Seq.empty) funcs
+      env vars p s =
     match s with
-    | T_label _ | T_print _ | T_add_var (_, None) | T_del_var _ -> p
-    | T_RETURN -> D.zero ?domain env vars
+    | T_label _ | T_print _ | T_add_var (_, None) | T_del_var _ -> (p, visited)
+    | T_RETURN ->
+        print_newline ();
+        Printf.printf "ici?\n";
+        (D.zero ?domain env vars, visited)
     | T_BREAK -> raise (UnsupportedFeature "break")
     | T_add_var (v, Some (exp, typ, ext)) | T_assign ((v, _), (exp, typ, ext))
       ->
-        D.bwdAssign ?domain ~taint:true ~underapprox:false p
-          ((T_var v, typ, ext), (exp, typ, ext))
-    | T_assert (b, _) | T_assume b -> p
+        print_newline ();
+        Printf.printf "ici ass?\n";
+        ( D.bwdAssign ?domain ~taint:true ~underapprox:false p
+            ((T_var v, typ, ext), (exp, typ, ext)),
+          visited )
+    | T_assert (b, _) | T_assume b -> (p, visited)
     | T_if ((b, typ, ba), s1, s2) ->
         let uap = false in
-        let p1 = bwdBlk funcs env vars p s1 in
-        let p1 = D.filter ?domain ~underapprox:uap p1 (b, typ, ba) in
-        let p2 = bwdBlk funcs env vars p s2 in
-        let p2 = D.filter ?domain ~underapprox:uap p2 (neg_bexp (b, typ, ba)) in
-        if !tracebwd && not !minimal then (
-          Format.fprintf Format.std_formatter "if in p1: %a\n" D.print p1;
-          Format.fprintf Format.std_formatter "p2: %a\n" D.print p2);
-        let joinType = APPROXIMATION in
-        D.join joinType p1 p2
+        let p1, visited2 = bwdBlk ~visited funcs env vars p s1 in
+        let p2, visited1 = bwdBlk ~visited funcs env vars p s2 in
+        if D.defined p1 && D.defined p2 then
+          (D.join COMPUTATIONAL p1 p2, Seq.append visited1 visited2)
+        else
+          let p1 = D.filter ?domain ~underapprox:uap p1 (b, typ, ba) in
+          let p2 =
+            D.filter ?domain ~underapprox:uap p2 (neg_bexp (b, typ, ba))
+          in
+          if !tracebwd && not !minimal then (
+            Format.fprintf Format.std_formatter "if in p1: %a\n" D.print p1;
+            Format.fprintf Format.std_formatter "p2: %a\n" D.print p2);
+          let joinType = APPROXIMATION in
+          (D.join joinType p1 p2, Seq.append visited1 visited2)
     | T_while ((l, _), (b, t, ba), s) ->
         let a = InvMap.find l !fwdInvMap in
         let dm = if !refine then Some a else None in
@@ -91,7 +103,7 @@ module TerminationIteratorNew (D : RANKING_FUNCTION) : SEMANTIC = struct
                 let i'' = if n <= !joinbwd then i' else D.widen ~jokers i i' in
                 if !tracebwd && not !minimal then
                   Format.fprintf !fmt "i'': %a\n" D.print i'';
-                let p2 = bwdBlk funcs env vars i'' s in
+                let p2, visited2 = bwdBlk ~visited funcs env vars i'' s in
                 let p2' = D.filter ?domain:dm ~underapprox:uap p2 (b, t, ba) in
                 aux i'' p2' (n + 1))
             else
@@ -101,25 +113,37 @@ module TerminationIteratorNew (D : RANKING_FUNCTION) : SEMANTIC = struct
               in
               if !tracebwd && not !minimal then
                 Format.fprintf !fmt "i'': %a\n" D.print i'';
-              let p2 = bwdBlk funcs env vars i'' s in
+              let p2, visited2 = bwdBlk ~visited funcs env vars i'' s in
               let p2' = D.filter ?domain:dm ~underapprox:uap p2 (b, t, ba) in
               aux i'' p2' (n + 1)
         in
         let i = D.bot ?domain:dm env vars in
-        let p2 = bwdBlk funcs env vars i s in
+        let p2, visited2 = bwdBlk ~visited funcs env vars i s in
         let p2' = D.filter ?domain:dm ~underapprox:uap p2 (b, t, ba) in
         let p = aux i p2' 1 in
         addBwdInv l p;
-        if !refine then D.refine p a else p
-    | T_recall (f, ss) -> raise (UnsupportedConversion "bwdStmt: T_Recall")
-    | T_call (f, ss) ->
-        let zero = D.domain_zero p in
-        let p' = bwdRec funcs env vars zero f.func_body in
-        let b = InvMap.find (Z.succ (blockLabel f.func_body)) !fwdInvMap in
-        D.meet APPROXIMATION (D.refine p b) p'
-    | T_expr e -> D.top env vars (* todo handle this *)
+        ((if !refine then D.refine p a else p), visited)
+    | T_call (f, ss) -> (
+        let p1, visited = bwdBlk ~visited funcs env vars p f.func_body in
+        Printf.printf "\n After \n";
+        D.print !fmt p1;
+        Format.print_flush ();
+        Printf.printf "\n stack :";
+        Seq.iter (fun f -> Printf.printf "%s | " f) visited;
+        let f_in =
+          Seq.find (fun name -> String.compare name f.func_name = 0) visited
+        in
+        match f_in with
+        | Some f_in -> raise (UnsupportedFeature "Recursive function")
+        | None ->
+            Format.fprintf !fmt "### Analysis of RETURN call to :%s ###:\n"
+              f.func_name;
+            (D.plus p (D.join APPROXIMATION p p1), Seq.cons f.func_name visited)
+        )
+    | T_expr e -> (D.top env vars, visited (* todo handle this *))
 
-  and bwdBlk ?property funcs env vars p (b : block) : D.t =
+  and bwdBlk ?property ?(visited : string Seq.t = Seq.empty) funcs env vars p
+      (b : block) : D.t * string Seq.t =
     let result_print l p =
       Format.fprintf !fmt "### %a ###:\n%a@." label_print l D.print p
     in
@@ -129,25 +153,25 @@ module TerminationIteratorNew (D : RANKING_FUNCTION) : SEMANTIC = struct
         let p = if !refine then D.refine p a else p in
         if !tracebwd && not !minimal then result_print l p;
         addBwdInv l p;
-        p
+        (p, visited)
     | T_stat ((l, _), (s, _), b) ->
         stop := Sys.time ();
         if !stop -. !start > !timeout then raise Timeout
         else
-          let b = bwdBlk funcs env vars p b in
+          let b, visited = bwdBlk ~visited funcs env vars p b in
           let a = InvMap.find l !fwdInvMap in
           (* let tvl = InvMap.find l !fwdTaintMap in *)
-          let p =
-            if !refine then bwdStm ~domain:a funcs env vars b s
-            else bwdStm funcs env vars b s
+          let p, visited =
+            if !refine then bwdStm ~visited ~domain:a funcs env vars b s
+            else bwdStm ~visited funcs env vars b s
           in
           let p = if !refine then D.refine p a else p in
           if !tracebwd && not !minimal then result_print l p;
           addBwdInv l p;
-          p
+          (p, visited)
 
   and bwdRec ?property funcs env vars (p : D.t) (b : block) : D.t =
-    bwdBlk funcs env vars p b
+    fst (bwdBlk funcs env vars p b)
 
   (* Analyzer *)
   let rec initStm env vars s =

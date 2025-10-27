@@ -303,19 +303,10 @@ and call (s, sx) args env pre post x =
   match f.func_return with
   | None ->
       (* function without return *)
-      let node =
-        if String.compare env.env_call_ctx s <> 0 then (T_call (f, sx), x)
-        else (T_recall (f, sx), x)
-      in
-
-      (None, pre @ pre' @ [ node ] @ post', post)
+      (None, pre @ pre' @ [ (T_call (f, sx), x) ] @ post', post)
   | Some v ->
       (* function with return value *)
       let v1 = new_var "__returned" true x v.var_typ T_LOCAL in
-      let node =
-        if String.compare env.env_call_ctx s <> 0 then (T_call (f, sx), x)
-        else (T_recall (f, sx), x)
-      in
       (* note: all the formal argument and return variables are deleted
          just after the call;
          the actual argument is copied into a temporary v1 to be used by the
@@ -328,7 +319,7 @@ and call (s, sx) args env pre post x =
         @ [
             (T_add_var (v1, None), x);
             (T_add_var (v, None), x);
-            node;
+            (T_call (f, sx), x);
             (T_assign ((v1, x), (T_var v, v.var_typ, x)), x);
             (T_del_var v, x);
           ]

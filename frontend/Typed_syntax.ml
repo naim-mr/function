@@ -59,7 +59,6 @@ type stat =
   | T_expr of expr typed
   | T_assign of var ext * expr typed
   | T_call of func ext (* arguments and return values as local variables *)
-  | T_recall of func ext (* arguments and return values as local variables *)
   | T_if of expr typed * block * block
   | T_while of label (* loop-invariant label *) * expr typed * block
   | T_add_var of var * expr typed option
@@ -213,7 +212,7 @@ let rec pp_stat ind fmt s =
   | T_expr e -> pp_expr_ext fmt e
   | T_assign ((v, _), e) ->
       Format.fprintf fmt "%a = %a" print_var_name v pp_expr_ext e
-  | T_call (f, _) | T_recall (f, _) ->
+  | T_call (f, _) ->
       (match f.func_return with
       | Some v -> Format.fprintf fmt "%a = " print_var_name v
       | None -> ());
@@ -337,7 +336,7 @@ let unbox_var (e : expr) : var option =
 let prog_contains_loops ((b, funcs, _) : prog) : bool =
   let rec stat_contains_loops (s : stat) : bool =
     match s with
-    | T_expr _ | T_assign _ | T_call _ | T_recall _ | T_add_var _ | T_del_var _
+    | T_expr _ | T_assign _ | T_call _ | T_add_var _ | T_del_var _
     | T_RETURN | T_BREAK | T_assert _ | T_assume _ | T_print _ | T_label _ ->
         false
     | T_if (_, b1, b2) -> block_contains_loops b1 || block_contains_loops b2
@@ -359,7 +358,7 @@ let nt_prog ((b, funcs, v) : prog) : prog * label list =
   let lnew = ref [] in
   let rec nt_stat (s : stat) : stat =
     match s with
-    | T_expr _ | T_assign _ | T_call _ | T_recall _ | T_add_var _ | T_del_var _
+    | T_expr _ | T_assign _ | T_call _ | T_add_var _ | T_del_var _
     | T_RETURN | T_BREAK | T_assert _ | T_assume _ | T_print _ | T_label _ ->
         s
     | T_if (e, b1, b2) ->

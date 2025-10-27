@@ -448,11 +448,12 @@ let doit () =
   run_termination_new prog;
   Format.print_newline ();
   if !Config.json_output then Regression.output_json (); 
-
+(* 
   if not !Config.result then (
     Config.analysis := "non-termination";
+    Config.refine := false;
        run_non_termination prog;
-    if !Config.json_output then Regression.output_json ()); 
+    if !Config.json_output then Regression.output_json ());  *)
 
   (*    
   let semantic = get_semantic () in

@@ -647,6 +647,37 @@ module Affine (B : PARTITION) : FUNCTION = struct
   let successor f =
     { ranking = successor_ranking f.ranking; env = f.env; vars = f.vars }
 
+  let plus_ranking b f1 f2 =
+    (* b = domain of first/second function, f1/f2 = value of first/second
+           function *)
+    (*REMOVE?*)
+    match (f1, f2) with
+    | Fun f1, Fun f2 ->
+        Format.printf "\n ADD: %a  +  %a \n" (Linexpr1.print) f1 (Linexpr1.print) f2;
+        let env = Environment.add (B.env b) [| v |] [||] in
+        let f1 = Linexpr1.copy f1 and f2 = Linexpr1.copy f2 in
+        let f1' = ref Seq.empty in
+        let f2' = ref Seq.empty in
+        Linexpr1.iter (fun coef var -> f1' := Seq.cons (coef, var) !f1') f1;
+        Linexpr1.iter (fun coef var -> f2' := Seq.cons (coef, var) !f2') f2;
+        let fcoef =
+          Seq.map2 (fun (c1, v) (c2, v) -> (addCoeff c1 c2, v)) !f1' !f2'
+          |> List.of_seq
+        in
+        let f = Linexpr1.make env in
+        Linexpr1.set_list f fcoef
+          (Some (addCoeff (Linexpr1.get_cst f1) (Linexpr1.get_cst f2)));
+        successor_ranking @@ Fun f
+      | _, Bot | Bot, _ -> Bot
+      | _, Top | Top, _ -> Top
+
+  let plus b f1 f2 =
+    {
+      ranking = plus_ranking b f1.ranking f2.ranking;
+      env = f1.env;
+      vars = f1.vars;
+    }
+
   let bwdAssign_ranking f ((x, t, ext), e) =
     match x with
     | T_var x -> (

@@ -614,9 +614,39 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
       The implementation assumes that t1 and t2 are defined over the same
       reachable states, the same APRON envorinment and the same list of program
       variables. *)
+  let tree_plus (t1, t2) domain env vars =
+    let fBotLeftRight cs f =
+      let b =
+        match domain with
+        | None -> B.inner env vars cs
+        | Some domain -> B.meet (B.inner env vars cs) domain
+      in
+      if B.isBot b then Bot else Leaf f
+    in
+    let fLeaf cs f1 f2 =
+      let b =
+        match domain with
+        | None -> B.inner env vars cs
+        | Some domain -> B.meet (B.inner env vars cs) domain
+      in
+      if B.isBot b then Bot else Leaf (F.plus b f1 f2)
+    in
+    tree_join_helper fBotLeftRight fBotLeftRight fLeaf t1 t2 env vars
 
   let join k t1 t2 =
     let t = tree_join k (t1.tree, t2.tree) t1.domain t1.env t1.vars in
+    {
+      domain = t1.domain;
+      (* assuming t1.domain = t2.domain *)
+      (* tree = tree_join k (t1.tree,t2.tree) t1.domain t1.env t1.vars; *)
+      tree = t;
+      env = t1.env;
+      (* assuming t1.env = t2.env *)
+      vars = t1.vars (* assuming t1.vars = t2.vars *);
+    }
+
+  let plus t1 t2 =
+    let t = tree_plus (t1.tree, t2.tree) t1.domain t1.env t1.vars in
     {
       domain = t1.domain;
       (* assuming t1.domain = t2.domain *)

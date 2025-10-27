@@ -365,7 +365,6 @@ module CTLIteratorNew (D : RANKING_FUNCTION) : SemanticsNew.SEMANTIC = struct
                 let ret = addInv (fst l) final_in_state in
                 if !refine then D.refine ret (Option.get pre_dom) else ret
             | T_call (f, ss) -> bwd out f.func_body |> addInv f.func_id
-            | T_recall (f, ss) -> raise (Invalid_argument "bwdStm:T_recall")
             | T_BREAK -> raise (Invalid_argument "bwdStm:T_BREAK")
             (* | A_recall (f, ss) -> raise (Invalid_argument "bwdStm:A_recall") *)
           in
@@ -476,8 +475,8 @@ module CTLIteratorNew (D : RANKING_FUNCTION) : SemanticsNew.SEMANTIC = struct
                   (* join two branches and combine with current 'in' state using mask *)
                   if !tracebwd && not !minimal then (
                     Format.fprintf !fmt "### %a:%i ###:\n" label_print (fst l) n;
-                    (* Format.fprintf !fmt "out_exit: %a\n" D.print out_exit; *)
-                    (* Format.fprintf !fmt "out_enter: %a\n" D.print out_enter; *)
+                    Format.fprintf !fmt "out_exit: %a\n" D.print out_exit; 
+                    Format.fprintf !fmt "out_enter: %a\n" D.print out_enter; 
                     Format.fprintf !fmt "out_joined: %a\n" D.print out_joined;
                     Format.fprintf !fmt "current_in: %a\n" D.print current_in;
                     Format.fprintf !fmt "updated_in: %a\n" D.print updated_in);
@@ -513,7 +512,6 @@ module CTLIteratorNew (D : RANKING_FUNCTION) : SemanticsNew.SEMANTIC = struct
                 (* compute fixed point for while-loop starting with current 'in' state at loop-head *)
                 addInv (fst l) final_in_state
             | T_call (f, ss) -> bwd out f.func_body
-            | T_recall (f, ss) -> raise (Invalid_argument "bwdStm:T_recall")
             | T_BREAK -> raise (Invalid_argument "bwdStm:T_BREAK")
             (* | A_recall (f, ss) -> raise (Invalid_argument "bwdStm:A_recall") *)
           in

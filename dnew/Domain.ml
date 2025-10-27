@@ -26,6 +26,7 @@ module type RANKING_FUNCTION = sig
   val domain_zero : t -> t
   val isLeq : kind -> t -> t -> bool
   val join : kind -> t -> t -> t
+  val plus : t -> t -> t
   val meet : kind -> t -> t -> t
   val widen : ?jokers:int -> t -> t -> t
   val dual_widen : t -> t -> t

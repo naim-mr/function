@@ -74,8 +74,8 @@ let convert_type_qual ((typ, _) : C_AST.type_qual) : Abstract_syntax.typ =
       | C_AST.UNSIGNED_CHAR 
           (* A_int (Abstract_syntax.A_CHAR, Abstract_syntax.A_UNSIGNED) *)
       | C_AST.UNSIGNED_INT  ->
-          (* A_int (Abstract_syntax.A_INT, Abstract_syntax.A_UNSIGNED) *)
-          raise (UnsupportedConversion "Unsigned integer are supported")
+           A_int (Abstract_syntax.A_INT, Abstract_syntax.A_UNSIGNED)  
+          (* raise (UnsupportedConversion "Unsigned integer are supported") *)
       | C_AST.Char signedness ->
           if signedness = C_AST.UNSIGNED then
             A_int (Abstract_syntax.A_CHAR, Abstract_syntax.A_UNSIGNED)
@@ -92,7 +92,7 @@ let convert_type_qual ((typ, _) : C_AST.type_qual) : Abstract_syntax.typ =
   | C_AST.T_array _ -> raise (UnsupportedFeature "array")
   | C_AST.T_record _ -> raise (UnsupportedFeature "struct")
   | C_AST.T_typedef _ -> raise (UnsupportedFeature "typedef")
-  | _ -> raise (UnsupportedConversion "unsupported type")
+  | _ ->  raise (UnsupportedConversion "unsupported type")
 
 let convert_un_op (op : C_AST.unary_operator) : Abstract_syntax.unary_op =
   match op with
@@ -200,6 +200,8 @@ let rec convert_expr (st : state) ((kind, typ, _) : C_AST.expr) :
           (convert_bin_op op, e1 |> attach_position, e2 |> attach_position),
         bin_op_out_hint op )
   | C_AST.E_cast (((_, e_typ, _) as ee), _) ->
+      Printf.printf "convert %s \n" (C_print.string_of_expr ee);
+      
       let e_typ = convert_type_qual e_typ in
       let ee = convert_expr st ee |> fst in
       let cast_typ = convert_type_qual typ in
@@ -385,7 +387,7 @@ let rec convert_stmt (st : state) ((stmt, _) : C_AST.statement) :
           ((C_AST.E_cast ((C_AST.E_function func, _, _), _), _, _), args),
         _,
         _ )
-    when func.func_unique_name = "__VERIFIER_assert" ->
+    when (func.func_unique_name = "__VERIFIER_assert"  ||  func.func_unique_name = "assert") ->
       assert (Array.length args = 1);
       Abstract_syntax.A_assert (expr_to_guard st args.(0) |> attach_position)
   (* HACK -> hook calls to `assume_abort_if_not` and inject a statement to emulate it *)
