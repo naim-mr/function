@@ -124,7 +124,7 @@ let parse_args () =
       ( "-domain",
         Arg.String (fun s -> Config.domain := s),
         "Numerical Abstract Domain used" );
-        ( "-nowrap",
+      ( "-nowrap",
         Arg.Unit (fun _ -> Config.nowrap := true),
         "Refine the backward analysis" );
       ( "-timeout",
@@ -141,7 +141,10 @@ let parse_args () =
         Arg.Int (fun i -> Config.meetbwd := i),
         "Dual widening delay in backward analysis" );
       ( "--version",
-        Arg.Unit (fun _ -> Format.printf "\n tool version:  v0.31\n"),
+        Arg.Unit
+          (fun _ ->
+            Config.version := true;
+            Format.printf "\n tool version:  v0.31\n"),
         "Output analysis result only" );
       ( "-minimal",
         Arg.Unit (fun _ -> Config.minimal := true),
@@ -226,7 +229,7 @@ let check_args () =
   then
     raise
       (Invalid_argument "Resilience analysis is avalaible only for termination");
-  if String.compare !Config.filename "" = 0 then
+  if String.compare !Config.filename "" = 0 && not !Config.version then
     raise (Invalid_argument "No Source File Specified");
   if
     String.compare !property "" = 0
@@ -353,9 +356,6 @@ let run_termination_new program =
 
 let run_non_termination program =
   let ntprog, labels = Typed_syntax.nt_prog program in
-  if not !minimal then (
-    Format.printf "\nAbstract typed Syntax:\n ";
-    Typed_syntax.pp_prog !fmt ntprog);
   let nonterm label =
     CTLProperty.AG
       (CTLProperty.AF
@@ -441,21 +441,24 @@ let doit () =
   check_args ();
   (* Get the iterator for the demanded analysis *)
   (* parse the program*)
-  let prog = C_Frontend.parse_file !Config.filename in
-  if not !minimal then (
-    Format.fprintf !fmt "\nAbstract typed Syntax:\n";
-    Typed_syntax.pp_prog !fmt prog);
-  run_termination_new prog;
-  Format.print_newline ();
-  if !Config.json_output then Regression.output_json (); 
-(* 
-  if not !Config.result then (
-    Config.analysis := "non-termination";
-    Config.refine := false;
-       run_non_termination prog;
-    if !Config.json_output then Regression.output_json ());  *)
+  if not !Config.version then (
+    let prog = C_Frontend.parse_file !Config.filename in
+    if not !minimal then (
+      Format.fprintf !fmt "\nAbstract typed Syntax:\n";
+      Typed_syntax.pp_prog !fmt prog);
+    run_termination_new prog;
+    Format.print_newline ();
+    if !Config.json_output then Regression.output_json ();
 
-  (*    
+    if not !Config.result then (
+      Config.analysis := "non-termination";
+      Config.refine := false;
+      run_non_termination prog;
+      if !Config.json_output then Regression.output_json ())
+    else ())
+
+(*    
+    
   let semantic = get_semantic () in
   (* Property and filename must be given (except for termination property) *)
   (* Parsing the property and the file to an intermediate ast *)
@@ -490,14 +493,13 @@ let doit () =
            | Semantics.Ctl p -> p
            | _ -> raise (Invalid_argument "Impossible to reach"))
      | _ -> raise (Invalid_argument "Unknown Analysis"));   *)
-  (* if !Config.vulnerability then ( *)
-  (* Launch the vulnerability analysisand output the infered variables *)
-  (* let varlist =
+(* if !Config.vulnerability then ( *)
+(* Launch the vulnerability analysisand output the infered variables *)
+(* let varlist =
       List.map snd @@ List.of_seq @@ AbstractSyntax.StringMap.to_seq vars
     in
     Vulnerability.analyse S.D.vulnerable varlist func !S.bwdInvMap;
     Format.fprintf !fmt " \n %s \n"
       (Yojson.Safe.pretty_to_string !Config.vuln_res));  *)
-  ()
 
 let _ = doit ()
