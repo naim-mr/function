@@ -653,7 +653,6 @@ module Affine (B : PARTITION) : FUNCTION = struct
     (*REMOVE?*)
     match (f1, f2) with
     | Fun f1, Fun f2 ->
-        Format.printf "\n ADD: %a  +  %a \n" (Linexpr1.print) f1 (Linexpr1.print) f2;
         let env = Environment.add (B.env b) [| v |] [||] in
         let f1 = Linexpr1.copy f1 and f2 = Linexpr1.copy f2 in
         let f1' = ref Seq.empty in
@@ -668,8 +667,8 @@ module Affine (B : PARTITION) : FUNCTION = struct
         Linexpr1.set_list f fcoef
           (Some (addCoeff (Linexpr1.get_cst f1) (Linexpr1.get_cst f2)));
         successor_ranking @@ Fun f
-      | _, Bot | Bot, _ -> Bot
-      | _, Top | Top, _ -> Top
+    | _, Bot | Bot, _ -> Bot
+    | _, Top | Top, _ -> Top
 
   let plus b f1 f2 =
     {
