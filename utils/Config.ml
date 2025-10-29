@@ -2,6 +2,7 @@ let joinbwd = ref 2
 let joinfwd = ref 2
 let learn = ref false (* conflict-driven conditional termination *)
 let meetbwd = ref 2
+let version = ref false
 let minimal = ref false
 let refine = ref false
 let retrybwd = ref 5
@@ -40,7 +41,7 @@ exception Timeout
 
 let json_output = ref false
 let output_dir = ref "logs/"
-let exectime = ref "0"
+let exectime = ref "1"
 let ctltype = ref ""
 let logfile = ref ""
 let result = ref false
