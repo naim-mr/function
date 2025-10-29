@@ -336,8 +336,8 @@ let unbox_var (e : expr) : var option =
 let prog_contains_loops ((b, funcs, _) : prog) : bool =
   let rec stat_contains_loops (s : stat) : bool =
     match s with
-    | T_expr _ | T_assign _ | T_call _ | T_add_var _ | T_del_var _
-    | T_RETURN | T_BREAK | T_assert _ | T_assume _ | T_print _ | T_label _ ->
+    | T_expr _ | T_assign _ | T_call _ | T_add_var _ | T_del_var _ | T_RETURN
+    | T_BREAK | T_assert _ | T_assume _ | T_print _ | T_label _ ->
         false
     | T_if (_, b1, b2) -> block_contains_loops b1 || block_contains_loops b2
     | T_while _ -> true
@@ -358,8 +358,8 @@ let nt_prog ((b, funcs, v) : prog) : prog * label list =
   let lnew = ref [] in
   let rec nt_stat (s : stat) : stat =
     match s with
-    | T_expr _ | T_assign _ | T_call _ | T_add_var _ | T_del_var _
-    | T_RETURN | T_BREAK | T_assert _ | T_assume _ | T_print _ | T_label _ ->
+    | T_expr _ | T_assign _ | T_add_var _ | T_del_var _ | T_RETURN | T_BREAK
+    | T_assert _ | T_assume _ | T_print _ | T_label _ ->
         s
     | T_if (e, b1, b2) ->
         let b1 = nt_block b1 in
@@ -377,6 +377,9 @@ let nt_prog ((b, funcs, v) : prog) : prog * label list =
               b )
         in
         T_while (l, e, block)
+    | T_call (f, ss) ->
+        let f = { f with func_body = nt_block f.func_body } in
+        T_call (f, ss)
   and nt_block (b : block) : block =
     match b with
     | T_empty _ -> b
@@ -386,7 +389,9 @@ let nt_prog ((b, funcs, v) : prog) : prog * label list =
         T_stat (l, (s, ext), b)
   in
   let f =
-    StringMap.map (fun f -> { f with func_body = nt_block f.func_body }) funcs
+    StringMap.update !Config.main
+      (Option.map (fun f -> { f with func_body = nt_block f.func_body }))
+      funcs
   in
   let p : prog = (b, f, v) in
   (p, !lnew)

@@ -55,6 +55,7 @@ module TerminationIteratorNew (D : RANKING_FUNCTION) : SEMANTIC = struct
       ->
         print_newline ();
         Printf.printf "ici ass?\n";
+        Typed_syntax.pp_stat "" !fmt s;
         ( D.bwdAssign ?domain ~taint:true ~underapprox:false p
             ((T_var v, typ, ext), (exp, typ, ext)),
           visited )
@@ -135,11 +136,7 @@ module TerminationIteratorNew (D : RANKING_FUNCTION) : SEMANTIC = struct
         in
         match f_in with
         | Some f_in -> raise (UnsupportedFeature "Recursive function")
-        | None ->
-            Format.fprintf !fmt "### Analysis of RETURN call to :%s ###:\n"
-              f.func_name;
-            (D.plus p (D.join APPROXIMATION p p1), Seq.cons f.func_name visited)
-        )
+        | None -> (D.plus p p1, Seq.cons f.func_name visited))
     | T_expr e -> (D.top env vars, visited (* todo handle this *))
 
   and bwdBlk ?property ?(visited : string Seq.t = Seq.empty) funcs env vars p

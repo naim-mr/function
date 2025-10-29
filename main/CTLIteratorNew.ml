@@ -55,11 +55,13 @@ type program = {
 }
 
 (* Computes the set of all labels of a program *)
+
 let labels_of_program program =
   let rec stmtLabels s =
     match s with
     | T_if (_, s1, s2) -> List.append (blockLabels s1) (blockLabels s2)
     | T_while (l, (b, typ, ba), s) -> l :: blockLabels s
+    | T_call (f, ss) -> (f.func_id, fst ss) :: blockLabels f.func_body
     | _ -> []
   and blockLabels b =
     match b with
@@ -85,6 +87,9 @@ let block_label_map block : block InvMap.t =
         | T_while ((whileLabel, _), _, loop_body) ->
             let map''' = InvMap.add whileLabel b map'' in
             aux loop_body map'''
+        | T_call (f, ss) ->
+            let map''' = InvMap.add f.func_id f.func_body map'' in
+            aux f.func_body map'''
         | _ -> map'')
   in
   aux block InvMap.empty
@@ -364,7 +369,13 @@ module CTLIteratorNew (D : RANKING_FUNCTION) : SemanticsNew.SEMANTIC = struct
                 (* compute fixed point for loop-head *)
                 let ret = addInv (fst l) final_in_state in
                 if !refine then D.refine ret (Option.get pre_dom) else ret
-            | T_call (f, ss) -> bwd out f.func_body |> addInv f.func_id
+            | T_call (f, ss) ->
+                let p =
+                  bwd (D.zero program.environment program.variables) f.func_body
+                in
+                D.print !fmt p;
+                let p' = D.plus p (D.join COMPUTATIONAL p out_state) in
+                addInv f.func_id p'
             | T_BREAK -> raise (Invalid_argument "bwdStm:T_BREAK")
             (* | A_recall (f, ss) -> raise (Invalid_argument "bwdStm:A_recall") *)
           in
@@ -475,8 +486,8 @@ module CTLIteratorNew (D : RANKING_FUNCTION) : SemanticsNew.SEMANTIC = struct
                   (* join two branches and combine with current 'in' state using mask *)
                   if !tracebwd && not !minimal then (
                     Format.fprintf !fmt "### %a:%i ###:\n" label_print (fst l) n;
-                    Format.fprintf !fmt "out_exit: %a\n" D.print out_exit; 
-                    Format.fprintf !fmt "out_enter: %a\n" D.print out_enter; 
+                    Format.fprintf !fmt "out_exit: %a\n" D.print out_exit;
+                    Format.fprintf !fmt "out_enter: %a\n" D.print out_enter;
                     Format.fprintf !fmt "out_joined: %a\n" D.print out_joined;
                     Format.fprintf !fmt "current_in: %a\n" D.print current_in;
                     Format.fprintf !fmt "updated_in: %a\n" D.print updated_in);
@@ -725,6 +736,9 @@ module CTLIteratorNew (D : RANKING_FUNCTION) : SemanticsNew.SEMANTIC = struct
     let property = get_ctl property in
     let module Init = EnvInit.Make (B) in
     let env, vars = Init.env prog in
+    if not !minimal then (
+      Format.printf "\nAbstract ctl typed Syntax:\n ";
+      Typed_syntax.pp_prog !fmt prog);
     let block, funcmap, _ = prog in
     let f = StringMap.find !Config.main funcmap in
     let program =
