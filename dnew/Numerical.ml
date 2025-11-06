@@ -466,6 +466,7 @@ module Numerical (N : NUMERICAL) (C : CONSTRAINT) : PARTITION = struct
 
   let fwdAssign b ((x, t, ext), e) =
     match x with
+    | T_var x when String.starts_with ~prefix:"nondet_" x.var_name -> b
     | T_var x ->
         let env = b.env in
         let vars = b.vars in
@@ -567,6 +568,12 @@ module Numerical (N : NUMERICAL) (C : CONSTRAINT) : PARTITION = struct
       | T_bool_const True -> b
       | T_bool_const Maybe -> b
       | T_bool_const False -> bot b.env b.vars
+      | T_binary (op, (T_var v, _, _), e2)
+        when String.starts_with ~prefix:"nondet_" v.var_name ->
+          f manager b (T_binary (op, e2, (T_bool_const Maybe, t, ext)), t, ext)
+      | T_binary (op, e1, (T_var v, _, ext))
+        when String.starts_with ~prefix:"nondet_" v.var_name ->
+          f manager b (T_binary (op, e1, (T_bool_const Maybe, t, ext)), t, ext)
       | T_int_const _ | T_var _ ->
           let env = b.env in
           let e = exp_to_apron (e, t, ext) in
