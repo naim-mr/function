@@ -46,16 +46,10 @@ module TerminationIteratorNew (D : RANKING_FUNCTION) : SEMANTIC = struct
       env vars p s =
     match s with
     | T_label _ | T_print _ | T_add_var (_, None) | T_del_var _ -> (p, visited)
-    | T_RETURN ->
-        print_newline ();
-        Printf.printf "ici?\n";
-        (D.zero ?domain env vars, visited)
+    | T_RETURN -> (D.zero ?domain env vars, visited)
     | T_BREAK -> raise (UnsupportedFeature "break")
     | T_add_var (v, Some (exp, typ, ext)) | T_assign ((v, _), (exp, typ, ext))
       ->
-        print_newline ();
-        Printf.printf "ici ass?\n";
-        Typed_syntax.pp_stat "" !fmt s;
         ( D.bwdAssign ?domain ~taint:true ~underapprox:false p
             ((T_var v, typ, ext), (exp, typ, ext)),
           visited )
@@ -77,8 +71,8 @@ module TerminationIteratorNew (D : RANKING_FUNCTION) : SEMANTIC = struct
           let joinType = APPROXIMATION in
           (D.join joinType p1 p2, Seq.append visited1 visited2)
     | T_while ((l, _), (b, t, ba), s) ->
-        let a = InvMap.find l !fwdInvMap in
-        let dm = if !refine then Some a else None in
+        let a = InvMap.find_opt l !fwdInvMap in
+        let dm = if !refine then a else None in
         let uap = false in
         let p1 = D.filter ?domain:dm p ~underapprox:uap (neg_bexp (b, t, ba)) in
         let rec aux i p2 n =
@@ -123,14 +117,9 @@ module TerminationIteratorNew (D : RANKING_FUNCTION) : SEMANTIC = struct
         let p2' = D.filter ?domain:dm ~underapprox:uap p2 (b, t, ba) in
         let p = aux i p2' 1 in
         addBwdInv l p;
-        ((if !refine then D.refine p a else p), visited)
+        ((if !refine then D.refine p (Option.get a) else p), visited)
     | T_call (f, ss) -> (
         let p1, visited = bwdBlk ~visited funcs env vars p f.func_body in
-        Printf.printf "\n After \n";
-        D.print !fmt p1;
-        Format.print_flush ();
-        Printf.printf "\n stack :";
-        Seq.iter (fun f -> Printf.printf "%s | " f) visited;
         let f_in =
           Seq.find (fun name -> String.compare name f.func_name = 0) visited
         in
@@ -146,8 +135,8 @@ module TerminationIteratorNew (D : RANKING_FUNCTION) : SEMANTIC = struct
     in
     match b with
     | T_empty (l, _) ->
-        let a = InvMap.find l !fwdInvMap in
-        let p = if !refine then D.refine p a else p in
+        let a = InvMap.find_opt l !fwdInvMap in
+        let p = if !refine then D.refine p (Option.get a) else p in
         if !tracebwd && not !minimal then result_print l p;
         addBwdInv l p;
         (p, visited)
@@ -156,13 +145,14 @@ module TerminationIteratorNew (D : RANKING_FUNCTION) : SEMANTIC = struct
         if !stop -. !start > !timeout then raise Timeout
         else
           let b, visited = bwdBlk ~visited funcs env vars p b in
-          let a = InvMap.find l !fwdInvMap in
+          let a = InvMap.find_opt l !fwdInvMap in
           (* let tvl = InvMap.find l !fwdTaintMap in *)
           let p, visited =
-            if !refine then bwdStm ~visited ~domain:a funcs env vars b s
+            if !refine then
+              bwdStm ~visited ~domain:(Option.get a) funcs env vars b s
             else bwdStm ~visited funcs env vars b s
           in
-          let p = if !refine then D.refine p a else p in
+          let p = if !refine then D.refine p (Option.get a) else p in
           if !tracebwd && not !minimal then result_print l p;
           addBwdInv l p;
           (p, visited)
@@ -200,11 +190,11 @@ module TerminationIteratorNew (D : RANKING_FUNCTION) : SEMANTIC = struct
     initBlk env vars s;
     (* TODO: handle functions calls *)
     (* Forward Analysis *)
-    if !tracefwd && not !minimal then
-      Format.fprintf !fmt "\nForward Analysis Trace:\n";
-    (let _ = ForwardIteratorB.analyze env prog in
-     fwdInvMap := !ForwardIteratorB.fwdInvMap;
-     fwdTaintMap := !ForwardIteratorB.fwdTaintMap)
+    (* if !tracefwd && not !minimal then
+      Format.fprintf !fmt "\nForward Analysis Trace:\n"; *)
+    if !refine then ForwardIteratorB.analyze env prog;
+    fwdInvMap := !ForwardIteratorB.fwdInvMap;
+    fwdTaintMap := !ForwardIteratorB.fwdTaintMap
     (* Format.fprintf !fmt "\nForward Analysis taint: size %d\n"
         (InvMap.cardinal !fwdTaintMap); *)
     (* InvMap.iter
@@ -215,8 +205,8 @@ module TerminationIteratorNew (D : RANKING_FUNCTION) : SEMANTIC = struct
                a ""))
         !fwdTaintMap); *);
     (* Backward Analysis *)
-    if !tracebwd && not !minimal then
-      Format.fprintf !fmt "\nBackward Analysis Trace:\n";
+    (* if !tracebwd && not !minimal then
+      Format.fprintf !fmt "\nBackward Analysis Trace:\n"; *)
     start := Sys.time ();
     let startbwd = Sys.time () in
     let i =
