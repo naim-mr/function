@@ -373,7 +373,6 @@ module CTLIteratorNew (D : RANKING_FUNCTION) : SemanticsNew.SEMANTIC = struct
                 let p =
                   bwd (D.zero program.environment program.variables) f.func_body
                 in
-                D.print !fmt p;
                 let p' = D.plus p (D.join COMPUTATIONAL p out_state) in
                 addInv f.func_id p'
             | T_BREAK -> raise (Invalid_argument "bwdStm:T_BREAK")
@@ -420,6 +419,21 @@ module CTLIteratorNew (D : RANKING_FUNCTION) : SemanticsNew.SEMANTIC = struct
       inv := InvMap.add l a !inv;
       a
     in
+    let target = ref "" in
+    let header = ref @@
+    Printf.sprintf {|
+    <graphml>
+    <graph edgedefault="directed">
+    <data key="witness-type">violation_witness</data>
+    <data key="sourcecodelang">C</data>
+    <data key="producer">HUMAN</data>
+    <data key="specification">CHECK( init(main()), LTL(F end) )</data>
+    <data key="programfile">%s</data>
+    <data key="programhash">?</data>
+    <data key="architecture">32bit</data>
+    |} !Config.filename 
+    in
+    let stop_witness = ref false in 
     (* update InvMap with new value and return new updated value *)
     let blockState block = InvMap.find (block_label block) !inv in
     (* returns current 'in' state of a block *)
@@ -443,6 +457,21 @@ module CTLIteratorNew (D : RANKING_FUNCTION) : SemanticsNew.SEMANTIC = struct
             if !refine then Some (fwdInv (blockLabel, ext)) else None
           in
           let out_state = bwd out nextBlock in
+          let new_node = (Z.to_string blockLabel) in
+          let witness_stmt ws = 
+            header :=
+            Printf.sprintf
+              {|%s  
+                <node id="%s"/>
+                %s
+                <edge source="%s" target="%s">
+                <data key='startline'>%d</data>
+                <data key='endline'>%d</data>
+                </edge>
+              |}
+              !header new_node ws new_node !target ext.pos_lnum ext.pos_lnum
+          in
+          target := new_node;
           (* recursively process the rest of the program, this gives us the 'out' state for this statement *)
           let new_in =
             match stmt with
@@ -463,6 +492,12 @@ module CTLIteratorNew (D : RANKING_FUNCTION) : SemanticsNew.SEMANTIC = struct
                 let out_else =
                   bwd_filter ?domain:pre_dom (bwd out_state s2) (neg_bexp b)
                 in
+                if D.partially_defined out_if then 
+                  witness_stmt {|<data key="control">condition-true</data>|}
+                else if D.partially_defined out_else then 
+                  witness_stmt {|<data key="control">condition-false</data>|}
+                else 
+                  stop_witness := true;
                 (* compute 'out' state for else-block *)
                 D.mask current_in (branch_join out_if out_else)
                 (* join the two branches and combine with current 'in' state using mask *)
@@ -530,6 +565,7 @@ module CTLIteratorNew (D : RANKING_FUNCTION) : SemanticsNew.SEMANTIC = struct
             if !refine then D.refine new_in (fwdInv (blockLabel, ext))
             else new_in
           in
+
           addInv blockLabel
             new_in (* use mask to compute the new 'in' state for this block *)
     in
@@ -537,6 +573,7 @@ module CTLIteratorNew (D : RANKING_FUNCTION) : SemanticsNew.SEMANTIC = struct
       bwd (if use_sink_state then zero else bot) program.mainFunction.func_body
     in
     (* run backward analysis starting from bottom *)
+    (* print_string !header; *)
     !inv
 
   (* 
@@ -731,6 +768,32 @@ module CTLIteratorNew (D : RANKING_FUNCTION) : SemanticsNew.SEMANTIC = struct
     bwdInvMap := i;
     programInvariant
 
+  (* let witness program inv  =
+
+    let rec aux b prev_node =
+      match b with
+      | T_empty (blockLabel, ext) -> ()
+      | T_stat ((blockLabel, ext), (stmt, ext'), nextBlock) -> (
+       
+          match stmt with
+          | T_expr _ 
+          | T_label _ | T_add_var (_, None) | T_del_var _ | T_print _
+            ->
+              ()
+          | T_RETURN -> ()
+          | T_add_var (l, Some e) | T_assign ((l, _), e) ->
+            ()
+          | T_assert (b, _) | T_assume b -> ()
+          | T_if (b, s1, s2) -> 
+            
+          | T_while (l, b, loop_body) -> ()
+          | T_call (f, ss) -> ()
+          | T_BREAK -> raise (Invalid_argument "bwdStm:T_BREAK"))
+      (* | A_recall (f, ss) -> raise (Invalid_argument "bwdStm:A_recall") *)
+    in
+    aux program.mainFunction.func_body (Z.to_string program.mainFunction.func_id);
+    print_string !header *)
+
   let analyze ?(precondition = Some (T_bool_const True))
       ?(property = dummy_prop) prog =
     let property = get_ctl property in
@@ -756,6 +819,7 @@ module CTLIteratorNew (D : RANKING_FUNCTION) : SemanticsNew.SEMANTIC = struct
     let initialLabel = block_label program.mainFunction.func_body in
     let programInvariant = InvMap.find initialLabel inv in
     bwdInvMap := inv;
+    
     tree := D.output_json program.variables programInvariant;
     Config.result := D.partially_defined programInvariant;
     !Config.result

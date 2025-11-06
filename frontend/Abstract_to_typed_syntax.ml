@@ -238,7 +238,6 @@ let rec pure_expr env pre post (e, x) =
           let e1, e2 = (as_bool e1, as_bool e2) in
           ((T_binary (op, e1, e2), A_BOOL, x), pre, post))
   | A_call ((s, sx), args) -> (
-      Printf.printf "\n check %s\n" env.env_call_ctx;
       let ee, pre, post = call (s, sx) args env pre post x in
       match ee with
       | None -> error x "function %s has no return value" s
@@ -375,7 +374,6 @@ let rec stat env (e, x) =
   match e with
   | A_SKIP -> (env, [], [])
   | A_expr (A_call ((s, sx), args), x) ->
-      Format.printf "\n here in %a \n " Abstract_syntax.pp_stat e;
       let env = { env with env_call_ctx = s } in
       (* unlike pure_expr, does not fail if there is no return value *)
       let _, pre, post = call (s, sx) args env [] [] x in

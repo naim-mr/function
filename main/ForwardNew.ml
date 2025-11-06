@@ -26,7 +26,7 @@ module ForwardIterator (B : PARTITION) = struct
     iter (fun l a -> Format.fprintf fmt "%a: %a\n" printkey l B.print a) m
 
   let fwdInvMap = ref InvMap.empty
-  let fwdSummaryMap = ref StringMap.empty
+  let fwdSummaryMap : B.t StringMap.t ref= ref StringMap.empty
   let addFwdInv l (a : B.t) = fwdInvMap := InvMap.add l a !fwdInvMap
 
   let blockLabel b =
@@ -202,9 +202,9 @@ module ForwardIterator (B : PARTITION) = struct
     let ctx = { ctx with summary = false } in
     let _ = fwdBlk ctx (fwdBlk ctx (B.top env v1) block) s in
     let stopfwd = Sys.time () in
-    Format.fprintf !fmt "\nForward Summary :\n";
+    (* Format.fprintf !fmt "\nForward Summary :\n";
     fwdMap_print !fmt !fwdSummaryMap StringMap.iter (fun fmt ->
-        Format.fprintf fmt "%s");
+        Format.fprintf fmt "%s"); *)
     if not !minimal then
       if !timefwd then
         Format.fprintf !fmt "\nForward Analysis (Time: %f s):\n"

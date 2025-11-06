@@ -200,8 +200,6 @@ let rec convert_expr (st : state) ((kind, typ, _) : C_AST.expr) :
           (convert_bin_op op, e1 |> attach_position, e2 |> attach_position),
         bin_op_out_hint op )
   | C_AST.E_cast (((_, e_typ, _) as ee), _) ->
-      Printf.printf "convert %s \n" (C_print.string_of_expr ee);
-
       let e_typ = convert_type_qual e_typ in
       let ee = convert_expr st ee |> fst in
       let cast_typ = convert_type_qual typ in
