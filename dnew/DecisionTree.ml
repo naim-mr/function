@@ -1176,11 +1176,16 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
     let env = t.env in
     let vars = t.vars in
     let e' : expr typed = snd e in
-    let random = ref false in
-    let _ =
-      match e' with
-      | Typed_syntax.T_INPUT, typ, ext -> random := true
-      | _ -> random := false
+    let random =
+      ref
+        (if !analysis = "termination" then
+           match e' with
+           | Typed_syntax.T_var v, typ, ext
+             when String.starts_with ~prefix:"nondet_in" v.var_name ->
+               true
+           | _ -> false
+         else
+           match e' with Typed_syntax.T_INPUT, typ, ext -> true | _ -> false)
     in
     let merge t1 t2 cs =
       let rec aux (t1, t2) cs =
