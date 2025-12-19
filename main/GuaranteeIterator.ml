@@ -321,5 +321,7 @@ module GuaranteeIterator (D : RANKING_FUNCTION) = struct
           Format.fprintf !fmt "\nBackward Analysis (Time: %f s):\n"
             (stopbwd -. startbwd)
         else bwdMap_print robust !fmt !bwdInvMap ;
+      Config.tree := D.output_json vars i;
+      Config.result := D.defined i;
       D.defined i )
 end

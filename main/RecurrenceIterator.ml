@@ -211,5 +211,7 @@ module RecurrenceIterator (D : RANKING_FUNCTION) = struct
           (stopbwd -. startbwd)
       else Format.fprintf !fmt "\nBackward Analysis:\n" ;
       bwdMap_print !fmt !bwdInvMap ) ;
+    Config.tree := D.output_json vars i;
+    Config.result := D.defined i;
     D.defined i
 end

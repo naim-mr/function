@@ -63,7 +63,9 @@ module type RANKING_FUNCTION = sig
   val compress : t -> t
 
   val print : Format.formatter -> t -> unit
-
+  
+  val output_json : var list -> t -> Yojson.Safe.t
+  
   val print_graphviz_dot : Format.formatter -> t -> unit
 
   val robust :

@@ -262,8 +262,6 @@ let parse_args () =
 
 (* do all *)
 
-let result = ref false
-
 let run_analysis analysis_function program () =
   try
     let start = Sys.time () in
@@ -446,13 +444,11 @@ let ctl_cfg () =
   let mainFunc = ControlFlowGraph.find_func !main cfg in
   let possibleLoopHeads = Loop_detection.possible_loop_heads cfg mainFunc in
   let domSets = Loop_detection.dominator cfg mainFunc in
-  let result =
-    analyze ~precondition cfg !robust mainFunc possibleLoopHeads domSets ctlProperty
-  in
+  analyze ~precondition cfg !robust mainFunc possibleLoopHeads domSets ctlProperty;
   ( if !time then
     let stoptime = Sys.time () in
     Format.fprintf !fmt "\nTime: %f" (stoptime -. starttime) ) ;
-  if result then Format.fprintf !fmt "\nAnalysis Result: TRUE\n"
+  if !Config.result then Format.fprintf !fmt "\nAnalysis Result: TRUE\n"
   else Format.fprintf !fmt "\nAnalysis Result: UNKNOWN\n"
 
 (*Main entry point for application*)

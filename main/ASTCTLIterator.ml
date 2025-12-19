@@ -691,5 +691,7 @@ module CTLIterator (D : RANKING_FUNCTION) = struct
     let inv = compute program property in
     let initialLabel = block_label program.mainFunction.funcBody in
     let programInvariant = InvMap.find initialLabel inv in
+    Config.tree := D.output_json program.variables programInvariant;
+    Config.result := D.defined ?condition:precondition programInvariant;
     D.defined ?condition:precondition programInvariant
 end

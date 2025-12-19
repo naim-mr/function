@@ -79,6 +79,26 @@ struct
 
   (** The current decision tree. *)
   let tree t = t.tree
+  
+  let output_json vars t : Yojson.Safe.t =
+    let rec aux t =
+      match t with
+      | Bot -> `String "BOT"
+      | Leaf f -> `Assoc [ ("Leaf", `String (Format.asprintf "%a" F.print f)) ]
+      | Node ((c, _), l, r) ->
+          `Assoc
+            [
+              ( "Node",
+                `Assoc
+                  [
+                    ( "constraint",
+                      `String (Format.asprintf "%a" (C.print vars) c) );
+                    ("left", aux l);
+                    ("right", aux r);
+                  ] );
+            ]
+    in
+    aux t.tree
 
   (** Prints the current decision tree. *)
   let print_tree vars fmt t =

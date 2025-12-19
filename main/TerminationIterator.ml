@@ -466,5 +466,7 @@ module TerminationIterator (D : RANKING_FUNCTION) = struct
         else Format.fprintf !fmt "\nBackward Analysis:\n" ;
            bwdMap_print !fmt !bwdInvMap ) ;
            if robust then bwdMap_robust !fmt  vars !bwdInvMap;
+      Config.tree := D.output_json vars i;
+      Config.result := D.defined i;
       D.defined i )
 end
