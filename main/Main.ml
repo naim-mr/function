@@ -173,8 +173,6 @@ let parse_args () =
         (* forward analysis trace *)
         Iterator.tracefwd := true ;
         doit r
-
-
     (* Termination arguments -------------------------------*)
     | "-termination" :: r ->
         (* guarantee analysis *)
@@ -454,13 +452,15 @@ let ctl_cfg () =
 (*Main entry point for application*)
 let doit () =
   parse_args () ;
-  match !analysis with
+  ( match !analysis with
   | "termination" -> termination ()
   | "guarantee" -> guarantee ()
   | "recurrence" -> recurrence ()
   | "ctl-ast" -> ctl_ast ()
   | "ctl-cfg" -> ctl_cfg ()
-  | _ -> raise (Invalid_argument "Unknown Analysis")
+  | _ -> raise (Invalid_argument "Unknown Analysis") );
+  Regression.output_json ()
+
 
 let _ = doit ()
 
