@@ -161,6 +161,9 @@ module Affine (B : PARTITION) : FUNCTION = struct
     | _ -> false
 
   (**)
+  let lincons1_cmp c1 c2 =
+  Linexpr0.cmp c1.Lincons1.lincons0.Lincons0.linexpr0
+    c2.Lincons1.lincons0.Lincons0.linexpr0
 
   let join_ranking k b f1 f2 =
     (* k = kind of join, b = domain of first/second function, f1/f2 = value
@@ -170,7 +173,7 @@ module Affine (B : PARTITION) : FUNCTION = struct
       let l = Lincons1.array_length a in
       let b = ref false in
       for i = 0 to l - 1 do
-        if c = Lincons1.array_get a i then b := true
+        if lincons1_cmp c (Lincons1.array_get a i) = 0 then b := true
       done ;
       !b
     in
@@ -309,7 +312,7 @@ module Affine (B : PARTITION) : FUNCTION = struct
       let l = Lincons1.array_length a in
       let b = ref false in
       for i = 0 to l - 1 do
-        if c = Lincons1.array_get a i then b := true
+        if lincons1_cmp c (Lincons1.array_get a i) = 0 then b := true
       done ;
       !b
     in
@@ -381,7 +384,7 @@ module Affine (B : PARTITION) : FUNCTION = struct
       let l = Lincons1.array_length a in
       let b = ref false in
       for i = 0 to l - 1 do
-        if c = Lincons1.array_get a i then b := true
+        if lincons1_cmp c (Lincons1.array_get a i) = 0 then b := true
       done ;
       !b
     in
