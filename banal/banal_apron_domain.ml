@@ -354,7 +354,7 @@ module ApronDomain (Param : Banal_apron_utils.APRON_PARAM) = struct
               (* this is required to analyze preciselw bwd_loop7! *)
               (* TODO: better heuristic to find which ray to add *)
               if
-                Linexpr0.compare ea
+                Linexpr0.cmp ea
                   g.Generator1.generator0.Generator0.linexpr0
                 = 0
               then acc

@@ -363,7 +363,7 @@ module Make (Param: APRON_PARAM) (Itv: INTERVAL) = struct
               (* this is required to analyze precisely bwd_loop7! *)
               (* TODO: better heuristic to find which ray to add *)
               if
-                Linexpr0.compare ea g.Generator1.generator0.Generator0.linexpr0
+                Linexpr0.cmp ea g.Generator1.generator0.Generator0.linexpr0
                 = 0
               then acc
               else
