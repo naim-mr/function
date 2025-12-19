@@ -521,9 +521,7 @@ struct
                else true
              else false
            | COMPUTATIONAL -> 
-             F.isLeq k b f1 f2 (* forall x: f1(x) <= f2(x) *)
-           | _  -> raise (Invalid_argument ("Learning order not defined for tree")) )
-            
+             F.isLeq k b f1 f2 (* forall x: f1(x) <= f2(x) *))
       | Node ((c1,nc1),l1,r1), Node((c2,nc2),l2,r2) when (C.isEq c1 c2) ->
         (aux (l1,l2) (c1::cs)) && (aux (r1,r2) (nc1::cs))
       | _ -> raise (Invalid_argument "isLeq:")
@@ -623,7 +621,7 @@ struct
     let fBotLeftRight = match k with
       | APPROXIMATION -> fun _ _ -> Bot (* use NIL if at least one leaf is NIL *)
       | COMPUTATIONAL -> fun _ _ -> botLeaf (* use bottom leaf if at least one leaf is nil*)
-      | _ -> raise (Invalid_argument "Should not call Learning meet on decision trees")
+      (* | _ -> raise (Invalid_argument "Should not call Learning meet on decision trees") *)
     in
     let fLeaf cs f1 f2 = 
       let b = match domain with 

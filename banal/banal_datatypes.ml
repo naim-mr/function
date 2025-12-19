@@ -19,6 +19,12 @@ let compare_id (x : id) (y : id) = compare x y
 
 let dummy_id = Z.minus_one
 
+
+let lincons1_cmp c1 c2 =
+  Linexpr0.cmp c1.Lincons1.lincons0.Lincons0.linexpr0
+    c2.Lincons1.lincons0.Lincons0.linexpr0
+
+
 (* maps and sets *)
 (* ************* *)
 
