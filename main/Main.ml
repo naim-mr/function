@@ -10,30 +10,7 @@
 
 (* parsing *)
 open Iterators
-let analysis = ref "termination"
-
-let robust = ref false
-
-let domain = ref "boxes"
-
-let filename = ref ""
-
-let fmt = ref Format.std_formatter
-
-let main = ref "main"
-
-let minimal = ref false
-
-let ordinals = ref false
-
-let property = ref ""
-
-let precondition = ref "true"
-
-let time = ref false
-
-let noinline = ref false
-
+open Config
 let parseFile filename =
   let f = open_in filename in
   let lex = Lexing.from_channel f in
@@ -132,6 +109,7 @@ let parseCTLPropertyString (property : string) =
   @@ parseCTLPropertyString_plain property
 
 let parse_args () =
+  let open Config in 
   let rec doit args =
     match args with
     (* General arguments -------------------------------------------*)
