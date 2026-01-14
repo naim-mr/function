@@ -8,7 +8,7 @@ suggested parameters:
 */
 
 int f() {
-    int x, y;
+  int x, y;
   while (x > 0 && y > 0)
     if (rand()) {
       x = x - 1;

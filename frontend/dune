@@ -3,10 +3,10 @@
  (libraries mopsa.mopsa_c_parser utils apron))
 
 (ocamllex
- (modules Lexer PropertyLexer CTLPropertyLexer))
+ (modules Lexer PropertyLexer PropertyLexerNew CTLPropertyLexer))
 
 (menhir
- (modules Parser PropertyParser CTLPropertyParser))
+ (modules Parser PropertyParser PropertyParserNew CTLPropertyParser))
 
 (env
  (dev

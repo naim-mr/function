@@ -51,6 +51,20 @@ let parsePropertyString str =
         failwith "Parse Error")
       else failwith e
 
+let parsePropertyStringNew str =
+  let lex = Lexing.from_string str in
+  try PropertyParserNew.file PropertyLexerNew.start lex with
+  | PropertyParserNew.Error ->
+      Format.eprintf "Parse Error (Invalid Syntax) near %s\n"
+        (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
+      failwith "Parse Error"
+  | Failure e ->
+      if e == "lexing: empty token" then (
+        Format.eprintf "Parse Error (Invalid Token) near %s\n"
+          (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
+        failwith "Parse Error")
+      else failwith e
+
 let parseProperty filename =
   let f = open_in filename in
   let lex = Lexing.from_channel f in
@@ -93,7 +107,46 @@ let parseCTLProperty filename =
         failwith "Parse Error")
       else failwith e
 
+let parseCTLPropertyNew filename =
+  let f = open_in filename in
+  let lex = Lexing.from_channel f in
+  try
+    lex.Lexing.lex_curr_p <-
+      { lex.Lexing.lex_curr_p with Lexing.pos_fname = filename };
+    let res = CTLPropertyParser.prog CTLPropertyLexer.read lex in
+    close_in f;
+    CTLProperty.map (fun p -> parsePropertyStringNew p) res
+  with
+  | CTLPropertyParser.Error ->
+      Format.eprintf "Parse Error (Invalid Syntax) near %s\n"
+        (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
+      failwith "Parse Error"
+  | Failure e ->
+      if e == "lexing: empty token" then (
+        Format.eprintf "Parse Error (Invalid Token) near %s\n"
+          (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
+        failwith "Parse Error")
+      else failwith e
+
 let parseCTLPropertyString_plain (property : string) =
+  let lex = Lexing.from_string property in
+  try
+    lex.Lexing.lex_curr_p <-
+      { lex.Lexing.lex_curr_p with Lexing.pos_fname = "string" };
+    CTLPropertyParser.prog CTLPropertyLexer.read lex
+  with
+  | CTLPropertyParser.Error ->
+      Format.eprintf "Parse Error (Invalid Syntax) near %s\n"
+        (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
+      failwith "Parse Error"
+  | Failure e ->
+      if e == "lexing: empty token" then (
+        Format.eprintf "Parse Error (Invalid Token) near %s\n"
+          (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
+        failwith "Parse Error")
+      else failwith e
+
+let parseCTLPropertyStringNew_plain (property : string) =
   let lex = Lexing.from_string property in
   try
     lex.Lexing.lex_curr_p <-
@@ -113,6 +166,10 @@ let parseCTLPropertyString_plain (property : string) =
 
 let parseCTLPropertyString (property : string) =
   CTLProperty.map (fun p -> fst (parsePropertyString p))
+  @@ parseCTLPropertyString_plain property
+
+let parseCTLPropertyStringNew (property : string) =
+  CTLProperty.map (fun p -> parsePropertyStringNew p)
   @@ parseCTLPropertyString_plain property
 
 let parse_args () =
@@ -140,12 +197,6 @@ let parse_args () =
       ( "-meetbwd",
         Arg.Int (fun i -> Config.meetbwd := i),
         "Dual widening delay in backward analysis" );
-      ( "--version",
-        Arg.Unit
-          (fun _ ->
-            Config.version := true;
-            Format.printf "\n tool version:  v0.31\n"),
-        "Output analysis result only" );
       ( "-minimal",
         Arg.Unit (fun _ -> Config.minimal := true),
         "Output analysis result only" );
@@ -178,7 +229,7 @@ let parse_args () =
         Arg.Unit (fun _ -> Config.analysis := "termination"),
         "Termination analysis" );
       ( "-nontermination",
-        Arg.Unit (fun _ -> Config.analysis := "nontermination"),
+        Arg.Unit (fun _ -> Config.analysis := "non-termination"),
         "Non-termination analysis" );
       ("-time", Arg.Unit (fun _ -> Config.time := true), "Track analysis time");
       ( "-timefwd",
@@ -357,13 +408,14 @@ let run_termination_new program =
 let run_non_termination program =
   let ntprog, labels = Typed_syntax.nt_prog program in
   let nonterm label =
-    CTLProperty.AG
-      (CTLProperty.AF
-         (CTLProperty.Atomic
-            ( ( Typed_syntax.T_bool_const True,
-                Abstract_syntax.A_BOOL,
-                Abstract_syntax.extent_unknown ),
-              Some (Z.to_string label) )))
+    CTLProperty.EF
+      (CTLProperty.AG
+         (CTLProperty.AF
+            (CTLProperty.Atomic
+               ( ( Typed_syntax.T_bool_const True,
+                   Abstract_syntax.A_BOOL,
+                   Abstract_syntax.extent_unknown ),
+                 Some (Z.to_string label) ))))
   in
   let rec create_prop label =
     match label with
@@ -383,7 +435,24 @@ let run_non_termination program =
       with Config.Timeout ->
         Format.fprintf !fmt "\nThe Analysis Timed Out!\n";
         Format.fprintf !fmt "\nDone.\n")
+
 (* TODO: precondition analysis *)
+let run_ctl_ast_new (module S : SemanticsNew.SEMANTIC) prog property =
+  let starttime = Sys.time () in
+  (* let parsedPrecondition = parsePropertyString !precondition in
+  let precondition =
+    fst
+    @@ AbstractSyntax.StringMap.find ""
+    @@ ItoA.property_itoa_of_prog prog !main parsedPrecondition
+  in *)
+  let analyze = S.analyze in
+  Config.result := analyze ~precondition:None ~property:(Ctl property) prog;
+  if !time then (
+    let stoptime = Sys.time () in
+    exectime := string_of_float (stoptime -. starttime);
+    Format.fprintf !fmt "\nTime: %f" (stoptime -. starttime));
+  if !Config.result then Format.fprintf !fmt "\nFinal Analysis Result: TRUE\n"
+  else Format.fprintf !fmt "\nFinal Analysis Result: UNKNOWN\n"
 
 let run_ctl_ast (module S : SEMANTIC) prog property =
   let starttime = Sys.time () in
@@ -417,6 +486,12 @@ let get_semantic () =
   | "ctl" -> ctl_iterator ()
   | _ -> raise (Invalid_argument "Unknown Analysis")
 
+let get_semantic_new () =
+  match !analysis with
+  | "termination" -> termination_iterator_new ()
+  | "non-termination" | "ctl" -> ctl_iterator_new ()
+  | _ -> raise (Invalid_argument "Unknown Analysis")
+
 let get_ast_prop itast =
   match !analysis with
   | "termination" ->
@@ -441,38 +516,26 @@ let doit () =
   check_args ();
   (* Get the iterator for the demanded analysis *)
   (* parse the program*)
-  if not !Config.version then (
-    let prog = C_Frontend.parse_file !Config.filename in
-    if not !minimal then (
-      Format.fprintf !fmt "\nAbstract typed Syntax:\n";
-      Typed_syntax.pp_prog !fmt prog);
-    run_termination_new prog;
-    Format.print_newline ();
-    if !Config.json_output then Regression.output_json ();
+  let prog = C_Frontend.parse_file !Config.filename in
 
-    if not !Config.result then (
-      Config.analysis := "non-termination";
-      Config.refine := false;
-      run_non_termination prog;
-      if !Config.json_output then Regression.output_json ())
-    else ())
+  let semantic = get_semantic_new () in
+  (* 
+  if not !minimal then (
+    Format.fprintf !fmt "\nAbstract typed Syntax:\n";
+    Typed_syntax.pp_prog !fmt prog);
+  run_termination_new prog;
+  Format.print_newline ();
+  if !Config.json_output then Regression.output_json ();
 
-(*    
-    
-  let semantic = get_semantic () in
-  (* Property and filename must be given (except for termination property) *)
-  (* Parsing the property and the file to an intermediate ast *)
-  let itast = parseFile !filename in 
-  (* Get the ast and the properties*)
-  let program, property, prop = get_ast_prop itast in 
-  
-  (* A program is a map of variable, a block (see: AbstractSyntax.ml) and a map of functions *)
-  let vars, b, funcs = program in
-  (* Get the main function and the variables as a list *)
-  let func = AbstractSyntax.StringMap.find !main funcs in
-  let module S = (val semantic : SEMANTIC) in
+  if not !Config.result then (
+    Config.analysis := "non-termination";
+    Config.refine := false;
+    run_non_termination prog;
+    if !Config.json_output then Regression.output_json ())
+  else (); *)
+  let module S = (val semantic : SemanticsNew.SEMANTIC) in
   (* Launch the analysis and get the returned output "true" or "unknow" *)
-  (if !Config.cda then
+  (* (if !Config.cda then
      let module C = (val run_cda semantic : CDA_ITERATOR) in
      let parsedPrecondition = parsePropertyString !precondition in
      let precondition =
@@ -482,17 +545,19 @@ let doit () =
      in
      Config.result :=
        C.analyze ~property ~precondition:(Some precondition) funcs vars b !main
-   else
-     match !analysis with
-     | "termination" -> run_termination (module S) program
-     | "ctl" (* default CTL analysis is CTL-AST *) ->
-         run_ctl_ast
-           (module S)
-           program
-           (match property with
-           | Semantics.Ctl p -> p
-           | _ -> raise (Invalid_argument "Impossible to reach"))
-     | _ -> raise (Invalid_argument "Unknown Analysis"));   *)
+   else *)
+  match !analysis with
+  | "termination" -> run_termination_new prog
+  | "nontermination" ->
+      Config.refine := false;
+      run_non_termination prog
+  | "ctl" (* default CTL analysis is CTL-AST *) ->
+      run_ctl_ast_new
+        (module S)
+        prog
+        (parseCTLPropertyStringNew !Config.property)
+  | _ -> raise (Invalid_argument "Unknow Property")
+
 (* if !Config.vulnerability then ( *)
 (* Launch the vulnerability analysisand output the infered variables *)
 (* let varlist =

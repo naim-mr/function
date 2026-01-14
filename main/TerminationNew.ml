@@ -190,23 +190,14 @@ module TerminationIteratorNew (D : RANKING_FUNCTION) : SEMANTIC = struct
     initBlk env vars s;
     (* TODO: handle functions calls *)
     (* Forward Analysis *)
-    (* if !tracefwd && not !minimal then
-      Format.fprintf !fmt "\nForward Analysis Trace:\n"; *)
+    if !tracefwd && not !minimal then
+      Format.fprintf !fmt "\nForward Analysis Trace:\n";
     if !refine then ForwardIteratorB.analyze env prog;
     fwdInvMap := !ForwardIteratorB.fwdInvMap;
-    fwdTaintMap := !ForwardIteratorB.fwdTaintMap
-    (* Format.fprintf !fmt "\nForward Analysis taint: size %d\n"
-        (InvMap.cardinal !fwdTaintMap); *)
-    (* InvMap.iter
-        (fun l a ->
-          Format.printf "%a: %s\n" label_print l
-            (VarSet.fold
-               (fun x acc -> acc ^ "" ^ x.var_id ^ "{" ^ x.var_name ^ "}")
-               a ""))
-        !fwdTaintMap); *);
+    fwdTaintMap := !ForwardIteratorB.fwdTaintMap;
     (* Backward Analysis *)
-    (* if !tracebwd && not !minimal then
-      Format.fprintf !fmt "\nBackward Analysis Trace:\n"; *)
+    if !tracebwd && not !minimal then
+      Format.fprintf !fmt "\nBackward Analysis Trace:\n";
     start := Sys.time ();
     let startbwd = Sys.time () in
     let i =

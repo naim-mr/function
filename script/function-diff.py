@@ -230,7 +230,7 @@ class ReportDiff:
         self.old = old
         self.new = new
         self.time = new.time - old.time
-        self.speedup = 100.0 * (old.time - new.time) / old.time
+        #self.speedup = 100.0 * (old.time - new.time) / old.time
         self.new_alarms = new.alarms.difference(old.alarms)
         self.removed_alarms = old.alarms.difference(new.alarms)
         self.new_assumptions = new.assumptions.difference(old.assumptions)
