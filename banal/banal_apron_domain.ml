@@ -22,13 +22,17 @@ module Lin = Linearization.Make (Itv_rat)
 
 module ApronDomain (Param : Banal_apron_utils.APRON_PARAM) = struct
   module U = Banal_apron_utils.Make (Param) (Itv_rat)
+
   let man = Param.manager
 
   type t = Param.lib Abstract1.t
+
   let top_apron env = Abstract1.top man env
+
   let bot_apron env = Abstract1.bottom man env
+
   let of_apron v env = Abstract1.join man v (bot_apron env)
-  
+
   (*************)
   (* UTILITIES *)
   (*************)
@@ -296,7 +300,7 @@ module ApronDomain (Param : Banal_apron_utils.APRON_PARAM) = struct
         (* for each constraint oldc in a *)
         for i = 0 to Lincons1.array_length ar - 1 do
           let oldc = Lincons1.array_get ar i in
-          if c <> oldc then (
+          if lincons1_cmp c oldc = 0 then (
             (* try to replace oldc with c *)
             Lincons1.array_set ar i c ;
             let aa = Abstract1.of_lincons_array man env ar in
@@ -309,7 +313,7 @@ module ApronDomain (Param : Banal_apron_utils.APRON_PARAM) = struct
       (pool @ [c]) ;
     (* now, remove c *)
     let l = list_of_lincons_array ar in
-    let ll = List.filter (fun cc -> c <> cc) l in
+    let ll = List.filter (fun cc -> lincons1_cmp c cc = 0) l in
     if trace_remove && List.length l <> List.length ll then
       Format.printf "### remove_constraint remove: %a ###@\n" Lincons1.print
         c ;
@@ -354,8 +358,7 @@ module ApronDomain (Param : Banal_apron_utils.APRON_PARAM) = struct
               (* this is required to analyze preciselw bwd_loop7! *)
               (* TODO: better heuristic to find which ray to add *)
               if
-                Linexpr0.cmp ea
-                  g.Generator1.generator0.Generator0.linexpr0
+                Linexpr0.cmp ea g.Generator1.generator0.Generator0.linexpr0
                 = 0
               then acc
               else
@@ -560,26 +563,26 @@ module ApronDomain (Param : Banal_apron_utils.APRON_PARAM) = struct
        stroke-width='1px'/>\n"
       (xx 0.) 0 (xx 0.) h ;
     ( if svg_grid then
-      let c = ref scale in
-      while !c <= x1 do
-        Printf.fprintf ch
-          "<line x1='%i' y1='%f' x2='%i' y2='%g' stroke='lightgray' \
-           stroke-width='1px'/>\n"
-          0 (yy !c) w (yy !c) ;
-        Printf.fprintf ch
-          "<line x1='%i' y1='%f' x2='%i' y2='%g' stroke='lightgray' \
-           stroke-width='1px'/>\n"
-          0 (yy (-. !c)) w (yy (-. !c)) ;
-        Printf.fprintf ch
-          "<line x1='%g' y1='%i' x2='%g' y2='%i' stroke='lightgray' \
-           stroke-width='1px'/>\n"
-          (xx !c) 0 (xx !c) h ;
-        Printf.fprintf ch
-          "<line x1='%g' y1='%i' x2='%g' y2='%i' stroke='lightgray' \
-           stroke-width='1px'/>\n"
-          (xx (-. !c)) 0 (xx (-. !c)) h ;
-        c := !c +. scale
-      done ) ;
+        let c = ref scale in
+        while !c <= x1 do
+          Printf.fprintf ch
+            "<line x1='%i' y1='%f' x2='%i' y2='%g' stroke='lightgray' \
+             stroke-width='1px'/>\n"
+            0 (yy !c) w (yy !c) ;
+          Printf.fprintf ch
+            "<line x1='%i' y1='%f' x2='%i' y2='%g' stroke='lightgray' \
+             stroke-width='1px'/>\n"
+            0 (yy (-. !c)) w (yy (-. !c)) ;
+          Printf.fprintf ch
+            "<line x1='%g' y1='%i' x2='%g' y2='%i' stroke='lightgray' \
+             stroke-width='1px'/>\n"
+            (xx !c) 0 (xx !c) h ;
+          Printf.fprintf ch
+            "<line x1='%g' y1='%i' x2='%g' y2='%i' stroke='lightgray' \
+             stroke-width='1px'/>\n"
+            (xx (-. !c)) 0 (xx (-. !c)) h ;
+          c := !c +. scale
+        done ) ;
     text (float_of_int (w - 10)) (yy 0. -. 4.) "end" "gray" x.var_name ;
     text (xx 0. +. 4.) 10. "start" "gray" y.var_name ;
     (* output constraints *)
@@ -964,38 +967,43 @@ module ApronDomain (Param : Banal_apron_utils.APRON_PARAM) = struct
     in
     bwd_trace "meet" (Abstract1.meet man pre) post
 
-	let bwd_join ((_,vset) as post1: t * VSet.t) (post2 : t * VSet.t) ((pre,_) : t * VSet.t)  =
-  
-	let lift_vset2 f (a,v) (b,_) = f a b, v in
-    lift_vset2 (fun post1 post2 ->
-      (* check if one element is contained in the other *)
-      if Abstract1.is_leq man post1 post2 then post2 else
-      if Abstract1.is_leq man post2 post1 then post1 else
-
-      (* HEURISTIC -> perform the refinement only if the result has some "reasonable"
-         directions, namely the ones of the `pre` and `post{1,2}` (in both polarities). *)
-      let allowed_dirs = U.get_directions pre @ U.get_directions post1 @ U.get_directions post2 in
-      let check_dirs a  =
-        let dirs = U.get_directions a in
-        List.for_all (fun d1 -> List.exists (fun d2 -> d1 = d2 || U.neg_linexpr d2 = d1) allowed_dirs) dirs
-      in
-
-      (* try refinement of poly with singleton components differing by +-1 *)
-      match U.refine_singleton vset post1 post2 with
-      | Some post1 when check_dirs post1 -> post1
-      | _ ->
-
-      (* try refinement of poly by adding behind some constraint *)
-      match U.refine_behind_cons vset post1 post2 with
-      | Some post1 when check_dirs post1 -> post1
-      | _ ->
-
-      (* refinemenet failed.. *)
-      post1
-
-    ) post1 post2
-
-
+  let bwd_join ((_, vset) as post1 : t * VSet.t) (post2 : t * VSet.t)
+      ((pre, _) : t * VSet.t) =
+    let lift_vset2 f (a, v) (b, _) = (f a b, v) in
+    lift_vset2
+      (fun post1 post2 ->
+        (* check if one element is contained in the other *)
+        if Abstract1.is_leq man post1 post2 then post2
+        else if Abstract1.is_leq man post2 post1 then post1
+        else
+          (* HEURISTIC -> perform the refinement only if the result has some
+             "reasonable" directions, namely the ones of the `pre` and
+             `post{1,2}` (in both polarities). *)
+          let allowed_dirs =
+            U.get_directions pre @ U.get_directions post1
+            @ U.get_directions post2
+          in
+          let check_dirs a =
+            let dirs = U.get_directions a in
+            List.for_all
+              (fun d1 ->
+                List.exists
+                  (fun d2 -> d1 = d2 || U.neg_linexpr d2 = d1)
+                  allowed_dirs )
+              dirs
+          in
+          (* try refinement of poly with singleton components differing by
+             +-1 *)
+          match U.refine_singleton vset post1 post2 with
+          | Some post1 when check_dirs post1 -> post1
+          | _ -> (
+            (* try refinement of poly by adding behind some constraint *)
+            match U.refine_behind_cons vset post1 post2 with
+            | Some post1 when check_dirs post1 -> post1
+            | _ ->
+                (* refinemenet failed.. *)
+                post1 ) )
+      post1 post2
 end
 
 (* INSTANTIATIONS *)
