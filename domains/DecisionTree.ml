@@ -1357,17 +1357,11 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
             let e, _ = negBExp e in
             filter ~taint ?domain:pre ~underapprox t e)
     | A_bbinary (o, (e1, _), (e2, _)) -> (
-        let joinType =
-          if underapprox && not !resilience then COMPUTATIONAL
-          else if !resilience then
-            if taint then APPROXIMATION else APPROXIMATION
-          else APPROXIMATION
-        in
         let t1 = filter ~taint ?domain:pre ~underapprox t e1
         and t2 = filter ~taint ?domain:pre ~underapprox t e2 in
         match o with
-        | A_AND -> meet joinType t1 t2
-        | A_OR -> join joinType t1 t2)
+        | A_AND -> meet APPROXIMATION t1 t2
+        | A_OR -> join APPROXIMATION t1 t2)
     | A_rbinary (_, _, _) ->
         let bp =
           match post with

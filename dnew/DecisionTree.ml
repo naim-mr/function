@@ -698,7 +698,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
         | None -> B.inner env vars cs
         | Some domain -> B.meet (B.inner env vars cs) domain
       in
-      if B.isBot b then Bot else Leaf (F.join k b f1 f2)
+      if B.isBot b then Bot else Leaf (F.join APPROXIMATION b f1 f2)
       (* join leaf values using APPROXIMATION join *)
     in
     {
@@ -1405,7 +1405,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
             ( A_AND,
               (T_binary (A_GREATER_EQUAL, e1, e2), typ, ext),
               (T_binary (A_GREATER_EQUAL, e2, e1), typ, ext) )
-        in  
+        in
         filter ~taint ?domain:pre ~underapprox t (bop, typ, ext)
     | T_binary (A_NOT_EQUAL, e1, e2) ->
         let bop =
@@ -1420,12 +1420,11 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
         let e = neg_bexp e in
         filter ~taint ?domain:pre ~underapprox t e
     | T_binary ((A_AND as op), e1, e2) | T_binary ((A_OR as op), e1, e2) -> (
-        let joinType = if underapprox then COMPUTATIONAL else APPROXIMATION in
         let t1 = filter ~taint ?domain:pre ~underapprox t e1
         and t2 = filter ~taint ?domain:pre ~underapprox t e2 in
         match op with
-        | A_AND -> meet joinType t1 t2
-        | A_OR -> join joinType t1 t2
+        | A_AND -> meet APPROXIMATION t1 t2
+        | A_OR -> join APPROXIMATION t1 t2
         | _ -> raise (Invalid_argument "This cases are impossible to reach"))
     | _ ->
         let bp =
@@ -1521,7 +1520,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
 
   (* NOTE: reset underapproximates the filter operation to guarantee soundness. 
      Currently this limits the set of supported domains to polyhedra *)
-     
+
   let reset ?mask t e =
     let domain = t.domain in
     let env = t.env in
