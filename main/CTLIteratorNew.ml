@@ -623,6 +623,7 @@ module CTLIteratorNew (D : RANKING_FUNCTION) : SemanticsNew.SEMANTIC = struct
   let atomic (program : program) (property : expr typed) : inv =
     let bot = D.bot program.environment program.variables in
     let blockMap = block_label_map program.mainFunction.func_body in
+    Typed_syntax.pp_expr_ext !fmt property;
     let atomicState = D.reset bot property in
     let reducer (inv : D.t InvMap.t) (label, block) =
       InvMap.add label atomicState inv
@@ -817,6 +818,10 @@ action: "follow"|}
     bwdInvMap := inv;
     witness program inv;
     tree := D.output_json program.variables programInvariant;
-    Config.result := D.partially_defined programInvariant;
+    Config.result := 
+    if !Config.analysis = "non-termination" then 
+      D.partially_defined programInvariant
+    else 
+    D.partially_defined programInvariant; 
     !Config.result
 end

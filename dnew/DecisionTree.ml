@@ -1521,7 +1521,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
 
   (* NOTE: reset underapproximates the filter operation to guarantee soundness. 
      Currently this limits the set of supported domains to polyhedra *)
-
+     
   let reset ?mask t e =
     let domain = t.domain in
     let env = t.env in
@@ -1538,9 +1538,6 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
       | None -> reset false (tree (filter ~underapprox:true t e))
       | Some mask -> reset true (tree (filter ~underapprox:true mask e))
     in
-    Printf.printf "\n reset tree \n";
-    print_tree t.vars !fmt t1;
-    print_tree t.vars !fmt t2;
     let rec aux (t1, t2) =
       match (t1, t2) with
       | _, Bot | Bot, _ -> t1

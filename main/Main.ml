@@ -284,7 +284,7 @@ let check_args () =
     raise (Invalid_argument "No Source File Specified");
   if
     String.compare !property "" = 0
-    && String.compare !analysis "termination" <> 0
+    && String.compare !analysis "termination" <> 0 && String.compare !analysis "non-termination" <> 0
   then raise (Invalid_argument "No Property File Specified")
 
 (* Factorised function to run termination analysis *)
@@ -548,7 +548,7 @@ let doit () =
    else *)
   match !analysis with
   | "termination" -> run_termination_new prog
-  | "nontermination" ->
+  | "non-termination" ->
       Config.refine := false;
       run_non_termination prog
   | "ctl" (* default CTL analysis is CTL-AST *) ->
