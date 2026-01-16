@@ -179,7 +179,12 @@ module TerminationIteratorNew (D : RANKING_FUNCTION) : SEMANTIC = struct
         initStm env vars s;
         initBlk env vars b
 
-  let analyze ?(precondition = Some (T_bool_const True)) ?property
+  let analyze
+      ?(precondition =
+        Some
+          ( T_bool_const True,
+            Abstract_syntax.A_BOOL,
+            (Lexing.dummy_pos, Lexing.dummy_pos) )) ?property
       (prog : Typed_syntax.prog) =
     let block, funcmap, varmap = prog in
     let f = StringMap.find !Config.main funcmap in
@@ -213,6 +218,6 @@ module TerminationIteratorNew (D : RANKING_FUNCTION) : SEMANTIC = struct
       else Format.fprintf !fmt "\nBackward Analysis:\n";
       bwdMap_print !fmt !bwdInvMap);
     tree := D.output_json vars i;
-    Config.result := D.defined i;
+    Config.result := D.defined ?condition:precondition i;
     !Config.result
 end

@@ -63,9 +63,7 @@ module ForwardIterator (B : PARTITION) = struct
     | T_expr _ | T_assume _ -> p
     | T_if (b, s1, s2) ->
         let p1 = fwdBlk ctx (B.filter p b) s1 in
-
         let p2 = fwdBlk ctx (B.filter p (neg_bexp b)) s2 in
-
         if ctx.summary then (
           Format.fprintf !fmt "neg b: %a\n" Typed_syntax.pp_expr_ext
             (neg_bexp b);

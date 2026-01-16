@@ -65,7 +65,7 @@ module type SEMANTIC = sig
   (** [initBlk]: initialisation function *)
 
   val analyze :
-    ?precondition:expr option -> ?property:'a p -> Typed_syntax.prog -> bool
+    ?precondition:expr typed option -> ?property:'a p -> Typed_syntax.prog -> bool
   (** [analyze]: iterating function that run the analysis for the given semantic
   *)
 end

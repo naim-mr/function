@@ -284,7 +284,8 @@ let check_args () =
     raise (Invalid_argument "No Source File Specified");
   if
     String.compare !property "" = 0
-    && String.compare !analysis "termination" <> 0 && String.compare !analysis "non-termination" <> 0
+    && String.compare !analysis "termination" <> 0
+    && String.compare !analysis "non-termination" <> 0
   then raise (Invalid_argument "No Property File Specified")
 
 (* Factorised function to run termination analysis *)
@@ -445,8 +446,13 @@ let run_ctl_ast_new (module S : SemanticsNew.SEMANTIC) prog property =
     @@ AbstractSyntax.StringMap.find ""
     @@ ItoA.property_itoa_of_prog prog !main parsedPrecondition
   in *)
+  let parsedPrecondition =
+    if !precondition <> "" then Some (parsePropertyStringNew !precondition)
+    else None
+  in
   let analyze = S.analyze in
-  Config.result := analyze ~precondition:None ~property:(Ctl property) prog;
+  Config.result :=
+    analyze ~precondition:parsedPrecondition ~property:(Ctl property) prog;
   if !time then (
     let stoptime = Sys.time () in
     exectime := string_of_float (stoptime -. starttime);
@@ -525,7 +531,7 @@ let doit () =
     Typed_syntax.pp_prog !fmt prog);
   run_termination_new prog;
   Format.print_newline ();
-  if !Config.json_output then Regression.output_json ();
+  
 
   if not !Config.result then (
     Config.analysis := "non-termination";
@@ -546,7 +552,7 @@ let doit () =
      Config.result :=
        C.analyze ~property ~precondition:(Some precondition) funcs vars b !main
    else *)
-  match !analysis with
+  (match !analysis with
   | "termination" -> run_termination_new prog
   | "non-termination" ->
       Config.refine := false;
@@ -556,8 +562,8 @@ let doit () =
         (module S)
         prog
         (parseCTLPropertyStringNew !Config.property)
-  | _ -> raise (Invalid_argument "Unknow Property")
-
+  | _ -> raise (Invalid_argument "Unknow Property"));
+  if !Config.json_output then Regression.output_json ()
 (* if !Config.vulnerability then ( *)
 (* Launch the vulnerability analysisand output the infered variables *)
 (* let varlist =

@@ -771,8 +771,13 @@ action: "follow"|}
     in
     aux program.mainFunction.func_body
 
-  let analyze ?(precondition = Some (T_bool_const True))
-      ?(property = dummy_prop) prog =
+  let analyze
+      ?(precondition =
+        Some
+          ( T_bool_const True,
+            Abstract_syntax.A_BOOL,
+            (Lexing.dummy_pos, Lexing.dummy_pos) )) ?(property = dummy_prop)
+      prog =
     let module Init = EnvInit.Make (B) in
     let env, vars = Init.env prog in
     let property =
@@ -793,6 +798,26 @@ action: "follow"|}
                | _ -> e
              in
              aux e)
+    in
+    let precondition =
+      match precondition with
+      | Some e ->
+          let rec aux e =
+            match e with
+            | T_var v, t, ext ->
+                ( T_var
+                    (List.find
+                       (fun x -> String.compare x.var_name v.var_name = 0)
+                       vars),
+                  t,
+                  ext )
+            | T_unary (op, e), t, ext -> (T_unary (op, aux e), t, ext)
+            | T_binary (bop, e1, e2), t, ext ->
+                (T_binary (bop, aux e1, aux e2), t, ext)
+            | _ -> e
+          in
+          Some (aux e)
+      | None -> None
     in
     if not !minimal then (
       Format.printf "\nAbstract ctl typed Syntax:\n ";
@@ -818,7 +843,7 @@ action: "follow"|}
     tree := D.output_json program.variables programInvariant;
     Config.result :=
       if !Config.analysis = "non-termination" then
-        D.partially_defined programInvariant
-      else D.defined programInvariant;
+        D.partially_defined ?condition:precondition programInvariant
+      else D.defined ?condition:precondition programInvariant;
     !Config.result
 end
