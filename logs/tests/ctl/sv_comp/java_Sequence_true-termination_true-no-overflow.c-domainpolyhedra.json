@@ -3,9 +3,11 @@
     "filename": "tests/ctl/sv_comp/java_Sequence_true-termination_true-no-overflow.c",
     "analysis_type": "ctl",
     "property": "AF{AND{AF{j >= 21}}{i==100}}",
+    "precondition": "true",
     "result": "TRUE",
     "domain": "polyhedra",
-    "time": 0.19620500000100003
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {
@@ -13,12 +15,12 @@
       "left": {
         "Node": {
           "constraint": "$2{i} >= 101",
-          "left": { "Leaf": "0." },
+          "left": { "Leaf": "302" },
           "right": {
             "Node": {
               "constraint": "$2{i} >= 100",
               "left": { "Leaf": "0." },
-              "right": { "Leaf": "0." }
+              "right": { "Leaf": "302" }
             }
           }
         }
@@ -26,12 +28,12 @@
       "right": {
         "Node": {
           "constraint": "$2{i} >= 101",
-          "left": { "Leaf": "0." },
+          "left": { "Leaf": "302" },
           "right": {
             "Node": {
               "constraint": "$2{i} >= 100",
               "left": { "Leaf": "0." },
-              "right": { "Leaf": "0." }
+              "right": { "Leaf": "302" }
             }
           }
         }

@@ -2,10 +2,12 @@
   "Config": {
     "filename": "tests/termination/widening3.c",
     "analysis_type": "termination",
-    "property": "",
+    "property": "AF{exit:true}",
+    "precondition": "x <= 0",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": 0.015637000000100002
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {

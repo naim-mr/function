@@ -3,14 +3,16 @@
     "filename": "tests/ctl/multi_branch_choice.c",
     "analysis_type": "ctl",
     "property": "AF{OR{x==4}{x==-4}}",
+    "precondition": "true",
     "result": "TRUE",
     "domain": "polyhedra",
-    "time": 0.066401000000100006
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {
       "constraint": "$2{x} >= 5",
-      "left": { "Leaf": "0." },
+      "left": { "Leaf": "8" },
       "right": {
         "Node": {
           "constraint": "$2{x} >= 4",
@@ -18,12 +20,12 @@
           "right": {
             "Node": {
               "constraint": "$2{x} >= -3",
-              "left": { "Leaf": "0." },
+              "left": { "Leaf": "8" },
               "right": {
                 "Node": {
                   "constraint": "$2{x} >= -4",
                   "left": { "Leaf": "0." },
-                  "right": { "Leaf": "0." }
+                  "right": { "Leaf": "8" }
                 }
               }
             }

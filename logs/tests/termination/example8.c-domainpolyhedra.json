@@ -2,10 +2,12 @@
   "Config": {
     "filename": "tests/termination/example8.c",
     "analysis_type": "termination",
-    "property": "",
+    "property": "AF{exit:true}",
+    "precondition": "true",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": 0.034706000000100005
+    "joinbwd": 7,
+    "time": "1"
   },
   "tree": { "Leaf": "top" },
   "vulnerability": "Not analyzed"

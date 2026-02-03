@@ -2,52 +2,54 @@
   "Config": {
     "filename": "tests/termination/cacm2009b.c",
     "analysis_type": "termination",
-    "property": "",
+    "property": "AF{exit:true}",
+    "precondition": "true",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": 0.059643000000100005
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {
-      "constraint": "$2{y} >= 2",
+      "constraint": "$3{y} >= 2",
       "left": {
         "Node": {
-          "constraint": "$1{x} >= 2",
+          "constraint": "$2{x} >= 2",
           "left": { "Leaf": "top" },
           "right": {
             "Node": {
-              "constraint": "$1{x} >= 1",
-              "left": { "Leaf": "3$2{y}+2" },
-              "right": { "Leaf": "1" }
+              "constraint": "$2{x} >= 1",
+              "left": { "Leaf": "3$3{y}+4" },
+              "right": { "Leaf": "3" }
             }
           }
         }
       },
       "right": {
         "Node": {
-          "constraint": "$2{y} >= 1",
+          "constraint": "$3{y} >= 1",
           "left": {
             "Node": {
-              "constraint": "$1{x} >= 2",
+              "constraint": "$2{x} >= 2",
               "left": { "Leaf": "top" },
               "right": {
                 "Node": {
-                  "constraint": "$1{x} >= 1",
-                  "left": { "Leaf": "5" },
-                  "right": { "Leaf": "1" }
+                  "constraint": "$2{x} >= 1",
+                  "left": { "Leaf": "7" },
+                  "right": { "Leaf": "3" }
                 }
               }
             }
           },
           "right": {
             "Node": {
-              "constraint": "$1{x} >= 2",
-              "left": { "Leaf": "1" },
+              "constraint": "$2{x} >= 2",
+              "left": { "Leaf": "3" },
               "right": {
                 "Node": {
-                  "constraint": "$1{x} >= 1",
-                  "left": { "Leaf": "1" },
-                  "right": { "Leaf": "1" }
+                  "constraint": "$2{x} >= 1",
+                  "left": { "Leaf": "3" },
+                  "right": { "Leaf": "3" }
                 }
               }
             }

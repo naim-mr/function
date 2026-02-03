@@ -2,10 +2,12 @@
   "Config": {
     "filename": "tests/termination/tap2008d.c",
     "analysis_type": "termination",
-    "property": "",
+    "property": "AF{exit:true}",
+    "precondition": "x <= 0",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": 0.065286000000100001
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {

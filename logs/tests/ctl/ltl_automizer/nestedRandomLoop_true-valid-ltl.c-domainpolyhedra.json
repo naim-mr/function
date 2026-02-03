@@ -3,9 +3,11 @@
     "filename": "tests/ctl/ltl_automizer/nestedRandomLoop_true-valid-ltl.c",
     "analysis_type": "ctl",
     "property": "AG{i >= n}",
+    "precondition": "true",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": 0.0034280000000100004
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {

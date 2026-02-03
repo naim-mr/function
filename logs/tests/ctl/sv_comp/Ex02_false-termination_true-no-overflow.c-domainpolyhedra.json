@@ -3,9 +3,11 @@
     "filename": "tests/ctl/sv_comp/Ex02_false-termination_true-no-overflow.c",
     "analysis_type": "ctl",
     "property": "OR{i >= 5}{AF{exit: true}}",
+    "precondition": "true",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": 0.047886000000100002
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {

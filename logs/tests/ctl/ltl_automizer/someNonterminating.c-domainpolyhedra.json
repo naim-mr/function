@@ -3,9 +3,11 @@
     "filename": "tests/ctl/ltl_automizer/someNonterminating.c",
     "analysis_type": "ctl",
     "property": "EG{x > 0}",
+    "precondition": "true",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": 0.012613000000100001
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {

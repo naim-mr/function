@@ -3,9 +3,11 @@
     "filename": "tests/ctl/ltl_automizer/coolant_basis_6_unsafe_sfty.c",
     "analysis_type": "ctl",
     "property": "AG{OR{limit <= -273 && limit >= 10}{OR{tempIn >= 0}{AF{ warnLED == 1}}}}",
+    "precondition": "true",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": 4.1876170000100004
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {

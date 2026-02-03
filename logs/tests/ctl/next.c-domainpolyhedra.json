@@ -3,19 +3,21 @@
     "filename": "tests/ctl/next.c",
     "analysis_type": "ctl",
     "property": "AX{x==0}",
-    "result": "TRUE",
+    "precondition": "x == 0",
+    "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": 0.0020230000000100004
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {
       "constraint": "$2{x} >= 2",
-      "left": { "Leaf": "0." },
+      "left": { "Leaf": "bottom" },
       "right": {
         "Node": {
           "constraint": "$2{x} >= 1",
           "left": { "Leaf": "0." },
-          "right": { "Leaf": "0." }
+          "right": { "Leaf": "bottom" }
         }
       }
     }

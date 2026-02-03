@@ -3,35 +3,55 @@
     "filename": "tests/ctl/existential_test3.c",
     "analysis_type": "ctl",
     "property": "EF{r == 1}",
-    "result": "TRUE",
+    "precondition": "x == 2",
+    "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": 0.016211000000100004
+    "joinbwd": 5,
+    "time": "1"
   },
   "tree": {
     "Node": {
-      "constraint": "$3{x} >= 1",
+      "constraint": "$3{x} >= 2",
       "left": {
         "Node": {
           "constraint": "$2{r} >= 2",
-          "left": { "Leaf": "0." },
+          "left": { "Leaf": "top" },
           "right": {
             "Node": {
               "constraint": "$2{r} >= 1",
               "left": { "Leaf": "0." },
-              "right": { "Leaf": "0." }
+              "right": { "Leaf": "top" }
             }
           }
         }
       },
       "right": {
         "Node": {
-          "constraint": "$2{r} >= 2",
-          "left": { "Leaf": "0." },
+          "constraint": "$3{x} >= 1",
+          "left": {
+            "Node": {
+              "constraint": "$2{r} >= 2",
+              "left": { "Leaf": "5" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{r} >= 1",
+                  "left": { "Leaf": "0." },
+                  "right": { "Leaf": "5" }
+                }
+              }
+            }
+          },
           "right": {
             "Node": {
-              "constraint": "$2{r} >= 1",
-              "left": { "Leaf": "0." },
-              "right": { "Leaf": "0." }
+              "constraint": "$2{r} >= 2",
+              "left": { "Leaf": "bottom" },
+              "right": {
+                "Node": {
+                  "constraint": "$2{r} >= 1",
+                  "left": { "Leaf": "0." },
+                  "right": { "Leaf": "bottom" }
+                }
+              }
             }
           }
         }

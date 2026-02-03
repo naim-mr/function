@@ -2,10 +2,12 @@
   "Config": {
     "filename": "tests/termination/increment_two_b.c",
     "analysis_type": "termination",
-    "property": "",
+    "property": "AF{exit:true}",
+    "precondition": "x > 6",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": 0.0070480000000000005
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {

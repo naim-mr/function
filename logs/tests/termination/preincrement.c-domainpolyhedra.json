@@ -2,10 +2,12 @@
   "Config": {
     "filename": "tests/termination/preincrement.c",
     "analysis_type": "termination",
-    "property": "",
+    "property": "AF{exit:true}",
+    "precondition": "true",
     "result": "TRUE",
     "domain": "polyhedra",
-    "time": 0.0065420000000100008
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {

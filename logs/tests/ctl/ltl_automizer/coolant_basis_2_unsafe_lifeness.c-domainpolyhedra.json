@@ -3,9 +3,11 @@
     "filename": "tests/ctl/ltl_automizer/coolant_basis_2_unsafe_lifeness.c",
     "analysis_type": "ctl",
     "property": "AG{AF{otime < time}}",
+    "precondition": "true",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": 0.54898900000100004
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {

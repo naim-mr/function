@@ -2,10 +2,12 @@
   "Config": {
     "filename": "tests/termination/sorting4.c",
     "analysis_type": "termination",
-    "property": "",
+    "property": "AF{exit:true}",
+    "precondition": "true",
     "result": "TRUE",
     "domain": "polyhedra",
-    "time": 0.11937900000100001
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {

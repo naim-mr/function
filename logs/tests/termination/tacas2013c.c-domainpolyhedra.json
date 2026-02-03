@@ -2,10 +2,12 @@
   "Config": {
     "filename": "tests/termination/tacas2013c.c",
     "analysis_type": "termination",
-    "property": "",
+    "property": "AF{exit:true}",
+    "precondition": "true",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": 0.42781500000100004
+    "joinbwd": 3,
+    "time": "1"
   },
   "tree": {
     "Node": {

@@ -3,9 +3,11 @@
     "filename": "tests/ctl/t2_cav13/P3_cheat.c",
     "analysis_type": "ctl",
     "property": "OR{varA != 1}{EF{varR==1}}",
+    "precondition": "varA == 0 && varR == 0",
     "result": "TRUE",
     "domain": "polyhedra",
-    "time": 0.30565400000100002
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {
@@ -15,19 +17,31 @@
           "constraint": "$5{varA} >= 2",
           "left": {
             "Node": {
-              "constraint": "$4{m_init} >= 1",
+              "constraint": "$4{m_init} >= 2",
               "left": {
                 "Node": {
                   "constraint": "$3{n_init} >= 1",
-                  "left": { "Leaf": "0" },
-                  "right": { "Leaf": "0" }
+                  "left": { "Leaf": "2$4{m_init}+10" },
+                  "right": { "Leaf": "0." }
                 }
               },
               "right": {
                 "Node": {
-                  "constraint": "$3{n_init} >= 1",
-                  "left": { "Leaf": "0" },
-                  "right": { "Leaf": "0" }
+                  "constraint": "$4{m_init} >= 1",
+                  "left": {
+                    "Node": {
+                      "constraint": "$3{n_init} >= 1",
+                      "left": { "Leaf": "12" },
+                      "right": { "Leaf": "0." }
+                    }
+                  },
+                  "right": {
+                    "Node": {
+                      "constraint": "$3{n_init} >= 1",
+                      "left": { "Leaf": "10" },
+                      "right": { "Leaf": "0." }
+                    }
+                  }
                 }
               }
             }
@@ -37,38 +51,62 @@
               "constraint": "$5{varA} >= 1",
               "left": {
                 "Node": {
-                  "constraint": "$4{m_init} >= 1",
+                  "constraint": "$4{m_init} >= 2",
                   "left": {
                     "Node": {
                       "constraint": "$3{n_init} >= 1",
-                      "left": { "Leaf": "0." },
-                      "right": { "Leaf": "0." }
+                      "left": { "Leaf": "2$4{m_init}+10" },
+                      "right": { "Leaf": "bottom" }
                     }
                   },
                   "right": {
                     "Node": {
-                      "constraint": "$3{n_init} >= 1",
-                      "left": { "Leaf": "0." },
-                      "right": { "Leaf": "0." }
+                      "constraint": "$4{m_init} >= 1",
+                      "left": {
+                        "Node": {
+                          "constraint": "$3{n_init} >= 1",
+                          "left": { "Leaf": "12" },
+                          "right": { "Leaf": "bottom" }
+                        }
+                      },
+                      "right": {
+                        "Node": {
+                          "constraint": "$3{n_init} >= 1",
+                          "left": { "Leaf": "10" },
+                          "right": { "Leaf": "bottom" }
+                        }
+                      }
                     }
                   }
                 }
               },
               "right": {
                 "Node": {
-                  "constraint": "$4{m_init} >= 1",
+                  "constraint": "$4{m_init} >= 2",
                   "left": {
                     "Node": {
                       "constraint": "$3{n_init} >= 1",
-                      "left": { "Leaf": "0" },
-                      "right": { "Leaf": "0" }
+                      "left": { "Leaf": "2$4{m_init}+10" },
+                      "right": { "Leaf": "0." }
                     }
                   },
                   "right": {
                     "Node": {
-                      "constraint": "$3{n_init} >= 1",
-                      "left": { "Leaf": "0" },
-                      "right": { "Leaf": "0" }
+                      "constraint": "$4{m_init} >= 1",
+                      "left": {
+                        "Node": {
+                          "constraint": "$3{n_init} >= 1",
+                          "left": { "Leaf": "12" },
+                          "right": { "Leaf": "0." }
+                        }
+                      },
+                      "right": {
+                        "Node": {
+                          "constraint": "$3{n_init} >= 1",
+                          "left": { "Leaf": "10" },
+                          "right": { "Leaf": "0." }
+                        }
+                      }
                     }
                   }
                 }
@@ -85,7 +123,7 @@
               "constraint": "$5{varA} >= 2",
               "left": {
                 "Node": {
-                  "constraint": "$4{m_init} >= 1",
+                  "constraint": "$4{m_init} >= 2",
                   "left": {
                     "Node": {
                       "constraint": "$3{n_init} >= 1",
@@ -95,9 +133,21 @@
                   },
                   "right": {
                     "Node": {
-                      "constraint": "$3{n_init} >= 1",
-                      "left": { "Leaf": "0" },
-                      "right": { "Leaf": "0" }
+                      "constraint": "$4{m_init} >= 1",
+                      "left": {
+                        "Node": {
+                          "constraint": "$3{n_init} >= 1",
+                          "left": { "Leaf": "0" },
+                          "right": { "Leaf": "0" }
+                        }
+                      },
+                      "right": {
+                        "Node": {
+                          "constraint": "$3{n_init} >= 1",
+                          "left": { "Leaf": "0" },
+                          "right": { "Leaf": "0" }
+                        }
+                      }
                     }
                   }
                 }
@@ -107,7 +157,7 @@
                   "constraint": "$5{varA} >= 1",
                   "left": {
                     "Node": {
-                      "constraint": "$4{m_init} >= 1",
+                      "constraint": "$4{m_init} >= 2",
                       "left": {
                         "Node": {
                           "constraint": "$3{n_init} >= 1",
@@ -117,16 +167,28 @@
                       },
                       "right": {
                         "Node": {
-                          "constraint": "$3{n_init} >= 1",
-                          "left": { "Leaf": "0." },
-                          "right": { "Leaf": "0." }
+                          "constraint": "$4{m_init} >= 1",
+                          "left": {
+                            "Node": {
+                              "constraint": "$3{n_init} >= 1",
+                              "left": { "Leaf": "0." },
+                              "right": { "Leaf": "0." }
+                            }
+                          },
+                          "right": {
+                            "Node": {
+                              "constraint": "$3{n_init} >= 1",
+                              "left": { "Leaf": "0." },
+                              "right": { "Leaf": "0." }
+                            }
+                          }
                         }
                       }
                     }
                   },
                   "right": {
                     "Node": {
-                      "constraint": "$4{m_init} >= 1",
+                      "constraint": "$4{m_init} >= 2",
                       "left": {
                         "Node": {
                           "constraint": "$3{n_init} >= 1",
@@ -136,9 +198,21 @@
                       },
                       "right": {
                         "Node": {
-                          "constraint": "$3{n_init} >= 1",
-                          "left": { "Leaf": "0" },
-                          "right": { "Leaf": "0" }
+                          "constraint": "$4{m_init} >= 1",
+                          "left": {
+                            "Node": {
+                              "constraint": "$3{n_init} >= 1",
+                              "left": { "Leaf": "0" },
+                              "right": { "Leaf": "0" }
+                            }
+                          },
+                          "right": {
+                            "Node": {
+                              "constraint": "$3{n_init} >= 1",
+                              "left": { "Leaf": "0" },
+                              "right": { "Leaf": "0" }
+                            }
+                          }
                         }
                       }
                     }
@@ -152,19 +226,31 @@
               "constraint": "$5{varA} >= 2",
               "left": {
                 "Node": {
-                  "constraint": "$4{m_init} >= 1",
+                  "constraint": "$4{m_init} >= 2",
                   "left": {
                     "Node": {
                       "constraint": "$3{n_init} >= 1",
-                      "left": { "Leaf": "0" },
-                      "right": { "Leaf": "0" }
+                      "left": { "Leaf": "2$4{m_init}+10" },
+                      "right": { "Leaf": "0." }
                     }
                   },
                   "right": {
                     "Node": {
-                      "constraint": "$3{n_init} >= 1",
-                      "left": { "Leaf": "0" },
-                      "right": { "Leaf": "0" }
+                      "constraint": "$4{m_init} >= 1",
+                      "left": {
+                        "Node": {
+                          "constraint": "$3{n_init} >= 1",
+                          "left": { "Leaf": "12" },
+                          "right": { "Leaf": "0." }
+                        }
+                      },
+                      "right": {
+                        "Node": {
+                          "constraint": "$3{n_init} >= 1",
+                          "left": { "Leaf": "10" },
+                          "right": { "Leaf": "0." }
+                        }
+                      }
                     }
                   }
                 }
@@ -174,38 +260,62 @@
                   "constraint": "$5{varA} >= 1",
                   "left": {
                     "Node": {
-                      "constraint": "$4{m_init} >= 1",
+                      "constraint": "$4{m_init} >= 2",
                       "left": {
                         "Node": {
                           "constraint": "$3{n_init} >= 1",
-                          "left": { "Leaf": "0." },
-                          "right": { "Leaf": "0." }
+                          "left": { "Leaf": "2$4{m_init}+10" },
+                          "right": { "Leaf": "bottom" }
                         }
                       },
                       "right": {
                         "Node": {
-                          "constraint": "$3{n_init} >= 1",
-                          "left": { "Leaf": "0." },
-                          "right": { "Leaf": "0." }
+                          "constraint": "$4{m_init} >= 1",
+                          "left": {
+                            "Node": {
+                              "constraint": "$3{n_init} >= 1",
+                              "left": { "Leaf": "12" },
+                              "right": { "Leaf": "bottom" }
+                            }
+                          },
+                          "right": {
+                            "Node": {
+                              "constraint": "$3{n_init} >= 1",
+                              "left": { "Leaf": "10" },
+                              "right": { "Leaf": "bottom" }
+                            }
+                          }
                         }
                       }
                     }
                   },
                   "right": {
                     "Node": {
-                      "constraint": "$4{m_init} >= 1",
+                      "constraint": "$4{m_init} >= 2",
                       "left": {
                         "Node": {
                           "constraint": "$3{n_init} >= 1",
-                          "left": { "Leaf": "0" },
-                          "right": { "Leaf": "0" }
+                          "left": { "Leaf": "2$4{m_init}+10" },
+                          "right": { "Leaf": "0." }
                         }
                       },
                       "right": {
                         "Node": {
-                          "constraint": "$3{n_init} >= 1",
-                          "left": { "Leaf": "0" },
-                          "right": { "Leaf": "0" }
+                          "constraint": "$4{m_init} >= 1",
+                          "left": {
+                            "Node": {
+                              "constraint": "$3{n_init} >= 1",
+                              "left": { "Leaf": "12" },
+                              "right": { "Leaf": "0." }
+                            }
+                          },
+                          "right": {
+                            "Node": {
+                              "constraint": "$3{n_init} >= 1",
+                              "left": { "Leaf": "10" },
+                              "right": { "Leaf": "0." }
+                            }
+                          }
                         }
                       }
                     }

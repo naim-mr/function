@@ -3,9 +3,11 @@
     "filename": "tests/ctl/ltl_automizer/timer-simple.c",
     "analysis_type": "ctl",
     "property": "NOT{AG{OR{timer_1 != 0}{AF{output_1 == 1}}}}",
+    "precondition": "true",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": 0.13994000000100002
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {
@@ -13,12 +15,12 @@
       "left": {
         "Node": {
           "constraint": "$1{timer_1} >= 1",
-          "left": { "Leaf": "bottom" },
+          "left": { "Leaf": "top" },
           "right": {
             "Node": {
               "constraint": "$1{timer_1} >= 0",
-              "left": { "Leaf": "bottom" },
-              "right": { "Leaf": "bottom" }
+              "left": { "Leaf": "top" },
+              "right": { "Leaf": "top" }
             }
           }
         }
@@ -29,12 +31,12 @@
           "left": {
             "Node": {
               "constraint": "$1{timer_1} >= 1",
-              "left": { "Leaf": "bottom" },
+              "left": { "Leaf": "0." },
               "right": {
                 "Node": {
                   "constraint": "$1{timer_1} >= 0",
-                  "left": { "Leaf": "bottom" },
-                  "right": { "Leaf": "bottom" }
+                  "left": { "Leaf": "0." },
+                  "right": { "Leaf": "0." }
                 }
               }
             }
@@ -42,12 +44,12 @@
           "right": {
             "Node": {
               "constraint": "$1{timer_1} >= 1",
-              "left": { "Leaf": "bottom" },
+              "left": { "Leaf": "top" },
               "right": {
                 "Node": {
                   "constraint": "$1{timer_1} >= 0",
-                  "left": { "Leaf": "bottom" },
-                  "right": { "Leaf": "bottom" }
+                  "left": { "Leaf": "top" },
+                  "right": { "Leaf": "top" }
                 }
               }
             }

@@ -3,9 +3,11 @@
     "filename": "tests/ctl/global_test_simple.c",
     "analysis_type": "ctl",
     "property": "AG{AF{x <= -10}}",
+    "precondition": "true",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": 0.13426800000100001
+    "joinbwd": 4,
+    "time": "1"
   },
   "tree": {
     "Node": {

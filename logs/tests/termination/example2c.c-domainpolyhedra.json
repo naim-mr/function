@@ -2,10 +2,12 @@
   "Config": {
     "filename": "tests/termination/example2c.c",
     "analysis_type": "termination",
-    "property": "",
+    "property": "AF{exit:true}",
+    "precondition": "true",
     "result": "TRUE",
     "domain": "polyhedra",
-    "time": 0.47969400000100005
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {

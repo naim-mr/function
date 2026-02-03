@@ -2,10 +2,12 @@
   "Config": {
     "filename": "tests/termination/sas2014b.c",
     "analysis_type": "termination",
-    "property": "",
+    "property": "AF{exit:true}",
+    "precondition": "true",
     "result": "TRUE",
     "domain": "polyhedra",
-    "time": 0.013847000000100002
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {

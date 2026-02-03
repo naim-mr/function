@@ -3,9 +3,11 @@
     "filename": "tests/ctl/ltl_automizer/cav2015.c",
     "analysis_type": "ctl",
     "property": "AG{OR{x <= 0}{AF{y == 0}}}",
-    "result": "TRUE",
+    "precondition": "true",
+    "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": 0.10296700000100001
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {
@@ -13,8 +15,8 @@
       "left": {
         "Node": {
           "constraint": "$1{x} >= 1",
-          "left": { "Leaf": "0." },
-          "right": { "Leaf": "0" }
+          "left": { "Leaf": "bottom" },
+          "right": { "Leaf": "bottom" }
         }
       },
       "right": {
@@ -23,15 +25,15 @@
           "left": {
             "Node": {
               "constraint": "$1{x} >= 1",
-              "left": { "Leaf": "0." },
-              "right": { "Leaf": "0" }
+              "left": { "Leaf": "bottom" },
+              "right": { "Leaf": "bottom" }
             }
           },
           "right": {
             "Node": {
               "constraint": "$1{x} >= 1",
-              "left": { "Leaf": "0." },
-              "right": { "Leaf": "0" }
+              "left": { "Leaf": "bottom" },
+              "right": { "Leaf": "bottom" }
             }
           }
         }

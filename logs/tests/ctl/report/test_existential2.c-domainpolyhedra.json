@@ -3,9 +3,11 @@
     "filename": "tests/ctl/report/test_existential2.c",
     "analysis_type": "ctl",
     "property": "EF{r == 1}",
-    "result": "TRUE",
+    "precondition": "true",
+    "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": 0.042051000000100002
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {
@@ -13,12 +15,12 @@
       "left": {
         "Node": {
           "constraint": "$2{x} >= 200",
-          "left": { "Leaf": "0." },
+          "left": { "Leaf": "bottom" },
           "right": {
             "Node": {
               "constraint": "$2{x} >= 199",
-              "left": { "Leaf": "0." },
-              "right": { "Leaf": "0." }
+              "left": { "Leaf": "bottom" },
+              "right": { "Leaf": "bottom" }
             }
           }
         }
@@ -42,12 +44,12 @@
           "right": {
             "Node": {
               "constraint": "$2{x} >= 200",
-              "left": { "Leaf": "0." },
+              "left": { "Leaf": "bottom" },
               "right": {
                 "Node": {
                   "constraint": "$2{x} >= 199",
-                  "left": { "Leaf": "0." },
-                  "right": { "Leaf": "0." }
+                  "left": { "Leaf": "bottom" },
+                  "right": { "Leaf": "bottom" }
                 }
               }
             }

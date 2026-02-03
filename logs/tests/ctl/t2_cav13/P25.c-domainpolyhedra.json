@@ -3,9 +3,11 @@
     "filename": "tests/ctl/t2_cav13/P25.c",
     "analysis_type": "ctl",
     "property": "OR{varC <= 5}{AF{varR > 5}}",
+    "precondition": "true",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": 0.28061200000100001
+    "joinbwd": 6,
+    "time": "1"
   },
   "tree": {
     "Node": {

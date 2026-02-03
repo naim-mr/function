@@ -3,9 +3,11 @@
     "filename": "tests/ctl/t2_cav13/P3.c",
     "analysis_type": "ctl",
     "property": "OR{varA != 1}{EF{varR==1}}",
+    "precondition": "varA == 0",
     "result": "TRUE",
     "domain": "polyhedra",
-    "time": 0.030420000000100003
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {
@@ -13,12 +15,12 @@
       "left": {
         "Node": {
           "constraint": "$1{varA} >= 2",
-          "left": { "Leaf": "0" },
+          "left": { "Leaf": "0." },
           "right": {
             "Node": {
               "constraint": "$1{varA} >= 1",
-              "left": { "Leaf": "0." },
-              "right": { "Leaf": "0" }
+              "left": { "Leaf": "bottom" },
+              "right": { "Leaf": "0." }
             }
           }
         }
@@ -42,12 +44,12 @@
           "right": {
             "Node": {
               "constraint": "$1{varA} >= 2",
-              "left": { "Leaf": "0" },
+              "left": { "Leaf": "0." },
               "right": {
                 "Node": {
                   "constraint": "$1{varA} >= 1",
-                  "left": { "Leaf": "0." },
-                  "right": { "Leaf": "0" }
+                  "left": { "Leaf": "bottom" },
+                  "right": { "Leaf": "0." }
                 }
               }
             }

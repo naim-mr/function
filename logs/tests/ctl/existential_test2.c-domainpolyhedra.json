@@ -3,9 +3,11 @@
     "filename": "tests/ctl/existential_test2.c",
     "analysis_type": "ctl",
     "property": "EF{r == 1}",
+    "precondition": "true",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": 0.0071260000000100003
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {

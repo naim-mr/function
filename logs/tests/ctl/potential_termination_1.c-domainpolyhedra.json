@@ -3,9 +3,11 @@
     "filename": "tests/ctl/potential_termination_1.c",
     "analysis_type": "ctl",
     "property": "EF{exit: true}",
+    "precondition": "true",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": 0.011319000000100001
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": { "Leaf": "bottom" },
   "vulnerability": "Not analyzed"

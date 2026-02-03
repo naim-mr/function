@@ -2,10 +2,12 @@
   "Config": {
     "filename": "tests/termination/squeez_interval_1b.c",
     "analysis_type": "termination",
-    "property": "",
+    "property": "AF{exit:true}",
+    "precondition": "true",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": 0.053063000000100003
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {

@@ -3,14 +3,16 @@
     "filename": "tests/ctl/or_test.c",
     "analysis_type": "ctl",
     "property": "OR{AF{AG{x < -100}}}{AF{x==20}}",
+    "precondition": "true",
     "result": "TRUE",
     "domain": "polyhedra",
-    "time": 0.034357000000100002
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {
       "constraint": "$2{x} >= 21",
-      "left": { "Leaf": "0." },
+      "left": { "Leaf": "2" },
       "right": {
         "Node": {
           "constraint": "$2{x} >= 20",
@@ -18,7 +20,7 @@
           "right": {
             "Node": {
               "constraint": "$2{x} >= 1",
-              "left": { "Leaf": "0." },
+              "left": { "Leaf": "2" },
               "right": {
                 "Node": {
                   "constraint": "$2{x} >= -98",
@@ -31,7 +33,7 @@
                         "Node": {
                           "constraint": "$2{x} >= -100",
                           "left": { "Leaf": "3" },
-                          "right": { "Leaf": "0" }
+                          "right": { "Leaf": "0." }
                         }
                       }
                     }

@@ -3,22 +3,24 @@
     "filename": "tests/ctl/fin_ex.c",
     "analysis_type": "ctl",
     "property": "EG{EF{n==1}}",
-    "result": "UKNOWN",
+    "precondition": "n > 0",
+    "result": "TRUE",
     "domain": "polyhedra",
-    "time": 0.031806000000100005
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {
       "constraint": "$1{n} >= 4",
-      "left": { "Leaf": "0." },
+      "left": { "Leaf": "2$1{n}-2" },
       "right": {
         "Node": {
           "constraint": "$1{n} >= 3",
-          "left": { "Leaf": "0." },
+          "left": { "Leaf": "4" },
           "right": {
             "Node": {
               "constraint": "$1{n} >= 2",
-              "left": { "Leaf": "0." },
+              "left": { "Leaf": "2" },
               "right": {
                 "Node": {
                   "constraint": "$1{n} >= 1",
@@ -26,7 +28,7 @@
                   "right": {
                     "Node": {
                       "constraint": "$1{n} >= 0",
-                      "left": { "Leaf": "0." },
+                      "left": { "Leaf": "4" },
                       "right": { "Leaf": "bottom" }
                     }
                   }

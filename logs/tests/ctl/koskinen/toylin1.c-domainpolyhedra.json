@@ -3,9 +3,11 @@
     "filename": "tests/ctl/koskinen/toylin1.c",
     "analysis_type": "ctl",
     "property": "AF{resp > 5}",
+    "precondition": "c > 5",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": 0.054526000000100002
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {

@@ -3,9 +3,11 @@
     "filename": "tests/ctl/ltl_automizer/coolant_basis_5_safe_sfty.c",
     "analysis_type": "ctl",
     "property": "AU{init == 0}{OR{AU{init == 1}{AG{init == 3}}}{AG{init == 1}}}",
+    "precondition": "true",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": 2.3619340000100003
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {

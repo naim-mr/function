@@ -3,9 +3,11 @@
     "filename": "tests/ctl/ltl_automizer/coolant_basis_4_unsafe_sfty.c",
     "analysis_type": "ctl",
     "property": "AG{OR{init != 3}{OR{temp <= limit}{AF{AG{chainBroken == 1}}}}}",
+    "precondition": "true",
     "result": "UKNOWN",
     "domain": "polyhedra",
-    "time": 33.930562000100004
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {
@@ -223,35 +225,71 @@
       },
       "right": {
         "Node": {
-          "constraint": "$5{chainBroken} >= 2",
+          "constraint": "$9{time} >= 99999999",
           "left": {
             "Node": {
-              "constraint": "$17{limit}-$7{temp} >= 0",
+              "constraint": "$5{chainBroken} >= 2",
               "left": {
                 "Node": {
-                  "constraint": "$17{limit} >= 0",
+                  "constraint": "$17{limit}-$7{temp} >= 0",
                   "left": {
                     "Node": {
-                      "constraint": "$11{init} >= 4",
-                      "left": { "Leaf": "bottom" },
+                      "constraint": "$17{limit} >= 0",
+                      "left": {
+                        "Node": {
+                          "constraint": "$11{init} >= 4",
+                          "left": { "Leaf": "bottom" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$11{init} >= 3",
+                              "left": { "Leaf": "bottom" },
+                              "right": { "Leaf": "bottom" }
+                            }
+                          }
+                        }
+                      },
                       "right": {
                         "Node": {
-                          "constraint": "$11{init} >= 3",
+                          "constraint": "$11{init} >= 4",
                           "left": { "Leaf": "bottom" },
-                          "right": { "Leaf": "bottom" }
+                          "right": {
+                            "Node": {
+                              "constraint": "$11{init} >= 3",
+                              "left": { "Leaf": "bottom" },
+                              "right": { "Leaf": "bottom" }
+                            }
+                          }
                         }
                       }
                     }
                   },
                   "right": {
                     "Node": {
-                      "constraint": "$11{init} >= 4",
-                      "left": { "Leaf": "bottom" },
+                      "constraint": "$17{limit} >= 0",
+                      "left": {
+                        "Node": {
+                          "constraint": "$11{init} >= 4",
+                          "left": { "Leaf": "bottom" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$11{init} >= 3",
+                              "left": { "Leaf": "bottom" },
+                              "right": { "Leaf": "bottom" }
+                            }
+                          }
+                        }
+                      },
                       "right": {
                         "Node": {
-                          "constraint": "$11{init} >= 3",
+                          "constraint": "$11{init} >= 4",
                           "left": { "Leaf": "bottom" },
-                          "right": { "Leaf": "bottom" }
+                          "right": {
+                            "Node": {
+                              "constraint": "$11{init} >= 3",
+                              "left": { "Leaf": "bottom" },
+                              "right": { "Leaf": "bottom" }
+                            }
+                          }
                         }
                       }
                     }
@@ -260,29 +298,137 @@
               },
               "right": {
                 "Node": {
-                  "constraint": "$17{limit} >= 0",
+                  "constraint": "$5{chainBroken} >= 1",
                   "left": {
                     "Node": {
-                      "constraint": "$11{init} >= 4",
-                      "left": { "Leaf": "bottom" },
+                      "constraint": "$17{limit}-$7{temp} >= 0",
+                      "left": {
+                        "Node": {
+                          "constraint": "$17{limit} >= 0",
+                          "left": {
+                            "Node": {
+                              "constraint": "$11{init} >= 4",
+                              "left": { "Leaf": "bottom" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 3",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": { "Leaf": "bottom" }
+                                }
+                              }
+                            }
+                          },
+                          "right": {
+                            "Node": {
+                              "constraint": "$11{init} >= 4",
+                              "left": { "Leaf": "bottom" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 3",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": { "Leaf": "bottom" }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
                       "right": {
                         "Node": {
-                          "constraint": "$11{init} >= 3",
-                          "left": { "Leaf": "bottom" },
-                          "right": { "Leaf": "bottom" }
+                          "constraint": "$17{limit} >= 0",
+                          "left": {
+                            "Node": {
+                              "constraint": "$11{init} >= 4",
+                              "left": { "Leaf": "bottom" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 3",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": { "Leaf": "bottom" }
+                                }
+                              }
+                            }
+                          },
+                          "right": {
+                            "Node": {
+                              "constraint": "$11{init} >= 4",
+                              "left": { "Leaf": "bottom" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 3",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": { "Leaf": "bottom" }
+                                }
+                              }
+                            }
+                          }
                         }
                       }
                     }
                   },
                   "right": {
                     "Node": {
-                      "constraint": "$11{init} >= 4",
-                      "left": { "Leaf": "bottom" },
+                      "constraint": "$17{limit}-$7{temp} >= 0",
+                      "left": {
+                        "Node": {
+                          "constraint": "$17{limit} >= 0",
+                          "left": {
+                            "Node": {
+                              "constraint": "$11{init} >= 4",
+                              "left": { "Leaf": "bottom" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 3",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": { "Leaf": "bottom" }
+                                }
+                              }
+                            }
+                          },
+                          "right": {
+                            "Node": {
+                              "constraint": "$11{init} >= 4",
+                              "left": { "Leaf": "bottom" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 3",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": { "Leaf": "bottom" }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
                       "right": {
                         "Node": {
-                          "constraint": "$11{init} >= 3",
-                          "left": { "Leaf": "bottom" },
-                          "right": { "Leaf": "bottom" }
+                          "constraint": "$17{limit} >= 0",
+                          "left": {
+                            "Node": {
+                              "constraint": "$11{init} >= 4",
+                              "left": { "Leaf": "bottom" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 3",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": { "Leaf": "bottom" }
+                                }
+                              }
+                            }
+                          },
+                          "right": {
+                            "Node": {
+                              "constraint": "$11{init} >= 4",
+                              "left": { "Leaf": "bottom" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 3",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": { "Leaf": "bottom" }
+                                }
+                              }
+                            }
+                          }
                         }
                       }
                     }
@@ -293,35 +439,71 @@
           },
           "right": {
             "Node": {
-              "constraint": "$5{chainBroken} >= 1",
+              "constraint": "$9{time} >= 99999998",
               "left": {
                 "Node": {
-                  "constraint": "$17{limit}-$7{temp} >= 0",
+                  "constraint": "$5{chainBroken} >= 2",
                   "left": {
                     "Node": {
-                      "constraint": "$17{limit} >= 0",
+                      "constraint": "$17{limit}-$7{temp} >= 0",
                       "left": {
                         "Node": {
-                          "constraint": "$11{init} >= 4",
-                          "left": { "Leaf": "bottom" },
+                          "constraint": "$17{limit} >= 0",
+                          "left": {
+                            "Node": {
+                              "constraint": "$11{init} >= 4",
+                              "left": { "Leaf": "bottom" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 3",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": { "Leaf": "bottom" }
+                                }
+                              }
+                            }
+                          },
                           "right": {
                             "Node": {
-                              "constraint": "$11{init} >= 3",
+                              "constraint": "$11{init} >= 4",
                               "left": { "Leaf": "bottom" },
-                              "right": { "Leaf": "bottom" }
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 3",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": { "Leaf": "bottom" }
+                                }
+                              }
                             }
                           }
                         }
                       },
                       "right": {
                         "Node": {
-                          "constraint": "$11{init} >= 4",
-                          "left": { "Leaf": "bottom" },
+                          "constraint": "$17{limit} >= 0",
+                          "left": {
+                            "Node": {
+                              "constraint": "$11{init} >= 4",
+                              "left": { "Leaf": "bottom" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 3",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": { "Leaf": "bottom" }
+                                }
+                              }
+                            }
+                          },
                           "right": {
                             "Node": {
-                              "constraint": "$11{init} >= 3",
+                              "constraint": "$11{init} >= 4",
                               "left": { "Leaf": "bottom" },
-                              "right": { "Leaf": "bottom" }
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 3",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": { "Leaf": "bottom" }
+                                }
+                              }
                             }
                           }
                         }
@@ -330,29 +512,137 @@
                   },
                   "right": {
                     "Node": {
-                      "constraint": "$17{limit} >= 0",
+                      "constraint": "$5{chainBroken} >= 1",
                       "left": {
                         "Node": {
-                          "constraint": "$11{init} >= 4",
-                          "left": { "Leaf": "bottom" },
+                          "constraint": "$17{limit}-$7{temp} >= 0",
+                          "left": {
+                            "Node": {
+                              "constraint": "$17{limit} >= 0",
+                              "left": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 4",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$11{init} >= 3",
+                                      "left": { "Leaf": "bottom" },
+                                      "right": { "Leaf": "bottom" }
+                                    }
+                                  }
+                                }
+                              },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 4",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$11{init} >= 3",
+                                      "left": { "Leaf": "bottom" },
+                                      "right": { "Leaf": "bottom" }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
                           "right": {
                             "Node": {
-                              "constraint": "$11{init} >= 3",
-                              "left": { "Leaf": "bottom" },
-                              "right": { "Leaf": "bottom" }
+                              "constraint": "$17{limit} >= 0",
+                              "left": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 4",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$11{init} >= 3",
+                                      "left": { "Leaf": "bottom" },
+                                      "right": { "Leaf": "bottom" }
+                                    }
+                                  }
+                                }
+                              },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 4",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$11{init} >= 3",
+                                      "left": { "Leaf": "bottom" },
+                                      "right": { "Leaf": "bottom" }
+                                    }
+                                  }
+                                }
+                              }
                             }
                           }
                         }
                       },
                       "right": {
                         "Node": {
-                          "constraint": "$11{init} >= 4",
-                          "left": { "Leaf": "bottom" },
+                          "constraint": "$17{limit}-$7{temp} >= 0",
+                          "left": {
+                            "Node": {
+                              "constraint": "$17{limit} >= 0",
+                              "left": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 4",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$11{init} >= 3",
+                                      "left": { "Leaf": "bottom" },
+                                      "right": { "Leaf": "bottom" }
+                                    }
+                                  }
+                                }
+                              },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 4",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$11{init} >= 3",
+                                      "left": { "Leaf": "bottom" },
+                                      "right": { "Leaf": "bottom" }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
                           "right": {
                             "Node": {
-                              "constraint": "$11{init} >= 3",
-                              "left": { "Leaf": "bottom" },
-                              "right": { "Leaf": "bottom" }
+                              "constraint": "$17{limit} >= 0",
+                              "left": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 4",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$11{init} >= 3",
+                                      "left": { "Leaf": "bottom" },
+                                      "right": { "Leaf": "bottom" }
+                                    }
+                                  }
+                                }
+                              },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 4",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$11{init} >= 3",
+                                      "left": { "Leaf": "bottom" },
+                                      "right": { "Leaf": "bottom" }
+                                    }
+                                  }
+                                }
+                              }
                             }
                           }
                         }
@@ -363,32 +653,68 @@
               },
               "right": {
                 "Node": {
-                  "constraint": "$17{limit}-$7{temp} >= 0",
+                  "constraint": "$5{chainBroken} >= 2",
                   "left": {
                     "Node": {
-                      "constraint": "$17{limit} >= 0",
+                      "constraint": "$17{limit}-$7{temp} >= 0",
                       "left": {
                         "Node": {
-                          "constraint": "$11{init} >= 4",
-                          "left": { "Leaf": "bottom" },
+                          "constraint": "$17{limit} >= 0",
+                          "left": {
+                            "Node": {
+                              "constraint": "$11{init} >= 4",
+                              "left": { "Leaf": "bottom" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 3",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": { "Leaf": "bottom" }
+                                }
+                              }
+                            }
+                          },
                           "right": {
                             "Node": {
-                              "constraint": "$11{init} >= 3",
+                              "constraint": "$11{init} >= 4",
                               "left": { "Leaf": "bottom" },
-                              "right": { "Leaf": "bottom" }
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 3",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": { "Leaf": "bottom" }
+                                }
+                              }
                             }
                           }
                         }
                       },
                       "right": {
                         "Node": {
-                          "constraint": "$11{init} >= 4",
-                          "left": { "Leaf": "bottom" },
+                          "constraint": "$17{limit} >= 0",
+                          "left": {
+                            "Node": {
+                              "constraint": "$11{init} >= 4",
+                              "left": { "Leaf": "bottom" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 3",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": { "Leaf": "bottom" }
+                                }
+                              }
+                            }
+                          },
                           "right": {
                             "Node": {
-                              "constraint": "$11{init} >= 3",
+                              "constraint": "$11{init} >= 4",
                               "left": { "Leaf": "bottom" },
-                              "right": { "Leaf": "bottom" }
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 3",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": { "Leaf": "bottom" }
+                                }
+                              }
                             }
                           }
                         }
@@ -397,29 +723,137 @@
                   },
                   "right": {
                     "Node": {
-                      "constraint": "$17{limit} >= 0",
+                      "constraint": "$5{chainBroken} >= 1",
                       "left": {
                         "Node": {
-                          "constraint": "$11{init} >= 4",
-                          "left": { "Leaf": "bottom" },
+                          "constraint": "$17{limit}-$7{temp} >= 0",
+                          "left": {
+                            "Node": {
+                              "constraint": "$17{limit} >= 0",
+                              "left": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 4",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$11{init} >= 3",
+                                      "left": { "Leaf": "bottom" },
+                                      "right": { "Leaf": "bottom" }
+                                    }
+                                  }
+                                }
+                              },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 4",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$11{init} >= 3",
+                                      "left": { "Leaf": "bottom" },
+                                      "right": { "Leaf": "bottom" }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
                           "right": {
                             "Node": {
-                              "constraint": "$11{init} >= 3",
-                              "left": { "Leaf": "bottom" },
-                              "right": { "Leaf": "bottom" }
+                              "constraint": "$17{limit} >= 0",
+                              "left": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 4",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$11{init} >= 3",
+                                      "left": { "Leaf": "bottom" },
+                                      "right": { "Leaf": "bottom" }
+                                    }
+                                  }
+                                }
+                              },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 4",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$11{init} >= 3",
+                                      "left": { "Leaf": "bottom" },
+                                      "right": { "Leaf": "bottom" }
+                                    }
+                                  }
+                                }
+                              }
                             }
                           }
                         }
                       },
                       "right": {
                         "Node": {
-                          "constraint": "$11{init} >= 4",
-                          "left": { "Leaf": "bottom" },
+                          "constraint": "$17{limit}-$7{temp} >= 0",
+                          "left": {
+                            "Node": {
+                              "constraint": "$17{limit} >= 0",
+                              "left": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 4",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$11{init} >= 3",
+                                      "left": { "Leaf": "bottom" },
+                                      "right": { "Leaf": "bottom" }
+                                    }
+                                  }
+                                }
+                              },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 4",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$11{init} >= 3",
+                                      "left": { "Leaf": "bottom" },
+                                      "right": { "Leaf": "bottom" }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
                           "right": {
                             "Node": {
-                              "constraint": "$11{init} >= 3",
-                              "left": { "Leaf": "bottom" },
-                              "right": { "Leaf": "bottom" }
+                              "constraint": "$17{limit} >= 0",
+                              "left": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 4",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$11{init} >= 3",
+                                      "left": { "Leaf": "bottom" },
+                                      "right": { "Leaf": "bottom" }
+                                    }
+                                  }
+                                }
+                              },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$11{init} >= 4",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$11{init} >= 3",
+                                      "left": { "Leaf": "bottom" },
+                                      "right": { "Leaf": "bottom" }
+                                    }
+                                  }
+                                }
+                              }
                             }
                           }
                         }

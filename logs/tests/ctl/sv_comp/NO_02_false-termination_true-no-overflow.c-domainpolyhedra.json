@@ -3,19 +3,21 @@
     "filename": "tests/ctl/sv_comp/NO_02_false-termination_true-no-overflow.c",
     "analysis_type": "ctl",
     "property": "EF{EG{j==0}}",
+    "precondition": "true",
     "result": "TRUE",
     "domain": "polyhedra",
-    "time": 0.039491000000100002
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {
       "constraint": "$3{j} >= 1",
-      "left": { "Leaf": "0." },
+      "left": { "Leaf": "3" },
       "right": {
         "Node": {
           "constraint": "$3{j} >= 0",
           "left": { "Leaf": "0." },
-          "right": { "Leaf": "0." }
+          "right": { "Leaf": "3" }
         }
       }
     }

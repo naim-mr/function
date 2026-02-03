@@ -2,10 +2,12 @@
   "Config": {
     "filename": "tests/termination/increment_one.c",
     "analysis_type": "termination",
-    "property": "",
+    "property": "AF{exit:true}",
+    "precondition": "true",
     "result": "TRUE",
     "domain": "polyhedra",
-    "time": 0.0040250000000000008
+    "joinbwd": 2,
+    "time": "1"
   },
   "tree": {
     "Node": {
