@@ -11,6 +11,7 @@
 (* parsing *)
 open Iterators
 open Config
+
 let parseFile filename =
   let f = open_in filename in
   let lex = Lexing.from_channel f in
@@ -109,154 +110,109 @@ let parseCTLPropertyString (property : string) =
   @@ parseCTLPropertyString_plain property
 
 let parse_args () =
-  let open Config in 
-  let rec doit args =
-    match args with
-    (* General arguments -------------------------------------------*)
-    | "-domain" :: x :: r ->
-        (* abstract domain: boxes|octagons|polyhedra *)
-        domain := x ;
-        doit r
-    | "-timeout" :: x :: r ->
-        (* analysis timeout *)
-        Iterator.timeout := float_of_string x ;
-        doit r
-    | "-joinfwd" :: x :: r ->
-        (* widening delay in forward analysis *)
-        Iterator.joinfwd := int_of_string x ;
-        doit r
-    | "-joinbwd" :: x :: r ->
-        (* widening delay in backward analysis *)
-        Iterator.joinbwd := int_of_string x ;
-        doit r
-    | "-main" :: x :: r ->
-        (* analyzer entry point *)
-        main := x ;
-        doit r
-    | "-meetbwd" :: x :: r ->
-        (* dual widening delay in backward analysis *)
-        Iterator.meetbwd := int_of_string x ;
-        doit r
-    | "-minimal" :: r ->
-        (* analysis result only *)
-        minimal := true ;
-        Iterator.minimal := true ;
-        doit r
-    | "-ordinals" :: x :: r ->
-        (* ordinal-valued ranking functions *)
-        ordinals := true ;
-        Ordinals.max := int_of_string x ;
-        doit r
-    | "-refine" :: r ->
-        (* refine in backward analysis *)
-        Iterator.refine := true ;
-        doit r
-    | "-retrybwd" :: x :: r ->
-        Iterator.retrybwd := int_of_string x ;
-        DecisionTree.retrybwd := int_of_string x ;
-        doit r
-
-    | "-evolve"::x::r -> 
-        Iterator.evolve := true; 
-        DecisionTree.evolve := true;
-        Iterator.evolvethr := int_of_string x;
-        DecisionTree.evolvethr := int_of_string x;
-        doit r
-    | "-tracebwd" :: r ->
-        (* backward analysis trace *)
-        Iterator.tracebwd := true ;
-        DecisionTree.tracebwd := true ;
-        CFGInterpreter.trace := true ;
-        CFGInterpreter.trace_states := true ;
-        doit r
-    | "-tracefwd" :: r ->
-        (* forward analysis trace *)
-        Iterator.tracefwd := true ;
-        doit r
-    (* Termination arguments -------------------------------*)
-    | "-termination" :: r ->
-        (* guarantee analysis *)
-        analysis := "termination" ;
-        doit r
-    (* Recurrence / Guarantee arguments -------------------------------*)
-    | "-guarantee" :: x :: r ->
-        (* guarantee analysis *)
-        analysis := "guarantee" ;
-        property := x ;
-        doit r
-    | "-robust_ctl" :: x :: r ->
-        analysis := "ctl" ;
-        property := x ;
-        robust := true ;
-        doit r
-    | "-robust" :: x :: r ->
-        analysis := "guarantee" ;
-        property := x ;
-        robust := true ;
-        doit r
-    | "-robust_termination" :: r ->
-        analysis := "termination" ;
-        robust := true ;
-        doit r
-    | "-recurrence" :: x :: r ->
-        (* recurrence analysis *)
-        analysis := "recurrence" ;
-        property := x ;
-        doit r
-    | "-time" :: r ->
-        (* track analysis time *)
-        time := true ;
-        doit r
-    | "-timebwd" :: r ->
-        (* track backward analysis time *)
-        Iterator.timebwd := true ;
-        doit r
-    | "-timefwd" :: r ->
-        (* track forward analysis time *)
-        Iterator.timefwd := true ;
-        doit r
-        (* CTL arguments
-           ---------------------------------------------------*)
-    | "-ctl-cfg" :: x :: r ->
-        (* CTL analysis *)
-        analysis := "ctl-cfg" ;
-        property := x ;
-        doit r
-    | "-ctl-ast" :: x :: r ->
-        (* use AST instead of CFG for analysis *)
-        analysis := "ctl-ast" ;
-        property := x ;
-        doit r
-    | "-dot" :: r ->
-        (* print CFG and decision trees in 'dot' format *)
-        Iterator.dot := true ;
-        doit r
-    | "-precondition" :: c :: r ->
-        (* optional precondition that holds at the start of the program,
-           default = true *)
-        precondition := c ;
-        doit r
-    | "-ctl_existential_equivalence" :: r ->
-        (* use CTL equivalence relations to convert existential to universal
-           CTL properties *)
-        Iterator.ctl_existential_equivalence := true ;
-        doit r
-    | "-noinline" :: r ->
-        (* don't inline function calls, only for CFG based analysis *)
-        noinline := true ;
-        doit r
-    | "-cda" :: x :: r ->
-        Iterator.cda := true ;
-        Iterator.size := int_of_string x ;
-        Iterator.refine := true ;
-        doit r
-    | x :: r ->
-        filename := x ;
-        doit r
-    | [] -> ()
-  in
-(*  let _ = List.map print_endline (Array.to_list Sys.argv) in *)
-  doit (List.tl (Array.to_list Sys.argv))
+  Arg.parse
+    [ ( "-config"
+      , Arg.String (fun s -> Config.from_json s)
+      , "Set analysis configuration with a json file" )
+    ; ( "-domain"
+      , Arg.String (fun s -> Config.domain := s)
+      , "Numerical Abstract Domain used" )
+    ; ( "-nowrap"
+      , Arg.Unit (fun _ -> Config.nowrap := true)
+      , "Refine the backward analysis" )
+    ; ( "-timeout"
+      , Arg.Float (fun d -> Config.timeout := d)
+      , "Maximal analysis time in seconds" )
+    ; ( "-joinfwd"
+      , Arg.Int (fun i -> Config.joinfwd := i)
+      , "Widening delay in forward analysis" )
+    ; ( "-joinbwd"
+      , Arg.Int (fun i -> Config.joinbwd := i)
+      , "Widening delay in backward analysis" )
+    ; ( "-main"
+      , Arg.String (fun s -> Config.main := s)
+      , "Analysis entry point" )
+    ; ( "-meetbwd"
+      , Arg.Int (fun i -> Config.meetbwd := i)
+      , "Dual widening delay in backward analysis" )
+    ; ( "-minimal"
+      , Arg.Unit (fun _ -> Config.minimal := true)
+      , "Output analysis result only" )
+    ; ( "-ordinals"
+      , Arg.Int
+          (fun i ->
+            Config.ordmax := i ;
+            Config.ordinals := true )
+      , "Set ordinals based analysis" )
+    ; ( "-refine"
+      , Arg.Unit (fun _ -> Config.refine := true)
+      , "Refine the backward analysis" )
+    ; ( "-retrybwd"
+      , Arg.Int (fun i -> Config.retrybwd := i)
+      , "Retry widening heuristic" )
+    ; ( "-tracefwd"
+      , Arg.Unit (fun _ -> Config.tracefwd := true)
+      , "Forward analysis trace" )
+    ; ( "-tracebwd"
+      , Arg.Unit (fun _ -> Config.tracebwd := true)
+      , "Backward analysis trace" )
+    ; ( "-cda"
+      , Arg.Int
+          (fun i ->
+            Config.cda := true ;
+            Config.refine := true ;
+            Config.size := i )
+      , "Conflict-driven analysis" )
+    ; ( "-termination"
+      , Arg.Unit (fun _ -> Config.analysis := "termination")
+      , "Termination analysis" )
+    ; ( "-nontermination"
+      , Arg.Unit (fun _ -> Config.analysis := "non-termination")
+      , "Non-termination analysis" )
+    ; ( "-time"
+      , Arg.Unit (fun _ -> Config.time := true)
+      , "Track analysis time" )
+    ; ( "-timefwd"
+      , Arg.Unit (fun _ -> Config.timefwd := true)
+      , "Track forward analysis time" )
+    ; ( "-timebwd"
+      , Arg.Unit (fun _ -> Config.timefwd := true)
+      , "Track backward analysis time" )
+    ; ( "-ctl"
+      , Arg.String
+          (fun s ->
+            Config.analysis := "ctl" ;
+            Config.property := s )
+      , "CTL analysis" )
+    ; ( "-dot"
+      , Arg.Unit (fun _ -> Config.dot := true)
+      , "Output decision trees in dot format" )
+    ; ( "-precondition"
+      , Arg.String (fun s -> Config.precondition := s)
+      , "Optional precondition that holds at the starts of the program" )
+    ; ( "-ctl_existential_equivalence"
+      , Arg.Unit (fun _ -> Config.ctl_existential_equivalence := true)
+      , "Convert existential ctl properties to universal" )
+    ; ( "-vulnerability"
+      , Arg.Unit (fun _ -> Config.vulnerability := true)
+      , "Vulnerability analysis" )
+    ; ( "-resilience"
+      , Arg.Unit
+          (fun _ ->
+            Config.analysis := "termination" ;
+            Config.resilience := true )
+      , "Termination Resilience analysis" )
+    ; ( "-json_output"
+      , Arg.String
+          (fun s ->
+            Config.json_output := true ;
+            Config.output_dir := s )
+      , "Summary of the analysis in a json file" )
+    ; ( "-json_output_std"
+      , Arg.Unit (fun _ -> Config.json_output := true)
+      , "Summary of the analysis as a json in stdout" ) ]
+    (fun s -> Config.filename := s)
+    ""
 
 (* do all *)
 
@@ -384,7 +340,8 @@ let ctl_ast () =
   let analyze =
     match !domain with
     | "boxes" ->
-        if !ordinals then ASTCTLBoxesOrdinals.analyze else ASTCTLBoxes.analyze
+        if !ordinals then ASTCTLBoxesOrdinals.analyze
+        else ASTCTLBoxes.analyze
     | "octagons" ->
         if !ordinals then ASTCTLOctagonsOrdinals.analyze
         else ASTCTLOctagons.analyze
@@ -395,8 +352,8 @@ let ctl_ast () =
   in
   let result = analyze ~precondition program property in
   ( if !time then
-    let stoptime = Sys.time () in
-    Format.fprintf !fmt "\nTime: %f" (stoptime -. starttime) ) ;
+      let stoptime = Sys.time () in
+      Format.fprintf !fmt "\nTime: %f" (stoptime -. starttime) ) ;
   if result then Format.fprintf !fmt "\nAnalysis Result: TRUE\n"
   else Format.fprintf !fmt "\nAnalysis Result: UNKNOWN\n"
 
@@ -410,7 +367,9 @@ let ctl_cfg () =
   let mainFunc = ControlFlowGraph.find_func !main cfg in
   let cfg = ControlFlowGraph.insert_entry_exit_label cfg mainFunc in
   (* add exit/entry labels to main function *)
-  let cfg = if !noinline then cfg else ControlFlowGraph.inline_function_calls cfg in
+  let cfg =
+    if !noinline then cfg else ControlFlowGraph.inline_function_calls cfg
+  in
   (* inline all non recursive functions unless -noinline is used *)
   let cfg = ControlFlowGraph.add_function_call_arcs cfg in
   (* insert function call edges for remaining function calls *)
@@ -427,9 +386,11 @@ let ctl_cfg () =
     | "boxes" ->
         if !ordinals then CTLBoxesOrdinals.analyze else CTLBoxes.analyze
     | "octagons" ->
-        if !ordinals then CTLOctagonsOrdinals.analyze else CTLOctagons.analyze
+        if !ordinals then CTLOctagonsOrdinals.analyze
+        else CTLOctagons.analyze
     | "polyhedra" ->
-        if !ordinals then CTLPolyhedraOrdinals.analyze else CTLPolyhedra.analyze
+        if !ordinals then CTLPolyhedraOrdinals.analyze
+        else CTLPolyhedra.analyze
     | _ -> raise (Invalid_argument "Unknown Abstract Domain")
   in
   if not !minimal then (
@@ -442,10 +403,11 @@ let ctl_cfg () =
   let mainFunc = ControlFlowGraph.find_func !main cfg in
   let possibleLoopHeads = Loop_detection.possible_loop_heads cfg mainFunc in
   let domSets = Loop_detection.dominator cfg mainFunc in
-  analyze ~precondition cfg !robust mainFunc possibleLoopHeads domSets ctlProperty;
+  analyze ~precondition cfg !robust mainFunc possibleLoopHeads domSets
+    ctlProperty ;
   ( if !time then
-    let stoptime = Sys.time () in
-    Format.fprintf !fmt "\nTime: %f" (stoptime -. starttime) ) ;
+      let stoptime = Sys.time () in
+      Format.fprintf !fmt "\nTime: %f" (stoptime -. starttime) ) ;
   if !Config.result then Format.fprintf !fmt "\nAnalysis Result: TRUE\n"
   else Format.fprintf !fmt "\nAnalysis Result: UNKNOWN\n"
 
@@ -457,13 +419,11 @@ let doit () =
   | "guarantee" -> guarantee ()
   | "recurrence" -> recurrence ()
   | "ctl-ast" -> ctl_ast ()
+  | "ctl" -> ctl_ast ()
   | "ctl-cfg" -> ctl_cfg ()
-  | _ -> raise (Invalid_argument "Unknown Analysis") );
+  | _ -> raise (Invalid_argument "Unknown Analysis") ) ;
   Regression.output_json ()
-
 
 let _ = doit ()
 
 (* DEPRECATED STUFF BELOW *)
-
-
