@@ -14,17 +14,20 @@ let create_logfile_name () =
   in
   Config.logfile := name
 
-let json_string filename time analysis property result domain time =
+let json_string filename analysis property precondition result domain joinbwd
+    time =
   Printf.sprintf
     {|
   {"filename" : "%s",
    "analysis_type": "%s",
    "property": "%s",
+   "precondition": "%s",
    "result": "%s",
    "domain": "%s",
-   "time": %s
+   "joinbwd": %d,
+   "time": "%s"
     }|}
-    filename analysis property result domain time
+    filename analysis property precondition result domain joinbwd time
 
 let output_json () =
   if !Config.resilience then Config.analysis := !analysis ^ "-resilience";
@@ -48,9 +51,9 @@ let output_json () =
       ]
   in
   let output =
-    json_string !filename time !analysis !property
+    json_string !filename !analysis !property !precondition
       (if !Config.result then "TRUE" else "UKNOWN")
-      !domain !exectime
+      !domain !joinbwd !exectime
   in
   let json : Yojson.Safe.t =
     `Assoc
