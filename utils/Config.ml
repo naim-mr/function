@@ -51,8 +51,28 @@ let vuln_res : Yojson.Safe.t ref = ref @@ `String "Not analyzed"
 
 let from_json filename =
   let json = Yojson.Safe.from_file filename in
-  match json with
-  | `Assoc [ ("analysis", `String a); ("domain", `String d) ] ->
-      analysis := a;
-      domain := d
-  | _ -> raise (Invalid_argument "Wrong config json format.")
+  let rec aux (json : Yojson.Safe.t) =
+    match json with
+    | `Assoc [] -> ()
+    | `Assoc (("analysis", `String a) :: q) ->
+        analysis := a;
+        aux (`Assoc q)
+    | `Assoc (("property", `String a) :: q) ->
+        property := a;
+        aux (`Assoc q)
+    | `Assoc (("domain", `String a) :: q) ->
+        domain := a;
+        aux (`Assoc q)
+    | `Assoc (("precondition", `String a) :: q) ->
+        precondition := a;
+        aux (`Assoc q)
+    | `Assoc (("ordinals", `Int i) :: q) ->
+        ordmax := i;
+        ordinals := true;
+        aux (`Assoc q)
+    | `Assoc (("joinbwd", `Int i) :: q) ->
+        joinbwd := i;
+        aux (`Assoc q)
+    | _ -> raise (Invalid_argument "Wrong config json format.")
+  in
+  aux json
