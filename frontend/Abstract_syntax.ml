@@ -45,6 +45,9 @@ let pp_position fmt pos =
 
 type extent = position * position [@@deriving yojson, show] (* start/end *)
 
+let position_tostring p =
+  Printf.sprintf "%s:%i:%i" p.pos_fname p.pos_lnum (p.pos_cnum - p.pos_bol)
+
 (* tree nodes are tagged with a source position *)
 type 'a ext = 'a * extent [@@deriving yojson, show]
 

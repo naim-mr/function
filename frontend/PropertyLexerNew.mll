@@ -5,7 +5,6 @@
 
 {
 open Lexing
-open IntermediateSyntax
 open PropertyParserNew
 
 let keyword = Hashtbl.create 2

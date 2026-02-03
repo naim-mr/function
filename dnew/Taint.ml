@@ -1,4 +1,4 @@
-open AbstractSyntax
+(* open Abstract_syntax
 open VarSet
 
 module Taint = struct
@@ -51,4 +51,4 @@ module Taint = struct
       | A_block (l, (s, _), b) -> join (aux s acc) (aux_block b acc)
     in
     aux_block block bot
-end
+end *)

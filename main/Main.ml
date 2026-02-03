@@ -12,56 +12,20 @@ open Cda
 open TerminationNew
 open CTLIteratorNew
 open Config
-open Semantics
 open C_Frontend
 open Typed_syntax
-
-let parseFile filename =
-  let f = open_in filename in
-  let lex = Lexing.from_channel f in
-  try
-    lex.Lexing.lex_curr_p <-
-      { lex.Lexing.lex_curr_p with Lexing.pos_fname = filename };
-    let r = Parser.file Lexer.start lex in
-    close_in f;
-    r
-  with
-  | Parser.Error ->
-      Format.eprintf "Parse Error (Invalid Syntax) near %s\n"
-        (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
-      failwith "Parse Error"
-  | Failure e ->
-      if e == "lexing: empty token" then (
-        Format.eprintf "Parse Error (Invalid Token) near %s\n"
-          (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
-        failwith "Parse Error")
-      else failwith e
-
-let parsePropertyString str =
-  let lex = Lexing.from_string str in
-  try PropertyParser.file PropertyLexer.start lex with
-  | PropertyParser.Error ->
-      Format.eprintf "Parse Error (Invalid Syntax) near %s\n"
-        (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
-      failwith "Parse Error"
-  | Failure e ->
-      if e == "lexing: empty token" then (
-        Format.eprintf "Parse Error (Invalid Token) near %s\n"
-          (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
-        failwith "Parse Error")
-      else failwith e
 
 let parsePropertyStringNew str =
   let lex = Lexing.from_string str in
   try PropertyParserNew.file PropertyLexerNew.start lex with
   | PropertyParserNew.Error ->
       Format.eprintf "Parse Error (Invalid Syntax) near %s\n"
-        (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
+        (Abstract_syntax.position_tostring lex.Lexing.lex_start_p);
       failwith "Parse Error"
   | Failure e ->
       if e == "lexing: empty token" then (
         Format.eprintf "Parse Error (Invalid Token) near %s\n"
-          (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
+          (Abstract_syntax.position_tostring lex.Lexing.lex_start_p);
         failwith "Parse Error")
       else failwith e
 
@@ -71,39 +35,18 @@ let parseProperty filename =
   try
     lex.Lexing.lex_curr_p <-
       { lex.Lexing.lex_curr_p with Lexing.pos_fname = filename };
-    let r = PropertyParser.file PropertyLexer.start lex in
+    let r = PropertyParserNew.file PropertyLexerNew.start lex in
     close_in f;
     r
   with
-  | PropertyParser.Error ->
+  | PropertyParserNew.Error ->
       Format.eprintf "Parse Error (Invalid Syntax) near %s\n"
-        (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
+        (Abstract_syntax.position_tostring lex.Lexing.lex_start_p);
       failwith "Parse Error"
   | Failure e ->
       if e == "lexing: empty token" then (
         Format.eprintf "Parse Error (Invalid Token) near %s\n"
-          (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
-        failwith "Parse Error")
-      else failwith e
-
-let parseCTLProperty filename =
-  let f = open_in filename in
-  let lex = Lexing.from_channel f in
-  try
-    lex.Lexing.lex_curr_p <-
-      { lex.Lexing.lex_curr_p with Lexing.pos_fname = filename };
-    let res = CTLPropertyParser.prog CTLPropertyLexer.read lex in
-    close_in f;
-    CTLProperty.map (fun p -> fst (parsePropertyString p)) res
-  with
-  | CTLPropertyParser.Error ->
-      Format.eprintf "Parse Error (Invalid Syntax) near %s\n"
-        (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
-      failwith "Parse Error"
-  | Failure e ->
-      if e == "lexing: empty token" then (
-        Format.eprintf "Parse Error (Invalid Token) near %s\n"
-          (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
+          (Abstract_syntax.position_tostring lex.Lexing.lex_start_p);
         failwith "Parse Error")
       else failwith e
 
@@ -119,12 +62,12 @@ let parseCTLPropertyNew filename =
   with
   | CTLPropertyParser.Error ->
       Format.eprintf "Parse Error (Invalid Syntax) near %s\n"
-        (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
+        (Abstract_syntax.position_tostring lex.Lexing.lex_start_p);
       failwith "Parse Error"
   | Failure e ->
       if e == "lexing: empty token" then (
         Format.eprintf "Parse Error (Invalid Token) near %s\n"
-          (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
+          (Abstract_syntax.position_tostring lex.Lexing.lex_start_p);
         failwith "Parse Error")
       else failwith e
 
@@ -137,12 +80,12 @@ let parseCTLPropertyString_plain (property : string) =
   with
   | CTLPropertyParser.Error ->
       Format.eprintf "Parse Error (Invalid Syntax) near %s\n"
-        (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
+        (Abstract_syntax.position_tostring lex.Lexing.lex_start_p);
       failwith "Parse Error"
   | Failure e ->
       if e == "lexing: empty token" then (
         Format.eprintf "Parse Error (Invalid Token) near %s\n"
-          (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
+          (Abstract_syntax.position_tostring lex.Lexing.lex_start_p);
         failwith "Parse Error")
       else failwith e
 
@@ -155,18 +98,14 @@ let parseCTLPropertyStringNew_plain (property : string) =
   with
   | CTLPropertyParser.Error ->
       Format.eprintf "Parse Error (Invalid Syntax) near %s\n"
-        (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
+        (Abstract_syntax.position_tostring lex.Lexing.lex_start_p);
       failwith "Parse Error"
   | Failure e ->
       if e == "lexing: empty token" then (
         Format.eprintf "Parse Error (Invalid Token) near %s\n"
-          (IntermediateSyntax.position_tostring lex.Lexing.lex_start_p);
+          (Abstract_syntax.position_tostring lex.Lexing.lex_start_p);
         failwith "Parse Error")
       else failwith e
-
-let parseCTLPropertyString (property : string) =
-  CTLProperty.map (fun p -> fst (parsePropertyString p))
-  @@ parseCTLPropertyString_plain property
 
 let parseCTLPropertyStringNew (property : string) =
   CTLProperty.map (fun p -> parsePropertyStringNew p)
@@ -283,6 +222,12 @@ let check_args () =
   if String.compare !Config.filename "" = 0 && not !Config.version then
     raise (Invalid_argument "No Source File Specified");
   if
+    String.compare !analysis "ctl" == 0
+    && String.compare !domain "polyhedra" <> 0
+  then (
+    Config.domain := "polyhedra";
+    Format.fprintf !fmt "Defaulting to Polyhedra for CTL analysis \n");
+  if
     String.compare !property "" = 0
     && String.compare !analysis "termination" <> 0
     && String.compare !analysis "non-termination" <> 0
@@ -342,58 +287,6 @@ let ctl_iterator_new () : (module SemanticsNew.SEMANTIC) =
         : SemanticsNew.SEMANTIC)
   in
   (module S)
-
-let termination_iterator () : (module Semantics.SEMANTIC) =
-  let open TerminationIterator in
-  let module S =
-    (val match !domain with
-         | "boxes" ->
-             if !ordinals then (module TerminationIterator (DecisionTree.TSOB))
-             else (module TerminationIterator (DecisionTree.TSAB))
-         | "octagons" ->
-             if !ordinals then (module TerminationIterator (DecisionTree.TSOO))
-             else (module TerminationIterator (DecisionTree.TSAO))
-         | "polyhedra" ->
-             if !ordinals then (module TerminationIterator (DecisionTree.TSOP))
-             else (module TerminationIterator (DecisionTree.TSAP))
-         | _ -> raise (Invalid_argument "Unknown Abstract Domain")
-        : SEMANTIC)
-  in
-  (module S)
-
-let ctl_iterator () : (module SEMANTIC) =
-  let open CTLIterator in
-  let module S =
-    (val match !domain with
-         | "boxes" ->
-             if !ordinals then (module CTLIterator (DecisionTree.TSOB))
-             else (module CTLIterator (DecisionTree.TSAB))
-         | "octagons" ->
-             if !ordinals then (module CTLIterator (DecisionTree.TSOO))
-             else (module CTLIterator (DecisionTree.TSAO))
-         | "polyhedra" ->
-             if !ordinals then (module CTLIterator (DecisionTree.TSOP))
-             else (module CTLIterator (DecisionTree.TSAP))
-         | _ -> raise (Invalid_argument "Unknown Abstract Domain")
-        : SEMANTIC)
-  in
-  (module S)
-
-let run_termination (module S : SEMANTIC) program =
-  if not !minimal then (
-    Format.fprintf !fmt "\nAbstract Syntax:\n";
-    AbstractSyntax.prog_print !fmt program);
-  let parsedPrecondition = parsePropertyString !precondition in
-  (* TODO:  property_itoa_of_prog logic is strange *)
-  let precondition =
-    fst
-    @@ AbstractSyntax.StringMap.find ""
-    @@ ItoA.property_itoa_of_prog program !main parsedPrecondition
-  in
-  let analysis_function =
-    S.analyze ~precondition:(Some precondition) ~property:S.dummy_prop
-  in
-  run_analysis analysis_function program ()
 
 let run_termination_new program =
   let module S = (val termination_iterator_new ()) in
@@ -464,60 +357,14 @@ let run_ctl_ast_new (module S : SemanticsNew.SEMANTIC) prog property =
   if !Config.result then Format.fprintf !fmt "\nFinal Analysis Result: TRUE\n"
   else Format.fprintf !fmt "\nFinal Analysis Result: UNKNOWN\n"
 
-let run_ctl_ast (module S : SEMANTIC) prog property =
-  let starttime = Sys.time () in
-  let parsedPrecondition = parsePropertyString !precondition in
-  let precondition =
-    fst
-    @@ AbstractSyntax.StringMap.find ""
-    @@ ItoA.property_itoa_of_prog prog !main parsedPrecondition
-  in
-  if not !minimal then (
-    Format.fprintf !fmt "\nAbstract Syntax:\n";
-    AbstractSyntax.prog_print !fmt prog;
-    Format.fprintf !fmt "\n");
-  let analyze = S.analyze in
-  Config.result :=
-    analyze ~precondition:(Some precondition) ~property:(Ctl property) prog "";
-  if !time then (
-    let stoptime = Sys.time () in
-    exectime := string_of_float (stoptime -. starttime);
-    Format.fprintf !fmt "\nTime: %f" (stoptime -. starttime));
-  if !Config.result then Format.fprintf !fmt "\nFinal Analysis Result: TRUE\n"
-  else Format.fprintf !fmt "\nFinal Analysis Result: UNKNOWN\n"
-
-let run_cda s : (module Cda.CDA_ITERATOR) =
+(* let run_cda s : (module Cda.CDA_ITERATOR) =
   let module D = (val s : SEMANTIC) in
-  (module Cda.Make (D))
-
-let get_semantic () =
-  match !analysis with
-  | "termination" -> termination_iterator ()
-  | "ctl" -> ctl_iterator ()
-  | _ -> raise (Invalid_argument "Unknown Analysis")
+  (module Cda.Make (D)) *)
 
 let get_semantic_new () =
   match !analysis with
   | "termination" -> termination_iterator_new ()
   | "non-termination" | "ctl" -> ctl_iterator_new ()
-  | _ -> raise (Invalid_argument "Unknown Analysis")
-
-let get_ast_prop itast =
-  match !analysis with
-  | "termination" ->
-      let s = Lexing.dummy_pos in
-      let p =
-        ( IntermediateSyntax.I_universal (IntermediateSyntax.I_TRUE, (s, s)),
-          (s, s) )
-      in
-      let program, property = ItoA.prog_itoa ~property:(!main, p) itast in
-      (program, Semantics.Exp (Option.get property), None)
-  | "ctl" ->
-      let parsedProperty = parseCTLPropertyString !property in
-      let program, property =
-        ItoA.ctl_prog_itoa parsedProperty !main (parseFile !filename)
-      in
-      (program, Semantics.Ctl property, None)
   | _ -> raise (Invalid_argument "Unknown Analysis")
 
 let doit () =
@@ -529,19 +376,10 @@ let doit () =
   let prog = C_Frontend.parse_file !Config.filename in
 
   let semantic = get_semantic_new () in
-   
+
   if not !minimal then (
     Format.fprintf !fmt "\nAbstract typed Syntax:\n";
     Typed_syntax.pp_prog !fmt prog);
-  run_termination_new prog;
-  Format.print_newline ();
-  (**
-  if not !Config.result then (
-    Config.analysis := "non-termination";
-    Config.refine := false;
-    run_non_termination prog;
-    if !Config.json_output then Regression.output_json ())
-  else (); *)
   let module S = (val semantic : SemanticsNew.SEMANTIC) in
   (* Launch the analysis and get the returned output "true" or "unknow" *)
   (* (if !Config.cda then

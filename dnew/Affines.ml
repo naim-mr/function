@@ -149,6 +149,7 @@ module Affine (B : PARTITION) : FUNCTION = struct
         (* p1 = polyhedra represented by a1 *)
         let p2 = Abstract1.of_lincons_array manager env a2 in
         (* p2 = polyhedra represented by a2 *)
+        Format.fprintf Format.std_formatter "\n check if %a <= %a: %b\n"  (Abstract1.print) p1 (Abstract1.print) p2 (Abstract1.is_leq manager p1 p2);
         Abstract1.is_leq manager p1 p2
     | Bot, Fun _ -> (
         match k with

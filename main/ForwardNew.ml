@@ -9,12 +9,12 @@ open Apron
 open Dnew
 open Dnew.Functions
 open Config
-open Semantics
+open SemanticsNew
 open Dnew.Domain
 open Dnew.Partition
 open Utils.Datatypes
 open VarSet
-open Taint
+(* open Taint *)
 
 module ForwardIterator (B : PARTITION) = struct
   let fwdMap_print fmt m fprint =
