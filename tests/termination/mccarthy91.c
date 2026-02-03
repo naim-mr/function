@@ -1,8 +1,6 @@
 
 int main() {
-	int x1; int x2;
-	x1 = 1; 
-	x2 = 1;
+	int x1, x2 = 1;
 	while (x2 >= 1) {
 		if (x1 > 100) {
 			x1 = x1 - 10;
@@ -12,5 +10,6 @@ int main() {
 			x2 = x2 + 1;
 		}
 	}
+	exit:
 	return x2;
 }

@@ -8,9 +8,9 @@ suggested parameters:
 */
 
 int main() {
-  int x = ?;
+  int x = rand();
   while (x <= 100) {
-    if (?)
+    if (rand())
       x = -2 * x + 2;
     else
       x = -3 * x - 2;

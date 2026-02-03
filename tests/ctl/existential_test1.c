@@ -5,7 +5,7 @@ int main() {
     int x;
     int y;
     if (2*x <= y+3) {
-        if (? == 1) {
+        if (rand() == 1) {
             r = 1;
         } 
     }

@@ -11,7 +11,7 @@
 // Property: AG(a => AF r)
 
 // FuncTion arguments:
-// -ctl "AG{OR{A!=1}{AF{R==1}}}" 
+// -ctl_cfg "AG{OR{A!=1}{AF{R==1}}}" 
 // -precondition "A==0 && R==0"
 
 
@@ -23,7 +23,7 @@ void main() {
   while(?) {
     A = 1;
     A = 0;
-    n = ?;
+    n = rand();
     while(n>0) {
       n--;
     }

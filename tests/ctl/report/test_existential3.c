@@ -13,7 +13,7 @@ int main() {
     int x;
     while (x > 0) {
         x = x - 1;
-        if (?) {
+       if (rand()){
             r = 1;
         }
     }

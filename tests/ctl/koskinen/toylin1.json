@@ -1,0 +1,4 @@
+{
+    "property": "AF{resp > 5}",
+    "precondition": "c > 5"
+}

@@ -1,5 +1,5 @@
 // FuncTion arguments:
-// -ctl "AND{AG{AF{n==1}}}{AF{n==0}}"
+// -ctl_cfg "AND{AG{AF{n==1}}}{AF{n==0}}"
 // -precondition n > 0
 
 void main() {
@@ -9,7 +9,7 @@ void main() {
         n--;
     }
 
-    while (n == 0) {
+    while (true) {
         n++;
         n--;
     }

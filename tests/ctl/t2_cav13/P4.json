@@ -1,0 +1,4 @@
+{
+    "property": "EF{AND{varA == 1}{AG{varR != 1}}}",
+    "precondition": "varN > 0"
+}

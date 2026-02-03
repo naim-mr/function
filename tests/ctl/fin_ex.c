@@ -1,5 +1,5 @@
 // FuncTion arguments:
-// -ctl "EG{EF{n==1}}
+// -ctl_cfg "EG{EF{n==1}}
 // -precondition n > 0
 // -domain polyhedra
 
@@ -10,7 +10,7 @@ void main() {
         n--;
     }
 
-    if (?) {
+   if (rand()){
         while (n == 0) {
             n++;
             n--;

@@ -2,7 +2,7 @@
 /**
  * Samuel Ueltschi: example for potential termination
  *
- * -ctl "EF{exit: true}"
+ * -ctl_cfg "EF{exit: true}"
  */
 
 int main() {
@@ -10,8 +10,8 @@ int main() {
     int x;
     int y;
     y = 1;
-    i = ?;
-    x = ?;
+    i = rand();
+    x = rand();
 
     if (i > 10) {
         x = 1;

@@ -1,0 +1,4 @@
+{
+    "property": "OR{varC <= 5}{AF{varR > 5}}",
+    "joinbwd": 6
+}

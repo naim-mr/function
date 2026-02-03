@@ -1,0 +1,4 @@
+{
+    "property": "AG{AND{AF{t == 1}{AF{t == 0}}}}",
+    "precondition": "t >= 0" 
+}
