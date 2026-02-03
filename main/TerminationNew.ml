@@ -58,18 +58,13 @@ module TerminationIteratorNew (D : RANKING_FUNCTION) : SEMANTIC = struct
         let uap = false in
         let p1, visited2 = bwdBlk ~visited funcs env vars p s1 in
         let p2, visited1 = bwdBlk ~visited funcs env vars p s2 in
-        if D.defined p1 && D.defined p2 then
-          (D.join COMPUTATIONAL p1 p2, Seq.append visited1 visited2)
-        else
-          let p1 = D.filter ?domain ~underapprox:uap p1 (b, typ, ba) in
-          let p2 =
-            D.filter ?domain ~underapprox:uap p2 (neg_bexp (b, typ, ba))
-          in
-          if !tracebwd && not !minimal then (
-            Format.fprintf Format.std_formatter "if in p1: %a\n" D.print p1;
-            Format.fprintf Format.std_formatter "p2: %a\n" D.print p2);
-          let joinType = APPROXIMATION in
-          (D.join joinType p1 p2, Seq.append visited1 visited2)
+        let p1 = D.filter ?domain ~underapprox:uap p1 (b, typ, ba) in
+        let p2 = D.filter ?domain ~underapprox:uap p2 (neg_bexp (b, typ, ba)) in
+        if !tracebwd && not !minimal then (
+          Format.fprintf Format.std_formatter "if in p1: %a\n" D.print p1;
+          Format.fprintf Format.std_formatter "p2: %a\n" D.print p2);
+        let joinType = APPROXIMATION in
+        (D.join joinType p1 p2, Seq.append visited1 visited2)
     | T_while ((l, _), (b, t, ba), s) ->
         let a = InvMap.find_opt l !fwdInvMap in
         let dm = if !refine then a else None in
