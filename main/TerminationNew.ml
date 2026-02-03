@@ -188,6 +188,26 @@ module TerminationIteratorNew (D : RANKING_FUNCTION) : SEMANTIC = struct
     let s = f.func_body in
     initBlk env vars block;
     initBlk env vars s;
+    let precondition =
+      match precondition with
+      | Some e ->
+          let rec aux e =
+            match e with
+            | T_var v, t, ext ->
+                ( T_var
+                    (List.find
+                       (fun x -> String.compare x.var_name v.var_name = 0)
+                       vars),
+                  t,
+                  ext )
+            | T_unary (op, e), t, ext -> (T_unary (op, aux e), t, ext)
+            | T_binary (bop, e1, e2), t, ext ->
+                (T_binary (bop, aux e1, aux e2), t, ext)
+            | _ -> e
+          in
+          Some (aux e)
+      | None -> None
+    in
     (* TODO: handle functions calls *)
     (* Forward Analysis *)
     if !tracefwd && not !minimal then
