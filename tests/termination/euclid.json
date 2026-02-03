@@ -1,0 +1,6 @@
+{
+    "property":"AF{exit:true}",
+    "precondition":"x > 0 && y > 0",
+    "domain":"polyhedra"
+    
+}

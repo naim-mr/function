@@ -1,3 +1,5 @@
 {
-    "property": "EG{EF{n==1}}"
+    "property": "EG{EF{n==1}}",
+    "precondition": "n > 0",
+    "domain": "polyhedra"
 }

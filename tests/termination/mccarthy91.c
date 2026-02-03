@@ -10,5 +10,6 @@ int main() {
 			x2 = x2 + 1;
 		}
 	}
+	exit:
 	return x2;
 }

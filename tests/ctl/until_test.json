@@ -1,3 +1,5 @@
 {
-    "property": "AU{x >= y}{x == y}"
+    "property": "AU{x >= y}{x == y}",
+    "precondition": "x == y  + 20",
+    "domain":"polyhedra"
 }
