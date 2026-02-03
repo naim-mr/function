@@ -1,3 +1,4 @@
 {
-    "property":"AG{AF{x == 3}}"
+    "property":"AG{AF{x == 3}}",
+    "precondition": "x <= 3"
 }

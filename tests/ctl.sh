@@ -261,7 +261,7 @@ echo "ECHO 3"
 
 ./main.exe tests/ctl/sv_comp/Bangalore_false-no-overflow.c -domain polyhedra -ctl "EF{x < 0}" -json_output -vulnerability  		# TODO: ?
 ./main.exe tests/ctl/sv_comp/Bangalore_false-no-overflow.c -domain polyhedra -ctl "EF{x < 0}" -ctl_existential_equivalence -json_output -vulnerability  
-./main.exe tests/ctl/sv_comp/Ex02_false-termination_true-no-overflow.c -domain polyhedra -ctl "OR{i >= 5}{AF{exit: true}}" -json_output -vulnerability  
+./main.exe tests/ctl/sv_comp/Ex02_false-termination_true-no-overflow.json_output then Regression.output_jsonc -domain polyhedra -ctl "OR{i >= 5}{AF{exit: true}}" -json_output -vulnerability  
 ./main.exe tests/ctl/sv_comp/Ex07_false-termination_true-no-overflow.c -domain polyhedra -ctl "AF{AG{i==0}}" -json_output -vulnerability  
 ./main.exe tests/ctl/sv_comp/Ex07_false-termination_true-no-overflow.c -domain polyhedra -ctl "EF{EG{i==0}}" -json_output -vulnerability  
 ./main.exe tests/ctl/sv_comp/Ex07_false-termination_true-no-overflow.c -domain polyhedra -ctl "EF{AG{i==0}}" -json_output -vulnerability  
