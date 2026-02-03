@@ -191,7 +191,7 @@ let parse_args () =
         Arg.Int (fun i -> Config.joinfwd := i),
         "Widening delay in forward analysis" );
       ( "-joinbwd",
-        Arg.Int (fun i -> Config.joinfwd := i),
+        Arg.Int (fun i -> Config.joinbwd := i),
         "Widening delay in backward analysis" );
       ("-main", Arg.String (fun s -> Config.main := s), "Analysis entry point");
       ( "-meetbwd",
@@ -398,7 +398,11 @@ let run_termination (module S : SEMANTIC) program =
 let run_termination_new program =
   let module S = (val termination_iterator_new ()) in
   try
-    Config.result := S.analyze program;
+    let parsedPrecondition =
+      if !precondition <> "" then Some (parsePropertyStringNew !precondition)
+      else None
+    in
+    Config.result := S.analyze ~precondition:parsedPrecondition program;
     if !Config.result then Format.printf "\nFinal Analysis Result: TRUE\n"
     else Format.printf "\nFinal Analysis Result: UNKNOWN\n"
   with Config.Timeout ->
@@ -525,14 +529,13 @@ let doit () =
   let prog = C_Frontend.parse_file !Config.filename in
 
   let semantic = get_semantic_new () in
-  (* 
+   
   if not !minimal then (
     Format.fprintf !fmt "\nAbstract typed Syntax:\n";
     Typed_syntax.pp_prog !fmt prog);
   run_termination_new prog;
   Format.print_newline ();
-  
-
+  (**
   if not !Config.result then (
     Config.analysis := "non-termination";
     Config.refine := false;
