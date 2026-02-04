@@ -9,7 +9,7 @@ open DecisionTree
 open Apron
 open InvMap
 open CTLProperty
-open Domains.Domain
+open Domain
 open VarSet
 open Utils.Datatypes
 

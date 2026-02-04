@@ -247,22 +247,21 @@ let run_analysis analysis_function program () =
     Format.fprintf !fmt "\nDone.\n"
 
 let termination_iterator_new () : (module Semantics.SEMANTIC) =
-  let open TerminationIterator in
   let open Domains in
   let module S =
     (val match !domain with
          | "boxes" ->
              if !ordinals then
-               (module TerminationIteratorNew (DecisionTree.TSOB))
-             else (module TerminationIteratorNew (DecisionTree.TSAB))
+               (module TerminationIterator (DecisionTree.TSOB))
+             else (module TerminationIterator (DecisionTree.TSAB))
          | "octagons" ->
              if !ordinals then
-               (module TerminationIteratorNew (DecisionTree.TSOO))
-             else (module TerminationIteratorNew (DecisionTree.TSAO))
+               (module TerminationIterator (DecisionTree.TSOO))
+             else (module TerminationIterator (DecisionTree.TSAO))
          | "polyhedra" ->
              if !ordinals then
-               (module TerminationIteratorNew (DecisionTree.TSOP))
-             else (module TerminationIteratorNew (DecisionTree.TSAP))
+               (module TerminationIterator (DecisionTree.TSOP))
+             else (module TerminationIterator (DecisionTree.TSAP))
          | _ -> raise (Invalid_argument "Unknown Abstract Domain")
         : Semantics.SEMANTIC)
   in

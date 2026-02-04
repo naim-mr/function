@@ -819,19 +819,18 @@ action: "follow"|}
           Some (aux e)
       | None -> None
     in
-    if not !minimal then (
-      Format.printf "\nAbstract ctl typed Syntax:\n ";
-      Typed_syntax.pp_prog !fmt prog);
     let block, funcmap, _ = prog in
     let f = StringMap.find !Config.main funcmap in
     let program =
       {
-        mainFunction = f;
-        globalBlock = block;
+        (program_of_prog prog f.func_name) with
         environment = env;
         variables = vars;
       }
     in
+    if not !minimal then (
+      Format.printf "\nAbstract ctl typed Syntax:\n ";
+      Typed_syntax.pp_prog !fmt (prog_of_program program));
     if !Config.refine then (* Run forward analysis if 'refine' flag is set *)
       ForwardIteratorB.analyze program.environment prog;
     fwdInvMap := !ForwardIteratorB.fwdInvMap;

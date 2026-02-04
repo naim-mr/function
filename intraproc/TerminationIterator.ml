@@ -20,7 +20,7 @@ open ForwardIterator
 open VarSet
 open Utils.Datatypes
 
-module TerminationIteratorNew (D : RANKING_FUNCTION) : SEMANTIC = struct
+module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
   type r = D.t
 
   module D = D
