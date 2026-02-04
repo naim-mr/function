@@ -7,10 +7,8 @@
 (*                   2012 - 2015                   *)
 (*                                                 *)
 (***************************************************)
-
-open Cda
-open TerminationNew
-open CTLIteratorNew
+open TerminationIterator
+open CTLIterator
 open Config
 open C_Frontend
 open Typed_syntax
@@ -248,9 +246,9 @@ let run_analysis analysis_function program () =
     Format.fprintf !fmt "\nThe Analysis Timed Out!\n";
     Format.fprintf !fmt "\nDone.\n"
 
-let termination_iterator_new () : (module SemanticsNew.SEMANTIC) =
-  let open TerminationNew in
-  let open Dnew in
+let termination_iterator_new () : (module Semantics.SEMANTIC) =
+  let open TerminationIterator in
+  let open Domains in
   let module S =
     (val match !domain with
          | "boxes" ->
@@ -266,25 +264,25 @@ let termination_iterator_new () : (module SemanticsNew.SEMANTIC) =
                (module TerminationIteratorNew (DecisionTree.TSOP))
              else (module TerminationIteratorNew (DecisionTree.TSAP))
          | _ -> raise (Invalid_argument "Unknown Abstract Domain")
-        : SemanticsNew.SEMANTIC)
+        : Semantics.SEMANTIC)
   in
   (module S)
 
-let ctl_iterator_new () : (module SemanticsNew.SEMANTIC) =
-  let open Dnew in
+let ctl_iterator_new () : (module Semantics.SEMANTIC) =
+  let open Domains in
   let module S =
     (val match !domain with
          | "boxes" ->
-             if !ordinals then (module CTLIteratorNew (DecisionTree.TSOB))
-             else (module CTLIteratorNew (DecisionTree.TSAB))
+             if !ordinals then (module CTLIterator (DecisionTree.TSOB))
+             else (module CTLIterator (DecisionTree.TSAB))
          | "octagons" ->
-             if !ordinals then (module CTLIteratorNew (DecisionTree.TSOO))
-             else (module CTLIteratorNew (DecisionTree.TSAO))
+             if !ordinals then (module CTLIterator (DecisionTree.TSOO))
+             else (module CTLIterator (DecisionTree.TSAO))
          | "polyhedra" ->
-             if !ordinals then (module CTLIteratorNew (DecisionTree.TSOP))
-             else (module CTLIteratorNew (DecisionTree.TSAP))
+             if !ordinals then (module CTLIterator (DecisionTree.TSOP))
+             else (module CTLIterator (DecisionTree.TSAP))
          | _ -> raise (Invalid_argument "Unknown Abstract Domain")
-        : SemanticsNew.SEMANTIC)
+        : Semantics.SEMANTIC)
   in
   (module S)
 
@@ -326,7 +324,7 @@ let run_non_termination program =
   | Some p -> (
       try
         let module Nonterm = (val ctl_iterator_new ()) in
-        Config.result := Nonterm.analyze ~property:(SemanticsNew.Ctl p) ntprog;
+        Config.result := Nonterm.analyze ~property:(Semantics.Ctl p) ntprog;
         if !Config.result then
           Format.printf "\nFinal Analysis Result: false(TERM)\n"
         else Format.printf "\nFinal Analysis Result: UNKNOWN\n"
@@ -335,7 +333,7 @@ let run_non_termination program =
         Format.fprintf !fmt "\nDone.\n")
 
 (* TODO: precondition analysis *)
-let run_ctl_ast_new (module S : SemanticsNew.SEMANTIC) prog property =
+let run_ctl_ast_new (module S : Semantics.SEMANTIC) prog property =
   let starttime = Sys.time () in
   (* let parsedPrecondition = parsePropertyString !precondition in
   let precondition =
@@ -380,7 +378,7 @@ let doit () =
   if not !minimal then (
     Format.fprintf !fmt "\nAbstract typed Syntax:\n";
     Typed_syntax.pp_prog !fmt prog);
-  let module S = (val semantic : SemanticsNew.SEMANTIC) in
+  let module S = (val semantic : Semantics.SEMANTIC) in
   (* Launch the analysis and get the returned output "true" or "unknow" *)
   (* (if !Config.cda then
      let module C = (val run_cda semantic : CDA_ITERATOR) in

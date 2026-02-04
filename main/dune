@@ -5,8 +5,8 @@
   (until-clean)
   (into ..))
  (flags
-  (:standard -open Frontend -open Utils))
- (libraries yojson frontend utils dnew))
+  (:standard -open Intraproc -open Frontend -open Utils))
+ (libraries yojson  intraproc frontend utils domains))
 
 (env
  (dev

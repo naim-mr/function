@@ -4,12 +4,12 @@
 *)
 open Config
 open Typed_syntax
-open Dnew
+open Domains
 open DecisionTree
 open Apron
 open InvMap
 open CTLProperty
-open Dnew.Domain
+open Domains.Domain
 open VarSet
 open Utils.Datatypes
 

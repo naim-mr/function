@@ -12,11 +12,11 @@ open Typed_syntax
 open InvMap
 open Config
 open Apron
-open Dnew.Domain
-open Dnew.Functions
-open SemanticsNew
-open Dnew.DecisionTree
-open ForwardNew
+open Domains.Domain
+open Domains.Functions
+open Semantics
+open Domains.DecisionTree
+open ForwardIterator
 open VarSet
 open Utils.Datatypes
 

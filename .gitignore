@@ -3,7 +3,6 @@
 *.cmx
 *.conflicts
 function
-test
 depend
 diff/
 frontend/Lexer.ml
@@ -24,6 +23,7 @@ _build/**
 *.byte
 *.native
 ocamlbuild.sh
+svbench/
 ocamlbuild_opt.sh
 _tags
 .idea
@@ -33,3 +33,4 @@ results/*
 script/proton
 script/UAutomizer-linux
 results*
+logs/*

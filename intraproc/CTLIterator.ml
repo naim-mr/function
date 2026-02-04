@@ -1,18 +1,18 @@
 open Typed_syntax
 open CTLProperty
 open Apron
-open Dnew
-open Dnew.Domain
+open Domains
+open Domains.Domain
 open Partition
 open Functions
 open Config
-open ForwardNew
+open ForwardIterator
 open Config
 open VarSet
 open Utils
 open Datatypes
 open Utils.InvMap
-open SemanticsNew
+open Semantics
 
 (* type for CTL properties, instantiated with bExp for atomic propositions *)
 type ctl_property = Typed_syntax.expr typed CTLProperty.generic_property
@@ -159,7 +159,7 @@ let prog_of_program (program : program) : prog =
   in
   (program.globalBlock, funcMap, varMap)
 
-module CTLIteratorNew (D : RANKING_FUNCTION) : SemanticsNew.SEMANTIC = struct
+module CTLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
   (*
      Fixed Point Computation:
 
@@ -729,7 +729,7 @@ module CTLIteratorNew (D : RANKING_FUNCTION) : SemanticsNew.SEMANTIC = struct
     let p =
       { environment = env; variables = vars; mainFunction = f; globalBlock = b }
     in
-    let i = compute p (SemanticsNew.get_ctl property) in
+    let i = compute p (Semantics.get_ctl property) in
     let initialLabel = block_label p.mainFunction.func_body in
     let programInvariant = InvMap.find initialLabel i in
     bwdInvMap := i;

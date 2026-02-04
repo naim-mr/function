@@ -6,12 +6,12 @@
 open Typed_syntax
 open InvMap
 open Apron
-open Dnew
-open Dnew.Functions
+open Domains
+open Domains.Functions
 open Config
-open SemanticsNew
-open Dnew.Domain
-open Dnew.Partition
+open Semantics
+open Domains.Domain
+open Domains.Partition
 open Utils.Datatypes
 open VarSet
 (* open Taint *)
