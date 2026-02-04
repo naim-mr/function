@@ -1,0 +1,14 @@
+{
+  "Config": {
+    "filename": "tests/termination/example8.c",
+    "analysis_type": "ctl",
+    "property": "AF{exit:true}",
+    "precondition": "true",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "joinbwd": 7,
+    "time": "0.593760000001"
+  },
+  "tree": { "Leaf": "36" },
+  "vulnerability": "Not analyzed"
+}

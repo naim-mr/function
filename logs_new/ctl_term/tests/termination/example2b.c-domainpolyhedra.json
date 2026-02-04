@@ -1,0 +1,44 @@
+{
+  "Config": {
+    "filename": "tests/termination/example2b.c",
+    "analysis_type": "ctl",
+    "property": "AF{exit:true}",
+    "precondition": "true",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "joinbwd": 2,
+    "time": "0.138384000001"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$20{y} >= 11",
+      "left": { "Leaf": "bottom" },
+      "right": {
+        "Node": {
+          "constraint": "$20{y} >= 3",
+          "left": { "Leaf": "bottom" },
+          "right": {
+            "Node": {
+              "constraint": "$20{y} >= 1",
+              "left": { "Leaf": "3" },
+              "right": {
+                "Node": {
+                  "constraint": "$20{y} >= -2",
+                  "left": { "Leaf": "3" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$20{y} >= -10",
+                      "left": { "Leaf": "bottom" },
+                      "right": { "Leaf": "bottom" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

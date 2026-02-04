@@ -1,0 +1,102 @@
+{
+  "Config": {
+    "filename": "tests/termination/example10.c",
+    "analysis_type": "ctl",
+    "property": "AF{exit:true}",
+    "precondition": "true",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "joinbwd": 2,
+    "time": "0.392833000001"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$15{x2} >= 2",
+      "left": {
+        "Node": {
+          "constraint": "$13{x1} >= 2",
+          "left": { "Leaf": "8589934589$13{x1}+4$15{x2}-8589934586" },
+          "right": {
+            "Node": {
+              "constraint": "$13{x1} >= 1",
+              "left": { "Leaf": "4$15{x2}+3" },
+              "right": {
+                "Node": {
+                  "constraint": "$13{x1} >= 0",
+                  "left": { "Leaf": "2" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$13{x1} >= -1",
+                      "left": {
+                        "Leaf": "18446744050087231499$15{x2}-18446744050087231492"
+                      },
+                      "right": {
+                        "Leaf": "-4$13{x1}+18446744050087231499$15{x2}-18446744050087231496"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$15{x2} >= 1",
+          "left": {
+            "Node": {
+              "constraint": "$13{x1} >= 2",
+              "left": { "Leaf": "8589934589$13{x1}-8589934582" },
+              "right": {
+                "Node": {
+                  "constraint": "$13{x1} >= 1",
+                  "left": { "Leaf": "7" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$13{x1} >= 0",
+                      "left": { "Leaf": "2" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$13{x1} >= -1",
+                          "left": { "Leaf": "7" },
+                          "right": { "Leaf": "-4$13{x1}+3" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$13{x1} >= 2",
+              "left": { "Leaf": "2" },
+              "right": {
+                "Node": {
+                  "constraint": "$13{x1} >= 1",
+                  "left": { "Leaf": "2" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$13{x1} >= 0",
+                      "left": { "Leaf": "2" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$13{x1} >= -1",
+                          "left": { "Leaf": "2" },
+                          "right": { "Leaf": "2" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

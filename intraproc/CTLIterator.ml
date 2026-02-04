@@ -122,12 +122,15 @@ let program_of_prog (prog : Typed_syntax.prog) (main : StringMap.key) : program
   let rec addTerminationStmtReturn (block : block) =
     match block with
     | T_empty l -> block
-    | T_stat (l, (T_RETURN, a), nextBlock) ->
+    | T_stat (l, (T_RETURN, a), nextBlock) -> 
         let nextBlock =
           T_stat (l, (T_RETURN, a), addTerminationStmtReturn nextBlock)
         in
         T_stat
           ((nextId (), Lexing.dummy_pos), (exitLabel, dummyExtent), nextBlock)
+    | T_stat (l, (T_call (f, ss), a), nextBlock) ->
+        let f = { f with func_body = addTerminationStmtReturn f.func_body } in
+        T_stat (l, (T_call (f, ss), a), addTerminationStmtReturn nextBlock)
     | T_stat (l, stmt, nextBlock) ->
         T_stat (l, stmt, addTerminationStmtReturn nextBlock)
   in

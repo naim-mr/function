@@ -1,0 +1,74 @@
+{
+  "Config": {
+    "filename": "tests/termination/squeez_interval_2f.c",
+    "analysis_type": "termination",
+    "property": "AF{exit:true}",
+    "precondition": "true",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "joinbwd": 2,
+    "time": "1"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$35{y} >= 41",
+      "left": { "Leaf": "bottom" },
+      "right": {
+        "Node": {
+          "constraint": "$35{y} >= 31",
+          "left": { "Leaf": "bottom" },
+          "right": {
+            "Node": {
+              "constraint": "$35{y} >= 21",
+              "left": { "Leaf": "bottom" },
+              "right": {
+                "Node": {
+                  "constraint": "$35{y} >= 11",
+                  "left": { "Leaf": "bottom" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$35{y} >= 4",
+                      "left": { "Leaf": "bottom" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$35{y} >= -3",
+                          "left": { "Leaf": "3" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$35{y} >= -10",
+                              "left": { "Leaf": "bottom" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$35{y} >= -20",
+                                  "left": { "Leaf": "bottom" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$35{y} >= -30",
+                                      "left": { "Leaf": "bottom" },
+                                      "right": {
+                                        "Node": {
+                                          "constraint": "$35{y} >= -40",
+                                          "left": { "Leaf": "bottom" },
+                                          "right": { "Leaf": "bottom" }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

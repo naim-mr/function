@@ -1,0 +1,26 @@
+{
+  "Config": {
+    "filename": "tests/termination/sas2014a.c",
+    "analysis_type": "termination",
+    "property": "AF{exit:true}",
+    "precondition": "r <= 0",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "joinbwd": 2,
+    "time": "1"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$7{r} >= 1",
+      "left": {
+        "Node": {
+          "constraint": "$3{x}-$5{y}+$7{r} >= 1",
+          "left": { "Leaf": "top" },
+          "right": { "Leaf": "4" }
+        }
+      },
+      "right": { "Leaf": "1" }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

@@ -1,0 +1,44 @@
+{
+  "Config": {
+    "filename": "tests/ctl/existential_test4.c",
+    "analysis_type": "ctl",
+    "property": "EF{r == 1}",
+    "precondition": "true",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "joinbwd": 2,
+    "time": "0.010549"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$9{r} >= 2",
+      "left": {
+        "Node": {
+          "constraint": "$5{i} >= 1",
+          "left": { "Leaf": "3" },
+          "right": { "Leaf": "bottom" }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$9{r} >= 1",
+          "left": {
+            "Node": {
+              "constraint": "$5{i} >= 1",
+              "left": { "Leaf": "0." },
+              "right": { "Leaf": "0." }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$5{i} >= 1",
+              "left": { "Leaf": "3" },
+              "right": { "Leaf": "bottom" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

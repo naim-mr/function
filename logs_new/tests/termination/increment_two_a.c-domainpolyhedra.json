@@ -1,0 +1,38 @@
+{
+  "Config": {
+    "filename": "tests/termination/increment_two_a.c",
+    "analysis_type": "termination",
+    "property": "AF{exit:true}",
+    "precondition": "x > 10",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "joinbwd": 2,
+    "time": "1"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$5{x} >= 11",
+      "left": { "Leaf": "2" },
+      "right": {
+        "Node": {
+          "constraint": "$5{x} >= 10",
+          "left": { "Leaf": "bottom" },
+          "right": {
+            "Node": {
+              "constraint": "$5{x} >= 9",
+              "left": { "Leaf": "5" },
+              "right": {
+                "Node": {
+                  "constraint": "$5{x} >= 8",
+                  "left": { "Leaf": "bottom" },
+                  "right": { "Leaf": "top" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

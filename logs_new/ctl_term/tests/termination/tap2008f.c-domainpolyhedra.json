@@ -1,0 +1,62 @@
+{
+  "Config": {
+    "filename": "tests/termination/tap2008f.c",
+    "analysis_type": "ctl",
+    "property": "AF{exit:true}",
+    "precondition": "true",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "joinbwd": 2,
+    "time": "0.101606000001"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$5{x} >= 5",
+      "left": { "Leaf": "top" },
+      "right": {
+        "Node": {
+          "constraint": "$5{x} >= 3",
+          "left": { "Leaf": "top" },
+          "right": {
+            "Node": {
+              "constraint": "$5{x} >= 2",
+              "left": { "Leaf": "6" },
+              "right": {
+                "Node": {
+                  "constraint": "$5{x} >= 1",
+                  "left": { "Leaf": "bottom" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$5{x} >= 0",
+                      "left": { "Leaf": "2" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$5{x} >= -1",
+                          "left": { "Leaf": "bottom" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$5{x} >= -2",
+                              "left": { "Leaf": "6" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$5{x} >= -4",
+                                  "left": { "Leaf": "top" },
+                                  "right": { "Leaf": "top" }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

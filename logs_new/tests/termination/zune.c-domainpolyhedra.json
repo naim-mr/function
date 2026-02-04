@@ -1,0 +1,98 @@
+{
+  "Config": {
+    "filename": "tests/termination/zune.c",
+    "analysis_type": "termination",
+    "property": "AF{exit:true}",
+    "precondition": "true",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "joinbwd": 2,
+    "time": "1"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$9{isLeapYear} >= 1",
+      "left": {
+        "Node": {
+          "constraint": "$5{days} >= 733",
+          "left": { "Leaf": "top" },
+          "right": {
+            "Node": {
+              "constraint": "$5{days} >= 732",
+              "left": { "Leaf": "bottom" },
+              "right": {
+                "Node": {
+                  "constraint": "$5{days} >= 731",
+                  "left": { "Leaf": "8" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$5{days} >= 367",
+                      "left": { "Leaf": "8" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$5{days} >= 366",
+                          "left": { "Leaf": "bottom" },
+                          "right": { "Leaf": "3" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$9{isLeapYear} >= 0",
+          "left": {
+            "Node": {
+              "constraint": "$5{days} >= 731",
+              "left": { "Leaf": "4$5{days}+727" },
+              "right": {
+                "Node": {
+                  "constraint": "$5{days} >= 366",
+                  "left": { "Leaf": "7" },
+                  "right": { "Leaf": "3" }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$5{days} >= 733",
+              "left": { "Leaf": "top" },
+              "right": {
+                "Node": {
+                  "constraint": "$5{days} >= 732",
+                  "left": { "Leaf": "bottom" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$5{days} >= 731",
+                      "left": { "Leaf": "8" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$5{days} >= 367",
+                          "left": { "Leaf": "8" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$5{days} >= 366",
+                              "left": { "Leaf": "bottom" },
+                              "right": { "Leaf": "3" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

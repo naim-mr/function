@@ -1,0 +1,56 @@
+{
+  "Config": {
+    "filename": "tests/termination/squeez_interval_1b.c",
+    "analysis_type": "ctl",
+    "property": "AF{exit:true}",
+    "precondition": "true",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "joinbwd": 2,
+    "time": "0.0437630000001"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$5{y} >= 11",
+      "left": { "Leaf": "top" },
+      "right": {
+        "Node": {
+          "constraint": "$5{y} >= 4",
+          "left": { "Leaf": "top" },
+          "right": {
+            "Node": {
+              "constraint": "$5{y} >= 3",
+              "left": { "Leaf": "6" },
+              "right": {
+                "Node": {
+                  "constraint": "$5{y} >= 1",
+                  "left": { "Leaf": "4" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$5{y} >= -2",
+                      "left": { "Leaf": "4" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$5{y} >= -3",
+                          "left": { "Leaf": "6" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$5{y} >= -10",
+                              "left": { "Leaf": "top" },
+                              "right": { "Leaf": "top" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

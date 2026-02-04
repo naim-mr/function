@@ -1,0 +1,44 @@
+{
+  "Config": {
+    "filename": "tests/ctl/ltl_automizer/PotentialMinimizeSEVPABug.c",
+    "analysis_type": "ctl",
+    "property": "AG{OR{x <= 0}{AF{y == 0}}}",
+    "precondition": "true",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "joinbwd": 2,
+    "time": "0.250729000001"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$7{y} >= 1",
+      "left": {
+        "Node": {
+          "constraint": "$5{x} >= 1",
+          "left": { "Leaf": "bottom" },
+          "right": { "Leaf": "0." }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$7{y} >= 0",
+          "left": {
+            "Node": {
+              "constraint": "$5{x} >= 1",
+              "left": { "Leaf": "0." },
+              "right": { "Leaf": "0" }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$5{x} >= 1",
+              "left": { "Leaf": "bottom" },
+              "right": { "Leaf": "0." }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

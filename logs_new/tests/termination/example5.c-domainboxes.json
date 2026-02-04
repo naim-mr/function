@@ -1,0 +1,26 @@
+{
+  "Config": {
+    "filename": "tests/termination/example5.c",
+    "analysis_type": "termination",
+    "property": "AF{exit:true}",
+    "precondition": "x > 10",
+    "result": "TRUE",
+    "domain": "boxes",
+    "joinbwd": 2,
+    "time": "1"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$5{x} >= 10",
+      "left": { "Leaf": "2" },
+      "right": {
+        "Node": {
+          "constraint": "$5{x} >= 5",
+          "left": { "Leaf": "4" },
+          "right": { "Leaf": "top" }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

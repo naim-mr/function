@@ -1,0 +1,44 @@
+{
+  "Config": {
+    "filename": "tests/termination/widening2.c",
+    "analysis_type": "termination",
+    "property": "AF{exit:true}",
+    "precondition": "true",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "joinbwd": 2,
+    "time": "1"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$3{x} >= 3",
+      "left": { "Leaf": "top" },
+      "right": {
+        "Node": {
+          "constraint": "$3{x} >= 2",
+          "left": { "Leaf": "4" },
+          "right": {
+            "Node": {
+              "constraint": "$3{x} >= 1",
+              "left": { "Leaf": "7" },
+              "right": {
+                "Node": {
+                  "constraint": "$3{x} >= 0",
+                  "left": { "Leaf": "1" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$3{x} >= -1",
+                      "left": { "Leaf": "4" },
+                      "right": { "Leaf": "-3$3{x}+1" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

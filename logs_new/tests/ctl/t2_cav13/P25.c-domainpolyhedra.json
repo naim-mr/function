@@ -1,0 +1,44 @@
+{
+  "Config": {
+    "filename": "tests/ctl/t2_cav13/P25.c",
+    "analysis_type": "ctl",
+    "property": "OR{varC <= 5}{AF{varR > 5}}",
+    "precondition": "true",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "joinbwd": 6,
+    "time": "1.82043700001"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$5{varR} >= 6",
+      "left": {
+        "Node": {
+          "constraint": "$3{varC} >= 8",
+          "left": { "Leaf": "0." },
+          "right": {
+            "Node": {
+              "constraint": "$3{varC} >= 6",
+              "left": { "Leaf": "0." },
+              "right": { "Leaf": "0" }
+            }
+          }
+        }
+      },
+      "right": {
+        "Node": {
+          "constraint": "$3{varC} >= 8",
+          "left": { "Leaf": "31" },
+          "right": {
+            "Node": {
+              "constraint": "$3{varC} >= 6",
+              "left": { "Leaf": "31" },
+              "right": { "Leaf": "31" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

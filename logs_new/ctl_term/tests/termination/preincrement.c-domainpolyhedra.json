@@ -1,0 +1,26 @@
+{
+  "Config": {
+    "filename": "tests/termination/preincrement.c",
+    "analysis_type": "ctl",
+    "property": "AF{exit:true}",
+    "precondition": "true",
+    "result": "TRUE",
+    "domain": "polyhedra",
+    "joinbwd": 2,
+    "time": "0.00638"
+  },
+  "tree": {
+    "Node": {
+      "constraint": "$5{x} >= 11",
+      "left": { "Leaf": "2" },
+      "right": {
+        "Node": {
+          "constraint": "$5{x} >= 10",
+          "left": { "Leaf": "5" },
+          "right": { "Leaf": "-3$5{x}+35" }
+        }
+      }
+    }
+  },
+  "vulnerability": "Not analyzed"
+}

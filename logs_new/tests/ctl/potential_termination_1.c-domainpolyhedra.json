@@ -1,0 +1,14 @@
+{
+  "Config": {
+    "filename": "tests/ctl/potential_termination_1.c",
+    "analysis_type": "ctl",
+    "property": "EF{exit: true}",
+    "precondition": "true",
+    "result": "UKNOWN",
+    "domain": "polyhedra",
+    "joinbwd": 2,
+    "time": "0.00454600000001"
+  },
+  "tree": { "Leaf": "bottom" },
+  "vulnerability": "Not analyzed"
+}
