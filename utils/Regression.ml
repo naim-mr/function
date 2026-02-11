@@ -14,7 +14,8 @@ let create_logfile_name () =
   in
   Config.logfile := name
 
-let json_string filename analysis property precondition result domain joinbwd time =
+let json_string filename analysis property precondition result domain joinbwd
+    time =
   Printf.sprintf
     {|
   {"filename" : "%s",
@@ -28,7 +29,7 @@ let json_string filename analysis property precondition result domain joinbwd ti
     }|}
     filename analysis property precondition result domain joinbwd time
 
-let output_json () = 
+let output_json () =
   if !Config.resilience then Config.analysis := !analysis ^ "-resilience";
   let dirname = !output_dir ^ Filename.dirname !filename in
   let rec mkdir_p filename =

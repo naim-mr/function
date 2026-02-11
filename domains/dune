@@ -8,9 +8,10 @@
   apron.boxMPQ
   apron.octMPQ
   apron.polkaMPQ
-  yojson)
+  yojson
+  sig)
  (flags
-  (:standard -open Utils -open Banal -open Frontend -open Apron)))
+  (:standard -open Sig -open Utils -open Banal -open Frontend -open Apron)))
 
 (env
  (dev

@@ -247,7 +247,7 @@ let run_analysis analysis_function program () =
     Format.fprintf !fmt "\nDone.\n"
 
 let termination_iterator_new () : (module Semantics.SEMANTIC) =
-  let open Domains in
+  let open Signatures in
   let module S =
     (val match !domain with
          | "boxes" ->
@@ -268,7 +268,7 @@ let termination_iterator_new () : (module Semantics.SEMANTIC) =
   (module S)
 
 let ctl_iterator_new () : (module Semantics.SEMANTIC) =
-  let open Domains in
+  let open Signatures in
   let module S =
     (val match !domain with
          | "boxes" ->

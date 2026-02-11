@@ -1,7 +1,7 @@
 (* open InvMap
 open Semantics
 open AbstractSyntax
-open Domain
+open Signature
 open DecisionTree
 open Apron
 open ForwardIterator
@@ -164,7 +164,7 @@ end = struct
                 [ab] is a contraint toward an undefined leaf the tree
               *)
               if
-                B.isLeq b ab
+                B.is_leq b ab
                 (* If the current domain [b] from which we start is smaller that the one define by the constraint [ab]
                    we need to split [ab]. 
                    Needed to divide the domain if after one iteration we cannot infer the property
@@ -175,10 +175,10 @@ end = struct
                 *)
                 let b1, b2 = B.assume ~pow:(float_of_int n) ab in
                 (* We reinit the leaf that are at top *)
-                assert (B.isLeq ab (B.join b1 b2));
-                assert (B.isLeq (B.join b1 b2) ab);
-                assert (not (B.isBot b1));
-                assert (not (B.isBot b2));
+                assert (B.is_leq ab (B.join b1 b2));
+                assert (B.is_leq (B.join b1 b2) ab);
+                assert (not (B.is_bot b1));
+                assert (not (B.is_bot b2));
                 reinit ();
                 compress ();
                 if not !minimal then

@@ -25,21 +25,21 @@ module OrdinalValued (F : FUNCTION) : FUNCTION = struct
 
   (**)
 
-  let isBot (f, _) = F.isBot f
+  let is_bot (f, _) = F.is_bot f
   let defined (f, _) = F.defined f
   let isTop (f, _) = F.isTop f
   let reinit (f, ff) = (F.reinit f, ff)
 
-  let rec isEq b (f1, ff1) (f2, ff2) =
+  let rec is_eq b (f1, ff1) (f2, ff2) =
     let env = F.env f1 in
     let vars = F.vars f1 in
     match (ff1, ff2) with
-    | [], [] -> F.isEq b f1 f2
-    | [], y :: ys -> F.isEq b (F.zero env vars) y && isEq b (f1, []) (f2, ys)
-    | x :: xs, [] -> F.isEq b x (F.zero env vars) && isEq b (f1, xs) (f2, [])
-    | x :: xs, y :: ys -> F.isEq b x y && isEq b (f1, xs) (f2, ys)
+    | [], [] -> F.is_eq b f1 f2
+    | [], y :: ys -> F.is_eq b (F.zero env vars) y && is_eq b (f1, []) (f2, ys)
+    | x :: xs, [] -> F.is_eq b x (F.zero env vars) && is_eq b (f1, xs) (f2, [])
+    | x :: xs, y :: ys -> F.is_eq b x y && is_eq b (f1, xs) (f2, ys)
 
-  let domainEq b (f1, ff1) (f2, ff2) =
+  let domain_eq b (f1, ff1) (f2, ff2) =
     let env = B.env b in
     let vars = B.vars b in
     let rec aux b ff1 ff2 =
@@ -47,11 +47,11 @@ module OrdinalValued (F : FUNCTION) : FUNCTION = struct
       | [], [] -> b
       | [], _ -> aux b [ F.zero env vars ] ff2
       | _, [] -> aux b ff1 [ F.zero env vars ]
-      | x :: xs, y :: ys -> aux (F.domainEq b x y) xs ys
+      | x :: xs, y :: ys -> aux (F.domain_eq b x y) xs ys
     in
-    aux (F.domainEq b f1 f2) ff1 ff2
+    aux (F.domain_eq b f1 f2) ff1 ff2
 
-  let isLeq k b (f1, ff1) (f2, ff2) =
+  let is_leq k b (f1, ff1) (f2, ff2) =
     let env = B.env b in
     let vars = B.vars b in
     (* aux ff1 ff2 returns the domain on which ff1 and ff2 are equal,
@@ -63,14 +63,14 @@ module OrdinalValued (F : FUNCTION) : FUNCTION = struct
       | _, [] -> aux ff1 [ F.zero env vars ]
       | x :: xs, y :: ys ->
           let r = aux xs ys in
-          if F.isLeq k r x y then F.domainEq r x y else raise Exit
+          if F.is_leq k r x y then F.domain_eq r x y else raise Exit
     in
     if F.defined f1 && F.defined f2 then
       try
         let r = aux ff1 ff2 in
-        F.isLeq k r f1 f2
+        F.is_leq k r f1 f2
       with Exit -> false
-    else F.isLeq k b f1 f2
+    else F.is_leq k b f1 f2
 
   let join ?(random = false) k b (f1, ff1) (f2, ff2) =
     let env = B.env b in
@@ -111,7 +111,7 @@ module OrdinalValued (F : FUNCTION) : FUNCTION = struct
       if List.length ff > !Config.ordmax then (F.top env vars, []) else (f, ff)
     else if
       (* f = Bot OR f = Top *)
-      F.isBot f
+      F.is_bot f
     then (f, []) (* f = Bot *)
     else if
       (* f = Top *)
@@ -160,7 +160,7 @@ module OrdinalValued (F : FUNCTION) : FUNCTION = struct
       if List.length ff > !Config.ordmax then (F.top env vars, []) else (f, ff)
     else if
       (* f = Bot OR f = Top *)
-      F.isBot f
+      F.is_bot f
     then (f, []) (* f = Bot *)
     else if
       (* f = Top *)
@@ -209,7 +209,7 @@ module OrdinalValued (F : FUNCTION) : FUNCTION = struct
       if List.length ff > !Config.ordmax then (F.top env vars, []) else (f, ff)
     else if
       (* f = Bot OR f = Top *)
-      F.isBot f
+      F.is_bot f
     then (f, []) (* f = Bot *)
     else if
       (* f = Top *)
@@ -290,14 +290,14 @@ module OrdinalValued (F : FUNCTION) : FUNCTION = struct
   let predecessor (f, ff) = (F.predecessor f, ff)
   let successor (f, ff) = (F.successor f, ff)
 
-  let bwdAssign (f, ff) e =
+  let bwd_assign (f, ff) e =
     let env = F.env f in
     let vars = F.vars f in
     let rec aux i ff =
       match ff with
       | [] -> ( match i with 0 -> [] | _ -> [ F.successor (F.zero env vars) ])
       | x :: xs -> (
-          let x = F.predecessor (F.bwdAssign x e) in
+          let x = F.predecessor (F.bwd_assign x e) in
           match i with
           | 0 ->
               if F.defined x then x :: aux 0 xs else F.zero env vars :: aux 1 xs
@@ -306,13 +306,13 @@ module OrdinalValued (F : FUNCTION) : FUNCTION = struct
               else F.successor (F.zero env vars) :: aux 1 xs)
     in
     if F.defined f then
-      let f = F.bwdAssign f e in
+      let f = F.bwd_assign f e in
       if F.defined f then
         let ff = aux 0 ff in
         if List.length ff > !Config.ordmax then (F.top env vars, []) else (f, ff)
       else if
         (* f = Bot OR f = Top *)
-        F.isBot f
+        F.is_bot f
       then (f, []) (* f = Bot *)
       else (* f = Top *)
         let ff = aux 1 ff in

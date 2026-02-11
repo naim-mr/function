@@ -6,12 +6,11 @@
 open Typed_syntax
 open InvMap
 open Apron
-open Domains
-open Domains.Functions
+open Signatures
+open Signature
 open Config
 open Semantics
-open Domains.Domain
-open Domains.Partition
+open Partition
 open Utils.Datatypes
 open VarSet
 (* open Taint *)
@@ -57,8 +56,8 @@ module ForwardIterator (B : PARTITION) = struct
                 !fwdSummaryMap; *)
         B.bot ctx.env ctx.vars
     | T_add_var (v, Some (e, t, ext)) ->
-        B.fwdAssign p ((T_var v, v.var_typ, ext), (e, t, ext))
-    | T_assign ((v, l), e) -> B.fwdAssign p ((T_var v, v.var_typ, l), e)
+        B.fwd_assign p ((T_var v, v.var_typ, ext), (e, t, ext))
+    | T_assign ((v, l), e) -> B.fwd_assign p ((T_var v, v.var_typ, l), e)
     | T_assert (b, l) -> B.filter p b
     | T_expr _ | T_assume _ -> p
     | T_if (b, s1, s2) ->
@@ -81,7 +80,7 @@ module ForwardIterator (B : PARTITION) = struct
             Format.fprintf !fmt "i: %a\n" B.print i;
             Format.fprintf !fmt "p2: %a\n" B.print p2;
             Format.fprintf !fmt "i': %a\n" B.print i');
-          if B.isLeq i' i then i
+          if B.is_leq i' i then i
           else
             let i'' = if n <= !joinfwd then i' else B.widen i i' in
             if !tracefwd && not !minimal then

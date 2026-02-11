@@ -5,14 +5,14 @@
 
 open Typed_syntax
 open Apron
-open Partition
-open Functions
+open AP_Partition
+open Sig.Ranking
 open Tast_to_texpr
-open Numerical
 open Utils
 open Apron_utils
+open Sig
 
-module Affine (B : PARTITION) : FUNCTION = struct
+module Affine (B : AP_PARTITION) : FUNCTION = struct
   module B = B
 
   (**)
@@ -47,11 +47,11 @@ module Affine (B : PARTITION) : FUNCTION = struct
 
   (**)
 
-  let isBot f = match f.ranking with Bot -> true | _ -> false
+  let is_bot f = match f.ranking with Bot -> true | _ -> false
   let defined f = match f.ranking with Fun _ -> true | _ -> false
   let isTop f = match f.ranking with Top -> true | _ -> false
 
-  let isEq b f1 f2 =
+  let is_eq b f1 f2 =
     (* b = domain of first/second function, f1/f2 = value of first/second function *)
     match (f1.ranking, f2.ranking) with
     | Fun f1, Fun f2 ->
@@ -84,7 +84,7 @@ module Affine (B : PARTITION) : FUNCTION = struct
     | Bot, Bot | Top, Top -> true
     | _ -> false
 
-  let domainEq b f1 f2 =
+  let domain_eq b f1 f2 =
     (* b = domain of first/second function, f1/f2 = value of first/second function *)
     match (f1.ranking, f2.ranking) with
     | Fun f1, Fun f2 ->
@@ -120,7 +120,7 @@ module Affine (B : PARTITION) : FUNCTION = struct
     | Bot, Bot | Top, Top -> b
     | _ -> B.bot (B.env b) (B.vars b)
 
-  let isLeq k b f1 f2 =
+  let is_leq k b f1 f2 =
     (* k = kind of test, b = domain of first/second function, f1/f2 = value of first/second function *)
     match (f1.ranking, f2.ranking) with
     | Fun f1, Fun f2 ->
@@ -677,7 +677,7 @@ module Affine (B : PARTITION) : FUNCTION = struct
       vars = f1.vars;
     }
 
-  let bwdAssign_ranking f ((x, t, ext), e) =
+  let bwd_assign_ranking f ((x, t, ext), e) =
     match x with
     | T_var x -> (
         match f with
@@ -703,10 +703,10 @@ module Affine (B : PARTITION) : FUNCTION = struct
               Fun f)
             else Top
         | _ -> f)
-    | _ -> raise (Invalid_argument "Box.fwdAssign: unexpected lvalue")
+    | _ -> raise (Invalid_argument "Box.fwd_assign: unexpected lvalue")
 
-  let bwdAssign f (x, e) =
-    { ranking = bwdAssign_ranking f.ranking (x, e); env = f.env; vars = f.vars }
+  let bwd_assign f (x, e) =
+    { ranking = bwd_assign_ranking f.ranking (x, e); env = f.env; vars = f.vars }
 
   let filter f _ = successor f
 

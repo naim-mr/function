@@ -5,48 +5,38 @@
 open Config
 open Typed_syntax
 open Domains
+open Sig
+open Domain
 open DecisionTree
 open Apron
 open InvMap
 open CTLProperty
-open Domain
 open VarSet
 open Utils.Datatypes
 
 type ctl_property = expr typed CTLProperty.generic_property
-type 'a p = Ctl of ctl_property | Exp of (expr * 'a) StringMap.t
+type 'a p = Ctl of ctl_property | Other
 
 let get_ctl prop =
   match prop with
   | Ctl prop -> prop
-  | _ -> raise (Invalid_argument "Expected a ctl property: got a bexp")
-
-let get_bexp prop =
-  match prop with
-  | Exp prop -> prop
-  | _ -> raise (Invalid_argument "Expected a bexp property, got a ctl")
+  | Other -> raise (Invalid_argument "Expected a ctl property: got an other")
 
 module type SEMANTIC = sig
-  module D : RANKING_FUNCTION
-  (** [D]: Underlying instanciantion of the DecisionTree Abstract Domain *)
-
-  module B = D.B
-  (** [B]: Underlying instanciantion of the Numerical Abstract Domain used in D
+ 
+  module BWD: FBDomain
+  (** [BWD]: Underlying Abstract Domain that will be use in the bwd analysis 
   *)
 
-  type r
-  (** [r]: Ghost type to to handle the different types returned by bwdBlk in
-      different iterators *)
+  module FWD: FDomain
+  (** [B]: Underlying Abstract Domain used in the fwd analysis
+  *)
 
-  val dummy_prop : 'a p
+  val fwdInvMap : FWD.t InvMap.t ref
+  (** [fwdInvMap]: a map from the label of the program to an associated
+      abstraction computed in a forward analysis *)
 
-  val fwdInvMap : B.t InvMap.t ref
-  (** [fwdInvMap]: a map from the label of the program to an associated the
-      over-approximating numerical abstraction computed in a forward analysis *)
-
-  val fwdTaintMap : VarSet.t InvMap.t ref
-
-  val bwdInvMap : D.t InvMap.t ref
+  val bwdInvMap : BWD.t InvMap.t ref
   (** [bwdInvMap]: a map from the label of the program to an associated a
       decision tree that abstract a ranking function of the program. *)
 
@@ -55,9 +45,9 @@ module type SEMANTIC = sig
     func StringMap.t ->
     Environment.t ->
     var list ->
-    D.t ->
+    BWD.t ->
     block ->
-    D.t
+    BWD.t
   (** [bwdRec]: abstract backward transfer function of statement for the
       decision tree abstract domain *)
 

@@ -12,10 +12,10 @@ open Typed_syntax
 open InvMap
 open Config
 open Apron
-open Domains.Domain
-open Domains.Functions
+open Signatures.Domain
+open Signatures.Functions
 open Semantics
-open Domains.DecisionTree
+open Signatures.DecisionTree
 open ForwardIterator
 open VarSet
 open Utils.Datatypes
@@ -50,7 +50,7 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
     | T_BREAK -> raise (UnsupportedFeature "break")
     | T_add_var (v, Some (exp, typ, ext)) | T_assign ((v, _), (exp, typ, ext))
       ->
-        ( D.bwdAssign ?domain ~taint:true ~underapprox:false p
+        ( D.bwd_assign ?domain ~taint:true ~underapprox:false p
             ((T_var v, typ, ext), (exp, typ, ext)),
           visited )
     | T_assert (b, _) | T_assume b -> (p, visited)
@@ -83,8 +83,8 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
             let jokers =
               max 0 ((!retrybwd * (!Config.ordmax + 1)) - n + !joinbwd)
             in
-            if D.isLeq COMPUTATIONAL i' i then (
-              if D.isLeq APPROXIMATION i' i then (
+            if D.is_leq COMPUTATIONAL i' i then (
+              if D.is_leq APPROXIMATION i' i then (
                 if !tracebwd && not !minimal then (
                   Format.fprintf !fmt "### %a:FIXPOINT ###:\n" label_print l;
                   Format.fprintf !fmt "i: %a\n" D.print i);

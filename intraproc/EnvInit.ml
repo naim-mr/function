@@ -1,6 +1,6 @@
 open Typed_syntax
 open Apron
-open Domains.Partition
+open Signatures.Partition
 open Utils.Datatypes
 
 module type ENVINIT = sig

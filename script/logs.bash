@@ -49,6 +49,25 @@ run_tests_term() {
             fi
    done
 }
+run_tests_term_ctl() {
+    opt=$1
+    TERM_TEST_DIR=$2
+    echo "=== Running Termination (+ $opt) tests in $TERM_TEST_DIR ==="
+    for cfile in $(find "$TERM_TEST_DIR" -name "*.c"); do
+            if [[ -e "$cfile" ]]; then
+                base="${cfile%.c}"
+                jsonfile="${base}.json"
+                if [[ ! -f "$jsonfile" ]]; then
+                    echo "Warning: JSON file $jsonfile not found, skipping $cfile"
+                    continue
+                fi
+                # Options spécifiques CTL
+                echo "Running TERMINATION: ./$EXEC -config $CONFIG $jsonfile $cfile"
+                ./"$EXEC" -config "$jsonfile" "$cfile" -json_output "logs_new/ctl_term/" -ctl "AF{exit:true}" > /dev/null 2>&1  || true
+            fi
+   done
+}
+
 
 # run_tests_vuln() {
 #     run_tests_ctl "-vulnerability" "test_vuln/ctl"
@@ -62,8 +81,7 @@ run_tests_term() {
 
 
 # run_tests_vuln  ""
-
-run_tests_term "" "tests/termination"
+run_tests_term_ctl "" "tests/termination"
 #run_tests_ctl "" "tests/ctl/"
 # run_test_resilience ""
 

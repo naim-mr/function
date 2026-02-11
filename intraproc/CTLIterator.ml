@@ -1,8 +1,8 @@
 open Typed_syntax
 open CTLProperty
 open Apron
-open Domains
-open Domains.Domain
+open Signatures
+open Signatures.Domain
 open Partition
 open Functions
 open Config
@@ -214,11 +214,11 @@ module CTLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
     match quantifier with
     | UNIVERSAL ->
         ( D.join APPROXIMATION,
-          D.bwdAssign ~underapprox:false,
+          D.bwd_assign ~underapprox:false,
           D.filter ~underapprox:false )
     | EXISTENTIAL ->
         ( D.join COMPUTATIONAL,
-          D.bwdAssign ~underapprox:true,
+          D.bwd_assign ~underapprox:true,
           D.filter ~underapprox:true )
 
   (* Computes fixed-point for 'until' properties: AU{inv_keep}{inv_reset} 
@@ -313,13 +313,13 @@ module CTLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
                     Format.fprintf !fmt "in: %a\n" D.print in_state;
                     Format.fprintf !fmt "out_enter: %a\n" D.print out_enter;
                     Format.fprintf !fmt "in': %a\n" D.print in_state');
-                  let isLeqComp = D.isLeq COMPUTATIONAL in_state' in_state in
-                  let isLeqApprox = D.isLeq APPROXIMATION in_state' in_state in
+                  let is_leqComp = D.is_leq COMPUTATIONAL in_state' in_state in
+                  let is_leqApprox = D.is_leq APPROXIMATION in_state' in_state in
                   let jokers =
                     max 0 ((!retrybwd * (!Config.ordmax + 1)) - n + !joinbwd)
                   in
-                  if isLeqComp then (
-                    if isLeqApprox then (
+                  if is_leqComp then (
+                    if is_leqApprox then (
                       (* fixed-point reached *)
                       let fixed_point = in_state in
                       if !tracebwd && not !minimal then (
@@ -496,11 +496,11 @@ module CTLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
                     Format.fprintf !fmt "out_joined: %a\n" D.print out_joined;
                     Format.fprintf !fmt "current_in: %a\n" D.print current_in;
                     Format.fprintf !fmt "updated_in: %a\n" D.print updated_in);
-                  let isLeqApprox =
-                    D.isLeq APPROXIMATION current_in updated_in
+                  let is_leqApprox =
+                    D.is_leq APPROXIMATION current_in updated_in
                   in
-                  let isLeqComp = D.isLeq COMPUTATIONAL current_in updated_in in
-                  if isLeqComp && isLeqApprox then (
+                  let is_leqComp = D.is_leq COMPUTATIONAL current_in updated_in in
+                  if is_leqComp && is_leqApprox then (
                     (* fixed point *)
                     let fixed_point = current_in in
                     if !tracebwd && not !minimal then
