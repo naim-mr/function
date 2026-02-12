@@ -248,8 +248,7 @@ module AP_OrdinalValued (F : FUNCTION) : FUNCTION = struct
       let f = if i > 0 then F.widen b f1 f2 else f2 in
       if F.is_top f then
         let ff = aux (i - 1) ff1 (succ ff2) in
-        if List.length ff > !Config.ordmax then top env
-        else (F.zero env, ff)
+        if List.length ff > !Config.ordmax then top env else (F.zero env, ff)
       else if F.defined f then
         let ff = aux (i - 1) ff1 ff2 in
         if List.length ff > !Config.ordmax then top env else (f, ff)
@@ -269,8 +268,7 @@ module AP_OrdinalValued (F : FUNCTION) : FUNCTION = struct
     let f = F.extend b1 b2 f1 f2 in
     if F.defined f then
       let ff = aux ff1 ff2 in
-      if List.exists (fun x -> F.is_top x) ff then (F.top env, [])
-      else (f, ff)
+      if List.exists (fun x -> F.is_top x) ff then (F.top env, []) else (f, ff)
     else (f, [])
 
   (**)
@@ -287,8 +285,7 @@ module AP_OrdinalValued (F : FUNCTION) : FUNCTION = struct
       | x :: xs -> (
           let x = F.predecessor (F.bwd_assign x e) in
           match i with
-          | 0 ->
-              if F.defined x then x :: aux 0 xs else F.zero env :: aux 1 xs
+          | 0 -> if F.defined x then x :: aux 0 xs else F.zero env :: aux 1 xs
           | _ ->
               if F.defined x then F.successor x :: aux 0 xs
               else F.successor (F.zero env) :: aux 1 xs)
@@ -304,8 +301,7 @@ module AP_OrdinalValued (F : FUNCTION) : FUNCTION = struct
       then (f, []) (* f = Bot *)
       else (* f = Top *)
         let ff = aux 1 ff in
-        if List.length ff > !Config.ordmax then (f, [])
-        else (F.zero env, ff)
+        if List.length ff > !Config.ordmax then (f, []) else (F.zero env, ff)
     else (f, [])
 
   let filter (f, ff) e = (F.filter f e, ff)
@@ -324,6 +320,6 @@ module AP_OrdinalValued (F : FUNCTION) : FUNCTION = struct
     Format.fprintf fmt "%a%a" aux (ff, 1) F.print f
 end
 
-module OB = AP_OrdinalValued (AB) 
+module OB = AP_OrdinalValued (AB)
 module OO = AP_OrdinalValued (AO)
 module OP = AP_OrdinalValued (AP)
