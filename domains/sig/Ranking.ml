@@ -11,7 +11,8 @@ module type PARTITION = sig
 
   val bwd_assign : t -> expr typed * expr typed -> t
   val ubwd_assign :t -> expr typed * expr typed -> t
-  val bwd_filter : t -> expr typed -> t
+  val fwd_assign : t -> expr typed * expr typed -> t
+  val filter : t -> expr typed -> t
   val ubwd_filter : t -> expr typed -> t
 
   module C : CONSTRAINT
@@ -34,8 +35,10 @@ module type PARTITION = sig
   val inner : env -> C.t list -> t
   (** [inner env cs] returns the partitions defined by the constraints in [cs] on [env]*)
   val print : Format.formatter -> t -> unit
-
-  val add_var_to_env: env -> var -> env
+  val add_var_to_env: env -> string -> env
+  val remove_var_of_env: env -> string -> env
+  val mem_var: env -> string -> bool
+  val init: var list -> t
 end
 
 module type AP_NUMERICAL = sig
@@ -64,6 +67,7 @@ module type FUNCTION = sig
 
   val bot : env -> t
   val top : env -> t
+  
   val env : t -> env
   val is_top : t -> bool
   val is_bot : t -> bool
@@ -93,6 +97,14 @@ module type RANKING_FUNCTION = sig
   module B : PARTITION
   include DOMAIN
 
+  val bwd_assign :  ?domain:B.t ->
+    ?taint:bool ->
+    ?underapprox:bool -> t -> expr typed * expr typed -> t
+
+  val filter : ?taint:bool ->
+    ?domain:B.t -> ?underapprox:bool -> t -> expr typed -> t
+
+  val zero : env -> t
   val domain_zero : t -> t
   val plus : t -> t -> t
   val defined : ?condition:expr typed -> t -> bool

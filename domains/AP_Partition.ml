@@ -95,12 +95,14 @@ struct
     { constraints = !cs; env }
 
   (** Returns the bottom elements: a singleton of a unsat constraint*)
+
   let bot e = { constraints = [ C.make_unsat e ]; env = e }
 
   let inner e cs = { constraints = cs; env = e }
 
   (** Returns the top elements: an empty list <-> no constraints*)
   let top e = { constraints = []; env = e }
+  let init vars = top {vars; ap_env = Environment.make [||] [||]}
 
   let print fmt b =
     let env = env b in
@@ -148,7 +150,10 @@ struct
   let meet kind = lift2_apron Abstract1.meet
 
   (**)
-  let add_var_to_env = fun env x -> {env with ap_env = BanalApron.add_var_to_env env.ap_env x}
+
+  let add_var_to_env = fun env id -> {env with ap_env = Environment.add env.ap_env [|(Var.of_string id)|] [||]}
+  let mem_var env id =  Environment.mem_var env.ap_env (Var.of_string id)
+  let remove_var_of_env = fun env id -> {env with ap_env = Environment.remove env.ap_env [|(Var.of_string id)|]}
 
   let fwd_assign b ((x, t, ext), e) =
     match x with
@@ -221,7 +226,7 @@ struct
     let filtered = BanalApron.bwd_filter at bot () e () pre in
     of_apron_t env filtered
 
-  let bwd_filter b (e, t, ext) =
+  let filter b (e, t, ext) =
     let rec f manager b (e, t, ext) =
       match e with
       | T_bool_const True -> b

@@ -47,6 +47,7 @@ module ApronDomain (Param : NUMERICAL) = struct
     in
     Environment.add env i r
 
+  let remove_var_of_env env v = Environment.remove env [| apron_of_var v |]
   (* to Apron types *)
   (* ************** *)
 

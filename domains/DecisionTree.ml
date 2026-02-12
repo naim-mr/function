@@ -1308,7 +1308,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
     let env = t.env in
     let f_env = env.f_env in
     let post = env.domain in
-    let b_filter = if underapprox then B.ubwd_filter else B.bwd_filter in
+    let b_filter = if underapprox then B.ubwd_filter else B.filter in
     let rec aux t bs cs =
       let bcs =
         match pre with
