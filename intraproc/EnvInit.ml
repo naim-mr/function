@@ -1,13 +1,14 @@
 open Typed_syntax
 open Apron
-open Signatures.Partition
+open Sig.Ranking
 open Utils.Datatypes
 
 module type ENVINIT = sig
-  val env : Typed_syntax.prog -> Environment.t * var list
+  type env
+  val env : Typed_syntax.prog -> env
 end
 
-module Make (B : PARTITION) : ENVINIT = struct
+module Make (B : PARTITION) : ENVINIT with type env = B.env = struct
   let rec initStat s (env, vars) =
     match s with
     | T_add_var (v, _)

@@ -14,19 +14,14 @@ open Tast_to_texpr
 open Sig.Constraints
 open Sig.Ranking
 open Sig.Domain
-open LinearConstraint
-
-module type AP_NUMERICAL = sig
-  type lib
-
-  val manager : lib Manager.t
-  val supports_underapproximation : bool
-end
+open AP_LinearConstraint
 
 (** Single partition of the domain of a ranking function represented by an APRON
     numerical abstract domain. *)
-module AP_Partition (N : AP_NUMERICAL) (C : AP_CONSTRAINT) : PARTITION = struct
+module AP_Partition (N : AP_NUMERICAL) (C : AP_CONSTRAINT) : AP_PARTITION =
+struct
   module C = C
+  module N = N
   module BanalApron = Banal_apron_domain.ApronDomain (N)
 
   type env = C.env
@@ -35,9 +30,9 @@ module AP_Partition (N : AP_NUMERICAL) (C : AP_CONSTRAINT) : PARTITION = struct
     constraints : C.t list; (* representation as list of constraints *)
     env : C.env; (* environements over which the constraints are defined *)
   }
-  (** An element of the numerical abstract domain. *)
 
   type apron_t = N.lib Abstract1.t
+  (** An element of the numerical abstract domain. *)
 
   (** The current representation as list of linear constraints. *)
   let constraints t =
@@ -47,15 +42,25 @@ module AP_Partition (N : AP_NUMERICAL) (C : AP_CONSTRAINT) : PARTITION = struct
         try
           (* equality constraints are turned into pairs of inequalities *)
           let c1, c2 = C.expand c in
+          c1.cons :: c2.cons :: cs
+        with Invalid_argument _ -> c.cons :: cs)
+      t.constraints []
+      
+  let conjunction t =
+    List.fold_right
+      (fun c cs ->
+        (* warning: fold_left impacts speed and result of the analysis *)
+        try
+          (* equality constraints are turned into pairs of inequalities *)
+          let c1, c2 = C.expand c in
           c1 :: c2 :: cs
         with Invalid_argument _ -> c :: cs)
       t.constraints []
-
   (** The environment of constraints. *)
   let env t = t.env
 
   (** The current underlying APRON environment. *)
-  let ap_env t = t.env.ap_env
+  let ap_env env = env.ap_env
 
   (** The current list of variables used by the constraints i.e bind in the
       APRON environment. *)
@@ -69,7 +74,7 @@ module AP_Partition (N : AP_NUMERICAL) (C : AP_CONSTRAINT) : PARTITION = struct
 
   (** Converts t into an apron_t *)
   let to_apron_t (t : t) : apron_t =
-    let ap_env = ap_env t in
+    let ap_env = env t |> ap_env in
     let a = Lincons1.array_make ap_env (List.length t.constraints) in
     let i = ref 0 in
     List.iter
@@ -93,13 +98,13 @@ module AP_Partition (N : AP_NUMERICAL) (C : AP_CONSTRAINT) : PARTITION = struct
   let bot e = { constraints = [ C.make_unsat e ]; env = e }
 
   let inner e cs = { constraints = cs; env = e }
-  
+
   (** Returns the top elements: an empty list <-> no constraints*)
   let top e = { constraints = []; env = e }
 
   let print fmt b =
     let env = env b in
-    let b = to_apron_t b in 
+    let b = to_apron_t b in
     let a = Abstract1.to_lincons_array manager b in
     let cs = ref [] in
     for i = 0 to Lincons1.array_length a - 1 do
@@ -143,14 +148,14 @@ module AP_Partition (N : AP_NUMERICAL) (C : AP_CONSTRAINT) : PARTITION = struct
   let meet kind = lift2_apron Abstract1.meet
 
   (**)
-  let add_var_to_env = BanalApron.add_var_to_env
+  let add_var_to_env = fun env x -> {env with ap_env = BanalApron.add_var_to_env env.ap_env x}
 
   let fwd_assign b ((x, t, ext), e) =
     match x with
     | T_var x when String.starts_with ~prefix:"nondet_" x.var_name -> b
     | T_var x ->
         let env = env b in
-        let ap_env = ap_env b in
+        let ap_env = ap_env env in
         let e = Texpr1.of_expr ap_env (exp_to_apron e) in
         let b =
           Abstract1.assign_texpr manager (to_apron_t b)
@@ -177,12 +182,13 @@ module AP_Partition (N : AP_NUMERICAL) (C : AP_CONSTRAINT) : PARTITION = struct
         of_apron_t env assigned
     | _ -> raise (Invalid_argument "ubwd_assign: unexpected lvalue")
 
-  let bwd_assign b ((x, t, ext), e) =
+  let bwd_assign b (lv, e) =
+    let (x, t, ext) : expr typed = lv in
     match x with
     | T_var x ->
         let f manager b (x, e) : t =
-          let env = env t in
-          let ap_env = ap_env t in
+          let env = env b in
+          let ap_env = ap_env env in
           let e = Texpr1.of_expr ap_env (exp_to_apron e) in
           let b =
             Abstract1.substitute_texpr manager (to_apron_t b)
@@ -200,7 +206,7 @@ module AP_Partition (N : AP_NUMERICAL) (C : AP_CONSTRAINT) : PARTITION = struct
         else f manager b (x, e)
     | _ -> raise (Invalid_argument "bwd_assign: unexpected lvalue")
 
-  let filter_underapprox (t : t) (e : expr typed) : t =
+  let ubwd_filter (t : t) (e : expr typed) : t =
     if not N.supports_underapproximation then
       raise
         (Invalid_argument
@@ -215,7 +221,7 @@ module AP_Partition (N : AP_NUMERICAL) (C : AP_CONSTRAINT) : PARTITION = struct
     let filtered = BanalApron.bwd_filter at bot () e () pre in
     of_apron_t env filtered
 
-  let filter b (e, t, ext) =
+  let bwd_filter b (e, t, ext) =
     let rec f manager b (e, t, ext) =
       match e with
       | T_bool_const True -> b
@@ -229,7 +235,7 @@ module AP_Partition (N : AP_NUMERICAL) (C : AP_CONSTRAINT) : PARTITION = struct
           f manager b (T_binary (op, e1, (T_bool_const Maybe, t, ext)), t, ext)
       | T_int_const _ | T_var _ ->
           let env = env b in
-          let ap_env = ap_env b in
+          let ap_env = ap_env env in
           let e = exp_to_apron (e, t, ext) in
           let e1 = Texpr1.of_expr ap_env e in
           let b = to_apron_t b in
@@ -248,7 +254,7 @@ module AP_Partition (N : AP_NUMERICAL) (C : AP_CONSTRAINT) : PARTITION = struct
       | T_unary (A_UNARY_PLUS, e) -> f manager b e
       | T_unary (A_UNARY_MINUS, e) ->
           let env = env b in
-          let ap_env = ap_env b in
+          let ap_env = ap_env env in
           let e = exp_to_apron e in
           let b = to_apron_t b in
           let eneg =
@@ -286,7 +292,7 @@ module AP_Partition (N : AP_NUMERICAL) (C : AP_CONSTRAINT) : PARTITION = struct
               f manager b (bop, t, ext)
           | o -> (
               let env = env b in
-              let ap_env = ap_env b in
+              let ap_env = ap_env env in
               let b = to_apron_t b in
               match o with
               | A_LESS ->
@@ -336,38 +342,35 @@ module AP_Partition (N : AP_NUMERICAL) (C : AP_CONSTRAINT) : PARTITION = struct
   (**)
 end
 
+module AP_Box : AP_NUMERICAL = struct
+  type lib = Box.t
+
+  let manager = Box.manager_alloc ()
+  let supports_underapproximation = false
+end
+
+module AP_Oct : AP_NUMERICAL = struct
+  type lib = Oct.t
+
+  let manager = Oct.manager_alloc ()
+  let supports_underapproximation = false
+end
+
+module AP_Poly : AP_NUMERICAL = struct
+  type lib = Polka.loose Polka.t
+
+  let manager = Polka.manager_alloc_loose ()
+  let supports_underapproximation = true
+end
+
+module B = AP_Partition (AP_Box) (AP_LinearConstraint)
 (** Single partition of the domain of a ranking function represented by the
     boxes numerical abstract domain. *)
-module B =
-  AP_Partition
-    (struct
-      type lib = Box.t
 
-      let manager = Box.manager_alloc ()
-      let supports_underapproximation = false
-    end)
-    (LinearConstraint)
-
+module O = AP_Partition (AP_Oct) (AP_LinearConstraint)
 (** Single partition of the domain of a ranking function represented by the
     octagons abstract domain. *)
-module O =
-  AP_Partition
-    (struct
-      type lib = Oct.t
 
-      let manager = Oct.manager_alloc ()
-      let supports_underapproximation = false
-    end)
-    (LinearConstraint)
-
+module P = AP_Partition (AP_Poly) (AP_LinearConstraint)
 (** Single partition of the domain of a ranking function represented by the
     polyhedra abstract domain. *)
-module P =
-  AP_Partition
-    (struct
-      type lib = Polka.loose Polka.t
-
-      let manager = Polka.manager_alloc_loose ()
-      let supports_underapproximation = true
-    end)
-    (LinearConstraint)

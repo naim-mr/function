@@ -5,57 +5,67 @@
 
 open Typed_syntax
 open Apron
-open AP_Partition
 open Sig.Ranking
 open Tast_to_texpr
 open Utils
 open Apron_utils
 open Sig
+open Sig.Domain
+open AP_Partition
 
-module Affine (B : AP_PARTITION) : FUNCTION = struct
+module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
   module B = B
 
   (**)
 
-  let manager = B.manager
+  let manager = N.manager
 
-  type a = Bot | Fun of Linexpr1.t | Top
-  type f = { ranking : a; env : Environment.t; vars : var list }
+  type rank = Bot | Fun of Linexpr1.t | Top
+  type env = B.env
+  type t = { ranking : rank; env : env }
+
+  let ct_of_lincons f b =
+    let cs : B.C.t list =
+      List.map
+        (fun (c : B.C.cons) ->
+          let c : B.C.t = { cons = c; env = B.env b } in
+          c)
+        f
+    in
+    cs
 
   let v = Var.of_string "#"
   let ranking f = f.ranking
   let env f = f.env
-  let vars f = f.vars
+  let ap_env env = B.ap_env env
+  let vars f = (env f).vars
 
   (**)
 
   let reinit f =
-    match f.ranking with
-    | Top -> { ranking = Bot; env = f.env; vars = f.vars }
-    | _ -> f
+    match f.ranking with Top -> { ranking = Bot; env = env f } | _ -> f
 
-  let bot e vs = { ranking = Bot; env = e; vars = vs }
+  let bot e = { ranking = Bot; env = e }
 
-  let zero e vs =
+  let zero e =
     {
-      ranking = Fun (Linexpr1.make (Environment.add e [| v |] [||]));
+      ranking = Fun (Linexpr1.make (Environment.add (ap_env e) [| v |] [||]));
       env = e;
-      vars = vs;
     }
 
-  let top e vs = { ranking = Top; env = e; vars = vs }
+  let top e = { ranking = Top; env = e }
 
   (**)
 
   let is_bot f = match f.ranking with Bot -> true | _ -> false
   let defined f = match f.ranking with Fun _ -> true | _ -> false
-  let isTop f = match f.ranking with Top -> true | _ -> false
+  let is_top f = match f.ranking with Top -> true | _ -> false
 
   let is_eq b f1 f2 =
     (* b = domain of first/second function, f1/f2 = value of first/second function *)
     match (f1.ranking, f2.ranking) with
     | Fun f1, Fun f2 ->
-        let env = Environment.add (B.env b) [| v |] [||] in
+        let env = Environment.add (B.env b |> B.ap_env) [| v |] [||] in
         (* adding special variable # to environment of b *)
         let l = List.length (B.constraints b) + 1 in
         (* l = |b| + 1 *)
@@ -88,7 +98,7 @@ module Affine (B : AP_PARTITION) : FUNCTION = struct
     (* b = domain of first/second function, f1/f2 = value of first/second function *)
     match (f1.ranking, f2.ranking) with
     | Fun f1, Fun f2 ->
-        let env = Environment.add (B.env b) [| v |] [||] in
+        let env = Environment.add (B.env b |> B.ap_env) [| v |] [||] in
         (* adding special variable # to environment of b *)
         let l = List.length (B.constraints b) + 2 in
         (* l = |b| + 2 *)
@@ -110,21 +120,30 @@ module Affine (B : AP_PARTITION) : FUNCTION = struct
         (* adding constraint # = f2 to a *)
         let p = Abstract1.of_lincons_array manager env a in
         (* remove # special variable *)
-        let p = Abstract1.change_environment manager p (B.env b) false in
+        let p =
+          Abstract1.change_environment manager p (B.env b |> B.ap_env) false
+        in
         let cc = Abstract1.to_lincons_array manager p in
         let f = ref [] in
         for i = 0 to Lincons1.array_length cc - 1 do
           f := Lincons1.array_get cc i :: !f
         done;
-        B.inner (B.env b) (B.vars b) !f
+        let cs : B.C.t list =
+          List.map
+            (fun (c : B.C.cons) ->
+              let c : B.C.t = { cons = c; env = B.env b } in
+              c)
+            !f
+        in
+        B.inner (B.env b) cs
     | Bot, Bot | Top, Top -> b
-    | _ -> B.bot (B.env b) (B.vars b)
+    | _ -> B.bot (B.env b)
 
   let is_leq k b f1 f2 =
     (* k = kind of test, b = domain of first/second function, f1/f2 = value of first/second function *)
     match (f1.ranking, f2.ranking) with
     | Fun f1, Fun f2 ->
-        let env = Environment.add (B.env b) [| v |] [||] in
+        let env = Environment.add (B.env b |> B.ap_env) [| v |] [||] in
         (* adding special variable # to environment of b *)
         let l = List.length (B.constraints b) + 1 in
         (* l = |b| + 1 *)
@@ -179,7 +198,7 @@ module Affine (B : AP_PARTITION) : FUNCTION = struct
     (* k = kind of join, b = domain of first/second function, f1/f2 = value of first/second function *)
     match (f1, f2) with
     | Fun f1, Fun f2 ->
-        let env = Environment.add (B.env b) [| v |] [||] in
+        let env = Environment.add (B.env b |> B.ap_env) [| v |] [||] in
         (* adding special variable # to environment of b *)
         let l = List.length (B.constraints b) + 1 in
         (* l = |b| + 1 *)
@@ -251,8 +270,8 @@ module Affine (B : AP_PARTITION) : FUNCTION = struct
                 (* There exists a constraint minimizing f1 and f2*)
                 (* f is the smaller element of the list *)
                 let f =
-                  Lincons1.get_linexpr1
-                    (List.hd (List.sort Constraints.C.compare !f))
+                  B.C.linexpr
+                    (List.hd (List.sort B.C.compare (ct_of_lincons !f b)))
                 in
                 Linexpr1.set_coeff f v (Coeff.s_of_int 0);
                 Fun f (* defined join function *))
@@ -294,11 +313,7 @@ module Affine (B : AP_PARTITION) : FUNCTION = struct
     | _ -> Top
 
   let join ?(random = false) k b f1 f2 =
-    {
-      ranking = join_ranking ~random k b f1.ranking f2.ranking;
-      env = f1.env;
-      vars = f1.vars;
-    }
+    { ranking = join_ranking ~random k b f1.ranking f2.ranking; env = f1.env }
 
   let mulScalar c1 c2 =
     match (c1, c2) with
@@ -370,7 +385,7 @@ module Affine (B : AP_PARTITION) : FUNCTION = struct
     (*REMOVE?*)
     match (f1, f2) with
     | Fun f1, Fun f2 ->
-        let env = Environment.add (B.env b) [| v |] [||] in
+        let env = Environment.add (B.env b |> B.ap_env) [| v |] [||] in
         (* adding special variable # to environment of b *)
         let l = List.length (B.constraints b) + 1 in
         (* l = |b| + 1 *)
@@ -425,11 +440,7 @@ module Affine (B : AP_PARTITION) : FUNCTION = struct
     | _, Bot -> f1
 
   let learn b f1 f2 =
-    {
-      ranking = learn_ranking b f1.ranking f2.ranking;
-      env = f1.env;
-      vars = f1.vars;
-    }
+    { ranking = learn_ranking b f1.ranking f2.ranking; env = f1.env }
 
   let widen_ranking b f1 f2 =
     (* b = domain of first/second function, f1/f2 = value of first/second function *)
@@ -445,7 +456,7 @@ module Affine (B : AP_PARTITION) : FUNCTION = struct
     (* REMOVE ? *)
     match (f1, f2) with
     | Fun f1, Fun f2 ->
-        let env = Environment.add (B.env b) [| v |] [||] in
+        let env = Environment.add (B.env b |> B.ap_env) [| v |] [||] in
         (* adding special variable # to environment of b *)
         let l = List.length (B.constraints b) + 1 in
         (* l = |b| + 1 *)
@@ -501,16 +512,12 @@ module Affine (B : AP_PARTITION) : FUNCTION = struct
     | _ -> Top
 
   let widen ?(jokers = 0) b f1 f2 =
-    {
-      ranking = widen_ranking b f1.ranking f2.ranking;
-      env = f1.env;
-      vars = f1.vars;
-    }
+    { ranking = widen_ranking b f1.ranking f2.ranking; env = f1.env }
 
   let extend_ranking b1 b2 f1 f2 =
     match (f1, f2) with
     | Fun f1, Fun f2 ->
-        let env = Environment.add (B.env b1) [| v |] [||] in
+        let env = Environment.add (B.env b1 |> B.ap_env) [| v |] [||] in
         (* adding special variable # to environment of b *)
         let l1 = List.length (B.constraints b1) + 1 in
         (* l1 = |b1| + 1 *)
@@ -576,19 +583,15 @@ module Affine (B : AP_PARTITION) : FUNCTION = struct
     | _ -> f2
 
   let extend b1 b2 f1 f2 =
-    {
-      ranking = extend_ranking b1 b2 f1.ranking f2.ranking;
-      env = f1.env;
-      vars = f1.vars;
-    }
+    { ranking = extend_ranking b1 b2 f1.ranking f2.ranking; env = f1.env }
 
   (**)
 
   let reset f =
     {
-      ranking = Fun (Linexpr1.make (Environment.add f.env [| v |] [||]));
+      ranking =
+        Fun (Linexpr1.make (Environment.add (env f |> ap_env) [| v |] [||]));
       env = f.env;
-      vars = f.vars;
     }
 
   let addScalar c1 c2 =
@@ -633,8 +636,7 @@ module Affine (B : AP_PARTITION) : FUNCTION = struct
         Fun f
     | _ -> f
 
-  let predecessor f =
-    { ranking = predecessor_ranking f.ranking; env = f.env; vars = f.vars }
+  let predecessor f = { ranking = predecessor_ranking f.ranking; env = f.env }
 
   let successor_ranking f =
     match f with
@@ -644,8 +646,7 @@ module Affine (B : AP_PARTITION) : FUNCTION = struct
         Fun f
     | _ -> f
 
-  let successor f =
-    { ranking = successor_ranking f.ranking; env = f.env; vars = f.vars }
+  let successor f = { ranking = successor_ranking f.ranking; env = f.env }
 
   let plus_ranking b f1 f2 =
     (* b = domain of first/second function, f1/f2 = value of first/second
@@ -653,7 +654,7 @@ module Affine (B : AP_PARTITION) : FUNCTION = struct
     (*REMOVE?*)
     match (f1, f2) with
     | Fun f1, Fun f2 ->
-        let env = Environment.add (B.env b) [| v |] [||] in
+        let env = Environment.add (B.env b |> B.ap_env) [| v |] [||] in
         let f1 = Linexpr1.copy f1 and f2 = Linexpr1.copy f2 in
         let f1' = ref Seq.empty in
         let f2' = ref Seq.empty in
@@ -671,11 +672,7 @@ module Affine (B : AP_PARTITION) : FUNCTION = struct
     | _, Top | Top, _ -> Top
 
   let plus b f1 f2 =
-    {
-      ranking = plus_ranking b f1.ranking f2.ranking;
-      env = f1.env;
-      vars = f1.vars;
-    }
+    { ranking = plus_ranking b f1.ranking f2.ranking; env = f1.env }
 
   let bwd_assign_ranking f ((x, t, ext), e) =
     match x with
@@ -706,9 +703,23 @@ module Affine (B : AP_PARTITION) : FUNCTION = struct
     | _ -> raise (Invalid_argument "Box.fwd_assign: unexpected lvalue")
 
   let bwd_assign f (x, e) =
-    { ranking = bwd_assign_ranking f.ranking (x, e); env = f.env; vars = f.vars }
+    { ranking = bwd_assign_ranking f.ranking (x, e); env = f.env }
 
   let filter f _ = successor f
+  let bwd_filter = filter
+
+  let meet =
+    raise (Invalid_argument "Meet of affines functions not implemented")
+
+  let ubwd_filter =
+    raise
+      (Invalid_argument
+         "Underapprox BwdFilter of affines functions not implemented")
+
+  let ubwd_assign =
+    raise
+      (Invalid_argument
+         "Underapprox BwdAssign of affines functions not implemented")
 
   (**)
 
@@ -740,7 +751,7 @@ module Affine (B : AP_PARTITION) : FUNCTION = struct
             if v <> "" then Format.fprintf fmt "%s" v);
           first := false
     in
-    let vars = f.vars in
+    let vars = vars f in
     match f.ranking with
     | Fun f ->
         Linexpr1.iter
@@ -762,6 +773,6 @@ module Affine (B : AP_PARTITION) : FUNCTION = struct
     | Top -> Format.fprintf fmt "top"
 end
 
-module AB = Affine (B)
-module AO = Affine (O)
-module AP = Affine (P)
+module AB = AP_Affine (B.N) (B)
+module AO = AP_Affine (O.N) (O)
+module AP = AP_Affine (P.N) (P)

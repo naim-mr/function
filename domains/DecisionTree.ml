@@ -16,12 +16,12 @@
 (***************************************************)
 
 open Typed_syntax
-open Affines
-open Apron
-open Signature
+open AP_Affines
+open Sig.Domain
+open Sig
+open Sig.Ranking
 open Config
-open Functions
-open Ordinals
+open AP_Ordinals
 
 (** The ranking functions abstract domain is an abstract domain functor T. It is
     parameterized by an auxiliary abstract domain for linear constraints C, and
@@ -57,13 +57,16 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
       recursively partition the space of possible values of the program
       variables and the functions at the leaves provide the corresponding upper
       bounds on the number of program execution steps to termination. *)
-  type tree = Bot | Leaf of F.f | Node of L.t * tree * tree
+  type tree = Bot | Leaf of F.t | Node of L.t * tree * tree
+
+  type env = {
+    f_env : F.env;
+    domain : B.t option; (* current reachable program states *)
+  }
 
   type t = {
-    domain : B.t option; (* current reachable program states *)
     tree : tree; (* current piecewise-defined ranking function *)
-    env : Environment.t; (* current APRON environment *)
-    vars : var list (* current list of program variables *);
+    env : env;
   }
   (** An element of the ranking functions abstract domain. *)
 
@@ -71,13 +74,13 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
   let tree t = t.tree
 
   (** Prints the current decision tree. *)
-  let print_tree vars fmt t =
+  let print_tree fmt t =
     let rec aux ind fmt t =
       match t with
       | Bot -> Format.fprintf fmt "\n%sNIL" ind
       | Leaf f -> Format.fprintf fmt "\n%sLEAF %a" ind F.print f
       | Node ((c, _), l, r) ->
-          Format.fprintf fmt "\n%sNODE %a%a%a" ind (C.print vars) c
+          Format.fprintf fmt "\n%sNODE %a%a%a" ind C.print c
             (aux (ind ^ "  "))
             l
             (aux (ind ^ "  "))
@@ -96,8 +99,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
               ( "Node",
                 `Assoc
                   [
-                    ( "constraint",
-                      `String (Format.asprintf "%a" (C.print vars) c) );
+                    ("constraint", `String (Format.asprintf "%a" C.print c));
                     ("left", aux l);
                     ("right", aux r);
                   ] );
@@ -110,7 +112,6 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
      http://www.graphviz.org/content/dot-language
   *)
   let print_graphviz_dot fmt t =
-    let vars = t.vars in
     let nodeId = ref 0 in
     let nextNodeId () =
       let id = !nodeId in
@@ -130,7 +131,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
              [label=\"\",width=.1,style=invis] ; %s -- %s ; %s -- %s \
              [style=invis] ; %s -- %s [style=dashed] {rank=same %s -- %s -- %s \
              [style=invis]} ; %a; %a"
-            id (C.print vars) c hiddenId id leftId id hiddenId id rightId leftId
+            id C.print c hiddenId id leftId id hiddenId id rightId leftId
             hiddenId rightId (aux leftId) l (aux rightId) r
     in
     Format.fprintf fmt "graph G { %a }" (aux (nextNodeId ())) t.tree
@@ -151,16 +152,13 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
 
   (* map function for decision tree*)
   let tree_map f_bot f_leaf t : t =
-    let domain = t.domain in
-    let env = t.env in
-    let vars = t.vars in
     let rec aux (tree : tree) : tree =
       match tree with
       | Bot -> f_bot
       | Leaf f -> f_leaf f
       | Node (c, l, r) -> Node (c, aux l, aux r)
     in
-    { domain; tree = aux t.tree; env; vars }
+    { t with tree = aux t.tree }
 
   (** Sorts (and normalizes the constraints within) a decision tree `t`.
 
@@ -407,20 +405,19 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
         Node (c, sl, sr)
     | _ -> st
 
+  let is_bot t = match t.tree with Leaf f when F.is_bot f -> true | _ -> false
+
   (** The bottom element of the abstract domain. The totally undefined function,
       i.e., a decision tree with a single `bottom` leaf. *)
-  let bot ?domain e vs =
-    { domain; tree = Leaf (F.bot e vs); env = e; vars = vs }
+  let bot e = { tree = Leaf (F.bot e.f_env); env = e }
 
   (** The total function equal to zero, i.e., a decision tree with a single leaf
       with value zero. *)
-  let zero ?domain e vs =
-    { domain; tree = Leaf (F.zero e vs); env = e; vars = vs }
+  let zero e = { tree = Leaf (F.zero e.f_env); env = e }
 
   (** The top element of the abstract domain. The totally unknown function,
       i.e., a decision tree with a single `top` leaf. *)
-  let top ?domain e vs =
-    { domain; tree = Leaf (F.top e vs); env = e; vars = vs }
+  let top e = { tree = Leaf (F.top e.f_env); env = e }
 
   (** BINARY OPERATORS *)
   let domain_zero t =
@@ -428,17 +425,17 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
       match tree with
       | Bot -> tree
       | Leaf f when not (F.defined f) -> tree
-      | Leaf _ -> Leaf (F.zero t.env t.vars)
+      | Leaf _ -> Leaf (F.zero t.env.f_env)
       | Node ((c, nc), l, r) -> Node ((c, nc), aux l, aux r)
     in
     { t with tree = aux t.tree }
 
-  let tree_unification_aux t1 t2 env vars cs =
+  let tree_unification_aux t1 t2 f_env cs =
     let rec aux (t1, t2) cs =
       match (t1, t2) with
       | Bot, Bot -> (t1, t2)
       | Bot, Leaf _ | Leaf _, Bot | Leaf _, Leaf _ ->
-          if B.isBot (B.inner env vars cs) then (Bot, Bot) else (t1, t2)
+          if B.is_bot (B.inner f_env cs) then (Bot, Bot) else (t1, t2)
       | Node ((c1, nc1), l1, r1), Node ((c2, nc2), l2, r2)
         when C.is_eq c1 c2 (* c1 = c2 *) ->
           let ul1, ul2 = aux (l1, l2) (c1 :: cs) in
@@ -446,13 +443,13 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
           (Node ((c1, nc1), ul1, ur1), Node ((c2, nc2), ul2, ur2))
       | Node ((c1, nc1), l1, r1), Node ((c2, nc2), l2, r2)
         when C.is_leq c1 c2 (* c1 < c2 *) ->
-          let bcs = B.inner env vars cs in
-          let bc1 = B.inner env vars [ c1 ] in
-          if B.is_leq bcs bc1 then (* c1 is redundant *)
+          let bcs = B.inner f_env cs in
+          let bc1 = B.inner f_env [ c1 ] in
+          if B.is_leq COMPUTATIONAL bcs bc1 then (* c1 is redundant *)
             aux (l1, t2) cs
           else (* c1 is not redundant *)
-            let bnc1 = B.inner env vars [ nc1 ] in
-            if B.is_leq bcs bnc1 then (* nc1 is redundant *)
+            let bnc1 = B.inner f_env [ nc1 ] in
+            if B.is_leq COMPUTATIONAL bcs bnc1 then (* nc1 is redundant *)
               aux (r1, t2) cs
             else (* nc1 is not redundant *)
               let ul1, ul2 = aux (l1, t2) (c1 :: cs) in
@@ -460,34 +457,40 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
               (Node ((c1, nc1), ul1, ur1), Node ((c1, nc1), ul2, ur2))
       | Node ((c1, nc1), l1, r1), Node ((c2, nc2), l2, r2)
         when C.is_leq c2 c1 (* c1 > c2 *) ->
-          let bcs = B.inner env vars cs in
-          let bc2 = B.inner env vars [ c2 ] in
-          if B.is_leq bcs bc2 then (* c2 is redundant *) aux (t1, l2) cs
+          let bcs = B.inner f_env cs in
+          let bc2 = B.inner f_env [ c2 ] in
+          if B.is_leq COMPUTATIONAL bcs bc2 then (* c2 is redundant *)
+            aux (t1, l2) cs
           else (* c2 is not redundant *)
-            let bnc2 = B.inner env vars [ nc2 ] in
-            if B.is_leq bcs bnc2 then (* nc2 is redundant *) aux (t1, r2) cs
+            let bnc2 = B.inner f_env [ nc2 ] in
+            if B.is_leq COMPUTATIONAL bcs bnc2 then (* nc2 is redundant *)
+              aux (t1, r2) cs
             else (* nc2 is not redundant *)
               let ul1, ul2 = aux (t1, l2) (c2 :: cs) in
               let ur1, ur2 = aux (t1, r2) (nc2 :: cs) in
               (Node ((c2, nc2), ul1, ur1), Node ((c2, nc2), ul2, ur2))
       | Node ((c1, nc1), l1, r1), _ ->
-          let bcs = B.inner env vars cs in
-          let bc1 = B.inner env vars [ c1 ] in
-          if B.is_leq bcs bc1 then (* c1 is redundant *) aux (l1, t2) cs
+          let bcs = B.inner f_env cs in
+          let bc1 = B.inner f_env [ c1 ] in
+          if B.is_leq COMPUTATIONAL bcs bc1 then (* c1 is redundant *)
+            aux (l1, t2) cs
           else (* c1 is not redundant *)
-            let bnc1 = B.inner env vars [ nc1 ] in
-            if B.is_leq bcs bnc1 then (* nc1 is redundant *) aux (r1, t2) cs
+            let bnc1 = B.inner f_env [ nc1 ] in
+            if B.is_leq COMPUTATIONAL bcs bnc1 then (* nc1 is redundant *)
+              aux (r1, t2) cs
             else (* nc1 is not redundant *)
               let ul1, ul2 = aux (l1, t2) (c1 :: cs) in
               let ur1, ur2 = aux (r1, t2) (nc1 :: cs) in
               (Node ((c1, nc1), ul1, ur1), Node ((c1, nc1), ul2, ur2))
       | _, Node ((c2, nc2), l2, r2) ->
-          let bcs = B.inner env vars cs in
-          let bc2 = B.inner env vars [ c2 ] in
-          if B.is_leq bcs bc2 then (* c2 is redundant *) aux (t1, l2) cs
+          let bcs = B.inner f_env cs in
+          let bc2 = B.inner f_env [ c2 ] in
+          if B.is_leq COMPUTATIONAL bcs bc2 then (* c2 is redundant *)
+            aux (t1, l2) cs
           else (* c2 is not redundant *)
-            let bnc2 = B.inner env vars [ nc2 ] in
-            if B.is_leq bcs bnc2 then (* nc2 is redundant *) aux (t1, r2) cs
+            let bnc2 = B.inner f_env [ nc2 ] in
+            if B.is_leq COMPUTATIONAL bcs bnc2 then (* nc2 is redundant *)
+              aux (t1, r2) cs
             else (* nc2 is not redundant *)
               let ul1, ul2 = aux (t1, l2) (c2 :: cs) in
               let ur1, ur2 = aux (t1, r2) (nc2 :: cs) in
@@ -503,7 +506,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
       negation is redundant with respect to `cs`.
 
       The implementation assumes that t1 and t2 are sorted and normalized. *)
-  let tree_unification t1 t2 env vars = tree_unification_aux t1 t2 env vars []
+  let tree_unification t1 t2 env = tree_unification_aux t1 t2 env.f_env []
 
   (** The decision tree ordering is parameterized by the choice of the ordering
       `k` between leaf nodes, i.e., approximation or computational ordering.
@@ -516,29 +519,27 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
       reachable states, the same APRON envorinment and the same list of program
       variables. *)
   let is_leq k t1 t2 =
-    let domain = t1.domain in
     (* assuming t1.domain = t2.domain *)
     let env = t1.env in
+    let f_env = env.f_env in
     (* assuming t1.env = t2.env *)
-    let vars = t1.vars in
-    (* assuming t1.vars = t2.vars *)
     let rec aux (t1, t2) cs =
       match (t1, t2) with
       | Bot, Bot -> true
       | Bot, _ | _, Bot ->
           let b =
-            match domain with
-            | None -> B.inner env vars cs
-            | Some domain -> B.meet (B.inner env vars cs) domain
+            match env.domain with
+            | None -> B.inner f_env cs
+            | Some domain -> B.meet COMPUTATIONAL (B.inner f_env cs) domain
           in
-          B.isBot b
+          B.is_bot b
       | Leaf f1, Leaf f2 -> (
           let b =
-            match domain with
-            | None -> B.inner env vars cs
-            | Some domain -> B.meet (B.inner env vars cs) domain
+            match env.domain with
+            | None -> B.inner f_env cs
+            | Some domain -> B.meet COMPUTATIONAL (B.inner f_env cs) domain
           in
-          if B.isBot b then true
+          if B.is_bot b then true
           else
             match k with
             | APPROXIMATION | RESILIENCE ->
@@ -549,12 +550,13 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
                     F.is_leq k b f1 f2
                   else true
                 else false
-            | COMPUTATIONAL -> F.is_leq k b f1 f2 (* forall x: f1(x) <= f2(x) *))
+            | COMPUTATIONAL -> F.is_leq k b f1 f2 (* forall x: f1(x) <= f2(x) *)
+          )
       | Node ((c1, nc1), l1, r1), Node ((c2, nc2), l2, r2) when C.is_eq c1 c2 ->
           aux (l1, l2) (c1 :: cs) && aux (r1, r2) (nc1 :: cs)
       | _ -> raise (Invalid_argument "is_leq:")
     in
-    aux (tree_unification t1.tree t2.tree env vars) []
+    aux (tree_unification t1.tree t2.tree env) []
 
   (*
     The 'tree_join_helper' function can be used to generalize the joining of two trees.
@@ -567,10 +569,10 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
 
     All of the above take the set of constraints 'cs' leading up to that tree node and the corresponding leaf value(s) as argument.
   *)
-  let tree_join_helper (fBotLeft : C.t list -> F.f -> tree)
-      (fBotRight : C.t list -> F.f -> tree)
-      (fLeaf : C.t list -> F.f -> F.f -> tree) (tree1 : tree) (tree2 : tree) env
-      vars =
+  let tree_join_helper (fBotLeft : C.t list -> F.t -> tree)
+      (fBotRight : C.t list -> F.t -> tree)
+      (fLeaf : C.t list -> F.t -> F.t -> tree) (tree1 : tree) (tree2 : tree) env
+      =
     let rec aux (t1, t2) cs =
       match (t1, t2) with
       | Bot, Bot -> Bot
@@ -584,26 +586,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
           Node ((c1, nc1), l, r)
       | _ -> raise (Invalid_argument "tree_join_helper: invalid tree structure")
     in
-    aux (tree_unification tree1 tree2 env vars) []
-
-  let tree_join k (t1, t2) domain env vars =
-    let fBotLeftRight cs f =
-      let b =
-        match domain with
-        | None -> B.inner env vars cs
-        | Some domain -> B.meet (B.inner env vars cs) domain
-      in
-      if B.isBot b then Bot else Leaf f
-    in
-    let fLeaf cs f1 f2 =
-      let b =
-        match domain with
-        | None -> B.inner env vars cs
-        | Some domain -> B.meet (B.inner env vars cs) domain
-      in
-      if B.isBot b then Bot else Leaf (F.join k b f1 f2)
-    in
-    tree_join_helper fBotLeftRight fBotLeftRight fLeaf t1 t2 env vars
+    aux (tree_unification tree1 tree2 env) []
 
   (** The decision tree join is parameterized by the choice of the join `k`
       between leaf nodes, i.e., approximation or computational join. Given two
@@ -614,47 +597,64 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
       The implementation assumes that t1 and t2 are defined over the same
       reachable states, the same APRON envorinment and the same list of program
       variables. *)
-  let tree_plus (t1, t2) domain env vars =
+  let tree_join k (t1, t2) env =
+    let f_env = env.f_env in
+    let domain = env.domain in
     let fBotLeftRight cs f =
       let b =
         match domain with
-        | None -> B.inner env vars cs
-        | Some domain -> B.meet (B.inner env vars cs) domain
+        | None -> B.inner f_env cs
+        | Some domain -> B.meet COMPUTATIONAL (B.inner f_env cs) domain
       in
-      if B.isBot b then Bot else Leaf f
+      if B.is_bot b then Bot else Leaf f
     in
     let fLeaf cs f1 f2 =
       let b =
         match domain with
-        | None -> B.inner env vars cs
-        | Some domain -> B.meet (B.inner env vars cs) domain
+        | None -> B.inner f_env cs
+        | Some domain -> B.meet COMPUTATIONAL (B.inner f_env cs) domain
       in
-      if B.isBot b then Bot else Leaf (F.plus b f1 f2)
+      if B.is_bot b then Bot else Leaf (F.join k b f1 f2)
     in
-    tree_join_helper fBotLeftRight fBotLeftRight fLeaf t1 t2 env vars
+    tree_join_helper fBotLeftRight fBotLeftRight fLeaf t1 t2 env
+
+  let tree_plus (t1, t2) env =
+    let f_env = env.f_env in
+    let domain = env.domain in
+    let fBotLeftRight cs f =
+      let b =
+        match domain with
+        | None -> B.inner f_env cs
+        | Some domain -> B.meet COMPUTATIONAL (B.inner f_env cs) domain
+      in
+      if B.is_bot b then Bot else Leaf f
+    in
+    let fLeaf cs f1 f2 =
+      let b =
+        match domain with
+        | None -> B.inner f_env cs
+        | Some domain -> B.meet COMPUTATIONAL (B.inner f_env cs) domain
+      in
+      if B.is_bot b then Bot else Leaf (F.plus b f1 f2)
+    in
+    tree_join_helper fBotLeftRight fBotLeftRight fLeaf t1 t2 env
 
   let join k t1 t2 =
-    let t = tree_join k (t1.tree, t2.tree) t1.domain t1.env t1.vars in
+    let t = tree_join k (t1.tree, t2.tree) t1.env in
     {
-      domain = t1.domain;
-      (* assuming t1.domain = t2.domain *)
-      (* tree = tree_join k (t1.tree,t2.tree) t1.domain t1.env t1.vars; *)
+      (* tree = tree_join k (t1.tree,t2.tree) t1.domain t1.env ; *)
       tree = t;
       env = t1.env;
       (* assuming t1.env = t2.env *)
-      vars = t1.vars (* assuming t1.vars = t2.vars *);
     }
 
   let plus t1 t2 =
-    let t = tree_plus (t1.tree, t2.tree) t1.domain t1.env t1.vars in
+    let t = tree_plus (t1.tree, t2.tree) t1.env in
     {
-      domain = t1.domain;
-      (* assuming t1.domain = t2.domain *)
-      (* tree = tree_join k (t1.tree,t2.tree) t1.domain t1.env t1.vars; *)
+      (* tree = tree_join k (t1.tree,t2.tree) t1.domain t1.env ; *)
       tree = t;
       env = t1.env;
       (* assuming t1.env = t2.env *)
-      vars = t1.vars (* assuming t1.vars = t2.vars *);
     }
 
   (** Given two decision trees t1 and t2, the decision tree meet accumulates
@@ -677,13 +677,10 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
       tree. *)
 
   let meet (k : kind) (t1 : t) (t2 : t) =
-    let domain = t1.domain in
-    (* assuming t1.domain = t2.domain *)
-    let env = t1.env in
+    let f_env = t1.env.f_env in
+    let domain = t1.env.domain in
     (* assuming t1.env = t2.env *)
-    let vars = t1.vars in
-    (* assuming t1.vars = t2.vars *)
-    let botLeaf = Leaf (F.bot env vars) in
+    let botLeaf = Leaf (F.bot f_env) in
     let fBotLeftRight =
       match k with
       | APPROXIMATION ->
@@ -695,30 +692,29 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
     let fLeaf cs f1 f2 =
       let b =
         match domain with
-        | None -> B.inner env vars cs
-        | Some domain -> B.meet (B.inner env vars cs) domain
+        | None -> B.inner f_env cs
+        | Some domain -> B.meet COMPUTATIONAL (B.inner f_env cs) domain
       in
-      if B.isBot b then Bot else Leaf (F.join APPROXIMATION b f1 f2)
+      if B.is_bot b then Bot else Leaf (F.join APPROXIMATION b f1 f2)
       (* join leaf values using APPROXIMATION join *)
     in
     {
-      domain;
       tree =
-        tree_join_helper fBotLeftRight fBotLeftRight fLeaf t1.tree t2.tree env
-          vars;
-      env;
-      vars;
+        tree_join_helper fBotLeftRight fBotLeftRight fLeaf t1.tree t2.tree
+          t1.env;
+      env = t1.env;
     }
 
-  let left_unification ?(join_kind = COMPUTATIONAL) t1 t2 domain env vars =
+  let left_unification ?(join_kind = COMPUTATIONAL) t1 t2 domain env =
     let ls1 = tree_labels t1 in
     let ls2 = tree_labels t2 in
     let ls = LSet.diff ls2 ls1 in
+    let f_env = env.f_env in
     (* Checks whether constraint c is redundant, given the constraints cs *)
     let is_redundant c cs =
-      let bcs = B.inner env vars cs in
-      let bc = B.inner env vars [ c ] in
-      B.is_leq bcs bc
+      let bcs = B.inner f_env cs in
+      let bc = B.inner f_env [ c ] in
+      B.is_leq COMPUTATIONAL bcs bc
     in
     (* Compare l1 and l2, with labels not in t1 being greater
      * than all others, and thus will go to the bottom of the
@@ -808,8 +804,9 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
             | Leaf f1, Leaf f2 ->
                 let b =
                   match domain with
-                  | None -> B.inner env vars cs
-                  | Some domain -> B.meet (B.inner env vars cs) domain
+                  | None -> B.inner f_env cs
+                  | Some domain ->
+                      B.meet COMPUTATIONAL (B.inner f_env cs) domain
                 in
                 Leaf (F.join join_kind b f1 f2)
             | _, _ -> assert false)
@@ -850,24 +847,24 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
     (* TODO: domain widening *)
 
     (* let t2 = left_unification t2 [] in *)
-    (* Format.fprintf !Config.fmt "\nt2[left_unification]: %a\n" (print_tree vars) t2;
+    (* Format.fprintf !Config.fmt "\nt2[left_unification]: %a\n" (print_tree ) t2;
        domain_widen t1 *)
     t2
 
   let widen ?(jokers = 0) t1 t2 =
-    let domain = t1.domain in
     let env = t1.env in
-    let vars = t1.vars in
+    let domain = env.domain in
+    let f_env = env.f_env in
     let t1 = t1.tree and t2 = t2.tree in
     let rec widen_right (t1, t2) cs =
       match (t1, t2) with
       | Leaf f1, Leaf f2 ->
           let b =
             match domain with
-            | None -> B.inner env vars cs
-            | Some domain -> B.meet (B.inner env vars cs) domain
+            | None -> B.inner f_env cs
+            | Some domain -> B.meet COMPUTATIONAL (B.inner f_env cs) domain
           in
-          if F.is_leq COMPUTATIONAL b f1 f2 then t2 else Leaf (F.top env vars)
+          if F.is_leq COMPUTATIONAL b f1 f2 then t2 else Leaf (F.top f_env)
       | Node ((c1, nc1), l1, r1), Node ((c2, nc2), l2, r2)
         when C.is_eq c1 c2 (* c1 = c2 *) ->
           let l = widen_right (l1, l2) (c1 :: cs) in
@@ -875,12 +872,13 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
           Node ((c2, nc2), l, r)
       | Node ((c1, nc1), l1, r1), Node ((c2, _), _, _)
         when C.is_leq c1 c2 (* c1 < c2 *) ->
-          let bcs = B.inner env vars cs in
-          let bc1 = B.inner env vars [ c1 ] in
-          if B.is_leq bcs bc1 then (* c1 is redundant *) widen_right (l1, t2) cs
+          let bcs = B.inner f_env cs in
+          let bc1 = B.inner f_env [ c1 ] in
+          if B.is_leq COMPUTATIONAL bcs bc1 then (* c1 is redundant *)
+            widen_right (l1, t2) cs
           else (* c1 is not redundant *)
-            let bnc1 = B.inner env vars [ nc1 ] in
-            if B.is_leq bcs bnc1 then (* nc1 is redundant *)
+            let bnc1 = B.inner f_env [ nc1 ] in
+            if B.is_leq COMPUTATIONAL bcs bnc1 then (* nc1 is redundant *)
               widen_right (r1, t2) cs
             else (* nc1 is not redundant *)
               let l = widen_right (l1, t2) (c1 :: cs) in
@@ -892,12 +890,13 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
           let r = widen_right (t1, r2) (nc2 :: cs) in
           Node ((c2, nc2), l, r)
       | Node ((c1, nc1), l1, r1), _ ->
-          let bcs = B.inner env vars cs in
-          let bc1 = B.inner env vars [ c1 ] in
-          if B.is_leq bcs bc1 then (* c1 is redundant *) widen_right (l1, t2) cs
+          let bcs = B.inner f_env cs in
+          let bc1 = B.inner f_env [ c1 ] in
+          if B.is_leq COMPUTATIONAL bcs bc1 then (* c1 is redundant *)
+            widen_right (l1, t2) cs
           else (* c1 is not redundant *)
-            let bnc1 = B.inner env vars [ nc1 ] in
-            if B.is_leq bcs bnc1 then (* nc1 is redundant *)
+            let bnc1 = B.inner f_env [ nc1 ] in
+            if B.is_leq COMPUTATIONAL bcs bnc1 then (* nc1 is redundant *)
               widen_right (r1, t2) cs
             else (* nc1 is not redundant *)
               let l = widen_right (l1, t2) (c1 :: cs) in
@@ -915,8 +914,8 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
       | Leaf f1, Leaf f2 ->
           let b =
             match domain with
-            | None -> B.inner env vars cs
-            | Some domain -> B.meet (B.inner env vars cs) domain
+            | None -> B.inner f_env cs
+            | Some domain -> B.meet COMPUTATIONAL (B.inner f_env cs) domain
           in
           Leaf
             (F.widen
@@ -932,12 +931,14 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
               widen_up (r1, r2) (nc1 :: cs) )
       | Node ((c1, nc1), l1, r1), Node ((c2, _), _, _)
         when C.is_leq c1 c2 (* c1 < c2 *) ->
-          let bcs = B.inner env vars cs in
-          let bc1 = B.inner env vars [ c1 ] in
-          if B.is_leq bcs bc1 then (* c1 is redundant *) widen_up (l1, t2) cs
+          let bcs = B.inner f_env cs in
+          let bc1 = B.inner f_env [ c1 ] in
+          if B.is_leq COMPUTATIONAL bcs bc1 then (* c1 is redundant *)
+            widen_up (l1, t2) cs
           else (* c1 is not redundant *)
-            let bnc1 = B.inner env vars [ nc1 ] in
-            if B.is_leq bcs bnc1 then (* nc1 is redundant *) widen_up (r1, t2) cs
+            let bnc1 = B.inner f_env [ nc1 ] in
+            if B.is_leq COMPUTATIONAL bcs bnc1 then (* nc1 is redundant *)
+              widen_up (r1, t2) cs
             else (* nc1 is not redundant *)
               Node
                 ( (c1, nc1),
@@ -950,12 +951,14 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
               widen_up (t1, l2) (c2 :: cs),
               widen_up (t1, r2) (nc2 :: cs) )
       | Node ((c1, nc1), l1, r1), _ ->
-          let bcs = B.inner env vars cs in
-          let bc1 = B.inner env vars [ c1 ] in
-          if B.is_leq bcs bc1 then (* c1 is redundant *) widen_up (l1, t2) cs
+          let bcs = B.inner f_env cs in
+          let bc1 = B.inner f_env [ c1 ] in
+          if B.is_leq COMPUTATIONAL bcs bc1 then (* c1 is redundant *)
+            widen_up (l1, t2) cs
           else (* c1 is not redundant *)
-            let bnc1 = B.inner env vars [ nc1 ] in
-            if B.is_leq bcs bnc1 then (* nc1 is redundant *) widen_up (r1, t2) cs
+            let bnc1 = B.inner f_env [ nc1 ] in
+            if B.is_leq COMPUTATIONAL bcs bnc1 then (* nc1 is redundant *)
+              widen_up (r1, t2) cs
             else (* nc1 is not redundant *)
               Node
                 ( (c1, nc1),
@@ -973,8 +976,8 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
       let lbl = LSet.elements (tree_labels t2) in
       let inner_b cs =
         match domain with
-        | None -> B.inner env vars cs
-        | Some domain -> B.meet (B.inner env vars cs) domain
+        | None -> B.inner f_env cs
+        | Some domain -> B.meet COMPUTATIONAL (B.inner f_env cs) domain
       in
       let extend1 b2 f20 f2 (b1, f1) =
         if !tracebwd then (
@@ -998,7 +1001,8 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
             in
             let leafb = inner_b leafcs in
             let b = inner_b cs in
-            if F.defined f && (not (B.isBot b)) && not (F.is_eq b f (F.reset f))
+            if
+              F.defined f && (not (B.is_bot b)) && not (F.is_eq b f (F.reset f))
             then Some (leafb, f)
             else None
         | Node ((c1, _), l1, r1) -> (
@@ -1045,7 +1049,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
         | Leaf f1, Leaf f2 ->
             let leafb = inner_b leafcs in
             let b = inner_b cs in
-            if B.isBot b then Bot
+            if B.is_bot b then Bot
             else if F.is_eq b f1 f2 then t2
             else
               let rec aux2 p ls cs acc =
@@ -1055,11 +1059,11 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
                     adjacent leafb f2 [] (List.rev p) acc (* path finished *)
                 | (c, nc) :: ls ->
                     (* extend the path *)
-                    let bcs = B.inner env vars cs in
-                    let bc = B.inner env vars [ c ] in
-                    let bnc = B.inner env vars [ nc ] in
-                    let leqc = B.is_leq bcs bc in
-                    let leqnc = B.is_leq bcs bnc in
+                    let bcs = B.inner f_env cs in
+                    let bc = B.inner f_env [ c ] in
+                    let bnc = B.inner f_env [ nc ] in
+                    let leqc = B.is_leq COMPUTATIONAL bcs bc in
+                    let leqnc = B.is_leq COMPUTATIONAL bcs bnc in
                     if leqc then (* c is redundant *)
                       aux2 (((c, nc), (true, true)) :: p) ls cs acc
                     else if leqnc then (* nc is redundant *)
@@ -1091,11 +1095,11 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
                     in
                     Node ((c, nc), l, r)
                   else if C.is_leq c c1 then
-                    let bcs = B.inner env vars cs in
-                    let bc = B.inner env vars [ c ] in
-                    let bnc = B.inner env vars [ nc ] in
-                    let leqc = B.is_leq bcs bc in
-                    let leqnc = B.is_leq bcs bnc in
+                    let bcs = B.inner f_env cs in
+                    let bc = B.inner f_env [ c ] in
+                    let bnc = B.inner f_env [ nc ] in
+                    let leqc = B.is_leq COMPUTATIONAL bcs bc in
+                    let leqnc = B.is_leq COMPUTATIONAL bcs bnc in
                     if leqc then (* c is redundant *)
                       aux (((c, nc), (true, true)) :: p) ls (t1, t2) leafcs cs
                     else if leqnc then (* nc is redundant *)
@@ -1115,42 +1119,39 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
     in
     if !tracebwd then (
       Format.fprintf !Config.fmt "WIDENING\n";
-      Format.fprintf !Config.fmt "t1: %a\n" (print_tree vars) t1;
-      Format.fprintf !Config.fmt "\nt2: %a\n" (print_tree vars) t2);
+      Format.fprintf !Config.fmt "t1: %a\n" print_tree t1;
+      Format.fprintf !Config.fmt "\nt2: %a\n" print_tree t2);
     let t2 = widen_right (t1, t2) [] in
     if !tracebwd then
-      Format.fprintf !Config.fmt "\nt2[widen_right]: %a\n" (print_tree vars) t2;
-    let t2 = left_unification t1 t2 domain env vars in
+      Format.fprintf !Config.fmt "\nt2[widen_right]: %a\n" print_tree t2;
+    let t2 = left_unification t1 t2 domain env in
     if !tracebwd then
-      Format.fprintf !Config.fmt "\nt2[left_unification]: %a\n"
-        (print_tree vars) t2;
-    let t1, t2 = tree_unification t1 t2 env vars in
+      Format.fprintf !Config.fmt "\nt2[left_unification]: %a\n" print_tree t2;
+    let t1, t2 = tree_unification t1 t2 env in
     if !tracebwd then (
-      Format.fprintf !Config.fmt "\nt1[tree_unification]: %a\n"
-        (print_tree vars) t1;
-      Format.fprintf !Config.fmt "\nt2[tree_unification]: %a\n"
-        (print_tree vars) t2);
+      Format.fprintf !Config.fmt "\nt1[tree_unification]: %a\n" print_tree t1;
+      Format.fprintf !Config.fmt "\nt2[tree_unification]: %a\n" print_tree t2);
     let t2 = widen_up (t1, t2) [] in
     if !tracebwd then
-      Format.fprintf !Config.fmt "\nt2[widen_up]: %a\n" (print_tree vars) t2;
-    { domain; tree = widen (t1, t2); env; vars }
+      Format.fprintf !Config.fmt "\nt2[widen_up]: %a\n" print_tree t2;
+    { tree = widen (t1, t2); env }
 
   let dual_widen t1 t2 =
-    let domain = t1.domain in
     let env = t1.env in
-    let vars = t1.vars in
+    let f_env = env.f_env in
+    let domain = env.domain in
     let rec aux (tree1, tree2) cs =
       match (tree1, tree2) with
       | Bot, _ | _, Bot -> Bot
       | Leaf f1, Leaf f2 ->
           let b =
             match domain with
-            | None -> B.inner env vars cs
-            | Some domain -> B.meet (B.inner env vars cs) domain
+            | None -> B.inner f_env cs
+            | Some domain -> B.meet COMPUTATIONAL (B.inner f_env cs) domain
           in
-          if B.isBot b then Bot
+          if B.is_bot b then Bot
           else if F.is_leq COMPUTATIONAL b f2 f1 then Leaf f2
-          else Leaf (F.bot env vars)
+          else Leaf (F.bot f_env)
       | Node ((c1, nc1), l1, r1), Node ((c2, nc2), l2, r2) ->
           let l = aux (l1, l2) (c2 :: cs) in
           let r = aux (r1, r2) (nc2 :: cs) in
@@ -1158,23 +1159,18 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
       | _ -> raise (Invalid_argument "dual_widen: invalid tree structure")
     in
     let t2_tree =
-      left_unification ~join_kind:APPROXIMATION t1.tree t2.tree domain env vars
+      left_unification ~join_kind:APPROXIMATION t1.tree t2.tree domain env
     in
-    {
-      domain;
-      tree = aux (tree_unification t1.tree t2_tree env vars) [];
-      env;
-      vars;
-    }
+    { tree = aux (tree_unification t1.tree t2_tree env) []; env }
 
   (**)
 
   let bwd_assign ?domain ?(taint = true) ?(underapprox = false) t e =
     let cache = ref CMap.empty in
-    let pre = domain in
-    let post = t.domain in
     let env = t.env in
-    let vars = t.vars in
+    let f_env = env.f_env in
+    let pre = domain in
+    let post = env.domain in
     let e' : expr typed = snd e in
     let random =
       ref
@@ -1195,8 +1191,8 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
         | Leaf f1, Leaf f2 ->
             let b =
               match pre with
-              | None -> B.inner env vars cs
-              | Some pre -> B.meet (B.inner env vars cs) pre
+              | None -> B.inner f_env cs
+              | Some pre -> B.meet COMPUTATIONAL (B.inner f_env cs) pre
             in
             let joinType =
               if underapprox && not !resilience then COMPUTATIONAL
@@ -1208,7 +1204,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
             Node ((c1, nc1), aux (l1, l2) (c1 :: cs), aux (r1, r2) (nc1 :: cs))
         | _ -> raise (Invalid_argument "bwd_assign:merge:")
       in
-      aux (tree_unification_aux t1 t2 env vars cs) cs
+      aux (tree_unification_aux t1 t2 f_env cs) cs
     in
     let rec build t cs =
       match cs with
@@ -1219,14 +1215,12 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
             Node ((x, nx), build t xs, Bot)
           else (* x is not normalized *) Node ((nx, x), Bot, build t xs)
     in
-    let b_bwd_assign =
-      if underapprox then B.ubwd_assign else B.bwd_assign
-    in
+    let b_bwd_assign = if underapprox then B.ubwd_assign else B.bwd_assign in
     let rec aux t cs =
       match t with
       | Bot -> Bot
       | Leaf f ->
-          if B.isBot (B.inner env vars cs) then Bot else Leaf (F.bwd_assign f e)
+          if B.is_bot (B.inner f_env cs) then Bot else Leaf (F.bwd_assign f e)
       | Node ((c, nc), l, r) -> (
           match fst e with
           | T_var variable, t, ext ->
@@ -1234,10 +1228,11 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
                 let filter_constraints cs dom =
                   List.fold_left
                     (fun cs c ->
-                      let b = B.inner env vars [ c ] in
+                      let b = B.inner f_env [ c ] in
                       if
-                        (not (C.isBot c))
-                        && (B.is_leq dom b || B.isBot (B.meet dom b))
+                        (not (C.is_bot c))
+                        && (B.is_leq COMPUTATIONAL dom b
+                           || B.is_bot (B.meet COMPUTATIONAL dom b))
                       then cs
                       else c :: cs)
                     [] cs
@@ -1249,16 +1244,16 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
                     | Some pre, Some post ->
                         let key = c in
                         let c =
-                          B.constraints
+                          B.conjunction
                             (b_bwd_assign
-                               (B.meet (B.inner env vars [ c ]) post)
+                               (B.meet COMPUTATIONAL (B.inner f_env [ c ]) post)
                                e)
                         in
                         let c = filter_constraints c pre in
                         let nc =
-                          B.constraints
+                          B.conjunction
                             (b_bwd_assign
-                               (B.meet (B.inner env vars [ nc ]) post)
+                               (B.meet COMPUTATIONAL (B.inner f_env [ nc ]) post)
                                e)
                         in
                         let nc = filter_constraints nc pre in
@@ -1267,11 +1262,10 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
                     | _ ->
                         let key = c in
                         let c =
-                          B.constraints (b_bwd_assign (B.inner env vars [ c ]) e)
+                          B.conjunction (b_bwd_assign (B.inner f_env [ c ]) e)
                         in
                         let nc =
-                          B.constraints
-                            (b_bwd_assign (B.inner env vars [ nc ]) e)
+                          B.conjunction (b_bwd_assign (B.inner f_env [ nc ]) e)
                         in
                         cache := CMap.add key (c, nc) !cache;
                         (c, nc))
@@ -1279,10 +1273,10 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
 
                 match (c, nc) with
                 | [], [] -> merge (aux l cs) (aux r cs) cs
-                | [], [ y ] when C.isBot y -> aux l cs
-                | [ x ], [] when C.isBot x -> aux r cs
-                | [ x ], [ y ] when C.isBot x && C.isBot y ->
-                    Leaf (F.bot env vars)
+                | [], [ y ] when C.is_bot y -> aux l cs
+                | [ x ], [] when C.is_bot x -> aux r cs
+                | [ x ], [ y ] when C.is_bot x && C.is_bot y ->
+                    Leaf (F.bot f_env)
                 | [ x ], [ y ] ->
                     let nx = C.negate x in
                     let ny = C.negate y in
@@ -1306,19 +1300,20 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
               raise
                 (Invalid_argument "DecisionTree.bwd_assign: unexpected lvalue"))
     in
-    { domain = pre; tree = sort_tree (aux t.tree []); env; vars }
+    let env = { env with domain = pre } in
+    { tree = sort_tree (aux t.tree []); env }
 
   let rec filter ?(taint = true) ?domain ?(underapprox = false) t e =
     let pre = domain in
-    let post = t.domain in
     let env = t.env in
-    let vars = t.vars in
-    let b_filter = if underapprox then B.filter_underapprox else B.filter in
+    let f_env = env.f_env in
+    let post = env.domain in
+    let b_filter = if underapprox then B.ubwd_filter else B.bwd_filter in
     let rec aux t bs cs =
       let bcs =
         match pre with
-        | None -> B.inner env vars cs
-        | Some pre -> B.meet (B.inner env vars cs) pre
+        | None -> B.inner f_env cs
+        | Some pre -> B.meet COMPUTATIONAL (B.inner f_env cs) pre
       in
       match bs with
       | [] -> (
@@ -1326,10 +1321,11 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
           | Bot -> Bot
           | Leaf f -> Leaf (F.filter f e)
           | Node ((c, nc), l, r) -> (
-              let bc = B.inner env vars [ c ] in
-              if B.is_leq bcs bc then (* c is redundant *) aux l bs cs
+              let bc = B.inner f_env [ c ] in
+              if B.is_leq COMPUTATIONAL bcs bc then (* c is redundant *)
+                aux l bs cs
               else (* c is not redundant *)
-                (* if (B.isBot (B.meet bc bcs))
+                (* if (B.is_bot (B.meet COMPUTATIONAL bc bcs))
                 then (* c is conflicting *) aux r bs cs
                 else *)
                 let l = aux l bs (c :: cs) in
@@ -1339,11 +1335,11 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
                 | Bot, Node (_, Bot, _) -> r
                 | _ -> Node ((c, nc), l, r)))
       | (x, nx) :: xs -> (
-          let bx = B.inner env vars [ x ] in
-          if B.is_leq bcs bx then (* x is redundant *) aux t xs cs
+          let bx = B.inner f_env [ x ] in
+          if B.is_leq COMPUTATIONAL bcs bx then (* x is redundant *) aux t xs cs
           else if
             (* x is not redundant *)
-            B.isBot (B.meet bx bcs)
+            B.is_bot (B.meet COMPUTATIONAL bx bcs)
           then (* x is conflicting *) Bot
             (* This introduces a NIL leaf to the tree *)
           else if C.is_leq nx x then (* x is normalized *)
@@ -1352,10 +1348,11 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
                 let l = aux l xs (c :: cs) in
                 match l with Bot -> Bot | _ -> Node ((c, nc), l, Bot))
             | Node ((c, nc), l, r) when C.is_leq c x (* c < x *) -> (
-                let bc = B.inner env vars [ c ] in
-                if B.is_leq bcs bc then (* c is redundant *) aux l bs cs
+                let bc = B.inner f_env [ c ] in
+                if B.is_leq COMPUTATIONAL bcs bc then (* c is redundant *)
+                  aux l bs cs
                 else (* c is not redundant *)
-                  (* if (B.isBot (B.meet bc bcs))
+                  (* if (B.is_bot (B.meet COMPUTATIONAL bc bcs))
                   then (* c is conflicting *) aux r bs cs
                   else *)
                   let l = aux l bs (c :: cs) in
@@ -1373,10 +1370,11 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
                 let r = aux r xs (nc :: cs) in
                 match r with Bot -> Bot | _ -> Node ((c, nc), Bot, r))
             | Node ((c, nc), l, r) when C.is_leq c nx (* c < nx *) -> (
-                let bc = B.inner env vars [ c ] in
-                if B.is_leq bcs bc then (* c is redundant *) aux l bs cs
+                let bc = B.inner f_env [ c ] in
+                if B.is_leq COMPUTATIONAL bcs bc then (* c is redundant *)
+                  aux l bs cs
                 else (* c is not redundant *)
-                  (* if (B.isBot (B.meet bc bcs))
+                  (* if (B.is_bot (B.meet COMPUTATIONAL bc bcs))
                   then (* c is conflicting *) aux r bs cs
                   else *)
                   let l = aux l bs (c :: cs) in
@@ -1392,13 +1390,13 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
     let e, typ, ext = e in
     match e with
     | T_bool_const True | T_bool_const Maybe ->
-        { domain = pre; tree = aux t.tree [] []; env; vars }
+        { tree = aux t.tree [] []; env = { env with domain = pre } }
     | T_binary (_, (T_var v, _, _), _)
       when String.starts_with ~prefix:"nondet_" v.var_name ->
-        { domain = pre; tree = aux t.tree [] []; env; vars }
+        { tree = aux t.tree [] []; env = { env with domain = pre } }
     | T_binary (_, _, (T_var v, _, _))
       when String.starts_with ~prefix:"nondet_" v.var_name ->
-        { domain = pre; tree = aux t.tree [] []; env; vars }
+        { tree = aux t.tree [] []; env = { env with domain = pre } }
     | T_binary (A_EQUAL, e1, e2) ->
         let bop =
           T_binary
@@ -1415,7 +1413,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
               (T_binary (A_LESS, e1, e2), typ, ext) )
         in
         filter ~taint ?domain:pre ~underapprox t (bop, typ, ext)
-    | T_bool_const False -> { domain = pre; tree = Bot; env; vars }
+    | T_bool_const False -> { tree = Bot; env = { env with domain = pre } }
     | T_unary (A_NOT, e) ->
         let e = neg_bexp e in
         filter ~taint ?domain:pre ~underapprox t e
@@ -1429,19 +1427,19 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
     | _ ->
         let bp =
           match post with
-          | None -> B.inner env vars []
-          | Some post -> B.meet (B.inner env vars []) post
+          | None -> B.inner f_env []
+          | Some post -> B.meet COMPUTATIONAL (B.inner f_env []) post
         in
         let bs =
           List.map
             (fun c ->
               let nc = C.negate c in
               (c, nc))
-            (B.constraints (b_filter bp (e, typ, ext)))
+            (B.conjunction (b_filter bp (e, typ, ext)))
         in
         let bs = List.sort L.compare bs in
         let t = aux t.tree bs [] in
-        { domain = pre; tree = t; env; vars }
+        { tree = t; env = { env with domain = pre } }
 
   (* 
     Check if all partitions in the decision tree are defined i.e. have a ranking function assigned to them.
@@ -1450,9 +1448,9 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
     satisfy the expression. This can be used to check if a decision tree is defined under a given assumption.
   *)
   let defined ?condition t =
-    let domain = t.domain in
     let env = t.env in
-    let vars = t.vars in
+    let f_env = env.f_env in
+    let domain = env.domain in
     let rec aux t cs =
       match t with
       | Bot -> (
@@ -1460,19 +1458,20 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
           | None ->
               let b =
                 match domain with
-                | None -> B.inner env vars cs
-                | Some domain -> B.meet (B.inner env vars cs) domain
+                | None -> B.inner f_env cs
+                | Some domain -> B.meet COMPUTATIONAL (B.inner f_env cs) domain
               in
-              B.isBot b
+              B.is_bot b
           | Some _ ->
               true
               (* when given a condition, we first filter the tree and ignore NIL leafs *)
           )
       | Leaf f -> (
           match domain with
-          | None -> F.defined f || B.isBot (B.inner env vars cs)
+          | None -> F.defined f || B.is_bot (B.inner f_env cs)
           | Some domain ->
-              F.defined f || B.isBot (B.meet (B.inner env vars cs) domain))
+              F.defined f
+              || B.is_bot (B.meet COMPUTATIONAL (B.inner f_env cs) domain))
       | Node ((c, nc), l, r) -> aux l (c :: cs) && aux r (nc :: cs)
     in
     let t =
@@ -1480,7 +1479,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
       | Some b ->
           (* replace all NIL leafs with 'bottom' leafs to ensure that we don't confuse actual 
            NIL leafs with NIL leafs introduces by filer *)
-          let t' = tree_map (Leaf (F.bot t.env t.vars)) (fun f -> Leaf f) t in
+          let t' = tree_map (Leaf (F.bot f_env)) (fun f -> Leaf f) t in
           filter t' b (* filte tree with optional condition *)
       | None -> t
     in
@@ -1493,17 +1492,18 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
     satisfy the expression. This can be used to check if a decision tree is defined under a given assumption.
   *)
   let partially_defined ?condition t =
-    let domain = t.domain in
     let env = t.env in
-    let vars = t.vars in
+    let f_env = env.f_env in
+    let domain = env.domain in
     let rec aux t cs =
       match t with
       | Bot -> false
       | Leaf f -> (
           match domain with
-          | None -> F.defined f && not (B.isBot (B.inner env vars cs))
+          | None -> F.defined f && not (B.is_bot (B.inner f_env cs))
           | Some domain ->
-              F.defined f && not (B.isBot (B.meet (B.inner env vars cs) domain))
+              F.defined f
+              && not (B.is_bot (B.meet COMPUTATIONAL (B.inner f_env cs) domain))
           )
       | Node ((c, nc), l, r) -> aux l (c :: cs) || aux r (nc :: cs)
     in
@@ -1512,7 +1512,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
       | Some b ->
           (* replace all NIL leafs with 'bottom' leafs to ensure that we don't confuse actual 
            NIL leafs with NIL leafs introduces by filer *)
-          let t' = tree_map (Leaf (F.bot t.env t.vars)) (fun f -> Leaf f) t in
+          let t' = tree_map (Leaf (F.bot f_env)) (fun f -> Leaf f) t in
           filter t' b (* filte tree with optional condition *)
       | None -> t
     in
@@ -1522,14 +1522,14 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
      Currently this limits the set of supported domains to polyhedra *)
 
   let reset ?mask t e =
-    let domain = t.domain in
     let env = t.env in
-    let vars = t.vars in
+    let f_env = env.f_env in
+    let domain = env.domain in
     let t1 = t.tree in
     let rec reset flag t =
       match t with
       | Bot -> Bot
-      | Leaf f -> if flag && F.isBot f then Leaf f else Leaf (F.reset f)
+      | Leaf f -> if flag && F.is_bot f then Leaf f else Leaf (F.reset f)
       | Node (c, l, r) -> Node (c, reset flag l, reset flag r)
     in
     let t2 =
@@ -1545,17 +1545,16 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
           Node ((c1, nc1), aux (l1, l2), aux (r1, r2))
       | _ -> raise (Invalid_argument "reset:")
     in
-    { domain; tree = aux (tree_unification t1 t2 env vars); env; vars }
+    { tree = aux (tree_unification t1 t2 env); env }
 
-  let refine t b =
-    { domain = Some b; tree = t.tree; env = t.env; vars = t.vars }
+  let refine t b = { tree = t.tree; env = { t.env with domain = Some b } }
 
   (**)
 
   let compress t =
-    let domain = t.domain in
     let env = t.env in
-    let vars = t.vars in
+    let f_env = env.f_env in
+    let domain = env.domain in
     let rec aux t cs =
       match t with
       | Bot | Leaf _ -> t
@@ -1564,38 +1563,40 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
           let r = aux r (nc :: cs) in
           match (l, r) with
           | Bot, Bot -> Bot
-          | Leaf f1, Leaf f2 when F.isBot f1 && F.isBot f2 -> Leaf f1
+          | Leaf f1, Leaf f2 when F.is_bot f1 && F.is_bot f2 -> Leaf f1
           | Leaf f1, Leaf f2 when F.defined f1 && F.defined f2 ->
               let b1 =
                 match domain with
-                | None -> B.inner env vars (c :: cs)
-                | Some domain -> B.meet (B.inner env vars (c :: cs)) domain
+                | None -> B.inner f_env (c :: cs)
+                | Some domain ->
+                    B.meet COMPUTATIONAL (B.inner f_env (c :: cs)) domain
               in
               if F.is_eq b1 f1 f2 then Leaf f2
               else
                 let b2 =
                   match domain with
-                  | None -> B.inner env vars (nc :: cs)
-                  | Some domain -> B.meet (B.inner env vars (nc :: cs)) domain
+                  | None -> B.inner f_env (nc :: cs)
+                  | Some domain ->
+                      B.meet COMPUTATIONAL (B.inner f_env (nc :: cs)) domain
                 in
                 if F.is_eq b2 f1 f2 then Leaf f1 else Node ((c, nc), l, r)
-          | Leaf f1, Leaf f2 when F.isTop f1 && F.isTop f2 -> Leaf f1
-          | Leaf f1, Node ((c2, nc2), Leaf f2, r2) when F.isBot f1 && F.isBot f2
-            ->
+          | Leaf f1, Leaf f2 when F.is_top f1 && F.is_top f2 -> Leaf f1
+          | Leaf f1, Node ((c2, nc2), Leaf f2, r2)
+            when F.is_bot f1 && F.is_bot f2 ->
               aux (Node ((c2, nc2), Leaf f1, r2)) cs
           | Leaf f1, Node ((c2, nc2), Leaf f2, r2)
             when F.defined f1 && F.defined f2 ->
               (* e.g., NODE( y >= 2, LEAF 3y+2, NODE( y >= 1, LEAF 5, LEAF 1 )) *)
               let b2 =
                 match domain with
-                | None -> B.inner env vars (c2 :: nc :: cs)
+                | None -> B.inner f_env (c2 :: nc :: cs)
                 | Some domain ->
-                    B.meet (B.inner env vars (c2 :: nc :: cs)) domain
+                    B.meet COMPUTATIONAL (B.inner f_env (c2 :: nc :: cs)) domain
               in
               if F.is_eq b2 f1 f2 then aux (Node ((c2, nc2), Leaf f1, r2)) cs
               else Node ((c, nc), l, r)
-          | Leaf f1, Node ((c2, nc2), Leaf f2, r2) when F.isTop f1 && F.isTop f2
-            ->
+          | Leaf f1, Node ((c2, nc2), Leaf f2, r2)
+            when F.is_top f1 && F.is_top f2 ->
               aux (Node ((c2, nc2), Leaf f1, r2)) cs
           | ( Node ((c1, nc1), Leaf f1, Leaf f2),
               Node ((c2, nc2), Node ((c3, nc3), Leaf f3, Leaf f4), r2) )
@@ -1604,15 +1605,19 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
               (* e.g., NODE( x >= 2, NODE( y >= 1, LEAF 7x+3y-5, LEAF 1 ), NODE( x >= 1, NODE( y >= 1, LEAF 3y+2, LEAF 1 ), LEAF 1 ) *)
               let b3 =
                 match domain with
-                | None -> B.inner env vars (c3 :: c2 :: nc :: cs)
+                | None -> B.inner f_env (c3 :: c2 :: nc :: cs)
                 | Some domain ->
-                    B.meet (B.inner env vars (c3 :: c2 :: nc :: cs)) domain
+                    B.meet COMPUTATIONAL
+                      (B.inner f_env (c3 :: c2 :: nc :: cs))
+                      domain
               in
               let b4 =
                 match domain with
-                | None -> B.inner env vars (nc3 :: c2 :: nc :: cs)
+                | None -> B.inner f_env (nc3 :: c2 :: nc :: cs)
                 | Some domain ->
-                    B.meet (B.inner env vars (nc3 :: c2 :: nc :: cs)) domain
+                    B.meet COMPUTATIONAL
+                      (B.inner f_env (nc3 :: c2 :: nc :: cs))
+                      domain
               in
               if F.is_eq b3 f1 f3 && F.is_eq b4 f2 f4 then
                 aux
@@ -1621,7 +1626,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
               else Node ((c, nc), l, r)
           | _ -> Node ((c, nc), l, r))
     in
-    { domain; tree = aux t.tree []; env; vars }
+    { tree = aux t.tree []; env }
 
   let reinit t =
     let rec aux t =
@@ -1630,55 +1635,55 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
       | Leaf f -> Leaf (F.reinit f)
       | Node (c, l, r) -> Node (c, aux l, aux r)
     in
-    { domain = t.domain; tree = aux t.tree; env = t.env; vars = t.vars }
+    { tree = aux t.tree; env = t.env }
 
   let learn t1 t2 =
     (* t1 learns t2 *)
-    let domain1 = t1.domain
+    let domain1 = t1.env.domain
     and domain2 =
-      t2.domain
+      t2.env.domain
       (*in  t2.domain \subseteq t1.domain *)
     in
     let env = t1.env in
-    let vars = t1.vars in
+    let f_env = env.f_env in
     let rec aux (t1, t2) cs =
       match (t1, t2) with
       | Bot, Bot -> Bot
       | Leaf _, Bot ->
           let b1 =
             match domain1 with
-            | None -> B.inner env vars cs
-            | Some domain1 -> B.meet (B.inner env vars cs) domain1
+            | None -> B.inner f_env cs
+            | Some domain1 -> B.meet COMPUTATIONAL (B.inner f_env cs) domain1
           in
-          if B.isBot b1 then Bot else t1
+          if B.is_bot b1 then Bot else t1
       | Bot, Leaf _ ->
           let b2 =
             match domain2 with
-            | None -> B.inner env vars cs
-            | Some domain2 -> B.meet (B.inner env vars cs) domain2
+            | None -> B.inner f_env cs
+            | Some domain2 -> B.meet COMPUTATIONAL (B.inner f_env cs) domain2
           in
-          if B.isBot b2 then t1
+          if B.is_bot b2 then t1
           else
             let b1 =
               match domain1 with
-              | None -> B.inner env vars cs
-              | Some domain1 -> B.meet (B.inner env vars cs) domain1
+              | None -> B.inner f_env cs
+              | Some domain1 -> B.meet COMPUTATIONAL (B.inner f_env cs) domain1
             in
-            if B.isBot b1 then Bot else t2
+            if B.is_bot b1 then Bot else t2
       | Leaf f1, Leaf f2 ->
           let b2 =
             match domain2 with
-            | None -> B.inner env vars cs
-            | Some domain2 -> B.meet (B.inner env vars cs) domain2
+            | None -> B.inner f_env cs
+            | Some domain2 -> B.meet COMPUTATIONAL (B.inner f_env cs) domain2
           in
-          if B.isBot b2 then t1
+          if B.is_bot b2 then t1
           else
             let b1 =
               match domain1 with
-              | None -> B.inner env vars cs
-              | Some domain1 -> B.meet (B.inner env vars cs) domain1
+              | None -> B.inner f_env cs
+              | Some domain1 -> B.meet COMPUTATIONAL (B.inner f_env cs) domain1
             in
-            if B.isBot b1 then Bot else Leaf (F.learn b1 f1 f2)
+            if B.is_bot b1 then Bot else Leaf (F.learn b1 f1 f2)
       | Node ((c1, nc1), l1, r1), Node ((c2, nc2), l2, r2)
         when C.is_eq c1 c2 (* c1 = c2 *) ->
           let l = aux (l1, l2) (c1 :: cs) in
@@ -1713,7 +1718,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
               let nc = C.negate c in
               if C.is_leq nc c then (* c is normalized *) LSet.add (c, nc) s
               else (* c is not normalized *) LSet.add (nc, c) s)
-            (tree_labels t1.tree) (B.constraints domain1)
+            (tree_labels t1.tree) (B.conjunction domain1)
     in
     let ls2 =
       match domain2 with
@@ -1724,7 +1729,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
               let nc = C.negate c in
               if C.is_leq nc c then (* c is normalized *) LSet.add (c, nc) s
               else (* c is not normalized *) LSet.add (nc, c) s)
-            LSet.empty (B.constraints domain2)
+            LSet.empty (B.conjunction domain2)
     in
     let ls = LSet.elements (LSet.diff ls2 ls1) in
     (* labels that need to be explicitely added to the tree(s) *)
@@ -1734,12 +1739,12 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
     if !tracebwd && not !minimal then (
       Format.fprintf !Config.fmt "\nLEARN :\n";
       Format.fprintf !Config.fmt "t1: DOMAIN = {%a}%a\n\n" print_domain domain1
-        (print_tree vars) t1.tree;
+        print_tree t1.tree;
       Format.fprintf !Config.fmt "t2: DOMAIN = {%a}%a\n\n" print_domain domain2
-        (print_tree vars) t2.tree;
+        print_tree t2.tree;
       List.iter
         (fun (c, nc) ->
-          C.print vars Format.std_formatter c;
+          C.print Format.std_formatter c;
           Format.fprintf !Config.fmt "\n")
         ls;
       Format.fprintf !Config.fmt "\n");
@@ -1750,20 +1755,22 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
         | [] -> t
         | (x, nx) :: xs -> (
             let b =
-              match domain with None -> B.top env vars | Some domain -> domain
+              match domain with None -> B.top f_env | Some domain -> domain
             in
-            let bx = B.inner env vars [ x ] in
-            if B.is_leq b bx then (* x is wanted *)
-              let bcs = B.inner env vars cs in
-              if B.isBot (B.meet bx bcs) then (* x is conflicting *) Bot
+            let bx = B.inner f_env [ x ] in
+            if B.is_leq COMPUTATIONAL b bx then (* x is wanted *)
+              let bcs = B.inner f_env cs in
+              if B.is_bot (B.meet COMPUTATIONAL bx bcs) then
+                (* x is conflicting *) Bot
               else (* x is neither redundant nor conflicting *)
                 match t with
                 | Node ((c, nc), l, r) when C.is_eq c x (* c = x *) -> (
                     let l = aux l xs (c :: cs) in
                     match l with Bot -> Bot | _ -> Node ((c, nc), l, Bot))
                 | Node ((c, nc), l, r) when C.is_leq c x (* c < x *) -> (
-                    let bc = B.inner env vars [ c ] in
-                    if B.isBot (B.meet bc bcs) then (* c is conflicting *)
+                    let bc = B.inner f_env [ c ] in
+                    if B.is_bot (B.meet COMPUTATIONAL bc bcs) then
+                      (* c is conflicting *)
                       aux r bs cs
                     else (* c is neither redundant nor conflicting *)
                       let l = aux l bs (c :: cs) in
@@ -1776,16 +1783,19 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
                     let l = aux t xs (x :: cs) in
                     match l with Bot -> Bot | _ -> Node ((x, nx), l, Bot))
             else (* nx is wanted *)
-              let bcs = B.inner env vars cs in
-              if B.isBot (B.meet bx bcs) then (* x is conflicting *) aux t xs cs
+              let bcs = B.inner f_env cs in
+              if B.is_bot (B.meet COMPUTATIONAL bx bcs) then
+                (* x is conflicting *)
+                aux t xs cs
               else (* x is neither redundant nor conflicting *)
                 match t with
                 | Node ((c, nc), l, r) when C.is_eq c x (* c = x *) -> (
                     let r = aux r xs (nc :: cs) in
                     match r with Bot -> Bot | _ -> Node ((c, nc), Bot, r))
                 | Node ((c, nc), l, r) when C.is_leq c x (* c < x *) -> (
-                    let bc = B.inner env vars [ c ] in
-                    if B.isBot (B.meet bc bcs) then (* c is conflicting *)
+                    let bc = B.inner f_env [ c ] in
+                    if B.is_bot (B.meet COMPUTATIONAL bc bcs) then
+                      (* c is conflicting *)
                       aux r bs cs
                     else (* c is neither redundant nor conflicting *)
                       let l = aux l bs (c :: cs) in
@@ -1803,42 +1813,42 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
     let tree2 = match ls with [] -> t2.tree | _ -> add t2.tree domain2 ls in
     if !tracebwd && not !minimal then (
       Format.fprintf !Config.fmt "t0: DOMAIN = {%a}%a\n\n" print_domain domain2
-        (print_tree vars) t2.tree;
+        print_tree t2.tree;
       Format.fprintf !Config.fmt "t2: DOMAIN = {%a}%a\n\n" print_domain domain2
-        (print_tree vars) tree2;
+        print_tree tree2;
       Format.fprintf !Config.fmt "t: DOMAIN = {%a}%a\n" print_domain domain1
-        (print_tree vars)
+        print_tree
         (aux (t1.tree, tree2) []));
-    { domain = domain1; tree = aux (t1.tree, tree2) []; env; vars }
+    { tree = aux (t1.tree, tree2) []; env = t1.env }
 
   let conflict t =
-    let domain = t.domain in
     let env = t.env in
-    let vars = t.vars in
+    let f_env = env.f_env in
+    let domain = env.domain in
     let rec aux t cs =
       match t with
       | Bot ->
           let b =
             match domain with
-            | None -> B.inner env vars cs
-            | Some domain -> B.meet (B.inner env vars cs) domain
+            | None -> B.inner f_env cs
+            | Some domain -> B.meet COMPUTATIONAL (B.inner f_env cs) domain
           in
-          if B.isBot b then [] else [ b ]
+          if B.is_bot b then [] else [ b ]
       | Leaf f ->
           let b =
             match domain with
-            | None -> B.inner env vars cs
-            | Some domain -> B.meet (B.inner env vars cs) domain
+            | None -> B.inner f_env cs
+            | Some domain -> B.meet COMPUTATIONAL (B.inner f_env cs) domain
           in
-          if F.defined f || B.isBot b then [] else [ b ]
+          if F.defined f || B.is_bot b then [] else [ b ]
       | Node ((c, nc), l, r) -> aux l (c :: cs) @ aux r (nc :: cs)
     in
     aux t.tree []
 
   let print fmt t =
-    let domain = t.domain in
     let env = t.env in
-    let vars = t.vars in
+    let f_env = env.f_env in
+    let domain = env.domain in
     (* let print_domain fmt domain =
       match domain with
       | None -> ()
@@ -1849,23 +1859,23 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
       | Bot ->
           let b =
             match domain with
-            | None -> B.inner env vars cs
-            | Some domain -> B.meet (B.inner env vars cs) domain
+            | None -> B.inner f_env cs
+            | Some domain -> B.meet COMPUTATIONAL (B.inner f_env cs) domain
           in
-          if B.isBot b then () else Format.fprintf fmt "%a ? BOT\n" B.print b
+          if B.is_bot b then () else Format.fprintf fmt "%a ? BOT\n" B.print b
       | Leaf f ->
           let b =
             match domain with
-            | None -> B.inner env vars cs
-            | Some domain -> B.meet (B.inner env vars cs) domain
+            | None -> B.inner f_env cs
+            | Some domain -> B.meet COMPUTATIONAL (B.inner f_env cs) domain
           in
-          if B.isBot b then ()
+          if B.is_bot b then ()
           else Format.fprintf fmt "%a ? %a\n" B.print b F.print f
       | Node ((c, nc), l, r) ->
           aux r (nc :: cs);
           aux l (c :: cs)
-      (* in aux t.tree []; Format.fprintf fmt "\nDOMAIN = {%a}%a\n" print_domain domain (print_tree vars) t.tree *)
-      (* Format.fprintf fmt "\nDOMAIN = {%a}%a\n" print_domain domain (print_tree vars) t.tree; *)
+      (* in aux t.tree []; Format.fprintf fmt "\nDOMAIN = {%a}%a\n" print_domain domain (print_tree ) t.tree *)
+      (* Format.fprintf fmt "\nDOMAIN = {%a}%a\n" print_domain domain (print_tree ) t.tree; *)
     in
     aux t.tree []
 
@@ -1879,11 +1889,10 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
      NOTE: mask is only monotone w.r.t. the APPROXIMATION order
   *)
   let mask t t_mask =
-    let domain = t.domain in
     let env = t.env in
-    let vars = t.vars in
-    let botLeaf = Leaf (F.bot env vars) in
-    let isDefined f = not (F.isBot f || F.isTop f) in
+    let f_env = env.f_env in
+    let botLeaf = Leaf (F.bot f_env) in
+    let isDefined f = not (F.is_bot f || F.is_top f) in
     let fBotLeft _ _ = Bot in
     (* LHS is bottom, keep it that way *)
     let fBotRight _ fLeft = if isDefined fLeft then botLeaf else Leaf fLeft in
@@ -1897,11 +1906,8 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
       else Leaf l1
     in
     {
-      domain;
-      tree =
-        tree_join_helper fBotLeft fBotRight fLeaf t.tree t_mask.tree env vars;
+      tree = tree_join_helper fBotLeft fBotRight fLeaf t.tree t_mask.tree env;
       env;
-      vars;
     }
 
   (*
@@ -1919,15 +1925,14 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
      an therefore excluding traces not satisfying the 'f1 U f2' property.
   *)
   let until t t_keep t_reset =
-    let domain = t.domain in
     let env = t.env in
-    let vars = t.vars in
-    let isDefined f = not (F.isBot f || F.isTop f) in
+    let f_env = env.f_env in
+    let isDefined f = not (F.is_bot f || F.is_top f) in
     let rec filter (t, t_valid) =
       match (t, t_valid) with
       | Bot, _ | _, Bot -> t
       | Leaf f, Leaf f_valid ->
-          Leaf (if isDefined f_valid then f else F.bot env vars)
+          Leaf (if isDefined f_valid then f else F.bot f_env)
       | Node (c, l1, r1), Node (_, l2, r2) ->
           Node (c, filter (l1, l2), filter (r1, r2))
       | _ -> raise (Invalid_argument "until: Invalid Tree shape")
@@ -1943,11 +1948,11 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
     in
     let t_valid = tree (join COMPUTATIONAL t_keep t_reset) in
     (* join t_reset and t_keep to get the entire domain for which 't' is still defined*)
-    let t_filtered = filter (tree_unification t.tree t_valid env vars) in
+    let t_filtered = filter (tree_unification t.tree t_valid env) in
     (* filter out all parts of 't' that are not part of the domain of 't_keep' or 't_reset'*)
-    let t_reset = reset (tree_unification t_filtered t_reset.tree env vars) in
+    let t_reset = reset (tree_unification t_filtered t_reset.tree env) in
     (* reset all parts of the 't' that are defined in 't_reset' *)
-    { domain; tree = t_reset; env; vars }
+    { tree = t_reset; env }
 
   (*
     Complements the domain of a tree:
@@ -1958,22 +1963,21 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
     This function assumes that there are no NIL nodes in the tree
   *)
   let complement t =
-    let domain = t.domain in
     let env = t.env in
-    let vars = t.vars in
-    let zeroLeaf = Leaf (F.zero env vars) in
-    let botLeaf = Leaf (F.bot env vars) in
+    let f_env = env.f_env in
+    let zeroLeaf = Leaf (F.zero f_env) in
+    let botLeaf = Leaf (F.bot f_env) in
     let rec aux tree =
       match tree with
       | Bot ->
           tree
           (* NIL nodes are unchanged because they represent missing information *)
-      | Leaf f when F.isBot f -> zeroLeaf (* bottom goes to constant zero *)
-      | Leaf f when F.isTop f -> tree (* top stays top *)
+      | Leaf f when F.is_bot f -> zeroLeaf (* bottom goes to constant zero *)
+      | Leaf f when F.is_top f -> tree (* top stays top *)
       | Leaf f -> botLeaf (* everything else goes to bottom *)
       | Node (c, l, r) -> Node (c, aux l, aux r)
     in
-    { domain; tree = aux t.tree; env; vars }
+    { tree = aux t.tree; env }
 
   (* Compute the vulnerability analysis, right now the algorithm is naif and doesnot implement the dynamic programming *)
   (* let vulnerable t : Polka.strict Polka.t Vulnerability.t list =
@@ -1984,8 +1988,8 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
     let rec unconstraint t cns =
       match t with
       | Bot -> (false, [ cns ])
-      | Leaf f when F.isBot f -> (false, [ cns ])
-      | Leaf f when F.isTop f -> (false, [ cns ])
+      | Leaf f when F.is_bot f -> (false, [ cns ])
+      | Leaf f when F.is_top f -> (false, [ cns ])
       | Leaf f -> (true, [ cns ])
       | Node ((c, nc), l, r) -> (
           let b, cns1 = unconstraint l (c :: cns) in
@@ -2063,26 +2067,26 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
       j *)
 
   let merge_after t =
-    let domain = t.domain in
+    let domain = t.env.domain in
     let env = t.env in
-    let vars = t.vars in
+    let f_env = env.f_env in
     match t.tree with
     | Node ((c1, nc1), t1, t2) ->
         let fBotLeftRight cs f =
           let b =
             match domain with
-            | None -> B.inner env vars cs
-            | Some domain -> B.meet (B.inner env vars cs) domain
+            | None -> B.inner f_env cs
+            | Some domain -> B.meet COMPUTATIONAL (B.inner f_env cs) domain
           in
-          if B.isBot b then Bot else Leaf f
+          if B.is_bot b then Bot else Leaf f
         in
         let fLeaf cs f1 f2 =
           let b =
             match domain with
-            | None -> B.inner env vars cs
-            | Some domain -> B.meet (B.inner env vars cs) domain
+            | None -> B.inner f_env cs
+            | Some domain -> B.meet COMPUTATIONAL (B.inner f_env cs) domain
           in
-          if B.isBot b then Bot
+          if B.is_bot b then Bot
           else Leaf (F.join RESILIENCE ~random:true b f1 f2)
         in
         let rec aux (t1, t2) cs =
@@ -2100,7 +2104,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
               raise
                 (Invalid_argument "tree_join_helper: invalid tree structure")
         in
-        { t with tree = aux (tree_unification_aux t1 t2 env vars []) [] }
+        { t with tree = aux (tree_unification_aux t1 t2 f_env []) [] }
     | _ -> t
 end
 

@@ -8,13 +8,14 @@ open Typed_syntax
 module type CONSTRAINT = sig
   
   type cons 
+  (** Type defining the constraint. *)
   type env 
   (** Type representing the environment in which the constraint is defined. *)
   type t = { cons : cons; env : env }
   (** Type representing the constraint alongside with its environment. *)
   
   type linexpr
-  (** Linear constraint type. *)
+  (** Linear constraints type. *)
 
   val make_unsat : env -> t
   (** [make_unsat env] returns a non satisfiable constraints over the environment [env]. *)

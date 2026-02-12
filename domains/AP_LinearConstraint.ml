@@ -7,13 +7,13 @@ open Typed_syntax
 open Apron
 open Sig.Constraints
 
-module LinearConstraint : AP_CONSTRAINT = struct
+module AP_LinearConstraint : AP_CONSTRAINT = struct
   type linexpr = Linexpr1.t
   type cons = Lincons1.t
   type env = lincons_env
   type t = { cons : cons; env : env }
 
-  let env t = Lincons1.get_env t.cons
+  let env t = t.env.ap_env
   let linexpr t = Lincons1.get_linexpr1 t.cons
 
   (**)
@@ -239,4 +239,4 @@ module LinearConstraint : AP_CONSTRAINT = struct
     | Lincons1.EQMOD s -> raise (Invalid_argument "print:EQMOD")
 end
 
-module C = LinearConstraint
+module C = AP_LinearConstraint
