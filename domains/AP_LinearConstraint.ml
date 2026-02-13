@@ -6,14 +6,30 @@
 open Typed_syntax
 open Apron
 open Sig.Constraints
+open Banal.Banal_apron_domain
 
 module AP_LinearConstraint : AP_CONSTRAINT = struct
   type linexpr = Linexpr1.t
   type cons = Lincons1.t
   type env = lincons_env
   type t = { cons : cons; env : env }
+  type dim = var
 
-  let env t = t.env.ap_env
+  let init_env () = { vars = []; ap_env = Environment.make [||] [||] }
+  let add_dim_to_env env dim =
+    {
+      vars = dim :: env.vars;
+      ap_env = Environment.add env.ap_env [| apron_of_var dim |] [||];
+    }
+
+  let remove_dim_of_env env dim =
+    {
+      vars = List.filter (fun v -> Z.compare v.var_id dim.var_id <> 0) env.vars;
+      ap_env = [| apron_of_var dim |] |> Environment.remove env.ap_env;
+    }
+  let env t = t.env
+  
+  let set_env env t = {t with env}
   let linexpr t = Lincons1.get_linexpr1 t.cons
 
   (**)

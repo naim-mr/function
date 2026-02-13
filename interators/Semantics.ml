@@ -24,34 +24,36 @@ let get_ctl prop =
 
 module type SEMANTIC = sig
  
-  module BWD: FBDOMAIN
+  type bwd_t
   (** [BWD]: Underlying Abstract Domain that will be use in the bwd analysis 
   *)
 
-  module FWD: FBDOMAIN
+  type fwd_t
   (** [B]: Underlying Abstract Domain used in the fwd analysis
   *)
 
-  val fwdInvMap : FWD.t InvMap.t ref
+  type env
+
+  val fwdInvMap : fwd_t InvMap.t ref
   (** [fwdInvMap]: a map from the label of the program to an associated
       abstraction computed in a forward analysis *)
 
-  val bwdInvMap : BWD.t InvMap.t ref
+  val bwdInvMap : bwd_t InvMap.t ref
   (** [bwdInvMap]: a map from the label of the program to an associated a
       decision tree that abstract a ranking function of the program. *)
 
   val bwdRec :
     ?property:'a p ->
     func StringMap.t ->
-    Environment.t ->
+    env ->
     var list ->
-    BWD.t ->
+    bwd_t ->
     block ->
-    BWD.t
+    bwd_t
   (** [bwdRec]: abstract backward transfer function of statement for the
       decision tree abstract domain *)
 
-  val initBlk : Environment.t -> var list -> block -> unit
+  val initBlk : env -> block -> unit
   (** [initBlk]: initialisation function *)
 
   val analyze :

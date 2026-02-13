@@ -25,6 +25,8 @@ struct
   module BanalApron = Banal_apron_domain.ApronDomain (N)
 
   type env = C.env
+  
+  type dim = var
 
   type t = {
     constraints : C.t list; (* representation as list of constraints *)
@@ -58,6 +60,7 @@ struct
       t.constraints []
   (** The environment of constraints. *)
   let env t = t.env
+  let set_env env t = {t with env}
 
   (** The current underlying APRON environment. *)
   let ap_env env = env.ap_env
@@ -102,8 +105,11 @@ struct
 
   (** Returns the top elements: an empty list <-> no constraints*)
   let top e = { constraints = []; env = e }
-  let init vars = top {vars; ap_env = Environment.make [||] [||]}
+  let init_env () = C.init_env ()
 
+  let add_dim_to_env t dim = {t with env = C.add_dim_to_env t.env dim}
+  let remove_dim_of_env t dim = {t with env = C.remove_dim_of_env t.env dim}
+  let dim_in_env t dim = vars t |> List.mem dim
   let print fmt b =
     let env = env b in
     let b = to_apron_t b in
@@ -226,7 +232,7 @@ struct
     let filtered = BanalApron.bwd_filter at bot () e () pre in
     of_apron_t env filtered
 
-  let filter b (e, t, ext) =
+  let fwd_filter b (e, t, ext) =
     let rec f manager b (e, t, ext) =
       match e with
       | T_bool_const True -> b

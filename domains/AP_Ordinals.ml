@@ -14,11 +14,14 @@ module AP_OrdinalValued (F : FUNCTION) : FUNCTION = struct
   type rank = Bot | Fun of Linexpr1.t | Top
   type env = F.env
   type t = F.t * F.t list
-
+  type dim = F.dim
   let env (f, _) = F.env f
-
+  let set_env (env:env)  ((f,ff):t) : t =  (F.set_env env f , List.map (fun f -> F.set_env env f) ff)
+  let init_env () = F.init_env ()
+  let add_dim_to_env (f,ff) dim =  (F.add_dim_to_env f dim, List.map (fun f -> F.add_dim_to_env f dim) ff)
+  let remove_dim_of_env (f,ff) dim =  (F.remove_dim_of_env f dim, List.map (fun f -> F.remove_dim_of_env f dim) ff)
   (**)
-  let ranking f = Obj.magic f
+  (**)
   let bot e = (F.bot e, [])
   let zero e = (F.zero e, [])
   let top e = (F.top e, [])

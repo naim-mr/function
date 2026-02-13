@@ -9,7 +9,7 @@ module type ENVINIT = sig
   val env : Typed_syntax.prog -> env * var list
 end
 
-module Make (B : PARTITION) : ENVINIT = struct
+module Make (B : PARTITION) : ENVINIT with type env = B.env = struct
   type env = B.env
 
   let rec initStat s (env, vars) =

@@ -6,22 +6,12 @@ open Typed_syntax
 
 (** Signature for a single partition of the domain of a ranking function. *)
 module type PARTITION = sig
-  (* A Partition has to implements operators of an abstract domain *)
-  include DOMAIN
-
-  val bwd_assign : t -> expr typed * expr typed -> t
-  val ubwd_assign :t -> expr typed * expr typed -> t
-  val fwd_assign : t -> expr typed * expr typed -> t
-  val filter : t -> expr typed -> t
-  val ubwd_filter : t -> expr typed -> t
 
   module C : CONSTRAINT
   (** [module C] The underlying constraints domains, a parititon is a
       conjunction of such constraints *)
-
-  val env : t -> env
-  (** [env t] returns the environment in which is defined the partition *)
-
+  include DOMAIN with type dim = C.dim
+  
   val constraints : t -> C.cons list
   (** [constraints t] returns the conjunction of constraints as a list of
       constraints in C*)
@@ -34,11 +24,23 @@ module type PARTITION = sig
   
   val inner : env -> C.t list -> t
   (** [inner env cs] returns the partitions defined by the constraints in [cs] on [env]*)
+
+  val bwd_assign : t -> expr typed * expr typed -> t
+  (** [bwd_assign t lv exp] Over-approximating backward assignement [lv := exp] on [t]*)
+  
+  val ubwd_assign :t -> expr typed * expr typed -> t
+  (** [ubwd_assign t lv exp] Under-approximating backward assignement [lv := exp] on [t]*)
+  
+  val fwd_assign : t -> expr typed * expr typed -> t
+  (** [fwd_assign t lv exp] Over-approximating forward assignement [lv := exp] on [t]*)
+  
+  val fwd_filter : t -> expr typed -> t
+  (** [fwd_assign t exp] Over-approximating forward filter [exp != 0] on [t]*)
+
+  val ubwd_filter : t -> expr typed -> t
+  (** [ubwd_assign t exp] Under-approximating backward filter [exp != 0] on [t]*)
   val print : Format.formatter -> t -> unit
-  val add_var_to_env: env -> string -> env
-  val remove_var_of_env: env -> string -> env
-  val mem_var: env -> string -> bool
-  val init: var list -> t
+
 end
 
 module type AP_NUMERICAL = sig
@@ -48,7 +50,6 @@ module type AP_NUMERICAL = sig
   val supports_underapproximation : bool
 end
 
-(** Signature for a single partition of the domain of a ranking function. *)
 module type AP_PARTITION = sig
   module C : AP_CONSTRAINT
   module N : AP_NUMERICAL
@@ -60,29 +61,35 @@ end
 
 module type FUNCTION = sig
   module B : PARTITION
-
+  type env = B.env 
+  type dim = B.dim
+  type t 
   type rank
-  type t
-  type env = B.env
-
   val bot : env -> t
   val top : env -> t
-  
-  val env : t -> env
-  val is_top : t -> bool
   val is_bot : t -> bool
-  val is_leq : kind -> B.t -> t -> t -> bool
-  val join : ?random:bool -> kind -> B.t -> t -> t -> t
-  val widen : ?jokers:int -> B.t -> t -> t -> t
+  val is_top : t -> bool
+  val init_env : unit -> env
+  (** [init env ()] returns an empty env *)
+  val env : t -> env
+  (** [env t] returns the environment in which is defined the partition *)
+  val set_env : env -> t -> t
+  (** [update_env env t] returns [t] with the environment [env]*)
+  val add_dim_to_env: t -> dim -> t
+  (** [add_var_to_env env x] add the variable [x] inside the environment [env]*)
+
+  val remove_dim_of_env: t -> dim -> t
+  (** [remove_dim_of_env env x] remove the variable [x] inside the environment [env]*)
+
   val bwd_assign : t -> expr typed * expr typed -> t
   val filter : t -> expr typed -> t
   val reinit : t -> t
   val zero : env -> t
-  val ranking : t -> rank
   val defined : t -> bool
+  val is_leq : kind -> B.t -> t -> t -> bool
+  val join : ?random:bool -> kind -> B.t -> t -> t -> t
+  val widen : ?jokers:int -> B.t -> t -> t -> t
   val is_eq : B.t -> t -> t -> bool
-
-  (* returns the domain where the two functions are equal *)
   val domain_eq : B.t -> t -> t -> B.t
   val plus : B.t -> t -> t -> t
   val extend : B.t -> B.t -> t -> t -> t
@@ -95,15 +102,17 @@ end
 
 module type RANKING_FUNCTION = sig
   module B : PARTITION
-  include DOMAIN
-
-  val bwd_assign :  ?domain:B.t ->
-    ?taint:bool ->
-    ?underapprox:bool -> t -> expr typed * expr typed -> t
-
-  val filter : ?taint:bool ->
-    ?domain:B.t -> ?underapprox:bool -> t -> expr typed -> t
-
+  
+  type dim = B.dim
+  type t
+  type env
+  
+  val dual_widen: t -> t -> t
+  val update_dom: B.t option -> env -> env
+  val bwd_assign : ?domain:B.t ->  t ->  expr typed * expr typed ->  t
+  val filter : ?domain:B.t -> t -> expr typed -> t
+  val ubwd_assign : ?domain:B.t ->  t ->  expr typed * expr typed ->  t
+  val ubwd_filter : ?domain:B.t -> t -> expr typed -> t
   val zero : env -> t
   val domain_zero : t -> t
   val plus : t -> t -> t

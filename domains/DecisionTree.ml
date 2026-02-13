@@ -70,8 +70,13 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
   }
   (** An element of the ranking functions abstract domain. *)
 
+  type dim = B.dim
+  
   (** The current decision tree. *)
   let tree t = t.tree
+
+  let env t = t.env
+  let lift_fenv f_env = { f_env; domain = None }
 
   (** Prints the current decision tree. *)
   let print_tree fmt t =
@@ -405,6 +410,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
         Node (c, sl, sr)
     | _ -> st
 
+  let update_dom b env = { env with domain = b }
   let is_bot t = match t.tree with Leaf f when F.is_bot f -> true | _ -> false
 
   (** The bottom element of the abstract domain. The totally undefined function,
@@ -1165,7 +1171,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
 
   (**)
 
-  let bwd_assign ?domain ?(taint = true) ?(underapprox = false) t e =
+  let assign ?domain ?(underapprox = false) t e =
     let cache = ref CMap.empty in
     let env = t.env in
     let f_env = env.f_env in
@@ -1303,12 +1309,15 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
     let env = { env with domain = pre } in
     { tree = sort_tree (aux t.tree []); env }
 
-  let rec filter ?(taint = true) ?domain ?(underapprox = false) t e =
+  let bwd_assign ?domain = assign ?domain ~underapprox:false
+  let ubwd_assign ?domain = assign ?domain ~underapprox:true
+
+  let rec filter_helper ?domain ?(underapprox = false) t e =
     let pre = domain in
     let env = t.env in
     let f_env = env.f_env in
     let post = env.domain in
-    let b_filter = if underapprox then B.ubwd_filter else B.filter in
+    let b_filter = if underapprox then B.ubwd_filter else B.fwd_filter in
     let rec aux t bs cs =
       let bcs =
         match pre with
@@ -1404,7 +1413,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
               (T_binary (A_GREATER_EQUAL, e1, e2), typ, ext),
               (T_binary (A_GREATER_EQUAL, e2, e1), typ, ext) )
         in
-        filter ~taint ?domain:pre ~underapprox t (bop, typ, ext)
+        filter_helper ?domain:pre ~underapprox t (bop, typ, ext)
     | T_binary (A_NOT_EQUAL, e1, e2) ->
         let bop =
           T_binary
@@ -1412,14 +1421,14 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
               (T_binary (A_GREATER, e1, e2), typ, ext),
               (T_binary (A_LESS, e1, e2), typ, ext) )
         in
-        filter ~taint ?domain:pre ~underapprox t (bop, typ, ext)
+        filter_helper ?domain:pre ~underapprox t (bop, typ, ext)
     | T_bool_const False -> { tree = Bot; env = { env with domain = pre } }
     | T_unary (A_NOT, e) ->
         let e = neg_bexp e in
-        filter ~taint ?domain:pre ~underapprox t e
+        filter_helper ?domain:pre ~underapprox t e
     | T_binary ((A_AND as op), e1, e2) | T_binary ((A_OR as op), e1, e2) -> (
-        let t1 = filter ~taint ?domain:pre ~underapprox t e1
-        and t2 = filter ~taint ?domain:pre ~underapprox t e2 in
+        let t1 = filter_helper ?domain:pre ~underapprox t e1
+        and t2 = filter_helper ?domain:pre ~underapprox t e2 in
         match op with
         | A_AND -> meet APPROXIMATION t1 t2
         | A_OR -> join APPROXIMATION t1 t2
@@ -1440,6 +1449,9 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
         let bs = List.sort L.compare bs in
         let t = aux t.tree bs [] in
         { tree = t; env = { env with domain = pre } }
+
+  let filter ?domain = filter_helper ?domain ~underapprox:false
+  let ubwd_filter ?domain = filter_helper ?domain ~underapprox:true
 
   (* 
     Check if all partitions in the decision tree are defined i.e. have a ranking function assigned to them.
@@ -1523,8 +1535,6 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
 
   let reset ?mask t e =
     let env = t.env in
-    let f_env = env.f_env in
-    let domain = env.domain in
     let t1 = t.tree in
     let rec reset flag t =
       match t with
@@ -1534,8 +1544,8 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
     in
     let t2 =
       match mask with
-      | None -> reset false (tree (filter ~underapprox:true t e))
-      | Some mask -> reset true (tree (filter ~underapprox:true mask e))
+      | None -> reset false (tree (ubwd_filter t e))
+      | Some mask -> reset true (tree (ubwd_filter mask e))
     in
     let rec aux (t1, t2) =
       match (t1, t2) with

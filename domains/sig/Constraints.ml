@@ -17,6 +17,19 @@ module type CONSTRAINT = sig
   type linexpr
   (** Linear constraints type. *)
 
+  type dim = var
+
+  val init_env : unit -> env
+  (** [init env ()] returns an empty env *)
+  val env : t -> env
+  (** [env t] returns the environment in which is defined the partition *)
+  val set_env : env -> t -> t
+  (** [update_env env t] returns [t] with the environment [env]*)
+  val add_dim_to_env: env -> dim -> env
+  (** [add_var_to_env env x] add the variable [x] inside the environment [env]*)
+  val remove_dim_of_env: env -> dim -> env
+  (** [remove_dim_of_env env x] remove the variable [x] inside the environment [env]*)
+
   val make_unsat : env -> t
   (** [make_unsat env] returns a non satisfiable constraints over the environment [env]. *)
   

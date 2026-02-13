@@ -12,6 +12,7 @@ open CTLIterator
 open Config
 open C_Frontend
 open Typed_syntax
+open Domains
 
 let parsePropertyStringNew str =
   let lex = Lexing.from_string str in
@@ -247,20 +248,17 @@ let run_analysis analysis_function program () =
     Format.fprintf !fmt "\nDone.\n"
 
 let termination_iterator_new () : (module Semantics.SEMANTIC) =
-  let open Signatures in
+  let open Domains in
   let module S =
     (val match !domain with
          | "boxes" ->
-             if !ordinals then
-               (module TerminationIterator (DecisionTree.TSOB))
+             if !ordinals then (module TerminationIterator (DecisionTree.TSOB))
              else (module TerminationIterator (DecisionTree.TSAB))
          | "octagons" ->
-             if !ordinals then
-               (module TerminationIterator (DecisionTree.TSOO))
+             if !ordinals then (module TerminationIterator (DecisionTree.TSOO))
              else (module TerminationIterator (DecisionTree.TSAO))
          | "polyhedra" ->
-             if !ordinals then
-               (module TerminationIterator (DecisionTree.TSOP))
+             if !ordinals then (module TerminationIterator (DecisionTree.TSOP))
              else (module TerminationIterator (DecisionTree.TSAP))
          | _ -> raise (Invalid_argument "Unknown Abstract Domain")
         : Semantics.SEMANTIC)
@@ -268,7 +266,7 @@ let termination_iterator_new () : (module Semantics.SEMANTIC) =
   (module S)
 
 let ctl_iterator_new () : (module Semantics.SEMANTIC) =
-  let open Signatures in
+  let open Sig in
   let module S =
     (val match !domain with
          | "boxes" ->

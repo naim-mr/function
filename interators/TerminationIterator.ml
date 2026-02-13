@@ -20,12 +20,16 @@ open ForwardIterator
 open VarSet
 open Utils.Datatypes
 
-module TerminationIterator (D : RANKING_FUNCTION)  = struct
+module TerminationIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
   type r = D.t
 
   module D = D
   module B = D.B
   module ForwardIteratorB = ForwardIterator (B)
+
+  type bwd_t = D.t
+  type fwd_t = D.B.t
+  type env = D.env
 
   let dummy_prop = StringMap.empty
   let fwdInvMap = ref InvMap.empty
@@ -46,20 +50,17 @@ module TerminationIterator (D : RANKING_FUNCTION)  = struct
       env vars p s =
     match s with
     | T_label _ | T_print _ | T_add_var (_, None) | T_del_var _ -> (p, visited)
-    | T_RETURN -> (D.zero ?domain env vars, visited)
+    | T_RETURN -> (D.update_dom domain env |> D.zero, visited)
     | T_BREAK -> raise (UnsupportedFeature "break")
     | T_add_var (v, Some (exp, typ, ext)) | T_assign ((v, _), (exp, typ, ext))
       ->
-        ( D.bwd_assign ?domain ~taint:true ~underapprox:false p
-            ((T_var v, typ, ext), (exp, typ, ext)),
-          visited )
+        (D.bwd_assign ?domain p ((T_var v, typ, ext), (exp, typ, ext)), visited)
     | T_assert (b, _) | T_assume b -> (p, visited)
     | T_if ((b, typ, ba), s1, s2) ->
-        let uap = false in
         let p1, visited2 = bwdBlk ~visited funcs env vars p s1 in
         let p2, visited1 = bwdBlk ~visited funcs env vars p s2 in
-        let p1 = D.filter ?domain ~underapprox:uap p1 (b, typ, ba) in
-        let p2 = D.filter ?domain ~underapprox:uap p2 (neg_bexp (b, typ, ba)) in
+        let p1 = D.filter ?domain p1 (b, typ, ba) in
+        let p2 = D.filter ?domain p2 (neg_bexp (b, typ, ba)) in
         if !tracebwd && not !minimal then (
           Format.fprintf Format.std_formatter "if in p1: %a\n" D.print p1;
           Format.fprintf Format.std_formatter "p2: %a\n" D.print p2);
@@ -68,8 +69,7 @@ module TerminationIterator (D : RANKING_FUNCTION)  = struct
     | T_while ((l, _), (b, t, ba), s) ->
         let a = InvMap.find_opt l !fwdInvMap in
         let dm = if !refine then a else None in
-        let uap = false in
-        let p1 = D.filter ?domain:dm p ~underapprox:uap (neg_bexp (b, t, ba)) in
+        let p1 = D.filter ?domain:dm p (neg_bexp (b, t, ba)) in
         let rec aux i p2 n =
           if !abort then raise Abort
           else
@@ -94,7 +94,7 @@ module TerminationIterator (D : RANKING_FUNCTION)  = struct
                 if !tracebwd && not !minimal then
                   Format.fprintf !fmt "i'': %a\n" D.print i'';
                 let p2, visited2 = bwdBlk ~visited funcs env vars i'' s in
-                let p2' = D.filter ?domain:dm ~underapprox:uap p2 (b, t, ba) in
+                let p2' = D.filter ?domain:dm p2 (b, t, ba) in
                 aux i'' p2' (n + 1))
             else
               let i'' =
@@ -104,12 +104,12 @@ module TerminationIterator (D : RANKING_FUNCTION)  = struct
               if !tracebwd && not !minimal then
                 Format.fprintf !fmt "i'': %a\n" D.print i'';
               let p2, visited2 = bwdBlk ~visited funcs env vars i'' s in
-              let p2' = D.filter ?domain:dm ~underapprox:uap p2 (b, t, ba) in
+              let p2' = D.filter ?domain:dm p2 (b, t, ba) in
               aux i'' p2' (n + 1)
         in
-        let i = D.bot ?domain:dm env vars in
+        let i = D.update_dom dm env |> D.bot in
         let p2, visited2 = bwdBlk ~visited funcs env vars i s in
-        let p2' = D.filter ?domain:dm ~underapprox:uap p2 (b, t, ba) in
+        let p2' = D.filter ?domain:dm p2 (b, t, ba) in
         let p = aux i p2' 1 in
         addBwdInv l p;
         ((if !refine then D.refine p (Option.get a) else p), visited)
@@ -121,7 +121,7 @@ module TerminationIterator (D : RANKING_FUNCTION)  = struct
         match f_in with
         | Some f_in -> raise (UnsupportedFeature "Recursive function")
         | None -> (D.plus p p1, Seq.cons f.func_name visited))
-    | T_expr e -> (D.top env vars, visited (* todo handle this *))
+    | T_expr e -> (D.top env, visited (* todo handle this *))
 
   and bwdBlk ?property ?(visited : string Seq.t = Seq.empty) funcs env vars p
       (b : block) : D.t * string Seq.t =
@@ -156,23 +156,23 @@ module TerminationIterator (D : RANKING_FUNCTION)  = struct
     fst (bwdBlk funcs env vars p b)
 
   (* Analyzer *)
-  let rec initStm env vars s =
+  let rec initStm env s =
     match s with
     | T_if (_, s1, s2) ->
-        initBlk env vars s1;
-        initBlk env vars s2
+        initBlk env s1;
+        initBlk env s2
     | T_while ((l, _), _, s) ->
-        addBwdInv l (D.bot env vars);
-        initBlk env vars s
+        addBwdInv l (D.bot env);
+        initBlk env s
     | _ -> ()
 
-  and initBlk env vars b =
+  and initBlk env b =
     match b with
-    | T_empty (l, _) -> addBwdInv l (D.bot env vars)
+    | T_empty (l, _) -> addBwdInv l (D.bot env)
     | T_stat ((l, _), (s, _), b) ->
-        addBwdInv l (D.bot env vars);
-        initStm env vars s;
-        initBlk env vars b
+        addBwdInv l (D.bot env);
+        initStm env s;
+        initBlk env b
 
   let analyze
       ?(precondition =
@@ -184,10 +184,11 @@ module TerminationIterator (D : RANKING_FUNCTION)  = struct
     let block, funcmap, varmap = prog in
     let f = StringMap.find !Config.main funcmap in
     let module Init = EnvInit.Make (B) in
-    let env, vars = Init.env prog in
+    let f_env, vars = Init.env prog in
     let s = f.func_body in
-    initBlk env vars block;
-    initBlk env vars s;
+    let env = f_env |> D.lift_fenv in
+    initBlk env block;
+    initBlk env s;
     let precondition =
       match precondition with
       | Some e ->
@@ -212,7 +213,7 @@ module TerminationIterator (D : RANKING_FUNCTION)  = struct
     (* Forward Analysis *)
     if !tracefwd && not !minimal then
       Format.fprintf !fmt "\nForward Analysis Trace:\n";
-    if !refine then ForwardIteratorB.analyze env prog;
+    if !refine then ForwardIteratorB.analyze f_env prog;
     fwdInvMap := !ForwardIteratorB.fwdInvMap;
     fwdTaintMap := !ForwardIteratorB.fwdTaintMap;
     (* Backward Analysis *)
@@ -221,9 +222,7 @@ module TerminationIterator (D : RANKING_FUNCTION)  = struct
     start := Sys.time ();
     let startbwd = Sys.time () in
     let i =
-      bwdRec funcmap env vars
-        (bwdRec funcmap env vars (D.zero env vars) s)
-        block
+      bwdRec funcmap env vars (bwdRec funcmap env vars (D.zero env) s) block
     in
     let stopbwd = Sys.time () in
     if not !minimal then (

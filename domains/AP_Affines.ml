@@ -23,6 +23,7 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
   type rank = Bot | Fun of Linexpr1.t | Top
   type env = B.env
   type t = { ranking : rank; env : env }
+  type dim = B.dim
 
   let ct_of_lincons f b =
     let cs : B.C.t list =
@@ -37,6 +38,7 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
   let v = Var.of_string "#"
   let ranking f = f.ranking
   let env f = f.env
+  let set_env env f = { f with env }
   let ap_env env = B.ap_env env
   let vars f = (env f).vars
 
@@ -54,9 +56,16 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
     }
 
   let top e = { ranking = Top; env = e }
-
+  let init_env () = B.init_env ()
+  let add_dim_to_env f dim = 
+    let b = B.bot f.env in 
+    let env = B.add_dim_to_env b dim |> B.env  in
+    {f with env}
+  let remove_dim_of_env f dim = 
+      let b = B.bot f.env in 
+      let env = B.remove_dim_of_env b dim |> B.env  in
+      {f with env}
   (**)
-
   let is_bot f = match f.ranking with Bot -> true | _ -> false
   let defined f = match f.ranking with Fun _ -> true | _ -> false
   let is_top f = match f.ranking with Top -> true | _ -> false
@@ -314,6 +323,8 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
 
   let join ?(random = false) k b f1 f2 =
     { ranking = join_ranking ~random k b f1.ranking f2.ranking; env = f1.env }
+
+  let meet _ = failwith "nyi"
 
   let mulScalar c1 c2 =
     match (c1, c2) with
@@ -706,20 +717,6 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
     { ranking = bwd_assign_ranking f.ranking (x, e); env = f.env }
 
   let filter f _ = successor f
-  let bwd_filter = filter
-
-  let meet =
-    raise (Invalid_argument "Meet of affines functions not implemented")
-
-  let ubwd_filter =
-    raise
-      (Invalid_argument
-         "Underapprox BwdFilter of affines functions not implemented")
-
-  let ubwd_assign =
-    raise
-      (Invalid_argument
-         "Underapprox BwdAssign of affines functions not implemented")
 
   (**)
 
