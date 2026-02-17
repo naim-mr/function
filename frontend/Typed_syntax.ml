@@ -49,6 +49,9 @@ and var = {
 
 and var_scope = T_GLOBAL | T_LOCAL | T_INPUT | T_VOLATILE
 
+let dummy_precond =
+  (T_bool_const True, Abstract_syntax.A_BOOL, Abstract_syntax.extent_unknown)
+
 (* statements *)
 type label = id * position [@@deriving yojson]
 
@@ -449,3 +452,17 @@ let prog_literals = ref IdSet.empty
 
 let add_prog_literal (cst : Int.t) =
   prog_literals := IdSet.add cst !prog_literals
+
+let expr_prop_handler e vars =
+  let rec aux e =
+    match e with
+    | T_var v, t, ext ->
+        ( T_var
+            (List.find (fun x -> String.compare x.var_name v.var_name = 0) vars),
+          t,
+          ext )
+    | T_unary (op, e), t, ext -> (T_unary (op, aux e), t, ext)
+    | T_binary (bop, e1, e2), t, ext -> (T_binary (bop, aux e1, aux e2), t, ext)
+    | _ -> e
+  in
+  aux e

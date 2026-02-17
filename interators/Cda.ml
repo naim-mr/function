@@ -2,7 +2,7 @@
 open Semantics
 open AbstractSyntax
 open Signature
-open DecisionTree
+open Decision_Tree
 open Apron
 open ForwardIterator
 open Partition

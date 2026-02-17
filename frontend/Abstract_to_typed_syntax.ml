@@ -35,11 +35,11 @@ let int_rank i s =
   | A_LONG -> 7
   | A_INTEGER -> 99
   | A_DYNINT _ ->
-      let itv = Valsem.int_type_set i s in
-      if Itv_int.subseteq itv (Valsem.int_type_set A_CHAR s) then 0
-      else if Itv_int.subseteq itv (Valsem.int_type_set A_SHORT s) then 2
-      else if Itv_int.subseteq itv (Valsem.int_type_set A_INT s) then 4
-      else if Itv_int.subseteq itv (Valsem.int_type_set A_LONG s) then 6
+      let itv = Value_semantics.int_type_set i s in
+      if Itv_int.subseteq itv (Value_semantics.int_type_set A_CHAR s) then 0
+      else if Itv_int.subseteq itv (Value_semantics.int_type_set A_SHORT s) then 2
+      else if Itv_int.subseteq itv (Value_semantics.int_type_set A_INT s) then 4
+      else if Itv_int.subseteq itv (Value_semantics.int_type_set A_LONG s) then 6
       else 8
 
 let float_rank = function A_FLOAT -> 1 | A_DOUBLE -> 2 | A_REAL -> 99
@@ -107,7 +107,7 @@ let cast ((e, t, _) as ee) t' x =
     match (e, t') with
     (* don't cast constants if they fit the target type *)
     | T_int_const (i1, i2), A_int (c, s)
-      when Valsem.const_fit_in_type c s i1 && Valsem.const_fit_in_type c s i2 ->
+      when Value_semantics.const_fit_in_type c s i1 && Value_semantics.const_fit_in_type c s i2 ->
         ee
     | _ -> (T_unary (A_cast (t', x), ee), t', x))
 
@@ -206,7 +206,7 @@ let rec pure_expr env pre post (e, x) =
         else A_int (A_INTEGER, A_SIGNED)
       in
       ((T_int_const (Finite i1, Finite i2), t, x), pre, post)
-  | A_nondet t -> ((Valsem.type_set_expr t, t, x), pre, post)
+  | A_nondet t -> ((Value_semantics.type_set_expr t, t, x), pre, post)
   | A_bool_const b -> ((T_bool_const (tbool_of_bool b), A_BOOL, x), pre, post)
   | A_unary (op, e1) -> (
       let e1, pre, post = pure_expr env pre post e1 in

@@ -7,7 +7,7 @@ open Typed_syntax
 open Domains
 open Sig
 open Sig.Domain
-open DecisionTree
+open Decision_Tree
 open Apron
 open InvMap
 open CTLProperty

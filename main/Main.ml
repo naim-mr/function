@@ -252,14 +252,14 @@ let termination_iterator_new () : (module Semantics.SEMANTIC) =
   let module S =
     (val match !domain with
          | "boxes" ->
-             if !ordinals then (module TerminationIterator (DecisionTree.TSOB))
-             else (module TerminationIterator (DecisionTree.TSAB))
+             if !ordinals then (module TerminationIterator (Decision_Tree.TSOB))
+             else (module TerminationIterator (Decision_Tree.TSAB))
          | "octagons" ->
-             if !ordinals then (module TerminationIterator (DecisionTree.TSOO))
-             else (module TerminationIterator (DecisionTree.TSAO))
+             if !ordinals then (module TerminationIterator (Decision_Tree.TSOO))
+             else (module TerminationIterator (Decision_Tree.TSAO))
          | "polyhedra" ->
-             if !ordinals then (module TerminationIterator (DecisionTree.TSOP))
-             else (module TerminationIterator (DecisionTree.TSAP))
+             if !ordinals then (module TerminationIterator (Decision_Tree.TSOP))
+             else (module TerminationIterator (Decision_Tree.TSAP))
          | _ -> raise (Invalid_argument "Unknown Abstract Domain")
         : Semantics.SEMANTIC)
   in
@@ -270,14 +270,14 @@ let ctl_iterator_new () : (module Semantics.SEMANTIC) =
   let module S =
     (val match !domain with
          | "boxes" ->
-             if !ordinals then (module CTLIterator (DecisionTree.TSOB))
-             else (module CTLIterator (DecisionTree.TSAB))
+             if !ordinals then (module CTLIterator (Decision_Tree.TSOB))
+             else (module CTLIterator (Decision_Tree.TSAB))
          | "octagons" ->
-             if !ordinals then (module CTLIterator (DecisionTree.TSOO))
-             else (module CTLIterator (DecisionTree.TSAO))
+             if !ordinals then (module CTLIterator (Decision_Tree.TSOO))
+             else (module CTLIterator (Decision_Tree.TSAO))
          | "polyhedra" ->
-             if !ordinals then (module CTLIterator (DecisionTree.TSOP))
-             else (module CTLIterator (DecisionTree.TSAP))
+             if !ordinals then (module CTLIterator (Decision_Tree.TSOP))
+             else (module CTLIterator (Decision_Tree.TSAP))
          | _ -> raise (Invalid_argument "Unknown Abstract Domain")
         : Semantics.SEMANTIC)
   in

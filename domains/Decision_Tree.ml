@@ -28,7 +28,7 @@ open AP_Ordinals
     an auxiliary abstract domains for functions F, both parameterized by an
     auxiliary numerical abstract domain B. *)
 
-module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
+module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
   module B = F.B (* auxiliary numerical abstract domain *)
   module C = B.C (* auxiliary linear constraints abstract domain *)
 
@@ -1304,7 +1304,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
                 Node ((c, nc), l, r)
           | _ ->
               raise
-                (Invalid_argument "DecisionTree.bwd_assign: unexpected lvalue"))
+                (Invalid_argument "Decision_Tree.bwd_assign: unexpected lvalue"))
     in
     let env = { env with domain = pre } in
     { tree = sort_tree (aux t.tree []); env }
@@ -2118,9 +2118,9 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
     | _ -> t
 end
 
-module TSAB = DecisionTree (AB)
-module TSOB = DecisionTree (OB)
-module TSAO = DecisionTree (AO)
-module TSOO = DecisionTree (OO)
-module TSAP = DecisionTree (AP)
-module TSOP = DecisionTree (OP)
+module TSAB = Decision_Tree (AB)
+module TSOB = Decision_Tree (OB)
+module TSAO = Decision_Tree (AO)
+module TSOO = Decision_Tree (OO)
+module TSAP = Decision_Tree (AP)
+module TSOP = Decision_Tree (OP)

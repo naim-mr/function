@@ -5,7 +5,7 @@
 *)
 
 open Utils.Datatypes
-open Valsem
+open Value_semantics
 open Banal_domain
 open Utils.Apron_utils
 open Frontend.Abstract_syntax

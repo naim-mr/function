@@ -214,7 +214,7 @@ let rec convert_expr (st : state) ((kind, typ, _) : C_AST.expr) :
         let e =
           match (ee, convert_type_qual typ) with
           | Abstract_syntax.A_int_const n, Abstract_syntax.A_int (t, s)
-            when Intinf.of_string n |> Valsem.const_fit_in_type t s ->
+            when Intinf.of_string n |> Value_semantics.const_fit_in_type t s ->
               ee
           | _ ->
               Abstract_syntax.A_unary

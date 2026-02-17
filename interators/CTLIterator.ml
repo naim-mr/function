@@ -193,9 +193,6 @@ module CTLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
   type inv = D.t InvMap.t
 
   (* dummy_prop to give a default value to optional (due to termination iterator) parameter ?property *)
-  let dummy_precond =
-    (T_bool_const True, Abstract_syntax.A_BOOL, Abstract_syntax.extent_unknown)
-
   let dummy_prop = Ctl (Atomic (dummy_precond, None))
 
   (* Also to match module type: to remove in the future *)
@@ -736,42 +733,6 @@ module CTLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
     bwdInvMap := i;
     programInvariant
 
-  let witness program inv =
-    let header = ref {|entry_type: "violation_sequence"
-    content:
-  |} in
-    let witness_statement s = header := Printf.sprintf "%s%s" !header s in
-    let rec aux b =
-      match b with
-      | T_empty (blockLabel, ext) -> ()
-      | T_stat ((blockLabel, ext), (stmt, ext'), nextBlock) -> (
-          match stmt with
-          | T_expr _ | T_label _ | T_add_var (_, None) | T_del_var _ | T_print _
-            ->
-              aux nextBlock
-          | T_RETURN -> aux nextBlock
-          | T_add_var (l, Some e) | T_assign ((l, _), e) -> aux nextBlock
-          | T_assert (b, _) | T_assume b -> aux nextBlock
-          | T_if (b, s1, s2) ->
-              witness_statement
-                (Printf.sprintf
-                   {|- waypoint:
-type: "branching"
-constraint:
-value: "true"
-location:
-file_name: ...
-line: %s
-action: "follow"|}
-                   (Z.to_string blockLabel));
-              aux nextBlock
-          | T_while (l, b, loop_body) -> aux nextBlock
-          | T_call (f, ss) -> aux nextBlock
-          | T_BREAK -> raise (Invalid_argument "bwdStm:T_BREAK"))
-      (* | A_recall (f, ss) -> raise (Invalid_argument "bwdStm:A_recall") *)
-    in
-    aux program.mainFunction.func_body
-
   let analyze ?(precondition = Some dummy_precond) ?(property = dummy_prop) prog
       =
     let module Init = EnvInit.Make (B) in
@@ -779,42 +740,11 @@ action: "follow"|}
     let env = f_env |> D.lift_fenv in
     let property =
       get_ctl property
-      |> CTLProperty.map (fun e ->
-             let rec aux e =
-               match e with
-               | T_var v, t, ext ->
-                   ( T_var
-                       (List.find
-                          (fun x -> String.compare x.var_name v.var_name = 0)
-                          vars),
-                     t,
-                     ext )
-               | T_unary (op, e), t, ext -> (T_unary (op, aux e), t, ext)
-               | T_binary (bop, e1, e2), t, ext ->
-                   (T_binary (bop, aux e1, aux e2), t, ext)
-               | _ -> e
-             in
-             aux e)
+      |> CTLProperty.map (fun e -> Typed_syntax.expr_prop_handler e vars)
     in
     let precondition =
-      match precondition with
-      | Some e ->
-          let rec aux e =
-            match e with
-            | T_var v, t, ext ->
-                ( T_var
-                    (List.find
-                       (fun x -> String.compare x.var_name v.var_name = 0)
-                       vars),
-                  t,
-                  ext )
-            | T_unary (op, e), t, ext -> (T_unary (op, aux e), t, ext)
-            | T_binary (bop, e1, e2), t, ext ->
-                (T_binary (bop, aux e1, aux e2), t, ext)
-            | _ -> e
-          in
-          Some (aux e)
-      | None -> None
+      Option.bind precondition (fun e ->
+          Some (Typed_syntax.expr_prop_handler e vars))
     in
     let block, funcmap, _ = prog in
     let f = StringMap.find !Config.main funcmap in
@@ -835,7 +765,6 @@ action: "follow"|}
     let initialLabel = block_label program.mainFunction.func_body in
     let programInvariant = InvMap.find initialLabel inv in
     bwdInvMap := inv;
-    witness program inv;
     tree := D.output_json program.variables programInvariant;
     Config.result :=
       if !Config.analysis = "non-termination" then

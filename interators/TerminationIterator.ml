@@ -15,7 +15,7 @@ open Apron
 open Sig.Domain
 open Sig.Ranking
 open Semantics
-open Domains.DecisionTree
+open Domains.Decision_Tree
 open ForwardIterator
 open VarSet
 open Utils.Datatypes
@@ -188,24 +188,8 @@ module TerminationIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
     initBlk env block;
     initBlk env s;
     let precondition =
-      match precondition with
-      | Some e ->
-          let rec aux e =
-            match e with
-            | T_var v, t, ext ->
-                ( T_var
-                    (List.find
-                       (fun x -> String.compare x.var_name v.var_name = 0)
-                       vars),
-                  t,
-                  ext )
-            | T_unary (op, e), t, ext -> (T_unary (op, aux e), t, ext)
-            | T_binary (bop, e1, e2), t, ext ->
-                (T_binary (bop, aux e1, aux e2), t, ext)
-            | _ -> e
-          in
-          Some (aux e)
-      | None -> None
+      Option.bind precondition (fun e ->
+          Some (Typed_syntax.expr_prop_handler e vars))
     in
     (* TODO: handle functions calls *)
     (* Forward Analysis *)

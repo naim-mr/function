@@ -9,7 +9,7 @@ These modules are provides the abstract transfer function for the language defin
 | Module | Description |
 |:------:|:-----------:|
 | `Domain.ml` | Signature for a ranking function abstract domain, defining RANKING_FUNCTION |
-| `DecisionTree.ml` | Decision tree abstract domain, implementing the signature RANKING_FUNCTION |
+| `Decision_Tree.ml` | Decision tree abstract domain, implementing the signature RANKING_FUNCTION |
 | `Function.ml` |  Abstract domain signature for the leaf value as function valuation in the decision tree abstract domain |
 | `Numerical.ml` |  Abstract domain signature numerical domain |
 | `Affine.ml` |  Implementation for the Function.ml signature as Affine function |
