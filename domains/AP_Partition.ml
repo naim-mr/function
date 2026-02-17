@@ -95,7 +95,7 @@ struct
     done;
     { constraints = !cs; env }
 
-  (** Returns the bottom elements: a singleton of a unsat constraint*)
+  (** Returns the bottom elements: a singleton of an unsat constraint*)
 
   let bot e = { constraints = [ C.make_unsat e ]; env = e }
   let inner e cs = { constraints = cs; env = e }

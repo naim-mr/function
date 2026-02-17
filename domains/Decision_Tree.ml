@@ -50,13 +50,14 @@ module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
 
   module LSet = Set.Make (L)
 
-  (** The abstract domain manipulates piecewise-defined partial functions. These
-      are represented by decision trees, where the decision nodes are labeled by
-      linear constraints over the program variables, and the leaf nodes are
-      labeled by functions of the program variables. The decision nodes
-      recursively partition the space of possible values of the program
-      variables and the functions at the leaves provide the corresponding upper
-      bounds on the number of program execution steps to termination. *)
+  (** [type tree] The abstract domain manipulates piecewise-defined partial
+      functions. These are represented by decision trees, where the decision
+      nodes are labeled by linear constraints over the program variables, and
+      the leaf nodes are labeled by functions of the program variables. The
+      decision nodes recursively partition the space of possible values of the
+      program variables and the functions at the leaves provide the
+      corresponding upper bounds on the number of program execution steps to
+      termination. *)
   type tree = Bot | Leaf of F.t | Node of L.t * tree * tree
 
   type env = {
@@ -68,17 +69,15 @@ module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
     tree : tree; (* current piecewise-defined ranking function *)
     env : env;
   }
-  (** An element of the ranking functions abstract domain. *)
 
   type dim = B.dim
 
-  (** The current decision tree. *)
+  (** [tree t] returns the current decision tree. *)
   let tree t = t.tree
 
   let env t = t.env
   let lift_fenv f_env = { f_env; domain = None }
 
-  (** Prints the current decision tree. *)
   let print_tree fmt t =
     let rec aux ind fmt t =
       match t with
@@ -112,10 +111,8 @@ module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
     in
     aux t.tree
 
-  (*
-     Prints a tree in graphviz 'dot' format for visualization. 
-     http://www.graphviz.org/content/dot-language
-  *)
+  (** [print_graphviz_dot fmt t] Prints a tree in graphviz 'dot' format for
+      visualization. http://www.graphviz.org/content/dot-language *)
   let print_graphviz_dot fmt t =
     let nodeId = ref 0 in
     let nextNodeId () =
@@ -141,7 +138,8 @@ module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
     in
     Format.fprintf fmt "graph G { %a }" (aux (nextNodeId ())) t.tree
 
-  (** Collects the linear constraints labeling the current decision tree. *)
+  (** [tree_labels t] collects the linear constraints labeling the current
+      decision tree. *)
   let tree_labels t =
     let ls = ref LSet.empty in
     let rec aux t =
@@ -155,7 +153,7 @@ module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
     aux t;
     !ls
 
-  (* map function for decision tree*)
+  (** [tree_map f_bot f_leaf t] map function for decision tree *)
   let tree_map f_bot f_leaf t : t =
     let rec aux (tree : tree) : tree =
       match tree with
@@ -425,7 +423,7 @@ module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
       i.e., a decision tree with a single `top` leaf. *)
   let top e = { tree = Leaf (F.top e.f_env); env = e }
 
-  (** BINARY OPERATORS *)
+  (* BINARY OPERATORS *)
   let domain_zero t =
     let rec aux tree =
       match tree with
@@ -528,7 +526,7 @@ module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
     (* assuming t1.domain = t2.domain *)
     let env = t1.env in
     let f_env = env.f_env in
-    (* assuming t1.env = t2.env *)
+    (* assuming t1.f_env = t2.f_env *)
     let rec aux (t1, t2) cs =
       match (t1, t2) with
       | Bot, Bot -> true
@@ -681,7 +679,6 @@ module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
       that are undefined i.e. not part of t1 and t2 are replaced with NIL nodes.
       Using this version of the meet can lead to NIL nodes in the resulting
       tree. *)
-
   let meet (k : kind) (t1 : t) (t2 : t) =
     let f_env = t1.env.f_env in
     let domain = t1.env.domain in
@@ -849,13 +846,7 @@ module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
               (lunify t1 l2 (c2 :: cs), lunify t1 r2 (nc2 :: cs))
               cs)
     in
-    let t2 = lunify t1 (remove_redundant (rebalance_tree t2 []) []) [] in
-    (* TODO: domain widening *)
-
-    (* let t2 = left_unification t2 [] in *)
-    (* Format.fprintf !Config.fmt "\nt2[left_unification]: %a\n" (print_tree ) t2;
-       domain_widen t1 *)
-    t2
+    lunify t1 (remove_redundant (rebalance_tree t2 []) []) []
 
   let widen ?(jokers = 0) t1 t2 =
     let env = t1.env in
@@ -1304,7 +1295,8 @@ module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
                 Node ((c, nc), l, r)
           | _ ->
               raise
-                (Invalid_argument "Decision_Tree.bwd_assign: unexpected lvalue"))
+                (Invalid_argument "Decision_Tree.bwd_assign: unexpected lvalue")
+          )
     in
     let env = { env with domain = pre } in
     { tree = sort_tree (aux t.tree []); env }
