@@ -301,14 +301,13 @@ let run_termination_new program =
 let run_non_termination program =
   let ntprog, labels = Typed_syntax.nt_prog program in
   let nonterm label =
-    CTLProperty.EF
-      (CTLProperty.AG
-         (CTLProperty.AF
-            (CTLProperty.Atomic
-               ( ( Typed_syntax.T_bool_const True,
-                   Abstract_syntax.A_BOOL,
-                   Abstract_syntax.extent_unknown ),
-                 Some (Z.to_string label) ))))
+    CTLProperty.AG
+      (CTLProperty.AF
+         (CTLProperty.Atomic
+            ( ( Typed_syntax.T_bool_const True,
+                Abstract_syntax.A_BOOL,
+                Abstract_syntax.extent_unknown ),
+              Some (Z.to_string label) )))
   in
   let rec create_prop label =
     match label with
@@ -388,7 +387,7 @@ let doit () =
      Config.result :=
        C.analyze ~property ~precondition:(Some precondition) funcs vars b !main
    else *)
-  (match !analysis with
+  (* (match !analysis with
   | "termination" -> run_termination_new prog
   | "non-termination" ->
       Config.refine := false;
@@ -399,7 +398,10 @@ let doit () =
         prog
         (parseCTLPropertyStringNew !Config.property)
   | _ -> raise (Invalid_argument "Unknow Property"));
-  if !Config.json_output then Regression.output_json ()
+  if !Config.json_output then Regression.output_json () *)
+  run_termination_new prog;
+  Config.refine := false;
+  run_non_termination prog
 (* if !Config.vulnerability then ( *)
 (* Launch the vulnerability analysisand output the infered variables *)
 (* let varlist =
