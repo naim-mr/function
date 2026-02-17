@@ -12,19 +12,18 @@ end
 module Make (B : PARTITION) : ENVINIT with type env = B.env = struct
   type env = B.env
 
-  let rec initStat s (env, vars) =
+  let rec initStat s (t, vars) =
     match s with
-    | T_add_var (v, _) when not @@ B.mem_var env (Z.to_string v.var_id) ->
-        (B.add_var_to_env env (Z.to_string v.var_id), v :: vars)
-    | T_assign ((v, _), _) when not @@ B.mem_var env (Z.to_string v.var_id) ->
-        (B.add_var_to_env env (Z.to_string v.var_id), v :: vars)
+    | T_add_var (v, _) when not @@ B.dim_in_env t v ->
+        (B.add_dim_to_env t v, v :: vars)
+    | T_assign ((v, _), _) when not @@ B.dim_in_env t v ->
+        (B.add_dim_to_env t v, v :: vars)
     | T_if (b, s1, s2) ->
-        let env, vars = initBlock s1 (env, vars) in
+        let env, vars = initBlock s1 (t, vars) in
         initBlock s2 (env, vars)
-    | T_while ((l, _), b, s) -> initBlock s (env, vars)
-    | T_call (f, ss) when not @@ B.mem_var env (Z.to_string f.func_id) ->
-        initBlock f.func_body (env, vars)
-    | _ -> (env, vars)
+    | T_while ((l, _), b, s) -> initBlock s (t, vars)
+    | T_call (f, ss) -> initBlock f.func_body (t, vars)
+    | _ -> (t, vars)
 
   and initBlock block (env, vars) =
     match block with
@@ -33,12 +32,12 @@ module Make (B : PARTITION) : ENVINIT with type env = B.env = struct
         let env, vars = initStat s (env, vars) in
         initBlock b (env, vars)
 
-  let rec initEnv xs env =
+  let rec initEnv xs t =
     match xs with
-    | [] -> env
+    | [] -> t
     | x :: xs ->
-        if B.mem_var env (Z.to_string x.var_id) then initEnv xs env
-        else initEnv xs (B.add_var_to_env env (Z.to_string x.var_id))
+        if B.dim_in_env t x then initEnv xs t
+        else initEnv xs (B.add_dim_to_env t x)
 
   let env (prog : Typed_syntax.prog) =
     let block, funcmap, varmap = prog in
@@ -51,7 +50,8 @@ module Make (B : PARTITION) : ENVINIT with type env = B.env = struct
            []
     in
     let v1 = snd (List.split (IdMap.bindings varmap)) @ f.func_args @ retvars in
-    let env = B.init v1 |> B.env in
-    let env, vars = initBlock block (env, v1) |> initBlock f.func_body in
-    (initEnv v1 env, vars)
+    let top = B.init_env () |> B.top in
+    let top = List.fold_left (fun t v -> B.add_dim_to_env top v) top v1 in
+    let top, vars = initBlock block (top, v1) |> initBlock f.func_body in
+    (initEnv v1 top |> B.env, vars)
 end

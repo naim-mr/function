@@ -25,7 +25,6 @@ struct
   module BanalApron = Banal_apron_domain.ApronDomain (N)
 
   type env = C.env
-  
   type dim = var
 
   type t = {
@@ -47,7 +46,7 @@ struct
           c1.cons :: c2.cons :: cs
         with Invalid_argument _ -> c.cons :: cs)
       t.constraints []
-      
+
   let conjunction t =
     List.fold_right
       (fun c cs ->
@@ -58,9 +57,9 @@ struct
           c1 :: c2 :: cs
         with Invalid_argument _ -> c :: cs)
       t.constraints []
-  (** The environment of constraints. *)
+
   let env t = t.env
-  let set_env env t = {t with env}
+  let set_env env t = { t with env }
 
   (** The current underlying APRON environment. *)
   let ap_env env = env.ap_env
@@ -69,7 +68,6 @@ struct
       APRON environment. *)
   let vars t = t.env.vars
 
-  type lib = N.lib
   (** Creates an APRON manager depending on the numerical abstract domain. *)
 
   let manager = N.manager
@@ -100,16 +98,18 @@ struct
   (** Returns the bottom elements: a singleton of a unsat constraint*)
 
   let bot e = { constraints = [ C.make_unsat e ]; env = e }
-
   let inner e cs = { constraints = cs; env = e }
 
   (** Returns the top elements: an empty list <-> no constraints*)
   let top e = { constraints = []; env = e }
-  let init_env () = C.init_env ()
 
-  let add_dim_to_env t dim = {t with env = C.add_dim_to_env t.env dim}
-  let remove_dim_of_env t dim = {t with env = C.remove_dim_of_env t.env dim}
-  let dim_in_env t dim = vars t |> List.mem dim
+  let init_env () = C.init_env ()
+  let add_dim_to_env t dim = { t with env = C.add_dim_to_env t.env dim }
+  let remove_dim_of_env t dim = { t with env = C.remove_dim_of_env t.env dim }
+
+  let dim_in_env t dim =
+    vars t |> List.exists (fun v -> Z.compare v.var_id dim.var_id = 0)
+
   let print fmt b =
     let env = env b in
     let b = to_apron_t b in
@@ -142,7 +142,7 @@ struct
 
   (**)
 
-  let rec assume ?(pow = 5.) b = (b, b)
+  let assume ?(pow = 5.) b = (b, b)
 
   let lift2_apron op b1 b2 =
     let env = env b1 in
@@ -157,9 +157,15 @@ struct
 
   (**)
 
-  let add_var_to_env = fun env id -> {env with ap_env = Environment.add env.ap_env [|(Var.of_string id)|] [||]}
-  let mem_var env id =  Environment.mem_var env.ap_env (Var.of_string id)
-  let remove_var_of_env = fun env id -> {env with ap_env = Environment.remove env.ap_env [|(Var.of_string id)|]}
+  let add_var_to_env =
+   fun env id ->
+    { env with ap_env = Environment.add env.ap_env [| Var.of_string id |] [||] }
+
+  let mem_var env id = Environment.mem_var env.ap_env (Var.of_string id)
+
+  let remove_var_of_env =
+   fun env id ->
+    { env with ap_env = Environment.remove env.ap_env [| Var.of_string id |] }
 
   let fwd_assign b ((x, t, ext), e) =
     match x with

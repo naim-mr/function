@@ -21,8 +21,6 @@ open VarSet
 open Utils.Datatypes
 
 module TerminationIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
-  type r = D.t
-
   module D = D
   module B = D.B
   module ForwardIteratorB = ForwardIterator (B)

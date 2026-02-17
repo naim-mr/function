@@ -75,7 +75,7 @@ let convert_type_qual ((typ, _) : C_AST.type_qual) : Abstract_syntax.typ =
         (* A_int (Abstract_syntax.A_CHAR, Abstract_syntax.A_UNSIGNED) *)
       | C_AST.UNSIGNED_INT ->
           (* A_int (Abstract_syntax.A_INT, Abstract_syntax.A_UNSIGNED) *)
-          raise (UnsupportedConversion "Unsigned integer are supported") 
+          raise (UnsupportedConversion "Unsigned integer are supported")
       | C_AST.Char signedness ->
           if signedness = C_AST.UNSIGNED then
             A_int (Abstract_syntax.A_CHAR, Abstract_syntax.A_UNSIGNED)

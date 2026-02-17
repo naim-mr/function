@@ -57,15 +57,17 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
 
   let top e = { ranking = Top; env = e }
   let init_env () = B.init_env ()
-  let add_dim_to_env f dim = 
-    let b = B.bot f.env in 
-    let env = B.add_dim_to_env b dim |> B.env  in
-    {f with env}
-  let remove_dim_of_env f dim = 
-      let b = B.bot f.env in 
-      let env = B.remove_dim_of_env b dim |> B.env  in
-      {f with env}
-  (**)
+
+  let add_dim_to_env f dim =
+    let b = B.bot f.env in
+    let env = B.add_dim_to_env b dim |> B.env in
+    { f with env }
+
+  let remove_dim_of_env f dim =
+    let b = B.bot f.env in
+    let env = B.remove_dim_of_env b dim |> B.env in
+    { f with env }
+
   let is_bot f = match f.ranking with Bot -> true | _ -> false
   let defined f = match f.ranking with Fun _ -> true | _ -> false
   let is_top f = match f.ranking with Top -> true | _ -> false

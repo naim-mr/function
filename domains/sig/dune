@@ -1,10 +1,6 @@
 (library
  (name sig)
- (libraries
-  utils
-  frontend
-  banal
-  yojson)
+ (libraries utils frontend banal yojson)
  (flags
   (:standard -open Utils -open Banal -open Frontend -open Apron)))
 

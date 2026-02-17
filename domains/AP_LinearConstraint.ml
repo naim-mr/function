@@ -16,6 +16,7 @@ module AP_LinearConstraint : AP_CONSTRAINT = struct
   type dim = var
 
   let init_env () = { vars = []; ap_env = Environment.make [||] [||] }
+
   let add_dim_to_env env dim =
     {
       vars = dim :: env.vars;
@@ -27,9 +28,9 @@ module AP_LinearConstraint : AP_CONSTRAINT = struct
       vars = List.filter (fun v -> Z.compare v.var_id dim.var_id <> 0) env.vars;
       ap_env = [| apron_of_var dim |] |> Environment.remove env.ap_env;
     }
+
   let env t = t.env
-  
-  let set_env env t = {t with env}
+  let set_env env t = { t with env }
   let linexpr t = Lincons1.get_linexpr1 t.cons
 
   (**)

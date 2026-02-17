@@ -6,7 +6,7 @@
   (into ..))
  (flags
   (:standard -open Intraproc -open Frontend -open Utils))
- (libraries yojson  intraproc frontend utils domains))
+ (libraries yojson intraproc frontend utils domains))
 
 (env
  (dev

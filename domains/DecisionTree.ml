@@ -71,7 +71,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
   (** An element of the ranking functions abstract domain. *)
 
   type dim = B.dim
-  
+
   (** The current decision tree. *)
   let tree t = t.tree
 

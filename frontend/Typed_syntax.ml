@@ -53,6 +53,8 @@ and var_scope = T_GLOBAL | T_LOCAL | T_INPUT | T_VOLATILE
 type label = id * position [@@deriving yojson]
 
 let apron_of_var (v : var) : Var.t = Var.of_string (Z.to_string v.var_id)
+let apron_of_string (s : string) : Var.t = Var.of_string s
+
 let label_print fmt l =
   if Z.compare l (Z.of_int 10) = 0 then Format.fprintf fmt "[ %i:]" (Z.to_int l)
   else Format.fprintf fmt "[%i:]" (Z.to_int l)

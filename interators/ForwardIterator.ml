@@ -43,7 +43,7 @@ module ForwardIterator (B : PARTITION) = struct
 
   let rec fwdStm ctx p s =
     let fwd_assign, join, filter, is_leq =
-      (B.fwd_assign, B.join COMPUTATIONAL, B.filter, B.is_leq COMPUTATIONAL)
+      (B.fwd_assign, B.join COMPUTATIONAL, B.fwd_filter, B.is_leq COMPUTATIONAL)
     in
     match s with
     | T_label _ | T_print _ | T_add_var (_, None) | T_del_var _ -> p
@@ -87,7 +87,7 @@ module ForwardIterator (B : PARTITION) = struct
             let i'' = if n <= !joinfwd then i' else B.widen i i' in
             if !tracefwd && not !minimal then
               Format.fprintf !fmt "i'': %a\n" B.print i'';
-            aux i'' (fwdBlk ctx (B.filter i'' b) s) (n + 1)
+            aux i'' (fwdBlk ctx (B.fwd_filter i'' b) s) (n + 1)
         in
         let i = B.bot ctx.env in
         let p2 = fwdBlk ctx (filter i b) s in

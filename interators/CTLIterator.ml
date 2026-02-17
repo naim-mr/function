@@ -60,10 +60,12 @@ module CTLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
   module ForwardIteratorB = ForwardIterator (D.B)
   module D = D
   module B = D.B
+
   (* Bundle commonly used values (AST, Apron env. variable list) to one struct *)
-  type bwd_t = D.t 
+  type bwd_t = D.t
   type fwd_t = D.B.t
   type env = D.env
+
   type program = {
     environment : env;
     variables : Typed_syntax.var list;
@@ -190,11 +192,7 @@ module CTLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
   *)
   type inv = D.t InvMap.t
 
-  (* type returned by the bwd analysis function: also necessary to match SEMANTIC module type *)
-  type r = inv
-
   (* dummy_prop to give a default value to optional (due to termination iterator) parameter ?property *)
-
   let dummy_precond =
     (T_bool_const True, Abstract_syntax.A_BOOL, Abstract_syntax.extent_unknown)
 
@@ -774,7 +772,8 @@ action: "follow"|}
     in
     aux program.mainFunction.func_body
 
-  let analyze ?(precondition = Some dummy_precond) ?(property = dummy_prop) prog =
+  let analyze ?(precondition = Some dummy_precond) ?(property = dummy_prop) prog
+      =
     let module Init = EnvInit.Make (B) in
     let f_env, vars = Init.env prog in
     let env = f_env |> D.lift_fenv in

@@ -23,14 +23,11 @@ let get_ctl prop =
   | Other -> raise (Invalid_argument "Expected a ctl property: got an other")
 
 module type SEMANTIC = sig
- 
   type bwd_t
-  (** [BWD]: Underlying Abstract Domain that will be use in the bwd analysis 
-  *)
+  (** [BWD]: Underlying Abstract Domain that will be use in the bwd analysis *)
 
   type fwd_t
-  (** [B]: Underlying Abstract Domain used in the fwd analysis
-  *)
+  (** [B]: Underlying Abstract Domain used in the fwd analysis *)
 
   type env
 
@@ -57,7 +54,10 @@ module type SEMANTIC = sig
   (** [initBlk]: initialisation function *)
 
   val analyze :
-    ?precondition:expr typed option -> ?property:'a p -> Typed_syntax.prog -> bool
+    ?precondition:expr typed option ->
+    ?property:'a p ->
+    Typed_syntax.prog ->
+    bool
   (** [analyze]: iterating function that run the analysis for the given semantic
   *)
 end
