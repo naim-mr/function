@@ -387,7 +387,7 @@ let doit () =
      Config.result :=
        C.analyze ~property ~precondition:(Some precondition) funcs vars b !main
    else *)
-  (* (match !analysis with
+  (match !analysis with
   | "termination" -> run_termination_new prog
   | "non-termination" ->
       Config.refine := false;
@@ -398,10 +398,8 @@ let doit () =
         prog
         (parseCTLPropertyStringNew !Config.property)
   | _ -> raise (Invalid_argument "Unknow Property"));
-  if !Config.json_output then Regression.output_json () *)
-  run_termination_new prog;
-  Config.refine := false;
-  run_non_termination prog
+  if !Config.json_output then Regression.output_json ()
+
 (* if !Config.vulnerability then ( *)
 (* Launch the vulnerability analysisand output the infered variables *)
 (* let varlist =
