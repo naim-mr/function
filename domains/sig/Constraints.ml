@@ -30,10 +30,10 @@ module type CONSTRAINT = sig
   (** [update_env env t] returns [t] with the environment [env]*)
 
   val add_dim_to_env : env -> dim -> env
-  (** [add_var_to_env env x] add the variable [x] inside the environment [env]*)
+  (** [add_dim_to_env env x] add the dimension [x] inside the environment [env]*)
 
   val remove_dim_of_env : env -> dim -> env
-  (** [remove_dim_of_env env x] remove the variable [x] inside the environment
+  (** [remove_dim_of_env env x] remove the dimension [x] inside the environment
       [env]*)
 
   val make_unsat : env -> t

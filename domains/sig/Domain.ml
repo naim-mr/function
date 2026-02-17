@@ -4,9 +4,11 @@ open Typed_syntax
 type kind = APPROXIMATION | COMPUTATIONAL | RESILIENCE
 
 module type DOMAIN = sig
-  type t
   type env
   type dim
+
+  type t
+  (** Type of an abstract value. *)
 
   val bot : env -> t
   (** [bot env] returns the bot element defines on [env]. *)
@@ -40,14 +42,14 @@ module type DOMAIN = sig
   (** [update_env env t] returns [t] with the environment [env]*)
 
   val add_dim_to_env : t -> dim -> t
-  (** [add_var_to_env env x] add the variable [x] inside the environment [env]*)
+  (** [add_dim_to_env env x] add the dimension [x] inside the environment [env]*)
 
   val dim_in_env : t -> dim -> bool
-  (** [dim_in_env t x] tests if the variable [x] is inside the environment of
+  (** [dim_in_env t x] tests if the dimension [x] is inside the environment of
       [t]*)
 
   val remove_dim_of_env : t -> dim -> t
-  (** [remove_dim_of_env env x] remove the variable [x] inside the environment
+  (** [remove_dim_of_env env x] remove the dimension [x] inside the environment
       [env]*)
 
   val print : Format.formatter -> t -> unit

@@ -96,7 +96,7 @@ let printer_list =
 let printer_tuple =
   { print_empty = "()"; print_begin = "("; print_sep = ","; print_end = ")" }
 
-(** Print as set: {a;b;c}. *)
+(** Print as set: \{a;b;c\}. *)
 let printer_set =
   { print_empty = "{}"; print_begin = "{"; print_sep = ";"; print_end = "}" }
 

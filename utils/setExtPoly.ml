@@ -634,7 +634,7 @@ let to_string printer key l =
     () l;
   Buffer.contents b
 
-(** [MOPSA] Print as set: {elem1,...,elemn} *)
+(** [MOPSA] Print as set: \{elem1,...,elemn\} *)
 let printer_default =
   { print_empty = "{}"; print_begin = "{"; print_sep = ","; print_end = "}" }
 

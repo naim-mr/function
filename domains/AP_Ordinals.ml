@@ -21,13 +21,6 @@ module AP_OrdinalValued (F : FUNCTION) : FUNCTION = struct
     (F.set_env env f, List.map (fun f -> F.set_env env f) ff)
 
   let init_env () = F.init_env ()
-
-  let add_dim_to_env (f, ff) dim =
-    (F.add_dim_to_env f dim, List.map (fun f -> F.add_dim_to_env f dim) ff)
-
-  let remove_dim_of_env (f, ff) dim =
-    (F.remove_dim_of_env f dim, List.map (fun f -> F.remove_dim_of_env f dim) ff)
-
   let bot e = (F.bot e, [])
   let zero e = (F.zero e, [])
   let top e = (F.top e, [])

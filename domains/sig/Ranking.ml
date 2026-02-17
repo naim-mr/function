@@ -47,6 +47,8 @@ module type PARTITION = sig
   (** [ubwd_assign t exp] Under-approximating backward filter [exp != 0] on [t]*)
 end
 
+(** [module type AP_NUMERICAL] include an apron domain type and a manager for it
+*)
 module type AP_NUMERICAL = sig
   type lib
 
@@ -54,6 +56,7 @@ module type AP_NUMERICAL = sig
   val supports_underapproximation : bool
 end
 
+(** [module type AP_PARTITION] module type for [PARTITION] relying on APRON *)
 module type AP_PARTITION = sig
   module C : AP_CONSTRAINT
   module N : AP_NUMERICAL
@@ -65,11 +68,19 @@ end
 
 module type FUNCTION = sig
   module B : PARTITION
+  (** [module B] defines the domain on which the function is defined. *)
 
   type env = B.env
+  (** Environement on which is defined the expression of function. *)
+
   type dim = B.dim
-  type t
+  (** Type of a dimension. *)
+
   type rank
+  (** Type of an abstract expression for the function. *)
+
+  type t
+  (** Type of an abstract value. *)
 
   val init_env : unit -> env
   (** [init env ()] returns an empty env *)
@@ -80,46 +91,102 @@ module type FUNCTION = sig
   val set_env : env -> t -> t
   (** [update_env env t] returns [t] with the environment [env]*)
 
-  val add_dim_to_env : t -> dim -> t
-  (** [add_var_to_env env x] add the variable [x] inside the environment [env]*)
-
-  val remove_dim_of_env : t -> dim -> t
-  (** [remove_dim_of_env env x] remove the variable [x] inside the environment
-      [env]*)
-
   val bot : env -> t
+  (** [bot env] returns the bot element defines on [env]. *)
+
   val top : env -> t
+  (** [top env] returns the top element defines on [env]. *)
+
   val is_bot : t -> bool
+  (** [is_bot t] tests if [t] is equal to bot. *)
+
   val is_top : t -> bool
-  val bwd_assign : t -> expr typed * expr typed -> t
-  val filter : t -> expr typed -> t
-  val reinit : t -> t
-  val zero : env -> t
-  val defined : t -> bool
+  (** [is_top t] tests if [t] is equal to top. *)
+
   val is_leq : kind -> B.t -> t -> t -> bool
-  val join : ?random:bool -> kind -> B.t -> t -> t -> t
-  val widen : ?jokers:int -> B.t -> t -> t -> t
+  (** [is_leq kind domain t1 t2] checks if the function [t1] is less or equal
+      than [t2] on the given [domain] *)
+
   val is_eq : B.t -> t -> t -> bool
+  (** [is_eq kind domain t1 t2] returns the domains on which the functions [t1]
+      and [t2] are equals *)
+
   val domain_eq : B.t -> t -> t -> B.t
+  (** [domain_eq kind domain t1 t2] checks if the function [t1] is equal to [t2]
+      on the given [domain] *)
+
+  val join : ?random:bool -> kind -> B.t -> t -> t -> t
+  (** [is_leq kind domain t1 t2] compute the join of function [t1] and the
+      function [t2] on the given [domain] *)
+
+  val widen : ?jokers:int -> B.t -> t -> t -> t
+  (** [widening domain t1 t2] compute the widening of function [t1] and the
+      function [t2] on the given [domain] *)
+
+  val bwd_assign : t -> expr typed * expr typed -> t
+  (** [bwd_assign t lv exp] Over-approximating backward assignement [lv := exp]
+      on the function [t]*)
+
+  val filter : t -> expr typed -> t
+  (** [bwd_assign t exp] Over-approximating backward filter [exp != 0] on [t]*)
+
+  val reinit : t -> t
+  (** [reinit t] set the function to bot *)
+
+  val zero : env -> t
+  (** [zero t env] return the constant function 0 on the environment [env]*)
+
+  val defined : t -> bool
+  (** [defined t] checks if the function [t] is a defined function *)
+
   val plus : B.t -> t -> t -> t
+  (** [plus domain t1 t2] compute the sum of the function [t1] and [t2] on
+      [domain] *)
+
   val extend : B.t -> B.t -> t -> t -> t
+  (** [extends domain1 domain2 t1 t2] comment TODO *)
+
   val learn : B.t -> t -> t -> t
+  (** [learn domain t1 t2] comment TODO *)
+
   val reset : t -> t
+  (** [reset domain t] reset the expression of the function [t] on [domain] *)
+
   val predecessor : t -> t
+  (** [predecessor t] -1 operator on the function [t] *)
+
   val successor : t -> t
+  (** [successor t] +1 operator on the function [t] *)
+
   val print : Format.formatter -> t -> unit
+  (** [print fmt t] pretty printer for the datatype t *)
 end
 
 module type RANKING_FUNCTION = sig
   module B : PARTITION
+  (** [module B] defines the domain on which the function is defined. *)
+
+  type env
+  (** Environement on which is defined the expression of function. *)
 
   type dim = B.dim
+  (** Type of a dimension. *)
+
   type t
-  type env
+  (** Type of an abstract value. *)
+
+  val env : t -> env
+  (** [env t] returns the environment in which is defined the partition *)
 
   val bot : env -> t
+  (** [bot env] returns the bot element defines on [env]. *)
+
   val top : env -> t
+  (** [top env] returns the top element defines on [env]. *)
+
   val is_bot : t -> bool
+  (** [is_bot t] tests if [t] is equal to bot. *)
+
   val is_leq : kind -> t -> t -> bool
   val join : kind -> t -> t -> t
   val widen : ?jokers:int -> t -> t -> t
