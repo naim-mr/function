@@ -7,6 +7,7 @@ open Typed_syntax
 open Apron
 open Sig.Constraints
 open Banal.Banal_apron_domain
+open Utils.Apron_utils
 
 module AP_LinearConstraint : AP_CONSTRAINT = struct
   type linexpr = Linexpr1.t
@@ -36,22 +37,6 @@ module AP_LinearConstraint : AP_CONSTRAINT = struct
   (**)
   let is_bot t = Lincons1.is_unsat t.cons
   let make_unsat env = { cons = Lincons1.make_unsat env.ap_env; env }
-
-  let compare_coeff c1 c2 =
-    match (c1, c2) with
-    | Coeff.Interval c1, Coeff.Interval c2 ->
-        let inf = Scalar.cmp c1.Interval.inf c2.Interval.inf in
-        let sup = Scalar.cmp c1.Interval.sup c2.Interval.sup in
-        if inf = 0 then if sup = 0 then 0 else sup else inf
-    | Coeff.Interval c1, Coeff.Scalar c2 ->
-        let inf = Scalar.cmp c1.Interval.inf c2 in
-        let sup = Scalar.cmp c1.Interval.sup c2 in
-        if inf = 0 then if sup = 0 then 0 else sup else inf
-    | Coeff.Scalar c1, Coeff.Interval c2 ->
-        let inf = Scalar.cmp c1 c2.Interval.inf in
-        let sup = Scalar.cmp c1 c2.Interval.sup in
-        if inf = 0 then if sup = 0 then 0 else sup else inf
-    | Coeff.Scalar c1, Coeff.Scalar c2 -> Scalar.cmp c1 c2
 
   let compare_typ t1 t2 =
     match (t1, t2) with
@@ -254,6 +239,40 @@ module AP_LinearConstraint : AP_CONSTRAINT = struct
         aux k ""
     | Lincons1.DISEQ -> raise (Invalid_argument "print:DISEQ")
     | Lincons1.EQMOD s -> raise (Invalid_argument "print:EQMOD")
+
+  (* Compute evovled constraints*)
+  let evolve_cns c =
+    let linexp = linexpr c in
+    let c1 = Lincons1.make (Linexpr1.copy linexp) Lincons1.SUPEQ in
+    let c2 = Lincons1.make (Linexpr1.copy linexp) Lincons1.SUPEQ in
+    Lincons1.set_cst c1 (Coeff.Scalar (Scalar.of_int 0));
+    Lincons1.set_cst c2 (Coeff.Scalar (Scalar.of_int (-1)));
+    ({ c with cons = c1 }, { c with cons = c2 })
+
+  let evolve c1 c2 =
+    let e1, e2 = (linexpr c1, linexpr c2) in
+    let result = Linexpr1.copy e1 in
+    Linexpr1.iter
+      (fun ci1 vi ->
+        let ci2 = Linexpr1.get_coeff e2 vi in
+        try
+          Linexpr1.iter
+            (fun cj1 vj ->
+              let cj2 = Linexpr1.get_coeff e2 vj in
+              let det =
+                add_coeff (mul_coeff ci1 cj2) (Coeff.neg (mul_coeff ci2 cj1))
+              in
+              let sdet = sign_coeff det in
+              if
+                mul_sign sdet (mul_sign (sign_coeff ci1) (sign_coeff cj1))
+                = Negative
+              then (
+                Linexpr1.set_coeff result vi (Coeff.Scalar (Scalar.of_int 0));
+                raise Exit (* Abort the loop *)))
+            e1
+        with Exit -> ())
+      e1;
+    { c1 with cons = Lincons1.make result (Lincons1.get_typ c1.cons) }
 end
 
 module C = AP_LinearConstraint

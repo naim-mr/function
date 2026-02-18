@@ -69,6 +69,8 @@ module type CONSTRAINT = sig
   val expand : t -> t * t
   (** [expand t] transforms equalities in pairs of supeq and infeq. *)
 
+  val evolve_cns : t -> t * t
+  val evolve : t -> t -> t
   val print : Format.formatter -> t -> unit
 end
 
