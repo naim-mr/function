@@ -59,7 +59,19 @@ module ForwardIterator (B : PARTITION) = struct
         B.bot ctx.env
     | T_add_var (v, Some (e, t, ext)) ->
         fwd_assign p ((T_var v, v.var_typ, ext), (e, t, ext))
-    | T_assign ((v, l), e) -> fwd_assign p ((T_var v, v.var_typ, l), e)
+    | T_assign (lval, rval) -> (
+        match lval with
+        | T_var v, typ, ext -> fwd_assign p ((T_var v, v.var_typ, ext), rval)
+        | T_deref (T_var v, typ, ext), _, _ ->
+            let v =
+              {
+                v with
+                var_name = Printf.sprintf "*%s" v.var_name;
+                var_typ = Typed_syntax.deref_typ v.var_typ;
+              }
+            in
+            fwd_assign p ((T_var v, v.var_typ, ext), rval)
+        | _ -> failwith "nyi")
     | T_assert (b, l) -> filter p b
     | T_expr _ | T_assume _ -> p
     | T_if (b, s1, s2) ->

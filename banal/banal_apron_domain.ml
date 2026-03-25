@@ -36,9 +36,6 @@ module ApronDomain (Param : NUMERICAL) = struct
   (* UTILITIES *)
   (*************)
 
-  (* apron name of a variable *)
-  let apron_of_var (v : var) : Var.t = Var.of_string (Z.to_string v.var_id)
-
   let add_var_to_env env v =
     let i, r =
       match v.var_typ with

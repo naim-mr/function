@@ -175,9 +175,7 @@ struct
         let ap_env = ap_env env in
         let e = Texpr1.of_expr ap_env (exp_to_apron e) in
         let b =
-          Abstract1.assign_texpr manager (to_apron_t b)
-            (Var.of_string (Z.to_string x.var_id))
-            e None
+          Abstract1.assign_texpr manager (to_apron_t b) (apron_of_var x) e None
         in
         of_apron_t env b
     | _ -> raise (Invalid_argument "fwd_assign: unexpected lvalue")
@@ -208,9 +206,8 @@ struct
           let ap_env = ap_env env in
           let e = Texpr1.of_expr ap_env (exp_to_apron e) in
           let b =
-            Abstract1.substitute_texpr manager (to_apron_t b)
-              (Var.of_string (Z.to_string x.var_id))
-              e None
+            Abstract1.substitute_texpr manager (to_apron_t b) (apron_of_var x) e
+              None
           in
           of_apron_t env b
         in

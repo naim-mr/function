@@ -648,7 +648,7 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
             let p = Abstract1.of_lincons_array manager env a in
             let p =
               Abstract1.substitute_texpr manager p
-                (Var.of_string (Z.to_string x.var_id))
+                (apron_of_var x)
                 e None
             in
             let a = Abstract1.to_lincons_array manager p in

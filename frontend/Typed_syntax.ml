@@ -35,6 +35,8 @@ type expr =
   | T_INPUT
   | T_bool_const of bool_set
   | T_var of var
+  | T_deref of expr typed
+  | T_address_of of expr typed
 
 (* variables *)
 and var = {
@@ -55,7 +57,7 @@ let dummy_precond =
 (* statements *)
 type label = id * position [@@deriving yojson]
 
-let apron_of_var (v : var) : Var.t = Var.of_string (Z.to_string v.var_id)
+let apron_of_var (v : var) : Var.t = Var.of_string v.var_name
 let apron_of_string (s : string) : Var.t = Var.of_string s
 
 let label_print fmt l =
@@ -64,7 +66,7 @@ let label_print fmt l =
 
 type stat =
   | T_expr of expr typed
-  | T_assign of var ext * expr typed
+  | T_assign of expr typed * expr typed
   | T_call of func ext (* arguments and return values as local variables *)
   | T_if of expr typed * block * block
   | T_while of label (* loop-invariant label *) * expr typed * block
@@ -192,6 +194,8 @@ let rec pp_expr_ext fmt ((e, _, _) : expr typed) =
   | T_bool_const b -> Format.pp_print_string fmt (string_of_tbool b)
   | T_INPUT -> Format.print_string "input()"
   | T_var v -> print_var_name fmt v
+  | T_deref e -> Format.fprintf fmt " *%a " pp_expr_ext e
+  | T_address_of e -> Format.fprintf fmt " &%a " pp_expr_ext e
 
 let rec pp_expr fmt e =
   match e with
@@ -213,12 +217,14 @@ let rec pp_expr fmt e =
   | T_bool_const b -> Format.pp_print_string fmt (string_of_tbool b)
   | T_INPUT -> Format.print_string "input()"
   | T_var v -> print_var_name fmt v
+  | T_deref (e, _, _) -> Format.fprintf fmt " *%a " pp_expr e
+  | T_address_of (e, _, _) -> Format.fprintf fmt " &%a " pp_expr e
 
 let rec pp_stat ind fmt s =
   match s with
   | T_expr e -> pp_expr_ext fmt e
-  | T_assign ((v, _), e) ->
-      Format.fprintf fmt "%a = %a" print_var_name v pp_expr_ext e
+  | T_assign (lval, rval) ->
+      Format.fprintf fmt "%a = %a" pp_expr_ext lval pp_expr_ext rval
   | T_call (f, _) ->
       (match f.func_return with
       | Some v -> Format.fprintf fmt "%a = " print_var_name v
@@ -335,6 +341,14 @@ let unbox_bool_const (e : expr) : bool_set option =
 
 let unbox_var (e : expr) : var option =
   match e with T_var v -> Some v | _ -> None
+
+(************************************************************************)
+(* POINTER ARITHMETICS *)
+(************************************************************************)
+let deref_typ (t : typ) : typ =
+  match t with
+  | A_pointer typ -> typ
+  | _ -> raise (Invalid_argument "derefence of scalar value")
 
 (************************************************************************)
 (* PREDICATES *)

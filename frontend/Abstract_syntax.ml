@@ -65,7 +65,11 @@ type int_type =
 type int_sign = A_SIGNED | A_UNSIGNED [@@deriving yojson]
 type float_type = A_FLOAT | A_DOUBLE | A_REAL [@@deriving yojson]
 
-type typ = A_int of int_type * int_sign | A_float of float_type | A_BOOL
+type typ =
+  | A_int of int_type * int_sign
+  | A_float of float_type
+  | A_BOOL
+  | A_pointer of typ  (** Scalar types. *)
 [@@deriving yojson]
 
 type unary_op = A_UNARY_PLUS | A_UNARY_MINUS | A_NOT | A_cast of typ ext
@@ -99,8 +103,10 @@ and binary_assign_op =
 and expr =
   | A_unary of unary_op * expr ext
   | A_binary of binary_op * expr ext * expr ext
-  | A_assign of lvalue ext * binary_assign_op option * expr ext
-  | A_increment of lvalue ext * incr * prepost
+  | A_address_of of expr
+  | A_deref of expr
+  | A_assign of expr ext * binary_assign_op option * expr ext
+  | A_increment of expr ext * incr * prepost
   | A_call of string ext * expr ext list
   | A_INPUT
   | A_identifier of string
@@ -195,7 +201,7 @@ let string_of_extent (p, q) =
     Printf.sprintf "%s:%i.%i-%s:%i.%i" p.pos_fname p.pos_lnum
       (p.pos_cnum - p.pos_bol) q.pos_fname q.pos_lnum (q.pos_cnum - q.pos_bol)
 
-let pp_typ fmt t =
+let rec pp_typ fmt t =
   match t with
   | A_BOOL -> Format.fprintf fmt "bool"
   | A_float A_FLOAT -> Format.fprintf fmt "float"
@@ -210,6 +216,7 @@ let pp_typ fmt t =
       | A_LONG -> Format.fprintf fmt "%slong" s
       | A_INTEGER -> Format.fprintf fmt "%sinteger" s
       | A_DYNINT (l, h) -> Format.fprintf fmt "%sdynint(%s,%s)" s l h)
+  | A_pointer t -> Format.fprintf fmt "%a*" pp_typ t
 
 let string_of_typ = pp_to_string pp_typ
 
@@ -254,14 +261,15 @@ let rec pp_expr fmt e =
   | A_unary (op, (e, _)) -> Format.fprintf fmt "%a(%a)" pp_unary_op op pp_expr e
   | A_binary (op, (e1, _), (e2, _)) ->
       Format.fprintf fmt "(%a %a %a)" pp_expr e1 pp_binary_op op pp_expr e2
-  | A_assign ((var, _), Some op, (e, _)) ->
-      Format.fprintf fmt "%s %a %a" var pp_binary_assign_op op pp_expr e
-  | A_assign ((var, _), None, (e, _)) ->
-      Format.fprintf fmt "%s = %a" var pp_expr e
-  | A_increment ((var, _), incr, A_PRE) ->
-      Format.fprintf fmt "%a%s" pp_incr incr var
-  | A_increment ((var, _), incr, A_POST) ->
-      Format.fprintf fmt "%s%a" var pp_incr incr
+  | A_assign ((lval, _), Some op, (rval, _)) ->
+      Format.fprintf fmt "%a %a %a" pp_expr lval pp_binary_assign_op op pp_expr rval
+  | A_assign ((lval, _), None, (rval, _)) ->
+      Format.fprintf fmt "%a = %a" pp_expr lval pp_expr rval
+  | A_identifier v -> Format.fprintf fmt "%s" v
+  | A_increment ((lval, _), incr, A_PRE) ->
+      Format.fprintf fmt "%a%a" pp_incr incr pp_expr lval
+  | A_increment ((lval, _), incr, A_POST) ->
+      Format.fprintf fmt "%a%a" pp_expr lval pp_incr incr
   | A_call ((tgt, _), args) ->
       Format.fprintf fmt "%s(" tgt;
       let rec proc_args = function
@@ -273,7 +281,6 @@ let rec pp_expr fmt e =
       in
       proc_args args;
       Format.fprintf fmt ")"
-  | A_identifier v -> Format.fprintf fmt "%s" v
   | A_float_const f -> Format.fprintf fmt "%s" f
   | A_int_const z -> Format.fprintf fmt "%s" z
   | A_INPUT -> Format.fprintf fmt "input"
@@ -281,6 +288,8 @@ let rec pp_expr fmt e =
   | A_float_itv ((f1, _), (f2, _)) -> Format.fprintf fmt "[%s, %s]" f1 f2
   | A_int_itv ((z1, _), (z2, _)) -> Format.fprintf fmt "[%s, %s]" z1 z2
   | A_nondet typ -> Format.fprintf fmt "nondet %a" pp_typ typ
+  | A_deref e -> Format.fprintf fmt "*%a" pp_expr e
+  | A_address_of e -> Format.fprintf fmt "&%a" pp_expr e
 
 let rec pp_stat fmt stat =
   match stat with

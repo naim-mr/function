@@ -37,9 +37,11 @@ let int_rank i s =
   | A_DYNINT _ ->
       let itv = Value_semantics.int_type_set i s in
       if Itv_int.subseteq itv (Value_semantics.int_type_set A_CHAR s) then 0
-      else if Itv_int.subseteq itv (Value_semantics.int_type_set A_SHORT s) then 2
+      else if Itv_int.subseteq itv (Value_semantics.int_type_set A_SHORT s) then
+        2
       else if Itv_int.subseteq itv (Value_semantics.int_type_set A_INT s) then 4
-      else if Itv_int.subseteq itv (Value_semantics.int_type_set A_LONG s) then 6
+      else if Itv_int.subseteq itv (Value_semantics.int_type_set A_LONG s) then
+        6
       else 8
 
 let float_rank = function A_FLOAT -> 1 | A_DOUBLE -> 2 | A_REAL -> 99
@@ -107,7 +109,8 @@ let cast ((e, t, _) as ee) t' x =
     match (e, t') with
     (* don't cast constants if they fit the target type *)
     | T_int_const (i1, i2), A_int (c, s)
-      when Value_semantics.const_fit_in_type c s i1 && Value_semantics.const_fit_in_type c s i2 ->
+      when Value_semantics.const_fit_in_type c s i1
+           && Value_semantics.const_fit_in_type c s i2 ->
         ee
     | _ -> (T_unary (A_cast (t', x), ee), t', x))
 
@@ -218,6 +221,8 @@ let rec pure_expr env pre post (e, x) =
       | A_NOT -> ((T_unary (op, as_bool e1), A_BOOL, x), pre, post)
       | A_cast (t', x) -> (cast e1 t' x, pre, post))
   | A_binary (op, e1, e2) -> (
+      Format.fprintf Format.std_formatter "\nin pure expr, %a\n"
+        Abstract_syntax.pp_expr e;
       let e1, pre, post = pure_expr env pre post e1 in
       let e2, pre, post = pure_expr env pre post e2 in
       match op with
@@ -257,30 +262,55 @@ let rec pure_expr env pre post (e, x) =
       let e = (A_assign (l, Some op, (A_int_const "1", x)), x) in
       let ee, pre1, post1 = pure_expr env [] [] e in
       (ee, pre, pre1 @ post1 @ post)
-  | A_assign ((s, sx), op, (e, ex)) ->
+  | A_assign ((lval, ext), op, (e, ex)) -> (
       (* optionally translate into v = v op e *)
-      let ve = (A_identifier s, sx) in
       let e =
         match op with
         | None -> e
-        | Some A_PLUS_ASSIGN -> A_binary (A_PLUS, ve, (e, ex))
-        | Some A_MINUS_ASSIGN -> A_binary (A_MINUS, ve, (e, ex))
-        | Some A_MULTIPLY_ASSIGN -> A_binary (A_MULTIPLY, ve, (e, ex))
-        | Some A_DIVIDE_ASSIGN -> A_binary (A_DIVIDE, ve, (e, ex))
-        | Some A_MODULO_ASSIGN -> A_binary (A_MODULO, ve, (e, ex))
+        | Some A_PLUS_ASSIGN -> A_binary (A_PLUS, (lval, ext), (e, ex))
+        | Some A_MINUS_ASSIGN -> A_binary (A_MINUS, (lval, ext), (e, ex))
+        | Some A_MULTIPLY_ASSIGN -> A_binary (A_MULTIPLY, (lval, ext), (e, ex))
+        | Some A_DIVIDE_ASSIGN -> A_binary (A_DIVIDE, (lval, ext), (e, ex))
+        | Some A_MODULO_ASSIGN -> A_binary (A_MODULO, (lval, ext), (e, ex))
       in
       let ee, pre1, post1 = pure_expr env [] [] (e, ex) in
       (* cast back to the type of v *)
-      let v = get_var env s sx in
-      if v.var_scope = T_INPUT then
-        error x "%s is an input and cannot be assigned" s;
-      if v.var_scope = T_VOLATILE then
-        error x "%s is a volatile and cannot be assigned" s;
-      let ee = cast ee v.var_typ x in
-      (* pre = assign variable, expr = variable *)
-      ( (T_var v, v.var_typ, x),
-        pre @ pre1 @ [ (T_assign ((v, sx), ee), x) ] @ post1,
-        post )
+      match lval with
+      | A_identifier s ->
+          let v = get_var env s ext in
+          if v.var_scope = T_INPUT then
+            error x "%s is an input and cannot be assigned" s;
+          if v.var_scope = T_VOLATILE then
+            error x "%s is a volatile and cannot be assigned" s;
+          let ee = cast ee v.var_typ x in
+          (* pre = assign variable, expr = variable *)
+          ( (T_var v, v.var_typ, x),
+            pre @ pre1 @ [ (T_assign ((T_var v, v.var_typ, x), ee), x) ] @ post1,
+            post )
+      | A_deref (A_identifier s) ->
+          let v = get_var env s ext in
+          if v.var_scope = T_INPUT then
+            error x "%s is an input and cannot be assigned" s;
+          if v.var_scope = T_VOLATILE then
+            error x "%s is a volatile and cannot be assigned" s;
+          let v =
+            {
+              v with
+              var_name = Printf.sprintf "*%s" v.var_name;
+              var_typ = Typed_syntax.deref_typ v.var_typ;
+            }
+          in
+          let ee = cast ee v.var_typ x in
+          ( (T_var v, v.var_typ, x),
+            pre @ pre1 @ [ (T_assign ((T_var v, v.var_typ, x), ee), x) ] @ post1,
+            post )
+      | _ -> failwith "neti")
+  | A_deref e ->
+      let (ee, typ, ext), pre, post = pure_expr env pre post (e, x) in
+      ((T_deref (ee, typ, ext), Typed_syntax.deref_typ typ, ext), pre, post)
+  | A_address_of e ->
+      let (ee, typ, ext), pre, post = pure_expr env pre post (e, x) in
+      ((T_deref (ee, typ, ext), A_pointer typ, ext), pre, post)
 
 and call (s, sx) args env pre post x =
   (* resolve identifier *)
@@ -319,7 +349,7 @@ and call (s, sx) args env pre post x =
             (T_add_var (v1, None), x);
             (T_add_var (v, None), x);
             (T_call (f, sx), x);
-            (T_assign ((v1, x), (T_var v, v.var_typ, x)), x);
+            (T_assign ((T_var v1, v.var_typ, x), (T_var v, v.var_typ, x)), x);
             (T_del_var v, x);
           ]
         @ post',
@@ -428,7 +458,10 @@ let rec stat env (e, x) =
           let ee = cast ee v.var_typ x in
           ( env,
             pre
-            @ [ (lbl, T_assign ((v, x), ee), x); (lbl2, T_RETURN, x) ]
+            @ [
+                (lbl, T_assign ((T_var v, v.var_typ, x), ee), x);
+                (lbl2, T_RETURN, x);
+              ]
             @ post,
             [] ))
   | A_block l ->

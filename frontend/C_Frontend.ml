@@ -5,7 +5,7 @@ open Mopsa_c_parser.C_parser
 open Utils
 open Datatypes
 
-type kind_hint = H_BOOL | H_INT | H_VOID
+type kind_hint = H_BOOL | H_INT | H_VOID | H_PTR of kind_hint
 
 let skip_funcs =
   StringSet.of_list
@@ -52,7 +52,7 @@ let attach_position ast =
   (ast, (fake_pos, fake_pos))
 
 (** AST TRANSLATION *)
-let convert_type_qual ((typ, _) : C_AST.type_qual) : Abstract_syntax.typ =
+let rec convert_type_qual ((typ, _) : C_AST.type_qual) : Abstract_syntax.typ =
   match typ with
   | C_AST.T_bool -> Abstract_syntax.A_BOOL
   | C_AST.T_integer int_type -> (
@@ -78,7 +78,7 @@ let convert_type_qual ((typ, _) : C_AST.type_qual) : Abstract_syntax.typ =
           raise (UnsupportedConversion "Unsigned integer are supported")
       | C_AST.Char signedness ->
           if signedness = C_AST.UNSIGNED then
-            A_int (Abstract_syntax.A_CHAR, Abstract_syntax.A_UNSIGNED)
+            raise (UnsupportedConversion "unsupported int type")
           else A_int (Abstract_syntax.A_CHAR, Abstract_syntax.A_SIGNED)
       | _ -> raise (UnsupportedConversion "unsupported int type"))
   | C_AST.T_float float_type -> (
@@ -88,7 +88,7 @@ let convert_type_qual ((typ, _) : C_AST.type_qual) : Abstract_syntax.typ =
       | C_AST.LONG_DOUBLE ->
           A_float Abstract_syntax.A_DOUBLE (* FIXME -> add this type *)
       | _ -> raise (UnsupportedConversion "unsupported float type"))
-  | C_AST.T_pointer _ -> raise (UnsupportedFeature "pointer")
+  | C_AST.T_pointer (typ, qual) -> A_pointer (convert_type_qual (typ, qual))
   | C_AST.T_array _ -> raise (UnsupportedFeature "array")
   | C_AST.T_record _ -> raise (UnsupportedFeature "struct")
   | C_AST.T_typedef _ -> raise (UnsupportedFeature "typedef")
@@ -160,6 +160,7 @@ let cast_if_necessary (e_hint : kind_hint) (op_in_hint : kind_hint)
   | H_BOOL, H_BOOL -> e
   | H_INT, H_BOOL -> raise (UnsupportedFeature "bool to int")
   | H_INT, H_INT -> e
+  | H_PTR _, _ | _, H_PTR _ -> e
   | _ -> raise (UnsupportedConversion "unexpected hint in cast_if_necessary")
 
 let var_name (var : C_AST.variable) : string = var.var_org_name
@@ -167,11 +168,12 @@ let var_name (var : C_AST.variable) : string = var.var_org_name
 let var_typ (var : C_AST.variable) : Abstract_syntax.typ =
   convert_type_qual var.var_type
 
-let typ_to_hint (typ : C_AST.typ) : kind_hint =
+let rec typ_to_hint (typ : C_AST.typ) : kind_hint =
   match typ with
   | T_integer _ | T_float _ -> H_INT
   | T_bool -> H_BOOL
   | T_void -> H_VOID
+  | T_pointer (t, _) -> H_PTR (typ_to_hint t)
   | _ -> raise (UnsupportedConversion "unsupported type in typ_to_hint")
 
 let rec convert_expr (st : state) ((kind, typ, _) : C_AST.expr) :
@@ -281,20 +283,18 @@ let rec convert_expr (st : state) ((kind, typ, _) : C_AST.expr) :
         in
         ( Abstract_syntax.A_call (attach_position func_name, args),
           typ_to_hint (fst func_ret_typ) )
-  | C_AST.E_assign ((lfs, _, _), rhs) ->
-      let lfs =
-        match lfs with
-        | C_AST.E_variable var -> var_name var
-        | C_AST.E_array_subscript _ -> raise (UnsupportedFeature "array")
-        | _ -> raise (UnsupportedConversion "unsupported lvalue kind")
-      in
-
+  | C_AST.E_assign (lfs, rhs) ->
       ( A_assign
-          ( attach_position lfs,
+          ( convert_expr st lfs |> fst |> attach_position,
             None,
             convert_expr st rhs |> fst |> attach_position ),
         H_VOID )
-  | C_AST.E_address_of _ -> raise (UnsupportedFeature "pointer")
+  | C_AST.E_address_of exp ->
+      let e, hint = convert_expr st exp in
+      (A_address_of e, H_PTR hint)
+  | C_AST.E_deref exp ->
+      let e, hint = convert_expr st exp in
+      (A_deref e, hint)
   | C_AST.E_array_subscript _ -> raise (UnsupportedFeature "array")
   | _ -> raise (UnsupportedConversion "unsupported expr")
 
@@ -482,6 +482,7 @@ let parse_file (f : string) : Typed_syntax.prog =
   parse_file "clang" !Config.filename [ "-fbracket-depth=512" ] false false
     false false ctx [];
   let prj = link_project ctx in
+  C_print.print_project stdout prj;
   let st = { input_vars = ref [] } in
   (* StringMap.to_seq returns the functions in random order. This may
      cause some problems as a function calling another one may be

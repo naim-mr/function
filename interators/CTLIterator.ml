@@ -159,7 +159,7 @@ module CTLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
     (* let v1 = snd (List.split (IdMap.bindings globalVariables)) in
     let v2 = mainFunction.func_args in
     let vars = List.append v1 v2 in
-    let var_to_apron v = Apron.Var.of_string (Z.to_string v.var_id) in
+    let var_to_apron v = Apron.apron_of_var v in
     let apron_vars = Array.map var_to_apron (Array.of_list vars) in
     let env = Environment.make apron_vars [||] in *)
     let program =
@@ -266,9 +266,11 @@ module CTLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
             | T_del_var _ | T_print _ ->
                 out_state
             | T_RETURN -> bot
-            | T_add_var (l, Some e) | T_assign ((l, _), e) ->
+            | T_add_var (l, Some e) ->
                 bwd_assign ?domain:pre_dom out_state
                   ((T_var l, l.var_typ, l.var_extent), e)
+            | T_assign (lval, rval) ->
+                bwd_assign ?domain:pre_dom out_state (lval, rval)
             | T_assert (b, _) | T_assume b ->
                 bwd_filter ?domain:pre_dom out_state b
             | T_if ((b, typ, ba), s1, s2) ->
@@ -449,10 +451,13 @@ module CTLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
             | T_del_var _ | T_print _ ->
                 out_state
             | T_RETURN -> if use_sink_state then zero else bot
-            | T_add_var (l, Some e) | T_assign ((l, _), e) ->
+            | T_add_var (l, Some e) ->
                 D.mask current_in
                 @@ bwd_assign ?domain:pre_dom out_state
                 @@ ((T_var l, l.var_typ, l.var_extent), e)
+            | T_assign (lval, rval) ->
+                D.mask current_in
+                @@ bwd_assign ?domain:pre_dom out_state (lval, rval)
             | T_assert (b, _) | T_assume b ->
                 D.mask current_in @@ bwd_filter ?domain:pre_dom out_state b
             | T_if (b, s1, s2) ->
@@ -581,11 +586,13 @@ module CTLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
               let s = branch_join sFall sJump in
               addInv blockLabel s;
               aux whileBlock blockState ()
-          | T_add_var (l, Some e) | T_assign ((l, _), e) ->
+          | T_add_var (l, Some e) ->
               let s =
                 bwd_assign nextBlockState ((T_var l, l.var_typ, l.var_extent), e)
               in
               addInv blockLabel s
+          | T_assign (lval, rval) ->
+              bwd_assign nextBlockState (lval, rval) |> addInv blockLabel
           | _ -> addInv blockLabel nextBlockState)
     in
     let bot = D.bot program.environment in

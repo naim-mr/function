@@ -16,8 +16,22 @@ module Make (B : PARTITION) : ENVINIT with type env = B.env = struct
     match s with
     | T_add_var (v, _) when not @@ B.dim_in_env t v ->
         (B.add_dim_to_env t v, v :: vars)
-    | T_assign ((v, _), _) when not @@ B.dim_in_env t v ->
-        (B.add_dim_to_env t v, v :: vars)
+    | T_assign (lval, rval) -> (
+        match lval with
+        | T_var v, typ, ext when not @@ B.dim_in_env t v ->
+            (B.add_dim_to_env t v, v :: vars)
+        | T_var v, typ, ext when B.dim_in_env t v -> (t, vars)
+        | T_deref (T_var v, typ, ext), _, _ ->
+            let v =
+              {
+                v with
+                var_name = Printf.sprintf "*%s" v.var_name;
+                var_typ = Typed_syntax.deref_typ v.var_typ;
+              }
+            in
+            if not @@ B.dim_in_env t v then (B.add_dim_to_env t v, v :: vars)
+            else (t, vars)
+        | _ -> failwith "nyi")
     | T_if (b, s1, s2) ->
         let env, vars = initBlock s1 (t, vars) in
         initBlock s2 (env, vars)

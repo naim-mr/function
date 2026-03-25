@@ -112,7 +112,7 @@ module AP_LinearConstraint : AP_CONSTRAINT = struct
     | _ -> false
 
   let var v t =
-    let v = Var.of_string (Z.to_string v.var_id) in
+    let v = apron_of_var v in
     let c = Lincons1.get_coeff t.cons v in
     compare_coeff c (Coeff.s_of_int 0) != 0
 
@@ -216,7 +216,7 @@ module AP_LinearConstraint : AP_CONSTRAINT = struct
           let x =
             List.find
               (fun y ->
-                String.compare (Var.to_string x) (Z.to_string y.var_id) = 0)
+                String.compare (Var.to_string x) (y.var_name) = 0)
               vars
           in
           Format.fprintf Format.str_formatter "$%s{%s}" (Z.to_string x.var_id)

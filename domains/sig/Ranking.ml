@@ -174,10 +174,9 @@ module type RANKING_FUNCTION = sig
 
   type t
   (** Type of an abstract value. *)
-
+  val f_env : t -> B.env
   val env : t -> env
   (** [env t] returns the environment in which is defined the partition *)
-
   val bot : env -> t
   (** [bot env] returns the bot element defines on [env]. *)
 

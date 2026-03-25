@@ -33,7 +33,7 @@ let rec exp_to_apron ((e, t, ext) : expr typed) =
           exp_to_apron (T_int_const (Value_semantics.int_type_set A_INT A_SIGNED), t, ext)
       | A_BOOL -> exp_to_apron (T_bool_const Maybe, t, ext)
       | _ -> raise (Invalid_argument "Float not handle yet"))
-  | T_var x -> Texpr1.Var (Var.of_string (Z.to_string x.var_id))
+  | T_var x -> Texpr1.Var (apron_of_var x)
   | T_float_const _ -> raise (Invalid_argument "Float not handle yet")
   | T_unary (A_UNARY_MINUS, e) ->
       let e = exp_to_apron e in
@@ -52,5 +52,6 @@ let rec exp_to_apron ((e, t, ext) : expr typed) =
           raise
             (UnsupportedFeature "not supported or not supposed to be supported")
       )
+  | T_deref (T_var v,_,_) -> Texpr1.Var (Var.of_string v.var_name)
   | _ ->
       raise (UnsupportedFeature "not supported or not supposed to be supported")

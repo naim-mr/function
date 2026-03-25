@@ -362,7 +362,7 @@ let get_semantic_new () =
   | _ -> raise (Invalid_argument "Unknown Analysis")
 
 let doit () =
-  (* Parsing cli args -> into Config ref variables *)
+  (* Parsing cli args -> into Config ref variables
   parse_args ();
   check_args ();
   (* Get the iterator for the demanded analysis *)
@@ -374,7 +374,7 @@ let doit () =
   if not !minimal then (
     Format.fprintf !fmt "\nAbstract typed Syntax:\n";
     Typed_syntax.pp_prog !fmt prog);
-  let module S = (val semantic : Semantics.SEMANTIC) in
+  let module S = (val semantic : Semantics.SEMANTIC) in *)
   (* Launch the analysis and get the returned output "true" or "unknow" *)
   (* (if !Config.cda then
      let module C = (val run_cda semantic : CDA_ITERATOR) in
@@ -387,7 +387,7 @@ let doit () =
      Config.result :=
        C.analyze ~property ~precondition:(Some precondition) funcs vars b !main
    else *)
-  (match !analysis with
+  (* (match !analysis with
   | "termination" -> run_termination_new prog
   | "non-termination" ->
       Config.refine := false;
@@ -398,8 +398,25 @@ let doit () =
         prog
         (parseCTLPropertyStringNew !Config.property)
   | _ -> raise (Invalid_argument "Unknow Property"));
-  if !Config.json_output then Regression.output_json ()
-
+  if !Config.json_output then Regression.output_json () *)
+  let open Apron in
+  let manager = Polka.manager_alloc_loose () in
+  let v = Var.of_string "x" in
+  let alpha = Var.of_string "α" in 
+  let env = Environment.make [|v;alpha|] [||] in 
+  let expr = (Texpr1.Binop ((Texpr1.Sub, Texpr1.Var alpha,Texpr1.Var v  , Texpr1.Int, Texpr1.Zero))) in 
+  let expr' = (Texpr1.Binop ((Texpr1.Mul, Texpr1.Var alpha, Texpr1.Var alpha, Texpr1.Int, Texpr1.Zero))) in 
+  let expr = (Texpr1.Binop ((Texpr1.Add, expr', expr, Texpr1.Int, Texpr1.Zero))) in 
+  let expr  = Texpr1.of_expr env expr in
+  let cons = (Tcons1.make expr Tcons1.SUPEQ ) in
+  Tcons1.print !fmt cons ;
+  Format.print_newline () ;
+  let array = Tcons1.array_make env 1 in 
+  Tcons1.array_set array 0 cons;
+  let a = Abstract1.of_tcons_array manager env array in
+  Abstract1.print !fmt a;
+  let lin = Abstract1.to_lincons_array  manager a in 
+  Lincons1.array_print !fmt lin
 (* if !Config.vulnerability then ( *)
 (* Launch the vulnerability analysisand output the infered variables *)
 (* let varlist =
