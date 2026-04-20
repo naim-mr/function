@@ -85,11 +85,19 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
     in
     aux "" fmt t
 
+  (** Serialize a leaf value to a human-readable string.
+      For ordinals (printed as "(coeff)⍵^k + ... + finite"), we keep the
+      textual representation produced by F.print which already handles
+      the ordinal tower. *)
+  let leaf_to_string f = Format.asprintf "%a" F.print f
+
   let output_json vars t : Yojson.Safe.t =
     let rec aux t =
       match t with
       | Bot -> `String "BOT"
-      | Leaf f -> `Assoc [ ("Leaf", `String (Format.asprintf "%a" F.print f)) ]
+      | Leaf f ->
+          let s = leaf_to_string f in
+          `Assoc [ ("Leaf", `String s) ]
       | Node ((c, _), l, r) ->
           `Assoc
             [
@@ -104,6 +112,93 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
             ]
     in
     aux t.tree
+
+  let json_to_linexpr1 env expr_json =
+    let linexpr = Linexpr1.make env in
+    let json = Yojson.Safe.from_string expr_json in
+    (* Set constant term *)
+    let rec aux (json : Yojson.Safe.t) =
+      match json with
+      | `Assoc [] -> ()
+      | `Assoc (("cst", `Int cst) :: q) ->
+          Linexpr1.set_cst linexpr (Coeff.s_of_int cst)
+      | `Assoc ((x, `Int coef) :: q) when x <> "cst" ->
+          let var = LLM.apron_var_of_llm_key x in
+          (if Environment.mem_var env var then
+            Linexpr1.set_coeff linexpr var (Coeff.s_of_int coef));
+          aux (`Assoc q)
+      | _ -> raise (Invalid_argument "Wrong config json format.")
+    in
+    aux json;
+    linexpr
+
+  (** Enumerate all leaves of a tree in DFS (left-to-right) order.
+      Returns a list of (partition_id, constraint_path) pairs where each
+      constraint in the path is the one that was taken at the corresponding node. *)
+  let enumerate_leaves_with_paths tree =
+    let counter = ref 0 in
+    let rec aux tree path =
+      match tree with
+      | Bot -> []
+      | Leaf _ ->
+          let id = !counter in
+          incr counter;
+          [ (id, List.rev path) ]
+      | Node ((c, nc), l, r) ->
+          aux l (c :: path) @ aux r (nc :: path)
+    in
+    aux tree []
+
+  (** Collect the leaf status for each partition by comparing computed vs previous tree.
+      Returns a list of (partition_id, status) where status is:
+      - "TOP" if the computed leaf is Top (widening overshot)
+      - "NEW" if the previous leaf was Bot but computed is defined (new partition)
+      - "OK"  otherwise *)
+  let leaf_statuses computed prev =
+    let counter = ref 0 in
+    let next_id () = let id = !counter in incr counter; id in
+    let rec aux ct pt =
+      match ct, pt with
+      | Bot, _ -> []
+      | Leaf f, Bot ->
+          let id = next_id () in
+          [(id, if F.isTop f then "TOP" else if F.defined f then "NEW" else "OK")]
+      | Leaf f, _ ->
+          let id = next_id () in
+          [(id, if F.isTop f then "TOP" else "OK")]
+      | Node (_, cl, cr), Node (_, pl, pr) ->
+          aux cl pl @ aux cr pr
+      | Node (_, cl, cr), _ ->
+          aux cl pt @ aux cr pt
+    in
+    aux computed prev
+
+  (** Build a human-readable partition description string for the LLM prompt.
+      Optionally annotated with statuses from [leaf_statuses]. *)
+  let partition_desc_string ?(statuses=[]) leaves vars =
+    String.concat "\n"
+      (List.map (fun (id, cs) ->
+        let cs_str =
+          match cs with
+          | [] -> "(unconstrained)"
+          | _  ->
+              String.concat " AND "
+                (List.map (fun c -> Format.asprintf "%a" (C.print vars) c) cs)
+        in
+        let tag = match List.assoc_opt id statuses with
+          | Some "TOP" -> " [TOP - widening overshot, propose a bounded expression]"
+          | Some "NEW" -> " [NEW - previously unreached, extrapolate from neighbors and program semantics]"
+          | _ -> ""
+        in
+        Printf.sprintf "Partition %d: %s%s" id cs_str tag)
+      leaves)
+
+  (** Build the variable list string used in the LLM prompt. *)
+  let var_list_string vars =
+    String.concat ", "
+      (List.map (fun v ->
+        Printf.sprintf "$%s{%s}" (Z.to_string v.var_id) v.var_name)
+      vars)
 
   (*
      Prints a tree in graphviz 'dot' format for visualization. 
@@ -421,6 +516,28 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
       i.e., a decision tree with a single `top` leaf. *)
   let top ?domain e vs =
     { domain; tree = Leaf (F.top e vs); env = e; vars = vs }
+
+  (** Initialise with a global Proton hint. If Proton succeeds, returns a single-leaf
+      tree with the proposed ranking function. Falls back to [bot] on failure. *)
+  let init_with_proton_hint ?domain ~source_code ~loop_code e vs =
+    let var_map = List.map (fun v ->
+      (v.var_name, Printf.sprintf "$%s{%s}" (Z.to_string v.var_id) v.var_name)
+    ) vs in
+    match LLM.query_proton ~source_code ~loop_code ~loop_id:"1" ~var_map with
+    | Ok (LLM.Ordinal_expr components) ->
+        (try
+          let linexprs = List.map (LLM.linexpr_of_coeffs e) components in
+          let f = F.of_ordinal_components e vs linexprs in
+          Format.fprintf !Config.fmt "[Proton] init analysis with hint: %a\n%!" F.print f;
+          { domain; tree = Leaf f; env = e; vars = vs }
+        with exn ->
+          Format.fprintf !Config.fmt "[Proton] init failed (%s), using zero\n%!" (Printexc.to_string exn);
+          { domain; tree = Leaf (F.zero e vs); env = e; vars = vs })
+    | Error e_msg ->
+        Format.fprintf !Config.fmt "[Proton] init error: %s, using zero\n%!" e_msg;
+        { domain; tree = Leaf (F.zero e vs); env = e; vars = vs }
+    | Ok _ ->
+        { domain; tree = Leaf (F.zero e vs); env = e; vars = vs }
 
   (** BINARY OPERATORS *)
   let domain_zero t =
@@ -854,7 +971,9 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
        domain_widen t1 *)
     t2
 
-  let widen ?(jokers = 0) t1 t2 =
+  let widen ?(jokers = 0) ?(program_source = "") ?(loop_condition = "")
+  ?(loop_description = "")
+      ?(iteration_number = "") ?(history : t list = []) t1 t2 =
     let domain = t1.domain in
     let env = t1.env in
     let vars = t1.vars in
@@ -968,13 +1087,41 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
               widen_up (t1, r2) (nc2 :: cs) )
       | Bot, _ | _, Bot -> Bot
     in
-    let widen (t1, t2) =
+    let widen (t1, t2) prompt =
       let prev = t1 in
       let lbl = LSet.elements (tree_labels t2) in
       let inner_b cs =
         match domain with
         | None -> B.inner env vars cs
         | Some domain -> B.meet (B.inner env vars cs) domain
+      in
+      (* Proton hint: used at the first widening iteration (joinbwd+1), per partition *)
+      let is_first_widen =
+        try int_of_string iteration_number = !Config.joinbwd + 1
+        with _ -> false
+      in
+      let use_proton = !Config.llm_backend = "proton" && !Config.use_llm
+                       && program_source <> "" && is_first_widen in
+      let var_map = lazy (List.map (fun v ->
+        (v.var_name, Printf.sprintf "$%s{%s}" (Z.to_string v.var_id) v.var_name)
+      ) vars) in
+      (* Query Proton with the loop code enriched with partition precondition.
+         Result is cached in LLM — at most one HTTP call per (loop, partition). *)
+      let proton_hint_for leafb =
+        if not use_proton then None
+        else
+          let precond_str = Format.asprintf "%a" B.print leafb in
+          let enriched_loop_code =
+            Printf.sprintf "/* Precondition: %s */\n%s" precond_str loop_description
+          in
+          match LLM.query_proton ~source_code:program_source
+                  ~loop_code:enriched_loop_code ~loop_id:"1"
+                  ~var_map:(Lazy.force var_map) with
+          | Ok (LLM.Ordinal_expr components) ->
+              (try Some (F.of_ordinal_components env vars
+                          (List.map (LLM.linexpr_of_coeffs env) components))
+               with _ -> None)
+          | _ -> None
       in
       let extend1 b2 f20 f2 (b1, f1) =
         if !tracebwd then (
@@ -1047,7 +1194,14 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
             let b = inner_b cs in
             if B.isBot b then Bot
             else if F.isEq b f1 f2 then t2
-            else
+            else begin
+              (* First widening: ask Proton for a per-partition hint (cached per partition) *)
+              match proton_hint_for leafb with
+              | Some f_proton ->
+                  Format.fprintf !Config.fmt "[Proton] first widen — partition %a → %a\n%!"
+                    B.print leafb F.print f_proton;
+                  Leaf f_proton
+              | None ->
               let rec aux2 p ls cs acc =
                 match ls with
                 (* finish the path, then extend *)
@@ -1072,6 +1226,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
                         (aux2 (((c, nc), (true, true)) :: p) ls (c :: cs) acc)
               in
               Leaf (aux2 p ls cs f2)
+            end
         | Node ((c1, _), l1, r1), Node ((c2, _), l2, r2) -> (
             if not (C.isEq c1 c2) then raise (Invalid_argument "widen:aux:")
             else
@@ -1111,7 +1266,88 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
                         cs
                   else raise (Invalid_argument "widen:aux:"))
       in
-      aux [] lbl (t1, t2) [] []
+      let computed = aux [] lbl (t1, t2) [] [] in
+      (* Check if the LLM should intervene: Top leaves, or Bot->defined transitions *)
+      let rec tree_needs_llm computed_t prev_t =
+        match computed_t, prev_t with
+        | Leaf f, _ when F.isTop f -> true         (* widening overshot *)
+        | Leaf f, Bot when F.defined f -> true      (* new partition: was Bot, now defined *)
+        | Node (_, cl, cr), Node (_, pl, pr) ->
+            tree_needs_llm cl pl || tree_needs_llm cr pr
+        | Node (_, cl, cr), _ ->
+            tree_needs_llm cl prev_t || tree_needs_llm cr prev_t
+        | _ -> false
+      in
+      if prompt = "" || not !Config.use_llm || !Config.llm_backend = "proton"
+         || not (tree_needs_llm computed t1) then computed
+      else begin
+        (* ---- General LLM backend (anthropic / gemini / ollama) ---- *)
+        let rec try_llm retries error_msg =
+          if retries <= 0 then computed
+          else begin
+            let full_prompt =
+              if error_msg = "" then prompt
+              else prompt ^ "\n\nPREVIOUS ATTEMPT FAILED:\n" ^ error_msg
+                   ^ "\nPlease correct your JSON response."
+            in
+            match LLM.query ~user_prompt:full_prompt with
+            | Error e ->
+                Format.fprintf !Config.fmt "[LLM] query error: %s\n%!" e;
+                computed
+            | Ok proposals ->
+                Format.fprintf !Config.fmt "[LLM] received %d proposals:\n%!" (List.length proposals);
+                let converted = List.filter_map (fun (id, expr) ->
+                  match (expr : LLM.parsed_expr) with
+                  | Top_expr ->
+                      Format.fprintf !Config.fmt "  partition %d -> top\n%!" id;
+                      Some (id, `Top)
+                  | Bot_expr ->
+                      Format.fprintf !Config.fmt "  partition %d -> bot\n%!" id;
+                      Some (id, `Bot)
+                  | Ordinal_expr components ->
+                      (try
+                        let linexprs = List.map (LLM.linexpr_of_coeffs env) components in
+                        let f = F.of_ordinal_components env vars linexprs in
+                        Format.fprintf !Config.fmt "  partition %d -> %a\n%!" id F.print f;
+                        Some (id, `Fun f)
+                      with e ->
+                        Format.fprintf !Config.fmt "[LLM] build failed for partition %d: %s\n%!" id (Printexc.to_string e);
+                        None)
+                ) proposals in
+                let errors = ref [] in
+                let counter = ref 0 in
+                let rec apply tree =
+                  match tree with
+                  | Bot -> Bot
+                  | Leaf f ->
+                      let id = !counter in
+                      incr counter;
+                      (match List.assoc_opt id converted with
+                       | None ->
+                           errors :=
+                             Printf.sprintf "Missing partition %d" id :: !errors;
+                           Leaf f
+                       | Some `Top -> Leaf f
+                       | Some `Bot -> Bot
+                       | Some (`Fun f_llm) ->
+                           if F.isTop f_llm then begin
+                             errors :=
+                               Printf.sprintf "Partition %d gave Top" id
+                               :: !errors;
+                             Leaf f
+                           end else Leaf f_llm)
+                  | Node (c, l, r) -> Node (c, apply l, apply r)
+                in
+                let result = apply computed in
+                Format.fprintf !Config.fmt "[LLM] applied result: %a\n%!" (print_tree vars) result;
+                if !errors <> [] then
+                  Format.fprintf !Config.fmt "[LLM] errors: %s\n%!" (String.concat "; " !errors);
+                if !errors = [] then result
+                else try_llm (retries - 1) (String.concat "; " !errors)
+          end
+        in
+        try_llm 1 ""
+      end
     in
     if !tracebwd then (
       Format.fprintf !Config.fmt "WIDENING\n";
@@ -1120,20 +1356,81 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
     let t2 = widen_right (t1, t2) [] in
     if !tracebwd then
       Format.fprintf !Config.fmt "\nt2[widen_right]: %a\n" (print_tree vars) t2;
+    let t2_b = t2 in
     let t2 = left_unification t1 t2 domain env vars in
     if !tracebwd then
       Format.fprintf !Config.fmt "\nt2[left_unification]: %a\n"
         (print_tree vars) t2;
+    let t2_c = t2 in
     let t1, t2 = tree_unification t1 t2 env vars in
     if !tracebwd then (
       Format.fprintf !Config.fmt "\nt1[tree_unification]: %a\n"
         (print_tree vars) t1;
       Format.fprintf !Config.fmt "\nt2[tree_unification]: %a\n"
         (print_tree vars) t2);
+    let t1_json = output_json vars { domain; tree = t1; env; vars } in
     let t2 = widen_up (t1, t2) [] in
     if !tracebwd then
       Format.fprintf !Config.fmt "\nt2[widen_up]: %a\n" (print_tree vars) t2;
-    { domain; tree = widen (t1, t2); env; vars }
+    (* Early fixpoint check: t2 ⊑ t1 in both COMPUTATIONAL and APPROXIMATION *)
+    Format.fprintf !Config.fmt "[widen_up] checking fixpoint...\n%!";
+    let leq_comp = isLeq COMPUTATIONAL
+      { domain; tree = t2; env; vars } { domain; tree = t1; env; vars } in
+    let leq_approx = isLeq APPROXIMATION
+      { domain; tree = t2; env; vars } { domain; tree = t1; env; vars } in
+    Format.fprintf !Config.fmt "[widen_up] leq_computational=%b leq_approximation=%b → fixpoint=%b\n%!"
+      leq_comp leq_approx (leq_comp && leq_approx);
+    if leq_comp && leq_approx then begin
+      Format.fprintf !Config.fmt "[widen_up] fixpoint reached — skipping extrapolation\n%!";
+      { domain; tree = t2; env; vars }
+    end else begin
+    let t2_json = output_json vars { domain; tree = t2; env; vars } in
+    let leaves = enumerate_leaves_with_paths t2 in
+    let statuses = leaf_statuses t2 t1 in
+    let history_str =
+      if history = [] then ""
+      else
+        let history_trees = List.mapi (fun i h ->
+          Printf.sprintf "Iteration %d:\n```json\n%s\n```" (i + 1)
+            (Yojson.Safe.to_string (output_json vars h))
+        ) history in
+        Printf.sprintf "ITERATION HISTORY (oldest to newest):\n%s\n\n"
+          (String.concat "\n\n" history_trees)
+    in
+    let user_prompt =
+      if program_source = "" then ""
+      else
+        Printf.sprintf
+          "PROGRAM UNDER ANALYSIS:\n```\n%s\n```\n\n\
+           VARIABLES IN SCOPE:\n%s\n\n\
+           LOOP BEING ANALYZED:\n%s\n\n\
+           LOOP CONDITION: %s\n\
+           --- WIDENING STEP %s ---\n\n\
+           %s\
+           PREVIOUS ITERATION TREE (current approximation):\n```json\n%s\n```\n\n\
+           CURRENT ITERATION TREE (new candidate):\n```json\n%s\n```\n\n\
+           PARTITIONS TO FILL:\n\
+           The analyzer needs generalized leaf expressions for the following partitions:\n\
+           %s\n\n\
+           Each partition is identified by an integer ID and described by its constraints \
+           (the path from root to leaf in the merged tree).\n\
+           Partitions marked [NEW] were previously unreachable (bottom) — extrapolate their value \
+           from neighboring partitions and the program semantics.\n\
+           Partitions marked [TOP] had their value overshot by standard widening — propose a \
+           bounded expression.\n\n\
+           Please propose generalized leaf expressions for each partition listed above."
+          program_source
+          (var_list_string vars)
+          loop_description
+          loop_condition
+          iteration_number
+          history_str
+          (Yojson.Safe.to_string t1_json)
+          (Yojson.Safe.to_string t2_json)
+          (partition_desc_string ~statuses leaves vars)
+    in
+    { domain; tree = widen (t1, t2) user_prompt; env; vars }
+    end
 
   let dual_widen t1 t2 =
     let domain = t1.domain in

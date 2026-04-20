@@ -320,6 +320,14 @@ module OrdinalValued (F : FUNCTION) : FUNCTION = struct
         else (F.zero env vars, ff)
     else (f, [])
 
+  let of_linexpr env vars linexpr = (F.of_linexpr env vars linexpr, [])
+
+  let of_ordinal_components env vars = function
+    | [] -> zero env vars
+    | finite :: omegas ->
+        (F.of_linexpr env vars finite,
+         List.map (F.of_linexpr env vars) omegas)
+
   let filter (f, ff) e = (F.filter f e, ff)
 
   (**)

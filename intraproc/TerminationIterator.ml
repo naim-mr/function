@@ -46,7 +46,10 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
       env vars p s =
     match s with
     | T_label _ | T_print _ | T_add_var (_, None) | T_del_var _ -> (p, visited)
-    | T_RETURN -> (D.zero ?domain env vars, visited)
+    | T_RETURN ->
+        ( D.init_with_proton_hint ~source_code:!Config.program_source
+            ~loop_code:!Config.program_source env vars,
+          visited ) 
     | T_BREAK -> raise (UnsupportedFeature "break")
     | T_add_var (v, Some (exp, typ, ext)) | T_assign ((v, _), (exp, typ, ext))
       ->
@@ -70,7 +73,8 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
         let dm = if !refine then a else None in
         let uap = false in
         let p1 = D.filter ?domain:dm p ~underapprox:uap (neg_bexp (b, t, ba)) in
-        let rec aux i p2 n =
+        let max_hist = !joinbwd in
+        let rec aux i p2 n hist =
           if !abort then raise Abort
           else
             let i' = D.join APPROXIMATION p1 p2 in
@@ -83,6 +87,21 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
             let jokers =
               max 0 ((!retrybwd * (!Config.ordmax + 1)) - n + !joinbwd)
             in
+            let loop_desc =
+              Printf.sprintf "while loop at label %s" (Z.to_string l)
+            in
+            let iter_num = string_of_int n in
+            (* Keep the last max_hist iterations *)
+            let hist' =
+              let h = hist @ [ i' ] in
+              if List.length h > max_hist then
+                let rec drop k l =
+                  if k <= 0 then l
+                  else match l with _ :: tl -> drop (k - 1) tl | [] -> []
+                in
+                drop (List.length h - max_hist) h
+              else h
+            in
             if D.isLeq COMPUTATIONAL i' i then (
               if D.isLeq APPROXIMATION i' i then (
                 if !tracebwd && not !minimal then (
@@ -90,27 +109,37 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
                   Format.fprintf !fmt "i: %a\n" D.print i);
                 i)
               else
-                let i'' = if n <= !joinbwd then i' else D.widen ~jokers i i' in
+                let i'' =
+                  if n <= !joinbwd then i'
+                  else
+                    D.widen ~jokers ~program_source:!Config.program_source
+                      ~loop_description:loop_desc ~iteration_number:iter_num
+                      ~history:hist' i i'
+                in
                 if !tracebwd && not !minimal then
                   Format.fprintf !fmt "i'': %a\n" D.print i'';
                 let p2, visited2 = bwdBlk ~visited funcs env vars i'' s in
                 let p2' = D.filter ?domain:dm ~underapprox:uap p2 (b, t, ba) in
-                aux i'' p2' (n + 1))
+                aux i'' p2' (n + 1) hist')
             else
               let i'' =
                 if n <= !joinbwd then i'
-                else D.widen ~jokers i (D.join COMPUTATIONAL i i')
+                else
+                  D.widen ~jokers ~program_source:!Config.program_source
+                    ~loop_description:loop_desc ~iteration_number:iter_num
+                    ~history:hist' i
+                    (D.join COMPUTATIONAL i i')
               in
               if !tracebwd && not !minimal then
                 Format.fprintf !fmt "i'': %a\n" D.print i'';
               let p2, visited2 = bwdBlk ~visited funcs env vars i'' s in
               let p2' = D.filter ?domain:dm ~underapprox:uap p2 (b, t, ba) in
-              aux i'' p2' (n + 1)
+              aux i'' p2' (n + 1) hist'
         in
         let i = D.bot ?domain:dm env vars in
         let p2, visited2 = bwdBlk ~visited funcs env vars i s in
         let p2' = D.filter ?domain:dm ~underapprox:uap p2 (b, t, ba) in
-        let p = aux i p2' 1 in
+        let p = aux i p2' 1 [] in
         addBwdInv l p;
         ((if !refine then D.refine p (Option.get a) else p), visited)
     | T_call (f, ss) -> (
@@ -222,7 +251,12 @@ module TerminationIterator (D : RANKING_FUNCTION) : SEMANTIC = struct
     let startbwd = Sys.time () in
     let i =
       bwdRec funcmap env vars
-        (bwdRec funcmap env vars (D.zero env vars) s)
+        (bwdRec funcmap env vars
+           (D.init_with_proton_hint ~source_code:!Config.program_source
+              ~loop_code:!Config.program_source env
+              vars (* else
+            D.zero env vars) *))
+           s)
         block
     in
     let stopbwd = Sys.time () in

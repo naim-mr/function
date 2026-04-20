@@ -208,6 +208,15 @@ let parse_args () =
       ( "-json_output_std",
         Arg.Unit (fun _ -> Config.json_output := true),
         "Summary of the analysis as a json in stdout" );
+      ( "-llm",
+        Arg.Unit (fun _ -> Config.use_llm := true),
+        "Enable LLM-assisted widening (requires ANTHROPIC_API_KEY)" );
+      ( "-llm-log",
+        Arg.String (fun s -> Config.use_llm := true; Config.llm_log := s),
+        "Enable LLM-assisted widening and log interactions to FILE" );
+      ( "-llm-backend",
+        Arg.String (fun s -> Config.llm_backend := s),
+        "LLM backend to use: 'gemini' (default, needs GEMINI_API_KEY) or 'anthropic' (needs ANTHROPIC_API_KEY)" );
     ]
     (fun s -> Config.filename := s)
     ""
@@ -371,6 +380,15 @@ let doit () =
   (* Get the iterator for the demanded analysis *)
   (* parse the program*)
   let prog = C_Frontend.parse_file !Config.filename in
+  (* Store source text for LLM-assisted widening *)
+  (try
+    let ic = open_in !Config.filename in
+    let n  = in_channel_length ic in
+    let s  = Bytes.create n in
+    really_input ic s 0 n;
+    close_in ic;
+    Config.program_source := Bytes.to_string s
+  with _ -> ());
 
   let semantic = get_semantic_new () in
 

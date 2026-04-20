@@ -1,0 +1,1675 @@
+
+------------------------------------------------------------------------
+[2026-04-01 04:05:28] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> /*
+TERMINATION
+
+suggested parameters:
+- conflict-driven conditional termination
+- partition abstract domain = boxes [default]
+- function abstract domain = affine [default]
+- backward widening delay = 2 [default]
+*/
+
+int get_step(int x) {
+  if (x > 10) {
+    return 2;
+  }
+  return 1;
+}
+
+int main()  {
+  int y, step;
+  if (y > 0) {
+    step = -get_step(y);
+  } else {
+    step = get_step(-y);
+  }
+  while(y < -2 || y > 2) {
+    y = y + step;
+  }
+  return 0;
+} </sourcecode> <loopcode> while loop at label 48 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>x - y</variant><invariant>y <= 0 AND y >= -20</invariant><assigns> y, step </assigns><pad><pad>Question><pad>Question><pad>Invariant><pad>*1</variant><In-1> and <\variant> generated variant </variant><variant>x - y</variant><invariant>0 <= y ANDInvariant>y <= 20 AND x >= 0</invariant><assigns> y, step </assigns><pad>The final</assigns><pad>Inclusive><pad>Inronic><pad>Problems><pad>-1<loopid
+
+## RESULT
+PROTON RAW: variant=x - y invariant=y <= 0 AND y >= -20
+
+------------------------------------------------------------------------
+[2026-04-01 04:07:21] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+PROGRAM UNDER ANALYSIS:
+```
+/*
+TERMINATION
+
+suggested parameters:
+- conflict-driven conditional termination
+- partition abstract domain = boxes [default]
+- function abstract domain = affine [default]
+- backward widening delay = 2 [default]
+*/
+
+int get_step(int x) {
+  if (x > 10) {
+    return 2;
+  }
+  return 1;
+}
+
+int main()  {
+  int y, step;
+  if (y > 0) {
+    step = -get_step(y);
+  } else {
+    step = get_step(-y);
+  }
+  while(y < -2 || y > 2) {
+    y = y + step;
+  }
+  return 0;
+}
+```
+
+VARIABLES IN SCOPE:
+$19{__return19}, $36{__returned36}, $7{__return7}, $25{__returned25}, $8{x}, $22{step}, $20{y}, $8{x}, $20{y}, $22{step}, $7{__return7}, $19{__return19}
+
+LOOP BEING ANALYZED:
+while loop at label 48
+
+LOOP CONDITION: 
+--- WIDENING STEP 4 ---
+
+ITERATION HISTORY (oldest to newest):
+Iteration 1:
+```json
+{"Node":{"constraint":"$20{y} >= 3","left":{"Node":{"constraint":"$20{y}+$22{step} >= 3","left":{"Node":{"constraint":"$20{y}+2$22{step} >= 3","left":{"Leaf":"bottom"},"right":{"Node":{"constraint":"$20{y}+2$22{step} >= -2","left":{"Leaf":"6"},"right":{"Leaf":"bottom"}}}}},"right":{"Node":{"constraint":"$20{y}+$22{step} >= -2","left":{"Leaf":"4"},"right":{"Leaf":"bottom"}}}}},"right":{"Node":{"constraint":"$20{y} >= -2","left":{"Leaf":"2"},"right":{"Node":{"constraint":"$20{y}+$22{step} >= 3","left":{"Leaf":"bottom"},"right":{"Node":{"constraint":"$20{y}+$22{step} >= -2","left":{"Leaf":"4"},"right":{"Node":{"constraint":"$20{y}+2$22{step} >= 3","left":{"Leaf":"bottom"},"right":{"Node":{"constraint":"$20{y}+2$22{step} >= -2","left":{"Leaf":"6"},"right":{"Leaf":"bottom"}}}}}}}}}}}}}
+```
+
+Iteration 2:
+```json
+{"Node":{"constraint":"$20{y} >= 3","left":{"Node":{"constraint":"$20{y}+$22{step} >= 3","left":{"Node":{"constraint":"$20{y}+2$22{step} >= 3","left":{"Leaf":"6$20{y}+8$22{step}+14"},"right":{"Node":{"constraint":"$20{y}+2$22{step} >= -2","left":{"Leaf":"6"},"right":{"Leaf":"bottom"}}}}},"right":{"Node":{"constraint":"$20{y}+$22{step} >= -2","left":{"Leaf":"4"},"right":{"Leaf":"-6$20{y}-8$22{step}+14"}}}}},"right":{"Node":{"constraint":"$20{y} >= -2","left":{"Leaf":"2"},"right":{"Node":{"constraint":"$20{y}+$22{step} >= 3","left":{"Leaf":"6$20{y}+8$22{step}+14"},"right":{"Node":{"constraint":"$20{y}+$22{step} >= -2","left":{"Leaf":"4"},"right":{"Node":{"constraint":"$20{y}+2$22{step} >= 3","left":{"Leaf":"bottom"},"right":{"Node":{"constraint":"$20{y}+2$22{step} >= -2","left":{"Leaf":"6"},"right":{"Leaf":"-6$20{y}-8$22{step}+14"}}}}}}}}}}}}}
+```
+
+PREVIOUS ITERATION TREE (current approximation):
+```json
+{"Node":{"constraint":"$20{y} >= 3","left":{"Node":{"constraint":"$20{y}+$22{step} >= 3","left":{"Leaf":"6$20{y}+2$22{step}+12"},"right":{"Node":{"constraint":"$20{y}+$22{step} >= -2","left":{"Leaf":"4"},"right":{"Leaf":"bottom"}}}}},"right":{"Node":{"constraint":"$20{y} >= -2","left":{"Leaf":"2"},"right":{"Node":{"constraint":"$20{y}+$22{step} >= 3","left":{"Leaf":"bottom"},"right":{"Node":{"constraint":"$20{y}+$22{step} >= -2","left":{"Leaf":"4"},"right":{"Leaf":"-6$20{y}-2$22{step}+12"}}}}}}}}}
+```
+
+CURRENT ITERATION TREE (new candidate):
+```json
+{"Node":{"constraint":"$20{y} >= 3","left":{"Node":{"constraint":"$20{y}+$22{step} >= 3","left":{"Leaf":"top"},"right":{"Node":{"constraint":"$20{y}+$22{step} >= -2","left":{"Leaf":"4"},"right":{"Leaf":"-6$20{y}-8$22{step}+14"}}}}},"right":{"Node":{"constraint":"$20{y} >= -2","left":{"Leaf":"2"},"right":{"Node":{"constraint":"$20{y}+$22{step} >= 3","left":{"Leaf":"6$20{y}+8$22{step}+14"},"right":{"Node":{"constraint":"$20{y}+$22{step} >= -2","left":{"Leaf":"4"},"right":{"Leaf":"top"}}}}}}}}}
+```
+
+PARTITIONS TO FILL:
+The analyzer needs generalized leaf expressions for the following partitions:
+Partition 6: $20{y} >= 3 AND $20{y}+$22{step} >= 3 [TOP - widening overshot, propose a bounded expression]
+Partition 5: $20{y} >= 3 AND -$20{y}-$22{step} >= -2 AND $20{y}+$22{step} >= -2
+Partition 4: $20{y} >= 3 AND -$20{y}-$22{step} >= -2 AND -$20{y}-$22{step} >= 3
+Partition 3: -$20{y} >= -2 AND $20{y} >= -2
+Partition 2: -$20{y} >= -2 AND -$20{y} >= 3 AND $20{y}+$22{step} >= 3
+Partition 1: -$20{y} >= -2 AND -$20{y} >= 3 AND -$20{y}-$22{step} >= -2 AND $20{y}+$22{step} >= -2
+Partition 0: -$20{y} >= -2 AND -$20{y} >= 3 AND -$20{y}-$22{step} >= -2 AND -$20{y}-$22{step} >= 3 [TOP - widening overshot, propose a bounded expression]
+
+Each partition is identified by an integer ID and described by its constraints (the path from root to leaf in the merged tree).
+Partitions marked [NEW] were previously unreachable (bottom) — extrapolate their value from neighboring partitions and the program semantics.
+Partitions marked [TOP] had their value overshot by standard widening — propose a bounded expression.
+
+Please propose generalized leaf expressions for each partition listed above.
+
+HINT FROM SPECIALIZED MODEL:
+A fine-tuned termination model suggests that the ranking function for this loop is: x - y
+Use this as guidance when proposing leaf expressions. The hint may not be exact — adapt it to each partition's constraints.
+
+
+## LLM RESPONSE
+(no response)
+
+## RESULT
+ERROR: curl exited with code 255
+
+------------------------------------------------------------------------
+[2026-04-01 04:07:56] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> /*
+TERMINATION
+
+suggested parameters:
+- conflict-driven conditional termination
+- partition abstract domain = boxes [default]
+- function abstract domain = affine [default]
+- backward widening delay = 2 [default]
+*/
+
+int get_step(int x) {
+  if (x > 10) {
+    return 2;
+  }
+  return 1;
+}
+
+int main()  {
+  int y, step;
+  if (y > 0) {
+    step = -get_step(y);
+  } else {
+    step = get_step(-y);
+  }
+  while(y < -2 || y > 2) {
+    y = y + step;
+  }
+  return 0;
+} </sourcecode> <loopcode> while loop at label 48 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>x - y</variant><invariant>y <= -10000 AND x >= 10</invariant><assigns> y, step </assigns><pad><pad>Question><pad>Question><pad>Inductive loop invariant><pad>1</invariant><pad>-1<invariant>x - 10*y ANDTheorem:0</invariant><assigns>y, x</assigns><pad>Invariant><In prove correctness using the tags<loopid> id </loopid><assigns> y, step </assigns><pad>\cancels><pad>defective: 
+
+for (i = 0;
+
+## RESULT
+PROTON RAW: variant=x - y invariant=y <= -10000 AND x >= 10
+
+------------------------------------------------------------------------
+[2026-04-01 04:08:43] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+PROGRAM UNDER ANALYSIS:
+```
+/*
+TERMINATION
+
+suggested parameters:
+- conflict-driven conditional termination
+- partition abstract domain = boxes [default]
+- function abstract domain = affine [default]
+- backward widening delay = 2 [default]
+*/
+
+int get_step(int x) {
+  if (x > 10) {
+    return 2;
+  }
+  return 1;
+}
+
+int main()  {
+  int y, step;
+  if (y > 0) {
+    step = -get_step(y);
+  } else {
+    step = get_step(-y);
+  }
+  while(y < -2 || y > 2) {
+    y = y + step;
+  }
+  return 0;
+}
+```
+
+VARIABLES IN SCOPE:
+$19{__return19}, $36{__returned36}, $7{__return7}, $25{__returned25}, $8{x}, $22{step}, $20{y}, $8{x}, $20{y}, $22{step}, $7{__return7}, $19{__return19}
+
+LOOP BEING ANALYZED:
+while loop at label 48
+
+LOOP CONDITION: 
+--- WIDENING STEP 4 ---
+
+ITERATION HISTORY (oldest to newest):
+Iteration 1:
+```json
+{"Node":{"constraint":"$20{y} >= 3","left":{"Node":{"constraint":"$20{y}+$22{step} >= 3","left":{"Node":{"constraint":"$20{y}+2$22{step} >= 3","left":{"Leaf":"bottom"},"right":{"Node":{"constraint":"$20{y}+2$22{step} >= -2","left":{"Leaf":"6"},"right":{"Leaf":"bottom"}}}}},"right":{"Node":{"constraint":"$20{y}+$22{step} >= -2","left":{"Leaf":"4"},"right":{"Leaf":"bottom"}}}}},"right":{"Node":{"constraint":"$20{y} >= -2","left":{"Leaf":"2"},"right":{"Node":{"constraint":"$20{y}+$22{step} >= 3","left":{"Leaf":"bottom"},"right":{"Node":{"constraint":"$20{y}+$22{step} >= -2","left":{"Leaf":"4"},"right":{"Node":{"constraint":"$20{y}+2$22{step} >= 3","left":{"Leaf":"bottom"},"right":{"Node":{"constraint":"$20{y}+2$22{step} >= -2","left":{"Leaf":"6"},"right":{"Leaf":"bottom"}}}}}}}}}}}}}
+```
+
+Iteration 2:
+```json
+{"Node":{"constraint":"$20{y} >= 3","left":{"Node":{"constraint":"$20{y}+$22{step} >= 3","left":{"Node":{"constraint":"$20{y}+2$22{step} >= 3","left":{"Leaf":"6$20{y}+8$22{step}+14"},"right":{"Node":{"constraint":"$20{y}+2$22{step} >= -2","left":{"Leaf":"6"},"right":{"Leaf":"bottom"}}}}},"right":{"Node":{"constraint":"$20{y}+$22{step} >= -2","left":{"Leaf":"4"},"right":{"Leaf":"-6$20{y}-8$22{step}+14"}}}}},"right":{"Node":{"constraint":"$20{y} >= -2","left":{"Leaf":"2"},"right":{"Node":{"constraint":"$20{y}+$22{step} >= 3","left":{"Leaf":"6$20{y}+8$22{step}+14"},"right":{"Node":{"constraint":"$20{y}+$22{step} >= -2","left":{"Leaf":"4"},"right":{"Node":{"constraint":"$20{y}+2$22{step} >= 3","left":{"Leaf":"bottom"},"right":{"Node":{"constraint":"$20{y}+2$22{step} >= -2","left":{"Leaf":"6"},"right":{"Leaf":"-6$20{y}-8$22{step}+14"}}}}}}}}}}}}}
+```
+
+PREVIOUS ITERATION TREE (current approximation):
+```json
+{"Node":{"constraint":"$20{y} >= 3","left":{"Node":{"constraint":"$20{y}+$22{step} >= 3","left":{"Leaf":"6$20{y}+2$22{step}+12"},"right":{"Node":{"constraint":"$20{y}+$22{step} >= -2","left":{"Leaf":"4"},"right":{"Leaf":"bottom"}}}}},"right":{"Node":{"constraint":"$20{y} >= -2","left":{"Leaf":"2"},"right":{"Node":{"constraint":"$20{y}+$22{step} >= 3","left":{"Leaf":"bottom"},"right":{"Node":{"constraint":"$20{y}+$22{step} >= -2","left":{"Leaf":"4"},"right":{"Leaf":"-6$20{y}-2$22{step}+12"}}}}}}}}}
+```
+
+CURRENT ITERATION TREE (new candidate):
+```json
+{"Node":{"constraint":"$20{y} >= 3","left":{"Node":{"constraint":"$20{y}+$22{step} >= 3","left":{"Leaf":"top"},"right":{"Node":{"constraint":"$20{y}+$22{step} >= -2","left":{"Leaf":"4"},"right":{"Leaf":"-6$20{y}-8$22{step}+14"}}}}},"right":{"Node":{"constraint":"$20{y} >= -2","left":{"Leaf":"2"},"right":{"Node":{"constraint":"$20{y}+$22{step} >= 3","left":{"Leaf":"6$20{y}+8$22{step}+14"},"right":{"Node":{"constraint":"$20{y}+$22{step} >= -2","left":{"Leaf":"4"},"right":{"Leaf":"top"}}}}}}}}}
+```
+
+PARTITIONS TO FILL:
+The analyzer needs generalized leaf expressions for the following partitions:
+Partition 6: $20{y} >= 3 AND $20{y}+$22{step} >= 3 [TOP - widening overshot, propose a bounded expression]
+Partition 5: $20{y} >= 3 AND -$20{y}-$22{step} >= -2 AND $20{y}+$22{step} >= -2
+Partition 4: $20{y} >= 3 AND -$20{y}-$22{step} >= -2 AND -$20{y}-$22{step} >= 3
+Partition 3: -$20{y} >= -2 AND $20{y} >= -2
+Partition 2: -$20{y} >= -2 AND -$20{y} >= 3 AND $20{y}+$22{step} >= 3
+Partition 1: -$20{y} >= -2 AND -$20{y} >= 3 AND -$20{y}-$22{step} >= -2 AND $20{y}+$22{step} >= -2
+Partition 0: -$20{y} >= -2 AND -$20{y} >= 3 AND -$20{y}-$22{step} >= -2 AND -$20{y}-$22{step} >= 3 [TOP - widening overshot, propose a bounded expression]
+
+Each partition is identified by an integer ID and described by its constraints (the path from root to leaf in the merged tree).
+Partitions marked [NEW] were previously unreachable (bottom) — extrapolate their value from neighboring partitions and the program semantics.
+Partitions marked [TOP] had their value overshot by standard widening — propose a bounded expression.
+
+Please propose generalized leaf expressions for each partition listed above.
+
+HINT FROM SPECIALIZED MODEL:
+A fine-tuned termination model suggests that the ranking function for this loop is: x - y
+Use this as guidance when proposing leaf expressions. The hint may not be exact — adapt it to each partition's constraints.
+
+
+## LLM RESPONSE
+(no response)
+
+## RESULT
+ERROR: curl exited with code 255
+
+------------------------------------------------------------------------
+[2026-04-01 04:12:57] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> /*
+TERMINATION
+
+suggested parameters:
+- conflict-driven conditional termination
+- partition abstract domain = boxes [default]
+- function abstract domain = affine [default]
+- backward widening delay = 2 [default]
+*/
+
+int get_step(int x) {
+  if (x > 10) {
+    return 2;
+  }
+  return 1;
+}
+
+int main()  {
+  int y, step;
+  if (y > 0) {
+    step = -get_step(y);
+  } else {
+    step = get_step(-y);
+  }
+  while(y < -2 || y > 2) {
+    y = y + step;
+  }
+  return 0;
+} </sourcecode> <loopcode> while loop at label 48 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>x - y</variant><invariant>y >= 0 AND y <= 2</invariant><assigns> y, step </assigns><pad><pad>Question><pad>Question><pad>Inductive loop invariant><pad>**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about
+
+## RESULT
+PROTON RAW: variant=x - y invariant=y >= 0 AND y <= 2
+
+------------------------------------------------------------------------
+[2026-04-01 04:16:54] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> /*
+TERMINATION
+
+suggested parameters:
+- partition abstract domain = boxes [default]
+- function abstract domain = affine [default]
+- backward widening delay = 2 [default]
+- conflict-driven analysis = 1
+*/
+
+int main() {
+  int x, y;
+  if (y < 0 && y % 2 == 0) {
+    x = 2;
+  } else if (y < 0) {
+    x = 1;
+  } else if (y >= 0 && y % 2 == 0) {
+    x = -2;
+  } else {
+    x = -1;
+  }
+  while (y < -2 || y > 2) {
+    y = y + x;
+  }
+  return 0;
+} </sourcecode> <loopcode> while loop at label 23 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>x - y</variant><invariant>y >= 0 AND y <= 2 AND x >= 0</invariant><assigns> y, x </assigns><pad><pad>Question><pad>Question><pad>Inductive loop invariant><pad>Invariant><pad> prove-cilene</variant><def> generated variant </variant><1> and <\variant> generated loop invariant </variant><assigns> generated variables </assigns><pad>5><pad>Frama><pad>R2 = 0;
+      //__VERIFIER_assert(x == n * y + z);
+      //__VERIFIER_assert(y ==
+
+## RESULT
+PROTON RAW: variant=x - y invariant=y >= 0 AND y <= 2 AND x >= 0
+
+------------------------------------------------------------------------
+[2026-04-01 04:19:48] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> /*
+TERMINATION
+
+suggested parameters:
+- partition abstract domain = boxes [default]
+- function abstract domain = affine [default]
+- backward widening delay = 2 [default]
+- conflict-driven analysis = 1
+*/
+
+int main() {
+  int x, y;
+  if (y < 0 && y % 2 == 0) {
+    x = 2;
+  } else if (y < 0) {
+    x = 1;
+  } else if (y >= 0 && y % 2 == 0) {
+    x = -2;
+  } else {
+    x = -1;
+  }
+  while (y < -2 || y > 2) {
+    y = y + x;
+  }
+  return 0;
+} </sourcecode> <loopcode> while loop at label 23 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>x - y</variant><invariant>y >= 0 AND y <= 2 AND x >= 0</invariant><assigns>x</assigns><pad><pad>Question><pad>Question><pad>-1;
+<sourcecode> 
+
+while (y < 2 || y > 0) {
+    y = y + x;
+  }
+
+</sourcecode> <loopid> 23
+<loopid>21</loopid><variant>x - y</variant><invariant>x >= 0 AND y >= 0 AND y <= 2</invariant><assigns>y</assigns><pad>
+
+## RESULT
+PROTON RAW: variant=x - y invariant=y >= 0 AND y <= 2 AND x >= 0
+
+------------------------------------------------------------------------
+[2026-04-01 04:23:21] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> /*
+TERMINATION
+
+suggested parameters:
+- partition abstract domain = boxes [default]
+- function abstract domain = affine [default]
+- backward widening delay = 2 [default]
+- conflict-driven analysis = 1
+*/
+
+int main() {
+  int x, y;
+  if (y < 0 && y % 2 == 0) {
+    x = 2;
+  } else if (y < 0) {
+    x = 1;
+  } else if (y >= 0 && y % 2 == 0) {
+    x = -2;
+  } else {
+    x = -1;
+  }
+  while (y < -2 || y > 2) {
+    y = y + x;
+  }
+  return 0;
+} </sourcecode> <loopcode> while loop at label 23 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>y</variant><invariant>x >= 0 AND y >= 0 AND y <= 2</invariant><assigns> x, y </assigns><pad><pad>Question><pad>Question><pad>Inductive loop invariant><pad>Inductive loop invariant>nothing</invariant><\invariant>x >= 0 ANDInclusive of 2. If y < 0, x = 2 * y; else if (y > 2) {
+    x = 1;
+  } else {
+    x = -1;
+  }
+  }
+
+</loopcode> <loopid> 1</
+
+## RESULT
+PROTON RAW: variant=y invariant=x >= 0 AND y >= 0 AND y <= 2
+
+------------------------------------------------------------------------
+[2026-04-01 04:24:11] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> /*
+TERMINATION
+
+suggested parameters:
+- conflict-driven conditional termination
+- partition abstract domain = boxes [default]
+- function abstract domain = affine [default]
+- backward widening delay = 2 [default]
+*/
+
+int get_step(int x) {
+  if (x > 10) {
+    return 2;
+  }
+  return 1;
+}
+
+int main()  {
+  int y, step;
+  if (y > 0) {
+    step = -get_step(y);
+  } else {
+    step = get_step(-y);
+  }
+  while(y < -2 || y > 2) {
+    y = y + step;
+  }
+  return 0;
+} </sourcecode> <loopcode> while loop at label 48 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>x - y</variant><invariant>y <= 0 AND y >= -20</invariant><assigns> y, step </assigns><pad><pad>Question><pad>Question><pad>Inductive loop invariant><pad>Invariant>4 * x - y</variant><variant>48 - y</variant><invariant>0 <= j ANDQuestion</invariant><assigns>y, x</assigns><pad>Inclusive><pad>\nothing</invariant><def>4 * y, 8 * n * x + y, 12 * y, 16 * n * q - y < 
+
+## RESULT
+PROTON RAW: variant=x - y invariant=y <= 0 AND y >= -20
+
+------------------------------------------------------------------------
+[2026-04-01 04:33:39] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> /*
+TERMINATION
+
+suggested parameters:
+- conflict-driven conditional termination
+- partition abstract domain = boxes [default]
+- function abstract domain = affine [default]
+- backward widening delay = 2 [default]
+*/
+
+int get_step(int x) {
+  if (x > 10) {
+    return 2;
+  }
+  return 1;
+}
+
+int main()  {
+  int y, step;
+  if (y > 0) {
+    step = -get_step(y);
+  } else {
+    step = get_step(-y);
+  }
+  while(y < -2 || y > 2) {
+    y = y + step;
+  }
+  return 0;
+} </sourcecode> <loopcode> while loop at label 48 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>x - y</variant><invariant>y <= -10000 AND y >= 0 AND x >= 0</invariant><assigns> y, step </assigns><pad><pad>Question><pad>def</assigns><pad>Invariant><import><pad>Invariant>9 * x - y</variant><assigns> y, x </assigns><pad>1><pad>Dondt >In\ondet</assigns><pad>InError><pad>I do not print anything else.  If the above is a loop, use the tags<loopcode> and <\loopcode>.</loop
+
+## RESULT
+PROTON RAW: variant=x - y invariant=y <= -10000 AND y >= 0 AND x >= 0
+
+------------------------------------------------------------------------
+[2026-04-01 04:34:36] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+
+    int x ;
+
+    while (x > 0){
+      x = x - 1
+    }
+
+} </sourcecode> <loopcode> while loop at label 8 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>x</variant><invariant>x >= 0 AND x <= \at(x, Pre)</invariant><assigns>x</assigns><pad><pad>Question><pad>Question><pad>Inductive loop invariant><pad>7<br> 
+
+while (x > 0){
+      if (!(\at(x,Pre) notation is not supported){
+        break;
+      }
+      x = x - 1;
+    }
+
+</loopcode> <loopid> 8</loopid>
+<loopid>8</loopid><variant>x</variant><invariant>x >= 0 AND x <= \at(x, Pre)</
+
+## RESULT
+PROTON RAW: variant=x invariant=x >= 0 AND x <= \at(x, Pre)
+
+------------------------------------------------------------------------
+[2026-04-01 04:35:34] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+
+    int x ;
+
+    while (x > 0){
+      x = x - 1
+    }
+
+} </sourcecode> <loopcode> while loop at label 8 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>x</variant><invariant>x >= 0 AND x <= \at(x, Pre)</invariant><assigns>x</assigns><pad><pad><pad>Question><pad>Question><pad>Inductive loop invariant><pad> prove the termination of the loop using the ACSL variant, the ACSL inductive loop invariant and assigns caluse using the tags<loopid> id </loopid> <variant>x</variant><invariant>x >= 0 AND x <= \at(x, Pre)</invariant><assigns>x</assigns><pad>Inductive><pad>The above is the ACSL loop variant for the given
+
+## RESULT
+PROTON RAW: variant=x invariant=x >= 0 AND x <= \at(x, Pre)
+
+------------------------------------------------------------------------
+[2026-04-01 04:39:02] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> 
+int main() {
+	int x1, x2 = 1;
+	while (x2 >= 1) {
+		if (x1 > 100) {
+			x1 = x1 - 10;
+			x2 = x2 - 1;
+		} else {
+			x1 = x1 + 11;
+			x2 = x2 + 1;
+		}
+	}
+	exit:
+	return x2;
+} </sourcecode> <loopcode> while loop at label 10 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>x2 - 1</variant><invariant>x2 >= 1 AND x1 >= 0</invariant><assigns>x1, x2</assigns><pad>Question><pad>Question>
+<loopid>1</loopid><variant>x2 - 1</variant><invariant>x2 >= 1 AND x1 >= 0</invariant><assigns>x1, x2</assigns><pad>\<pad>10><pad>Inductive loop invariant><pad>Invariant><pad>Invariant>1.1.1.5 - x2 - 1.1.5 + x
+
+## RESULT
+PROTON RAW: variant=x2 - 1 invariant=x2 >= 1 AND x1 >= 0
+
+------------------------------------------------------------------------
+[2026-04-01 04:39:44] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> 
+int main() {
+	int x1, x2 = 1;
+	while (x2 >= 1) {
+		if (x1 > 100) {
+			x1 = x1 - 10;
+			x2 = x2 - 1;
+		} else {
+			x1 = x1 + 11;
+			x2 = x2 + 1;
+		}
+	}
+	exit:
+	return x2;
+} </sourcecode> <loopcode> while loop at label 10 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+(no response)
+
+## RESULT
+PROTON RAW ERROR: curl exited with code 255
+
+------------------------------------------------------------------------
+[2026-04-01 04:41:22] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+
+    int x ;
+
+    while (x > 0){
+      x = x - 1
+    }
+
+} </sourcecode> <loopcode> /* Precondition: $5{x} >= 2 */
+while loop at label 8 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>x</variant><invariant>x >= 0 AND x <= \at(x, Pre)</invariant><assigns>x</assigns><pad><pad>Question><pad>Question><pad>Inductive loop invariant><pad>2018</assigns><pad>Inh * x - y - x + z - 2.1</assigns><pad> prove ><pad>s><pad> prove <loopcode> 
+
+while (x > 0){
+      if (c == 0){
+        x = x - 1;
+        c = c + 1;
+      } else {
+        x = x - 2;
+     
+
+## RESULT
+PROTON RAW: variant=x invariant=x >= 0 AND x <= \at(x, Pre)
+
+------------------------------------------------------------------------
+[2026-04-01 04:42:01] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> 
+int main() {
+	int x1, x2 = 1;
+	while (x2 >= 1) {
+		if (x1 > 100) {
+			x1 = x1 - 10;
+			x2 = x2 - 1;
+		} else {
+			x1 = x1 + 11;
+			x2 = x2 + 1;
+		}
+	}
+	exit:
+	return x2;
+} </sourcecode> <loopcode> /* Precondition: $5{x1} >= 111 && $7{x2} >= 2 */
+while loop at label 10 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>x1 + x2 - x2</variant><invariant>x1 >= 0 AND x2 >= 1 AND x1 > 100 AND x2 >= 1</invariant><assigns> x1, x2 </assigns><pad><pad>Question><pad>Question><pad>Inbox</assigns><pad>The final line</finals><pad>Invalidate><pad>7: 
+while (i < 100) {
+		i = i + 1;
+		x = x + y;
+	}
+
+</loopcode> <loopid> 0</loopid>
+<loopid>0
+
+## RESULT
+PROTON RAW: variant=x1 + x2 - x2 invariant=x1 >= 0 AND x2 >= 1 AND x1 > 100 AND x2 >= 1
+
+------------------------------------------------------------------------
+[2026-04-01 04:42:16] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> 
+int main() {
+	int x1, x2 = 1;
+	while (x2 >= 1) {
+		if (x1 > 100) {
+			x1 = x1 - 10;
+			x2 = x2 - 1;
+		} else {
+			x1 = x1 + 11;
+			x2 = x2 + 1;
+		}
+	}
+	exit:
+	return x2;
+} </sourcecode> <loopcode> /* Precondition: $5{x1} >= 111 && $7{x2} >= 2 */
+while loop at label 10 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+(no response)
+
+## RESULT
+PROTON RAW ERROR: curl exited with code 255
+
+------------------------------------------------------------------------
+[2026-04-01 04:43:32] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+
+    int x ;
+    int y;
+    while (x > 0){
+      if (y > 0){
+        x = x - y;
+      }else {
+        x = x + y;
+      }
+
+    }
+
+} </sourcecode> <loopcode> /* Precondition: $5{x}-$7{y} >= 1 && $7{y} >= 1 */
+while loop at label 10 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>x + y</variant><invariant>x >= 0 AND y >= 0 AND x + y >= 0</invariant><assigns> x, y </assigns><pad><pad>Question><pad><pad>Question><pad>Inductive loop invariant><pad>Invariant><pad> prove_theoren</variant><Question>4D</variant><InFAR - x + y == 0);
+      else {
+        x = x + y;
+      }
+    }
+
+</loopcode> <loopid> 1</loopid>
+<loopid>1</loopid><variant>x</variant><invariant>x
+
+## RESULT
+PROTON RAW: variant=x + y invariant=x >= 0 AND y >= 0 AND x + y >= 0
+
+------------------------------------------------------------------------
+[2026-04-01 04:43:51] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+
+    int x ;
+    int y;
+    while (x > 0){
+      if (y > 0){
+        x = x - y;
+      }else {
+        x = x + y;
+      }
+
+    }
+
+} </sourcecode> <loopcode> /* Precondition: $5{x}+$7{y} >= 1 && -$7{y} >= 0 */
+while loop at label 10 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>x</variant><invariant>x >= 0 AND y >= 0 AND x + y >= 0 AND y <= 10</invariant><assigns> x, y </assigns><pad><pad>Question><pad>def</assigns><pad>Invariant><Question><pad>Invariant>5 prove correctness </variant><p>1.5*x - 3*y - x + 7*y - a*b - X >= 0 && -$7*us - y > 0);
+
+</loopcode> <loopid> 1</loopid>
+<loopid>1.5*x - 
+
+## RESULT
+PROTON RAW: variant=x invariant=x >= 0 AND y >= 0 AND x + y >= 0 AND y <= 10
+
+------------------------------------------------------------------------
+[2026-04-01 04:44:56] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+
+    int x ;
+    int y;
+    while (x > 0){
+      if (y > 0){
+        x = x - y;
+      }else {
+        x = x + y + 1;
+      }
+
+    }
+
+} </sourcecode> <loopcode> /* Precondition: $5{x}-$7{y} >= 1 && $7{y} >= 1 */
+while loop at label 10 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+(no response)
+
+## RESULT
+PROTON RAW ERROR: curl exited with code 255
+
+------------------------------------------------------------------------
+[2026-04-01 04:44:57] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+
+    int x ;
+    int y;
+    while (x > 0){
+      if (y > 0){
+        x = x - y;
+      }else {
+        x = x + y + 1;
+      }
+
+    }
+
+} </sourcecode> <loopcode> /* Precondition: $5{x}+$7{y} >= 0 && $5{x} >= 1 && -$7{y} >= 0 */
+while loop at label 10 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+(no response)
+
+## RESULT
+PROTON RAW ERROR: curl exited with code 255
+
+------------------------------------------------------------------------
+[2026-04-01 04:46:44] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+
+    int x ;
+    int y;
+    
+    while (x > 0){
+      if (y > 0){
+        x = x - y ;
+      }else {
+        x = x + y + 1;
+      }
+
+    }
+
+} </sourcecode> <loopcode> /* Precondition: $5{x}-$7{y} >= 1 && $7{y} >= 1 */
+while loop at label 10 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>x</variant><invariant>x >= 0 AND y >= 0 AND x + y >= 0</invariant><assigns>x, y</assigns><pad><pad><pad>Question><pad>import</assigns><pad>-1</assigns><pad>Inductive loop invariant><pad>10</invariant><from 5*x - 7*y+1 <= k && k < 11 && x + y >= 0)</invariant>x >= 0 AND y >= 0 AND x + y >= 0</invariant><assigns> x, y </assigns><pad>def</assign
+
+## RESULT
+PROTON RAW: variant=x invariant=x >= 0 AND y >= 0 AND x + y >= 0
+
+------------------------------------------------------------------------
+[2026-04-01 04:47:03] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+
+    int x ;
+    int y;
+    
+    while (x > 0){
+      if (y > 0){
+        x = x - y ;
+      }else {
+        x = x + y + 1;
+      }
+
+    }
+
+} </sourcecode> <loopcode> /* Precondition: $5{x}+$7{y} >= 0 && $5{x} >= 1 && -$7{y} >= 0 */
+while loop at label 10 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>x</variant><invariant>x >= 0 AND y >= 0 AND x > 0</invariant><assigns> x, y </assigns><pad><pad>Question><pad>defunct><pad>Inclusive><pad>I'll use variables that are not explicitly initialized.****Do not make any assumptions about functions whose definitions are not given.****Do not use keywords that are not supported in ACSL annotations for loops.****Do not use variables that have K- variant, inductive loop invariant or assigns caluse that are not explicitly initialized.****Do not make any assumptions about functions whose definitions are not given.
+
+## RESULT
+PROTON RAW: variant=x invariant=x >= 0 AND y >= 0 AND x > 0
+
+------------------------------------------------------------------------
+[2026-04-01 04:50:13] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+
+    int x ;
+    int y;
+    
+    while (x > 0){
+      if (y > 0){
+        x = x - y ;
+      else (if y == 0){
+        x = -1;
+      }
+      }else {
+        x = x + y ;
+      }
+
+    }
+
+} </sourcecode> <loopcode> /* Precondition: $5{x}-$7{y} >= 1 && $7{y} >= 1 */
+while loop at label 10 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>x</variant><invariant>x >= 0 AND y >= 0 AND x + y >= 1</invariant><assigns>x, y</assigns><pad>Question><pad>Question><pad>defunct><pad>5</assigns><pad>Invariant><pad>I cannot generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.</assigns> <loopcode> 
+
+while (x + y >= 0){
+      if (y > 0){
+        x = x - y;
+      } else (if y <= 0){
+        x =
+
+## RESULT
+PROTON RAW: variant=x invariant=x >= 0 AND y >= 0 AND x + y >= 1
+
+------------------------------------------------------------------------
+[2026-04-01 04:50:32] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+
+    int x ;
+    int y;
+    
+    while (x > 0){
+      if (y > 0){
+        x = x - y ;
+      else (if y == 0){
+        x = -1;
+      }
+      }else {
+        x = x + y ;
+      }
+
+    }
+
+} </sourcecode> <loopcode> /* Precondition: $5{x}+$7{y} >= 1 && -$7{y} >= 0 */
+while loop at label 10 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>x</variant><invariant>x >= 0 AND y > 0 AND x == -y</invariant><assigns> x, y </assigns><pad>Question><pad>Question><pad>Inductive loop invariant><pad>Invariant><pad>B1 + E1 = 10*x - x+7*y + c <= k</invariant><loopid>1</loopid><assigns>x, y</assigns><pad>Invariant><-1</assigns><pad>**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions
+
+## RESULT
+PROTON RAW: variant=x invariant=x >= 0 AND y > 0 AND x == -y
+
+------------------------------------------------------------------------
+[2026-04-01 05:03:09] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+int i = 0, k = 0;
+while(i < 100000) {
+  int j = [1,100000];
+  i = i + j; 
+}
+
+} </sourcecode> <loopcode> /* Precondition: -$5{i} >= -99999 && -$11{j}-$5{i} >= -99999 */
+while loop at label 10 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>100000 - i</variant><invariant>i >= 0 AND i <= 100000 AND j == 1, AND k == 0</invariant><assigns>i, j, k</assigns><pad><pad>Question><pad>Question><pad>Inductive loop invariant><pad>The final answer: 
+
+for (i = 0; i < 100000; i++) {
+      int j = [1,100000];
+      i = i + j;
+    }
+
+</loopcode> <loopid>1</loopid><variant>100000 - i</variant><invariant>i >=
+
+## RESULT
+PROTON RAW: variant=100000 - i invariant=i >= 0 AND i <= 100000 AND j == 1, AND k == 0
+
+------------------------------------------------------------------------
+[2026-04-01 05:07:19] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+int i = 0, k = 0;
+while(i < 100000) {
+  int j = [1,100000];
+  i = i + j; 
+}
+
+} </sourcecode> <loopcode> /* Precondition: -$5{i} >= -99999 && -$11{j}-$5{i} >= -99999 */
+while loop at label 10 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>100000 - i</variant><invariant>i >= 0 AND i <= 100000 AND j == 1</invariant><assigns> i, k </assigns><pad><pad>Question><pad>def</assigns><pad>Inductive loop invariant><pad>
+<sourcecode> 
+
+for prove <= k && -1073741824 < i + k && i + k >= -10000 AND i + j == 1</sourcecode> <loopid> 1</loopid><variant>100000 - i</variant><invariant>i >= 0 AND i <= 10000
+
+## RESULT
+PROTON RAW: variant=100000 - i invariant=i >= 0 AND i <= 100000 AND j == 1
+
+------------------------------------------------------------------------
+[2026-04-01 05:08:09] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+int i = 0, k = 0;
+while(i < 100000) {
+  int j = [1,100000];
+  i = i + j; 
+}
+
+} </sourcecode> <loopcode> /* Precondition: -$5{i} >= -99999 && -$11{j}-$5{i} >= -99999 */
+while loop at label 10 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>100000 - i</variant><invariant>i >= 0 AND i <= 100000 AND j == 1, 10000...9</invariant><assigns> i, k </assigns><pad><pad>Question><pad>def</assigns><pad>Inductive loop invariant><pad>-1</invariant><**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL
+
+## RESULT
+PROTON RAW: variant=100000 - i invariant=i >= 0 AND i <= 100000 AND j == 1, 10000...9
+
+------------------------------------------------------------------------
+[2026-04-01 05:10:45] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+int i = 0, k = 0;
+while(i < 100000) {
+  int j = [1,100000];
+  i = i + j; 
+}
+
+} </sourcecode> <loopcode> /* Precondition: -$5{i} >= -99999 && -$11{j}-$5{i} >= -99999 */
+while loop at label 10 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>100000 - i</variant><invariant>i >= 0 AND i <= 100000 AND j == 1</invariant><assigns> i, k </assigns><pad><pad>Question><pad>def</assigns><pad>" false</assigns><pad>Inductive loop invariant><pad>1</invariant><def>10 - i - 10000 - i < 1000000</def><pad>-1>
+<loopcode> 
+
+for (i = 0; i <= 1000000; 
+      //__VERIFIER_assert(i >= -10000 && i <= 
+
+## RESULT
+PROTON RAW: variant=100000 - i invariant=i >= 0 AND i <= 100000 AND j == 1
+
+------------------------------------------------------------------------
+[2026-04-01 05:17:18] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+int i = 0, k = 0;
+while(i < 100000) {
+  int j = [1,100000];
+  i = i + j; 
+}
+
+} </sourcecode> <loopcode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+int i = 0, k = 0;
+while(i < 100000) {
+  int j = [1,100000];
+  i = i + j; 
+}
+
+} </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>100000 - i</variant><invariant>i >= 0 AND i <= 100000 AND k == 0</invariant><assigns> i, k </assigns><pad>Question><pad>Question><pad>\_assert(k == 0);
+     
+        
+} else {
+        i = 0;
+        j = [1,100000;
+        k = 0,if( k > 0) {
+            k = k - 1;
+        }
+ 
+
+</loopcode> <loopid>1</loopid><variant>100000 - i</variant><invariant>i >= 0
+
+## RESULT
+PROTON RAW: variant=100000 - i invariant=i >= 0 AND i <= 100000 AND k == 0
+
+------------------------------------------------------------------------
+[2026-04-01 05:17:37] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+int i = 0, k = 0;
+while(i < 100000) {
+  int j = [1,100000];
+  i = i + j; 
+}
+
+} </sourcecode> <loopcode> /* Precondition: -$5{i} >= -99999 && -$11{j}-$5{i} >= -99999 */
+while loop at label 10 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>100000 - i</variant><invariant>i >= 0 AND i <= 100000 AND j == 1</invariant><assigns>i, k</assigns><pad><pad>Question><pad>Question><pad>Inductive loop invariant><pad>-1: false;
+<invariant>0 <= i + j AND'11 < inductive loop invariant>10 * i - j = [1,100000; i = i + j</invariant><assigns>i, k</assigns><pad>[2]</assigns><pad>Inductiveloop invariant><pad>-1:$/-100
+
+## RESULT
+PROTON RAW: variant=100000 - i invariant=i >= 0 AND i <= 100000 AND j == 1
+
+------------------------------------------------------------------------
+[2026-04-01 05:18:12] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> 
+int main() {
+	int x1, x2 = 1;
+	while (x2 >= 1) {
+		if (x1 > 100) {
+			x1 = x1 - 10;
+			x2 = x2 - 1;
+		} else {
+			x1 = x1 + 11;
+			x2 = x2 + 1;
+		}
+	}
+	exit:
+	return x2;
+} </sourcecode> <loopcode> 
+int main() {
+	int x1, x2 = 1;
+	while (x2 >= 1) {
+		if (x1 > 100) {
+			x1 = x1 - 10;
+			x2 = x2 - 1;
+		} else {
+			x1 = x1 + 11;
+			x2 = x2 + 1;
+		}
+	}
+	exit:
+	return x2;
+} </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>x2</variant><invariant>x2 >= 1 AND x1 >= 0</invariant><assigns> x1, x2 </assigns><pad>Question><pad>from<\assigns><pad>Inbox><pad>6</assigns><pad>1</assigns><pad>This is not a valid use of variables or functions. Do not make any assumptions about functions whose definitions are not given. Use the tags <loopcode> and <\loopcode> to generate the generated variant and inductive loop invariant for the given loop. Do not use variables or functions that are not declared in the program
+
+## RESULT
+PROTON RAW: variant=x2 invariant=x2 >= 1 AND x1 >= 0
+
+------------------------------------------------------------------------
+[2026-04-01 05:18:32] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> 
+int main() {
+	int x1, x2 = 1;
+	while (x2 >= 1) {
+		if (x1 > 100) {
+			x1 = x1 - 10;
+			x2 = x2 - 1;
+		} else {
+			x1 = x1 + 11;
+			x2 = x2 + 1;
+		}
+	}
+	exit:
+	return x2;
+} </sourcecode> <loopcode> /* Precondition: $5{x1} >= 111 && $7{x2} >= 2 */
+while loop at label 10 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>x1 + x2 - 101</variant><invariant>x2 >= 1 AND x1 >= 100</invariant><assigns>x1, x2</assigns><pad>Question><pad>Question><pad>Question><pad>Inductive loop invariant><pad>Invariants</variant><Question><pad>Invariants><pad>\ variant><pad> prove-c</variant><Question><pad>I shall not print anything else.  If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not
+
+## RESULT
+PROTON RAW: variant=x1 + x2 - 101 invariant=x2 >= 1 AND x1 >= 100
+
+------------------------------------------------------------------------
+[2026-04-01 05:20:31] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> 
+int main() {
+	int x1, x2 = 1;
+	while (x2 >= 1) {
+		if (x1 > 100) {
+			x1 = x1 - 10;
+			x2 = x2 - 1;
+		} else {
+			x1 = x1 + 11;
+			x2 = x2 + 1;
+		}
+	}
+	exit:
+	return x2;
+} </sourcecode> <loopcode> 
+int main() {
+	int x1, x2 = 1;
+	while (x2 >= 1) {
+		if (x1 > 100) {
+			x1 = x1 - 10;
+			x2 = x2 - 1;
+		} else {
+			x1 = x1 + 11;
+			x2 = x2 + 1;
+		}
+	}
+	exit:
+	return x2;
+} </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>x2</variant><invariant>x2 >= 1 AND x1 >= 0</invariant><assigns> x1, x2 </assigns><pad>Question><pad>Question><pad>for* r - 
+<loopcode> 
+
+while (x2 >= 1) {
+		if (x1 > 100) {
+			x1 = x1 - 10;
+			x2 = x1 + 1;
+		} else {
+			x1 = x2 + 11;
+			x2 = x1 + 1;
+		}
+	}
+	exit:
+	return x2;
+
+
+## RESULT
+PROTON RAW: variant=x2 invariant=x2 >= 1 AND x1 >= 0
+
+------------------------------------------------------------------------
+[2026-04-01 05:20:49] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> 
+int main() {
+	int x1, x2 = 1;
+	while (x2 >= 1) {
+		if (x1 > 100) {
+			x1 = x1 - 10;
+			x2 = x2 - 1;
+		} else {
+			x1 = x1 + 11;
+			x2 = x2 + 1;
+		}
+	}
+	exit:
+	return x2;
+} </sourcecode> <loopcode> /* Precondition: $5{x1} >= 111 && $7{x2} >= 2 */
+while loop at label 10 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>x1 + x2 - 2 * x1</variant><invariant>x1 >= 0 AND x2 >= 1 AND x1 > 100 AND x2 >= 1</invariant><assigns> x1, x2 </assigns><pad>DoNot use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could
+
+## RESULT
+PROTON RAW: variant=x1 + x2 - 2 * x1 invariant=x1 >= 0 AND x2 >= 1 AND x1 > 100 AND x2 >= 1
+
+------------------------------------------------------------------------
+[2026-04-01 05:21:19] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> 
+int main() {
+	int x1, x2 = 1;
+	while (x2 >= 1) {
+		if (x1 > 100) {
+			x1 = x1 - 10;
+			x2 = x2 - 1;
+		} else {
+			x1 = x1 + 11;
+			x2 = x2 + 1;
+		}
+	}
+	exit:
+	return x2;
+} </sourcecode> <loopcode> 
+int main() {
+	int x1, x2 = 1;
+	while (x2 >= 1) {
+		if (x1 > 100) {
+			x1 = x1 - 10;
+			x2 = x2 - 1;
+		} else {
+			x1 = x1 + 11;
+			x2 = x2 + 1;
+		}
+	}
+	exit:
+	return x2;
+} </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>x2 - 1</variant><invariant>x1 >= 0 AND x2 >= 1</invariant><assigns> x1, x2 </assigns><pad>Question><pad>Question><pad>InconsistentError:Do not print anything else.  If the error is a loop variant, use the tag <loopvariant> and <\loopvariant>. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not
+
+## RESULT
+PROTON RAW: variant=x2 - 1 invariant=x1 >= 0 AND x2 >= 1
+
+------------------------------------------------------------------------
+[2026-04-01 05:21:38] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> 
+int main() {
+	int x1, x2 = 1;
+	while (x2 >= 1) {
+		if (x1 > 100) {
+			x1 = x1 - 10;
+			x2 = x2 - 1;
+		} else {
+			x1 = x1 + 11;
+			x2 = x2 + 1;
+		}
+	}
+	exit:
+	return x2;
+} </sourcecode> <loopcode> /* Precondition: $5{x1} >= 111 && $7{x2} >= 2 */
+while loop at label 10 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>x1 + x2 - x2</variant><invariant>x1 >= 0 AND x2 >= 1 AND x1 > 100 AND x2 > 1</invariant><assigns> x1, x2 </assigns><pad><pad>Question><pad>Question><pad>Indef</assigns><pad>4</assigns><pad>-4</assigns><pad>Invalidate><pad>9</invariant><InIn Question>9.5 < x1> 10.0 - x1 + 11.0 - x2</assigns><pad>Invariant><Inductive loop
+
+## RESULT
+PROTON RAW: variant=x1 + x2 - x2 invariant=x1 >= 0 AND x2 >= 1 AND x1 > 100 AND x2 > 1
+
+------------------------------------------------------------------------
+[2026-04-01 05:22:08] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+int i = 0, k = 0;
+while(i < 100000) {
+  int j = [1,100000];
+  i = i + j; 
+}
+
+} </sourcecode> <loopcode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+int i = 0, k = 0;
+while(i < 100000) {
+  int j = [1,100000];
+  i = i + j; 
+}
+
+} </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>100000 - i</variant><invariant>0 <= i AND i <= 100000 AND k == 0</invariant><assigns>i, k</assigns><pad>Question><pad>Question><pad>def</assigns><pad>The final</assigns><pad>Inondet</finals><pad>1><pad>' AND prove_assert(1 <= i + j ANDQuestion) <sourcecode> 
+
+for (i = 0; i <= 100000; i++) {
+      //__VERIFIER_assert(1 <= i);
+      //__VERIFIER_assert(i <= 100000);
+
+
+## RESULT
+PROTON RAW: variant=100000 - i invariant=0 <= i AND i <= 100000 AND k == 0
+
+------------------------------------------------------------------------
+[2026-04-01 05:22:15] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+int i = 0, k = 0;
+while(i < 100000) {
+  int j = [1,100000];
+  i = i + j; 
+}
+
+} </sourcecode> <loopcode> /* Precondition: -$5{i} >= -99999 && -$11{j}-$5{i} >= -99999 */
+while loop at label 10 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+(no response)
+
+## RESULT
+PROTON RAW ERROR: curl exited with code 255
+
+------------------------------------------------------------------------
+[2026-04-01 05:22:22] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+int i = 0, k = 0;
+while(i < 100000) {
+  int j;
+  j = [1,100000];
+  i = i + j; 
+}
+
+} </sourcecode> <loopcode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+int i = 0, k = 0;
+while(i < 100000) {
+  int j;
+  j = [1,100000];
+  i = i + j; 
+}
+
+} </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+(no response)
+
+## RESULT
+PROTON RAW ERROR: curl exited with code 255
+
+------------------------------------------------------------------------
+[2026-04-01 05:22:23] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+int i = 0, k = 0;
+while(i < 100000) {
+  int j;
+  j = [1,100000];
+  i = i + j; 
+}
+
+} </sourcecode> <loopcode> /* Precondition: -$5{i} >= -99999 && -$11{j}-$5{i} >= -99999 */
+while loop at label 10 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+(no response)
+
+## RESULT
+PROTON RAW ERROR: curl exited with code 255
+
+------------------------------------------------------------------------
+[2026-04-01 05:22:35] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+int i = 0, k = 0;
+int j= 0;
+while(i < 100000) {
+  
+  j = [1,100000];
+  i = i + j; 
+}
+
+} </sourcecode> <loopcode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+int i = 0, k = 0;
+int j= 0;
+while(i < 100000) {
+  
+  j = [1,100000];
+  i = i + j; 
+}
+
+} </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+(no response)
+
+## RESULT
+PROTON RAW ERROR: curl exited with code 255
+
+------------------------------------------------------------------------
+[2026-04-01 05:22:36] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+int i = 0, k = 0;
+int j= 0;
+while(i < 100000) {
+  
+  j = [1,100000];
+  i = i + j; 
+}
+
+} </sourcecode> <loopcode> /* Precondition: -$5{i} >= -99999 && -$5{i}-$9{j} >= -99999 */
+while loop at label 12 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+(no response)
+
+## RESULT
+PROTON RAW ERROR: curl exited with code 255
+
+------------------------------------------------------------------------
+[2026-04-01 05:22:57] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+int i = 0, k = 0;
+while(i < 100000) {
+  int j = rand();
+  if (!(1 <= j && j < 100000))return 0;
+  i = i + j; 
+  k ++; 
+}
+
+} </sourcecode> <loopcode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+int i = 0, k = 0;
+while(i < 100000) {
+  int j = rand();
+  if (!(1 <= j && j < 100000))return 0;
+  i = i + j; 
+  k ++; 
+}
+
+} </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+<pad>Question><pad>Question><pad>Invariant>1.0</variant><variant>100000 - i</variant><invariant>i >= 0 ANDINet - 0 <= i AND i <= 100000 AND k == 0</invariant><assigns> i, k </assigns><pad>10><pad>-2</assigns><pad>Invariant><def><pad>Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do
+
+## RESULT
+PROTON RAW: variant=100000 - i invariant=i >= 0 ANDINet - 0 <= i AND i <= 100000 AND k == 0
+
+------------------------------------------------------------------------
+[2026-04-01 05:27:13] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+int i = 0, k = 0;
+int j = __VERIFIER_nondet_int();
+  if (!(1 <= j && j < 100000))return 0;
+while(i < 100000) {
+  i = i + j; 
+  k ++; 
+}
+
+} </sourcecode> <loopcode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+int i = 0, k = 0;
+int j = __VERIFIER_nondet_int();
+  if (!(1 <= j && j < 100000))return 0;
+while(i < 100000) {
+  i = i + j; 
+  k ++; 
+}
+
+} </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>100000 - i</variant><invariant>0 <= i AND i <= 100000 AND k == 0</invariant><assigns>i, k</assigns><pad>Question><pad> Question><pad>Question><pad>...<\question><pad>Insecure><pad> prove_error</proveable><pad>1><pad>Fin</invariant><def>EMPTY</def><pad>'<=}<pad>Frama><pad>Insecure>EMPTY</ramcode><pad>Insecure><pad>"if (!(Do10 < k + 2*i) -  i = 0, k; 
+    i =
+
+## RESULT
+PROTON RAW: variant=100000 - i invariant=0 <= i AND i <= 100000 AND k == 0
+
+------------------------------------------------------------------------
+[2026-04-01 05:27:34] LLM WIDENING CALL
+------------------------------------------------------------------------
+## USER PROMPT
+In order to prove the termination of a loop, we use the notion of loop variant. A loop variant is not a property but a value. It is an expression that involves the variables modified by the loop and that provides an upper bound to the number of iterations that remains to be executed by the loop before any iteration. Thus, this expression is greater or equals to 0, and strictly decreases at each loop iteration. You are a software engineer working on a safety-critical system. You are tasked with verifying the correctness of a loop in a given C program using Frama-C. I shall provide you with three things - 1. a C program delimited using the tags <sourcecode> and <\sourcecode>, 2. the source code of a loop from the provided C program and given as delimited by the tags <loopcode> and <\loopcode> and 3. a unique loop identifer (integer) for the loop delimited by <loopid> and <\loopid>. You are to generate a Frama-C ACSL (ANSI/ISO C Specification Language) loop variant for the given loop. In addition generate an ACSL inductive loop invariant that helps Frama-C to prove the termination of the loop using the ACSL variant and the ACSL inductive loop invariant, where the ACSL inductive loop invariant is true(i) before the loop execution, (ii) given that the inductive loop invariant holds at the head of the loop, it also holds at the end of one more iteration of the loop. Also generate an ACSL assigns clause that specifies the variables modified by the loop. Return only the loop id, ACSL loop variant, ACSL inductive loop invariant and assigns clause using the tags <loopid> id </loopid> <variant> generated variant </variant> <invariant> generated invariant </invariant> <assigns> generated assigns </assigns> and do not print anything else. If the invariant is a conjunction, use the string 'AND' to separate the conjuncts. Rules:**Do not use variables or functions that are not declared in the program.****Do not make any assumptions about functions whose definitions are not given.****All undefined variables contain garbage values. Do not use variables that have garbage values.****Do not use keywords that are not supported in ACSL annotations for loops.****Variables that are not explicitly initialized, could have garbage values. Do not make any assumptions about such values.****Do not use the \at(x, Pre) notation for any variable x.****Do not use non-deterministic function calls.****Do not generate &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.** <sourcecode> typedef enum {false,true} bool;
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+int i = 0, k = 0;
+int j = __VERIFIER_nondet_int();
+  if (!(1 <= j && j < 100000))return 0;
+while(i < 100000) {
+  i = i + j; 
+  k ++; 
+}
+
+} </sourcecode> <loopcode> /* Precondition: -$7{i} >= -99999 && -$11{j}-$7{i} >= -99999 */
+while loop at label 19 </loopcode> <loopid> 1 </loopid>
+
+## LLM RESPONSE
+ <variant>100000 - i</variant><invariant>0 <= i AND i <= 100000 AND k == 0 AND -10000. <= j AND j <= 10000.</invariant><assigns>i, k</assigns><pad><pad>Question><pad>Question><pad>Inductive loop invariant><pad>1. <s> generated variant </s> <assigns> generated k, i </assigns><pad>The above are generated &gt, &lt for greater than and less than symbols. Use the symbols > and < directly.**Do not use variables or functions that are not declared in the
+
+## RESULT
+PROTON RAW: variant=100000 - i invariant=0 <= i AND i <= 100000 AND k == 0 AND -10000. <= j AND j <= 10000.

@@ -23,12 +23,26 @@ module type RANKING_FUNCTION = sig
   val bot : ?domain:B.t -> Environment.t -> var list -> t
   val zero : ?domain:B.t -> Environment.t -> var list -> t
   val top : ?domain:B.t -> Environment.t -> var list -> t
+  val init_with_proton_hint :
+    ?domain:B.t -> source_code:string -> loop_code:string ->
+    Environment.t -> var list -> t
   val domain_zero : t -> t
   val isLeq : kind -> t -> t -> bool
   val join : kind -> t -> t -> t
   val plus : t -> t -> t
   val meet : kind -> t -> t -> t
-  val widen : ?jokers:int -> t -> t -> t
+
+  val widen :
+    ?jokers:int ->
+    ?program_source:string ->
+    ?loop_condition:string ->
+    ?loop_description:string ->
+    ?iteration_number:string ->
+    ?history:t list ->
+    t ->
+    t ->
+    t
+
   val dual_widen : t -> t -> t
   val defined : ?condition:expr typed -> t -> bool
   val partially_defined : ?condition:expr typed -> t -> bool

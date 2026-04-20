@@ -32,6 +32,10 @@ let tracefwd = ref false
 let tracebwd = ref false
 let dot = ref false (* output trees in graphviz dot format *)
 let abort = ref false
+let program_source = ref "" (* source code of the program under analysis, used by LLM widening *)
+let use_llm      = ref false    (* enable LLM-assisted widening *)
+let llm_log      = ref ""       (* path to LLM interaction log file; "" = no log *)
+let llm_backend  = ref "anthropic" (* LLM backend: "anthropic" (default), "gemini", "ollama" or "proton" *)
 let vulnerability = ref false
 let resilience = ref false
 let nowrap = ref false

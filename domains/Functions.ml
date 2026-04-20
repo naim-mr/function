@@ -38,6 +38,10 @@ module type FUNCTION = sig
   val reset : f -> f
   val predecessor : f -> f
   val successor : f -> f
+  val of_linexpr : Environment.t -> var list -> Linexpr1.t -> f
+  (** Build from ordinal components: [finite; ω^1 coeff; ω^2 coeff; ...].
+      For non-ordinal domains, only the first element is used. *)
+  val of_ordinal_components : Environment.t -> var list -> Linexpr1.t list -> f
   val bwdAssign : f -> expr typed * expr typed -> f
   val filter : f -> expr typed -> f
   val print : Format.formatter -> f -> unit

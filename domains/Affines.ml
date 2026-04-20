@@ -682,7 +682,15 @@ module Affine (B : PARTITION) : FUNCTION = struct
     | T_var x -> (
         match f with
         | Fun f ->
-            let env = Linexpr1.get_env f in
+            let env0 = Linexpr1.get_env f in
+            let env =
+              if Environment.mem_var env0 v then env0
+              else Environment.add env0 [| v |] [||]
+            in
+            let f =
+              if Environment.mem_var env0 v then f
+              else Linexpr1.extend_environment f env
+            in
             let e = Texpr1.of_expr env (exp_to_apron e) in
             let f = Linexpr1.copy f in
             let a = Lincons1.array_make env 1 in
@@ -707,6 +715,20 @@ module Affine (B : PARTITION) : FUNCTION = struct
 
   let bwdAssign f (x, e) =
     { ranking = bwdAssign_ranking f.ranking (x, e); env = f.env; vars = f.vars }
+
+  let of_linexpr env vars linexpr =
+    let le =
+      let le_env = Linexpr1.get_env linexpr in
+      if Environment.mem_var le_env v then linexpr
+      else
+        let ext_env = Environment.add le_env [| v |] [||] in
+        Linexpr1.extend_environment linexpr ext_env
+    in
+    { ranking = Fun le; env; vars }
+
+  let of_ordinal_components env vars = function
+    | [] -> zero env vars
+    | l :: _ -> of_linexpr env vars l
 
   let filter f _ = successor f
 
