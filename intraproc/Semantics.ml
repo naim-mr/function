@@ -14,18 +14,25 @@ open VarSet
 open Utils.Datatypes
 
 type ctl_property = expr typed CTLProperty.generic_property
-type 'a p = Ctl of ctl_property | Exp of (expr * 'a) StringMap.t
+type atl_property = expr typed ATLProperty.generic_property
+
+type 'a p = Ctl of ctl_property | Exp of (expr * 'a) StringMap.t | Atl of atl_property
 
 let get_ctl prop =
   match prop with
   | Ctl prop -> prop
-  | _ -> raise (Invalid_argument "Expected a ctl property: got a bexp")
+  | _ -> raise (Invalid_argument "Expected a ctl property")
 
 let get_bexp prop =
   match prop with
   | Exp prop -> prop
-  | _ -> raise (Invalid_argument "Expected a bexp property, got a ctl")
+  | _ -> raise (Invalid_argument "Expected a bexp property")
 
+let get_atl prop =
+  match prop with
+  | Atl prop -> prop
+  | _ -> raise (Invalid_argument "Expected a atl property")
+  
 module type SEMANTIC = sig
   module D : RANKING_FUNCTION
   (** [D]: Underlying instanciantion of the DecisionTree Abstract Domain *)

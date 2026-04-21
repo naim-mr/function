@@ -1169,24 +1169,13 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
 
   (**)
 
-  let bwdAssign ?domain ?(taint = true) ?(underapprox = false) t e =
+  let bwdAssign ?domain ?(taint = true) ?(underapprox = false) ?(controllable = false) t e =
     let cache = ref CMap.empty in
     let pre = domain in
     let post = t.domain in
     let env = t.env in
     let vars = t.vars in
     let e' : expr typed = snd e in
-    let random =
-      ref
-        (if !analysis = "termination" then
-           match e' with
-           | Typed_syntax.T_var v, typ, ext
-             when String.starts_with ~prefix:"nondet_in" v.var_name ->
-               true
-           | _ -> false
-         else
-           match e' with Typed_syntax.T_INPUT, typ, ext -> true | _ -> false)
-    in
     let merge t1 t2 cs =
       let rec aux (t1, t2) cs =
         match (t1, t2) with
@@ -1202,7 +1191,7 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
               if underapprox && not !resilience then COMPUTATIONAL
               else APPROXIMATION
             in
-            Leaf (F.join ~random:!random joinType b f1 f2)
+            Leaf (F.join ~random:controllable joinType b f1 f2)
         | Node ((c1, nc1), l1, r1), Node ((c2, nc2), l2, r2) when C.isEq c1 c2
           ->
             Node ((c1, nc1), aux (l1, l2) (c1 :: cs), aux (r1, r2) (nc1 :: cs))
@@ -1878,22 +1867,36 @@ module DecisionTree (F : FUNCTION) : RANKING_FUNCTION = struct
 
      NOTE: mask is only monotone w.r.t. the APPROXIMATION order
   *)
-  let mask t t_mask =
+  let mask ?(controllable=false) t t_mask =
     let domain = t.domain in
     let env = t.env in
     let vars = t.vars in
     let botLeaf = Leaf (F.bot env vars) in
     let isDefined f = not (F.isBot f || F.isTop f) in
-    let fBotLeft _ _ = Bot in
+    let fBotLeft _ fRight = 
+      if isDefined fRight then 
+        if controllable then Leaf fRight 
+        else botLeaf
+      else botLeaf
+    in
     (* LHS is bottom, keep it that way *)
-    let fBotRight _ fLeft = if isDefined fLeft then botLeaf else Leaf fLeft in
+    let fBotRight _ fLeft = if isDefined fLeft then 
+                              if controllable then Leaf fLeft 
+                              else botLeaf 
+                            else Leaf fLeft in
     (* if RHS is NIL and LHS is defined then go to bottom *)
     let fLeaf cs l1 l2 =
-      if isDefined l2 then Leaf l1 (* don't change if RHS is defined*)
+      if isDefined l2 then 
+        if controllable then
+          Leaf l2
+        else
+          Leaf l1 (* don't change if RHS is defined*)
       else if
         (* if RHS is not defined, then go to bottom if LHS is not already top or bottom*)
         isDefined l1
-      then botLeaf
+      then 
+        if !resilience then Leaf l1
+        else botLeaf 
       else Leaf l1
     in
     {

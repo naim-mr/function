@@ -38,6 +38,7 @@ module type RANKING_FUNCTION = sig
     ?domain:B.t ->
     ?taint:bool ->
     ?underapprox:bool ->
+    ?controllable:bool ->
     t ->
     expr typed * expr typed ->
     t
@@ -48,7 +49,7 @@ module type RANKING_FUNCTION = sig
   val reset : ?mask:t -> t -> expr typed -> t
   val until : t -> t -> t -> t
   val refine : t -> B.t -> t
-  val mask : t -> t -> t
+  val mask : ?controllable:bool -> t -> t -> t
   val learn : t -> t -> t
   val conflict : t -> B.t list
   val reinit : t -> t
