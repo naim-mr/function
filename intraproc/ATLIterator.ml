@@ -665,7 +665,7 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
 
   (* atl 'or' opperator *)
   let logic_or (fp1 : inv) (fp2 : inv) : inv =
-    let f _ t1 t2 = Some (D.join COMPUTATIONAL t1 t2) in
+    let f _ t1 t2 = Some (D.join RESILIENCE t1 t2) in
     InvMap.union f fp1 fp2
 
   (* atl 'and' opperator *)
@@ -817,15 +817,16 @@ action: "follow"|}
         variables = vars;
       }
     in
-    if not !minimal then (
+    (* if not !minimal then (
       Format.printf "\nAbstract atl typed Syntax:\n ";
-      Typed_syntax.pp_prog !fmt (prog_of_program program));
+      Typed_syntax.pp_prog !fmt (prog_of_program program)); *)
     if !Config.refine then (* Run forward analysis if 'refine' flag is set *)
       ForwardIteratorB.analyze program.environment prog;
     fwdInvMap := !ForwardIteratorB.fwdInvMap;
     let inv = compute program property in
     let initialLabel = block_label program.mainFunction.func_body in
     let programInvariant = InvMap.find initialLabel inv in
+    Format.fprintf Format.std_formatter "debug label %a %a\n" Z.pp_print initialLabel D.print programInvariant;
     bwdInvMap := inv;
     witness program inv;
     tree := D.output_json program.variables programInvariant;

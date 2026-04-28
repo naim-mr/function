@@ -33,7 +33,7 @@ rule read =
   | "<r>"  {R}
   | "<ri>" {IR}
   | "<ir>" {IR}
-  | "<>"   {NP}
+  | "<emp>"   {NP}
   | "X"   { X }
   | "F"   { F }
   | "G"   { G }

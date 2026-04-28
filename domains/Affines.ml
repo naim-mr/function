@@ -275,22 +275,28 @@ module Affine (B : PARTITION) : FUNCTION = struct
         res
     | Bot, _ -> (
         match k with
-        | _ when random && !Config.resilience -> Printf.printf "la 1?\n";f2
+        | _ when random && !Config.resilience ->
+            Printf.printf "la 1?\n";
+            f2
+        | RESILIENCE -> f2
         | APPROXIMATION -> Bot
-        | COMPUTATIONAL -> f2
-        | RESILIENCE -> Bot)
+        | COMPUTATIONAL -> f2)
     | _, Bot -> (
         match k with
-        | _ when random && !Config.resilience -> Printf.printf "la 2?\n";f1
+        | _ when random && !Config.resilience ->
+            Printf.printf "la 2?\n";
+            f1
+        | RESILIENCE -> f1
         | APPROXIMATION -> Bot
-        | COMPUTATIONAL -> f1
-        | RESILIENCE -> Bot)
+        | COMPUTATIONAL -> f1)
     | Fun f, Top | Top, Fun f -> (
         match k with
-        | _ when random && !Config.resilience -> Printf.printf "la 3?\n";Fun f
+        | _ when random && !Config.resilience ->
+            Printf.printf "la 3?\n";
+            Fun f
+        | RESILIENCE -> Fun f
         | APPROXIMATION -> Top
-        | COMPUTATIONAL -> Top
-        | RESILIENCE -> Top)
+        | COMPUTATIONAL -> Top)
     | _ -> Top
 
   let join ?(random = false) k b f1 f2 =

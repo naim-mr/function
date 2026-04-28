@@ -11,6 +11,7 @@ let label_name l = String.sub l 0 (String.length l - 1)
 %token F
 %token G
 %token U
+%token IMPLY
 %token AND
 %token OR
 %token NOT
@@ -40,4 +41,5 @@ prog:
   | AND; LEFT_BRACE; e1 = prog; RIGHT_BRACE; LEFT_BRACE; e2 = prog; RIGHT_BRACE; { AND (e1, e2) }
   | OR; LEFT_BRACE; e1 = prog; RIGHT_BRACE; LEFT_BRACE; e2 = prog; RIGHT_BRACE; { OR (e1, e2) }
   | NOT; LEFT_BRACE; e = prog; RIGHT_BRACE; { NOT e}
-  ;
+  
+
