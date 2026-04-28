@@ -212,13 +212,13 @@ struct
           in
           of_apron_t env b
         in
-        if !Config.resilience && !Config.domain = "polyhedra" then
-          (* let b1 = f manager b (x, e) in
+        (* if !Config.resilience && !Config.domain = "polyhedra" then
+          let b1 = f manager b (x, e) in
           let man: lib Manager.t = N.of () in 
           let b2 = f man b (x, e) in
-          { b1 with constraints = b1.constraints @ b2.constraints; env } *)
-          raise (Invalid_argument "resilience need to use boxes to complete")
-        else f manager b (x, e)
+          { b1 with constraints = b1.constraints @ b2.constraints; env } 
+          raise (Invalid_argument "resilience need to use boxes to complete") *)
+       f manager b (x, e)
     | _ -> raise (Invalid_argument "bwd_assign: unexpected lvalue")
 
   let ubwd_filter (t : t) (e : expr typed) : t =
@@ -351,7 +351,8 @@ struct
     in
     let b1 = f manager b (e, t, ext) in
     if !Config.resilience && !Config.domain = "polyhedra" then
-      raise (Invalid_argument "resilience need to use boxes to complete")
+      (* raise (Invalid_argument "resilience need to use boxes to complete") *)
+      b1
     else b1
 
   (**)

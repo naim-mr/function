@@ -1163,24 +1163,13 @@ module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
 
   (**)
 
-  let assign ?domain ?(underapprox = false) t e =
+  let assign ?domain controllable ?(underapprox = false) t e =
     let cache = ref CMap.empty in
     let env = t.env in
     let f_env = env.f_env in
     let pre = domain in
     let post = env.domain in
     let e' : expr typed = snd e in
-    let random =
-      ref
-        (if !analysis = "termination" then
-           match e' with
-           | Typed_syntax.T_var v, typ, ext
-             when String.starts_with ~prefix:"nondet_in" v.var_name ->
-               true
-           | _ -> false
-         else
-           match e' with Typed_syntax.T_INPUT, typ, ext -> true | _ -> false)
-    in
     let merge t1 t2 cs =
       let rec aux (t1, t2) cs =
         match (t1, t2) with
@@ -1196,7 +1185,7 @@ module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
               if underapprox && not !resilience then COMPUTATIONAL
               else APPROXIMATION
             in
-            Leaf (F.join ~random:!random joinType b f1 f2)
+            Leaf (F.join ~random:controllable joinType b f1 f2)
         | Node ((c1, nc1), l1, r1), Node ((c2, nc2), l2, r2) when C.is_eq c1 c2
           ->
             Node ((c1, nc1), aux (l1, l2) (c1 :: cs), aux (r1, r2) (nc1 :: cs))
@@ -1268,7 +1257,6 @@ module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
                         cache := CMap.add key (c, nc) !cache;
                         (c, nc))
                 in
-
                 match (c, nc) with
                 | [], [] -> merge (aux l cs) (aux r cs) cs
                 | [], [ y ] when C.is_bot y -> aux l cs
@@ -1302,8 +1290,11 @@ module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
     let env = { env with domain = pre } in
     { tree = sort_tree (aux t.tree []); env }
 
-  let bwd_assign ?domain = assign ?domain ~underapprox:false
-  let ubwd_assign ?domain = assign ?domain ~underapprox:true
+  let bwd_assign ?domain ?(controllable = false) =
+    assign ?domain controllable ~underapprox:false
+
+  let ubwd_assign ?domain ?(controllable = false) =
+    assign ?domain controllable ~underapprox:true
 
   let rec filter_helper ?domain ?(underapprox = false) t e =
     let pre = domain in

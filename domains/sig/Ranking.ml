@@ -193,9 +193,9 @@ module type RANKING_FUNCTION = sig
   val lift_fenv : B.env -> env
   val dual_widen : t -> t -> t
   val update_dom : B.t option -> env -> env
-  val bwd_assign : ?domain:B.t -> t -> expr typed * expr typed -> t
+  val bwd_assign : ?domain:B.t -> ?controllable:bool -> t -> expr typed * expr typed -> t
   val filter : ?domain:B.t -> t -> expr typed -> t
-  val ubwd_assign : ?domain:B.t -> t -> expr typed * expr typed -> t
+  val ubwd_assign : ?domain:B.t -> ?controllable:bool ->  t -> expr typed * expr typed -> t
   val ubwd_filter : ?domain:B.t -> t -> expr typed -> t
   val zero : env -> t
   val domain_zero : t -> t
