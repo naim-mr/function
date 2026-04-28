@@ -1,5 +1,5 @@
 (library
- (name intraproc)
+ (name iterators)
  (flags
   (:standard -open Frontend -open Utils))
  (libraries yojson frontend utils domains))

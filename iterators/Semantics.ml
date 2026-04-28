@@ -15,12 +15,18 @@ open VarSet
 open Utils.Datatypes
 
 type ctl_property = expr typed CTLProperty.generic_property
-type 'a p = Ctl of ctl_property | Other
+type atl_property = expr typed ATLProperty.generic_property
+type 'a p = Ctl of ctl_property | Atl of atl_property | Other
 
 let get_ctl prop =
   match prop with
   | Ctl prop -> prop
-  | Other -> raise (Invalid_argument "Expected a ctl property: got an other")
+  | _ -> raise (Invalid_argument "Expected a ctl property: got an other")
+
+let get_atl prop =
+  match prop with
+  | Atl prop -> prop
+  | _ -> raise (Invalid_argument "Expected a atl property: got an other")
 
 module type SEMANTIC = sig
   type bwd_t
