@@ -206,7 +206,6 @@ let rec convert_expr (st : state) ((kind, typ, _) : C_AST.expr) :
       let ee = convert_expr st ee |> fst in
       let cast_typ = convert_type_qual typ in
       let hint = fst typ |> typ_to_hint in
-
       (* if the cast type is the same of the underlying expression, do not emit
          the cast *)
       if cast_typ = e_typ then (ee, hint)
@@ -237,7 +236,7 @@ let rec convert_expr (st : state) ((kind, typ, _) : C_AST.expr) :
             | _ -> raise (Unexpected "unexpected expr_kind in E_call/E_cast"))
         | _ -> raise (Unexpected "unexpected expr_kind in E_call")
       in
-
+(* 
       (* hook the non determinisitc assignement *)
       if StringMap.mem func_name nondet_func_type_hint then (
         (* create a fresh input variable to be placed in the init block*)
@@ -273,8 +272,12 @@ let rec convert_expr (st : state) ((kind, typ, _) : C_AST.expr) :
         st.input_vars := (typ, input_v_name, assign_expr) :: !(st.input_vars);
         (* return the variable *)
         (Abstract_syntax.A_identifier input_v_name, hint))
-      else if String.compare func_name "input" = 0 then
+      else 
+      *)
+      if String.compare func_name "input" = 0 then
         (Abstract_syntax.A_INPUT, H_INT)
+      else if StringMap.mem func_name nondet_func_type_hint then
+          (Abstract_syntax.A_nondet (convert_type_qual typ), H_INT)
       else
         let args =
           List.map

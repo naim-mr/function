@@ -46,3 +46,4 @@ let type_set_expr (t : typ) : expr =
   | A_int (i, s) -> T_int_const (int_type_set i s)
   | A_float f -> T_float_const (float_type_set f)
   | A_BOOL -> T_bool_const Maybe
+  | _ -> failwith "nyi"

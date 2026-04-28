@@ -21,5 +21,7 @@ int f() {
 
 
 int main() {
+  int x;
+  reach_error();
   return f();
 }

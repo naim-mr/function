@@ -9,10 +9,10 @@
 (***************************************************)
 open TerminationIterator
 open CTLIterator
+open ATLIterator
 open Config
 open C_Frontend
 open Typed_syntax
-open Domains
 
 let parsePropertyStringNew str =
   let lex = Lexing.from_string str in
@@ -70,6 +70,27 @@ let parseCTLPropertyNew filename =
         failwith "Parse Error")
       else failwith e
 
+let parseATLProperty filename =
+  let f = open_in filename in
+  let lex = Lexing.from_channel f in
+  try
+    lex.Lexing.lex_curr_p <-
+      { lex.Lexing.lex_curr_p with Lexing.pos_fname = filename };
+    let res = ATLPropertyParser.prog ATLPropertyLexer.read lex in
+    close_in f;
+    ATLProperty.map (fun p -> parsePropertyStringNew p) res
+  with
+  | ATLPropertyParser.Error ->
+      Format.eprintf "Parse Error (Invalid Syntax) near %s\n"
+        (Abstract_syntax.position_tostring lex.Lexing.lex_start_p);
+      failwith "Parse Error"
+  | Failure e ->
+      if e == "lexing: empty token" then (
+        Format.eprintf "Parse Error (Invalid Token) near %s\n"
+          (Abstract_syntax.position_tostring lex.Lexing.lex_start_p);
+        failwith "Parse Error")
+      else failwith e
+
 let parseCTLPropertyString_plain (property : string) =
   let lex = Lexing.from_string property in
   try
@@ -106,9 +127,30 @@ let parseCTLPropertyStringNew_plain (property : string) =
         failwith "Parse Error")
       else failwith e
 
+let parseATLPropertyStringNew_plain (property : string) =
+  let lex = Lexing.from_string property in
+  try
+    lex.Lexing.lex_curr_p <-
+      { lex.Lexing.lex_curr_p with Lexing.pos_fname = "string" };
+    ATLPropertyParser.prog ATLPropertyLexer.read lex
+  with
+  | ATLPropertyParser.Error ->
+      Format.eprintf "Parse Error (Invalid Syntax) near %s\n"
+        (Abstract_syntax.position_tostring lex.Lexing.lex_start_p);
+      failwith "Parse Error"
+  | Failure e ->
+      if e == "lexing: empty token" then (
+        Format.eprintf "Parse Error (Invalid Token) near %s\n"
+          (Abstract_syntax.position_tostring lex.Lexing.lex_start_p);
+        failwith "Parse Error")
+      else failwith e
 let parseCTLPropertyStringNew (property : string) =
   CTLProperty.map (fun p -> parsePropertyStringNew p)
-  @@ parseCTLPropertyString_plain property
+  @@ parseCTLPropertyStringNew_plain property
+
+let parseATLPropertyStringNew (property : string) =
+  ATLProperty.map (fun p -> parsePropertyStringNew p)
+  @@ parseATLPropertyStringNew_plain property
 
 let parse_args () =
   Arg.parse
@@ -182,6 +224,13 @@ let parse_args () =
             Config.analysis := "ctl";
             Config.property := s),
         "CTL analysis" );
+      ( "-atl",
+        Arg.String
+          (fun s ->
+            Config.analysis := "atl";
+            Config.resilience := true;
+            Config.property := s),
+        "ATL analysis" );  
       ( "-dot",
         Arg.Unit (fun _ -> Config.dot := true),
         "Output decision trees in dot format" );
@@ -214,7 +263,7 @@ let parse_args () =
     ""
 
 let check_args () =
-  if !Config.resilience && String.compare !Config.analysis "termination" <> 0
+  if !Config.resilience && (String.compare !Config.analysis "termination" <> 0  && String.compare !Config.analysis "atl" <> 0)
   then
     raise
       (Invalid_argument "Resilience analysis is avalaible only for termination");
@@ -252,36 +301,57 @@ let termination_iterator_new () : (module Semantics.SEMANTIC) =
   let module S =
     (val match !domain with
          | "boxes" ->
-             if !ordinals then (module TerminationIterator (Decision_Tree.TSOB))
-             else (module TerminationIterator (Decision_Tree.TSAB))
+             if !ordinals then
+               (module TerminationIterator (DecisionTree.TSOB))
+             else (module TerminationIterator (DecisionTree.TSAB))
          | "octagons" ->
-             if !ordinals then (module TerminationIterator (Decision_Tree.TSOO))
-             else (module TerminationIterator (Decision_Tree.TSAO))
+             if !ordinals then
+               (module TerminationIterator (DecisionTree.TSOO))
+             else (module TerminationIterator (DecisionTree.TSAO))
          | "polyhedra" ->
-             if !ordinals then (module TerminationIterator (Decision_Tree.TSOP))
-             else (module TerminationIterator (Decision_Tree.TSAP))
+             if !ordinals then
+               (module TerminationIterator (DecisionTree.TSOP))
+             else (module TerminationIterator (DecisionTree.TSAP))
          | _ -> raise (Invalid_argument "Unknown Abstract Domain")
         : Semantics.SEMANTIC)
   in
   (module S)
 
 let ctl_iterator_new () : (module Semantics.SEMANTIC) =
-  let open Sig in
+  let open Domains in
   let module S =
     (val match !domain with
          | "boxes" ->
-             if !ordinals then (module CTLIterator (Decision_Tree.TSOB))
-             else (module CTLIterator (Decision_Tree.TSAB))
+             if !ordinals then (module CTLIterator (DecisionTree.TSOB))
+             else (module CTLIterator (DecisionTree.TSAB))
          | "octagons" ->
-             if !ordinals then (module CTLIterator (Decision_Tree.TSOO))
-             else (module CTLIterator (Decision_Tree.TSAO))
+             if !ordinals then (module CTLIterator (DecisionTree.TSOO))
+             else (module CTLIterator (DecisionTree.TSAO))
          | "polyhedra" ->
-             if !ordinals then (module CTLIterator (Decision_Tree.TSOP))
-             else (module CTLIterator (Decision_Tree.TSAP))
+             if !ordinals then (module CTLIterator (DecisionTree.TSOP))
+             else (module CTLIterator (DecisionTree.TSAP))
          | _ -> raise (Invalid_argument "Unknown Abstract Domain")
         : Semantics.SEMANTIC)
   in
   (module S)
+
+  let atl_iterator_new () : (module Semantics.SEMANTIC) =
+    let open Domains in
+    let module S =
+      (val match !domain with
+           | "boxes" ->
+               if !ordinals then (module ATLIterator (DecisionTree.TSOB))
+               else (module ATLIterator (DecisionTree.TSAB))
+           | "octagons" ->
+               if !ordinals then (module ATLIterator (DecisionTree.TSOO))
+               else (module ATLIterator (DecisionTree.TSAO))
+           | "polyhedra" ->
+               if !ordinals then (module ATLIterator (DecisionTree.TSOP))
+               else (module ATLIterator (DecisionTree.TSAP))
+           | _ -> raise (Invalid_argument "Unknown Abstract Domain")
+          : Semantics.SEMANTIC)
+    in
+    (module S)
 
 let run_termination_new program =
   let module S = (val termination_iterator_new ()) in
@@ -301,13 +371,14 @@ let run_termination_new program =
 let run_non_termination program =
   let ntprog, labels = Typed_syntax.nt_prog program in
   let nonterm label =
-    CTLProperty.AG
-      (CTLProperty.AF
-         (CTLProperty.Atomic
-            ( ( Typed_syntax.T_bool_const True,
-                Abstract_syntax.A_BOOL,
-                Abstract_syntax.extent_unknown ),
-              Some (Z.to_string label) )))
+    CTLProperty.EF
+      (CTLProperty.AG
+         (CTLProperty.AF
+            (CTLProperty.Atomic
+               ( ( Typed_syntax.T_bool_const True,
+                   Abstract_syntax.A_BOOL,
+                   Abstract_syntax.extent_unknown ),
+                 Some (Z.to_string label) ))))
   in
   let rec create_prop label =
     match label with
@@ -351,6 +422,29 @@ let run_ctl_ast_new (module S : Semantics.SEMANTIC) prog property =
   if !Config.result then Format.fprintf !fmt "\nFinal Analysis Result: TRUE\n"
   else Format.fprintf !fmt "\nFinal Analysis Result: UNKNOWN\n"
 
+
+let run_atl_ast (module S : Semantics.SEMANTIC) prog property =
+  let starttime = Sys.time () in
+  (* let parsedPrecondition = parsePropertyString !precondition in
+  let precondition =
+    fst
+    @@ AbstractSyntax.StringMap.find ""
+    @@ ItoA.property_itoa_of_prog prog !main parsedPrecondition
+  in *)
+  let parsedPrecondition =
+    if !precondition <> "" then Some (parsePropertyStringNew !precondition)
+    else None
+  in
+  let analyze = S.analyze in
+  Config.result :=
+    analyze ~precondition:parsedPrecondition ~property:(Atl property) prog;
+  if !time then (
+    let stoptime = Sys.time () in
+    exectime := string_of_float (stoptime -. starttime);
+    Format.fprintf !fmt "\nTime: %f" (stoptime -. starttime));
+  if !Config.result then Format.fprintf !fmt "\nFinal Analysis Result: TRUE\n"
+  else Format.fprintf !fmt "\nFinal Analysis Result: UNKNOWN\n"
+  
 (* let run_cda s : (module Cda.CDA_ITERATOR) =
   let module D = (val s : SEMANTIC) in
   (module Cda.Make (D)) *)
@@ -359,6 +453,7 @@ let get_semantic_new () =
   match !analysis with
   | "termination" -> termination_iterator_new ()
   | "non-termination" | "ctl" -> ctl_iterator_new ()
+  | "atl" -> atl_iterator_new ()
   | _ -> raise (Invalid_argument "Unknown Analysis")
 
 let doit () =
@@ -397,9 +492,13 @@ let doit () =
         (module S)
         prog
         (parseCTLPropertyStringNew !Config.property)
+  | "atl" (* default CTL analysis is CTL-AST *) ->
+          run_atl_ast
+            (module S)
+            prog
+            (parseATLPropertyStringNew !Config.property)
   | _ -> raise (Invalid_argument "Unknow Property"));
   if !Config.json_output then Regression.output_json ()
-
 (* if !Config.vulnerability then ( *)
 (* Launch the vulnerability analysisand output the infered variables *)
 (* let varlist =
