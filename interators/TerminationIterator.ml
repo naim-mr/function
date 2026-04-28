@@ -51,42 +51,9 @@ module TerminationIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
     | T_RETURN -> (D.update_dom domain env |> D.zero, visited)
     | T_BREAK -> raise (UnsupportedFeature "break")
     | T_add_var (v, Some (exp, typ, ext)) ->
-        let eb =
-          p |> D.f_env |> B.top |> fun e ->
-          B.fwd_filter e
-            ( T_binary
-                ( A_LESS,
-                  (T_var v, typ, ext),
-                  (T_int_const Itv_int.zero, typ, ext) ),
-              A_BOOL,
-              ext )
-        in
-        let uba = B.ubwd_assign eb ((T_var v, typ, ext), (exp, typ, ext)) in
-        let ba = B.bwd_assign eb ((T_var v, typ, ext), (exp, typ, ext)) in
-        let ff =
-          B.fwd_filter eb
-            ( T_binary (A_EQUAL, (T_var v, typ, ext), (exp, typ, ext)),
-              A_BOOL,
-              ext )
-        in
-        let uf =
-          B.ubwd_filter eb
-            ( T_binary (A_EQUAL, (T_var v, typ, ext), (exp, typ, ext)),
-              A_BOOL,
-              ext )
-        in
-        (*(T_binary (A_EQUAL,(T_var v, typ, ext), (exp, typ, ext)),A_BOOL,ext)*)
-        Format.fprintf !fmt
-          " \n debug\n uba: %a \n ba: %a \n ff: %a \n uf: %a \n" B.print uba
-          B.print ba B.print ff B.print uf;
+        (* s *)
         (D.bwd_assign ?domain p ((T_var v, typ, ext), (exp, typ, ext)), visited)
-      
-    | T_assign (lval, rval) ->
-        let d = B.bwd_assign (B.init_env () |> B.top) (lval, rval) in
-        Printf.printf "debug \n";
-        B.print !fmt d;
-        Printf.printf "debug \n";
-        (D.bwd_assign ?domain p (lval, rval), visited)
+    | T_assign (lval, rval) -> (D.bwd_assign ?domain p (lval, rval), visited)
     | T_assert (b, _) | T_assume b -> (p, visited)
     | T_if ((b, typ, ba), s1, s2) ->
         let p1, visited2 = bwdBlk ~visited funcs env vars p s1 in

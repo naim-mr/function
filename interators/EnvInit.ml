@@ -20,7 +20,9 @@ module Make (B : PARTITION) : ENVINIT with type env = B.env = struct
         match lval with
         | T_var v, typ, ext when not @@ B.dim_in_env t v ->
             (B.add_dim_to_env t v, v :: vars)
-        | T_var v, typ, ext when B.dim_in_env t v -> (t, vars)
+        | T_var v, typ, ext when B.dim_in_env t v ->
+            Printf.printf "ici?\n";
+            (t, vars)
         | T_deref (T_var v, typ, ext), _, _ ->
             let v =
               {
@@ -33,18 +35,18 @@ module Make (B : PARTITION) : ENVINIT with type env = B.env = struct
             else (t, vars)
         | _ -> failwith "nyi")
     | T_if (b, s1, s2) ->
-        let env, vars = initBlock s1 (t, vars) in
-        initBlock s2 (env, vars)
+        let t, vars = initBlock s1 (t, vars) in
+        initBlock s2 (t, vars)
     | T_while ((l, _), b, s) -> initBlock s (t, vars)
     | T_call (f, ss) -> initBlock f.func_body (t, vars)
     | _ -> (t, vars)
 
-  and initBlock block (env, vars) =
+  and initBlock block (t, vars) =
     match block with
-    | T_empty (l, _) -> (env, vars)
+    | T_empty (l, _) -> (t, vars)
     | T_stat ((l, _), (s, _), b) ->
-        let env, vars = initStat s (env, vars) in
-        initBlock b (env, vars)
+        let t, vars = initStat s (t, vars) in
+        initBlock b (t, vars)
 
   let rec initEnv xs t =
     match xs with

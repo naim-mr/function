@@ -262,7 +262,8 @@ let rec pp_expr fmt e =
   | A_binary (op, (e1, _), (e2, _)) ->
       Format.fprintf fmt "(%a %a %a)" pp_expr e1 pp_binary_op op pp_expr e2
   | A_assign ((lval, _), Some op, (rval, _)) ->
-      Format.fprintf fmt "%a %a %a" pp_expr lval pp_binary_assign_op op pp_expr rval
+      Format.fprintf fmt "%a %a %a" pp_expr lval pp_binary_assign_op op pp_expr
+        rval
   | A_assign ((lval, _), None, (rval, _)) ->
       Format.fprintf fmt "%a = %a" pp_expr lval pp_expr rval
   | A_identifier v -> Format.fprintf fmt "%s" v

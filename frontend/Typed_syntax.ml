@@ -57,7 +57,9 @@ let dummy_precond =
 (* statements *)
 type label = id * position [@@deriving yojson]
 
-let apron_of_var (v : var) : Var.t = Var.of_string v.var_name
+let apron_of_var (v : var) : Var.t =
+  Var.of_string ("$" ^ Z.to_string v.var_id ^ "#" ^ v.var_name)
+
 let apron_of_string (s : string) : Var.t = Var.of_string s
 
 let label_print fmt l =

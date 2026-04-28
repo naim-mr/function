@@ -327,7 +327,6 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
     { ranking = join_ranking ~random k b f1.ranking f2.ranking; env = f1.env }
 
   let meet _ = failwith "nyi"
-  
   let remove_special v f = Linexpr1.set_coeff f v (Coeff.s_of_int 0)
 
   let learn_ranking b f1 f2 =
@@ -647,9 +646,7 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
             Lincons1.array_set a 0 (Lincons1.make f Lincons1.SUPEQ);
             let p = Abstract1.of_lincons_array manager env a in
             let p =
-              Abstract1.substitute_texpr manager p
-                (apron_of_var x)
-                e None
+              Abstract1.substitute_texpr manager p (apron_of_var x) e None
             in
             let a = Abstract1.to_lincons_array manager p in
             if 1 = Lincons1.array_length a then (

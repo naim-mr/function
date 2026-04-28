@@ -30,7 +30,8 @@ let rec exp_to_apron ((e, t, ext) : expr typed) =
   | T_var x when String.starts_with ~prefix:"nondet_" x.var_name -> (
       match x.var_typ with
       | A_int (_, _) ->
-          exp_to_apron (T_int_const (Value_semantics.int_type_set A_INT A_SIGNED), t, ext)
+          exp_to_apron
+            (T_int_const (Value_semantics.int_type_set A_INT A_SIGNED), t, ext)
       | A_BOOL -> exp_to_apron (T_bool_const Maybe, t, ext)
       | _ -> raise (Invalid_argument "Float not handle yet"))
   | T_var x -> Texpr1.Var (apron_of_var x)
@@ -52,6 +53,6 @@ let rec exp_to_apron ((e, t, ext) : expr typed) =
           raise
             (UnsupportedFeature "not supported or not supposed to be supported")
       )
-  | T_deref (T_var v,_,_) -> Texpr1.Var (Var.of_string v.var_name)
+  | T_deref (T_var v, _, _) -> Texpr1.Var (Var.of_string v.var_name)
   | _ ->
       raise (UnsupportedFeature "not supported or not supposed to be supported")

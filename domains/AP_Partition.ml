@@ -104,7 +104,6 @@ struct
   let top e = { constraints = []; env = e }
 
   let init_env () = C.init_env ()
-  let add_dim_to_env t dim = { t with env = C.add_dim_to_env t.env dim }
   let remove_dim_of_env t dim = { t with env = C.remove_dim_of_env t.env dim }
 
   let dim_in_env t dim =
@@ -130,6 +129,11 @@ struct
               if !i = l then () else Format.fprintf fmt " && ";
               i := !i + 1)
             !cs
+
+  let add_dim_to_env t dim =
+    Format.fprintf Format.std_formatter "add to env [%a] %s\n" print t
+      dim.var_name;
+    { t with env = C.add_dim_to_env t.env dim }
   (**)
 
   let lift1_apron op b = to_apron_t b |> op manager
