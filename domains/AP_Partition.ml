@@ -130,10 +130,7 @@ struct
               i := !i + 1)
             !cs
 
-  let add_dim_to_env t dim =
-    Format.fprintf Format.std_formatter "add to env [%a] %s\n" print t
-      dim.var_name;
-    { t with env = C.add_dim_to_env t.env dim }
+  let add_dim_to_env t dim = { t with env = C.add_dim_to_env t.env dim }
   (**)
 
   let lift1_apron op b = to_apron_t b |> op manager
