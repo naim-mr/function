@@ -78,7 +78,7 @@ module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
   let env t = t.env
   let f_env t = t.env.f_env
   let lift_fenv f_env = { f_env; domain = None }
-
+ 
   let print_tree fmt t =
     let rec aux ind fmt t =
       match t with

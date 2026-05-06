@@ -272,7 +272,7 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
         let res =
           let f = ref [] in
           match k with
-          | _ when random && !Config.resilience ->
+          | _ when (random && !Config.resilience) || !Config.property = "atl" ->
               (* When resilience join is on we need to underapproximate f1 and f2*)
               f := filter_constraints (Abstract1.to_lincons_array manager p1);
               f :=
@@ -306,21 +306,21 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
     | Bot, _ -> (
         match k with
         | _ when random && !Config.resilience -> f2
+        | RESILIENCE -> f2
         | APPROXIMATION -> Bot
-        | COMPUTATIONAL -> f2
-        | RESILIENCE -> Bot)
+        | COMPUTATIONAL -> f2)
     | _, Bot -> (
         match k with
         | _ when random && !Config.resilience -> f1
+        | RESILIENCE -> f1
         | APPROXIMATION -> Bot
-        | COMPUTATIONAL -> f1
-        | RESILIENCE -> Bot)
+        | COMPUTATIONAL -> f1)
     | Fun f, Top | Top, Fun f -> (
         match k with
         | _ when random && !Config.resilience -> Fun f
+        | RESILIENCE -> Fun f
         | APPROXIMATION -> Top
-        | COMPUTATIONAL -> Top
-        | RESILIENCE -> Top)
+        | COMPUTATIONAL -> Top)
     | _ -> Top
 
   let join ?(random = false) k b f1 f2 =
