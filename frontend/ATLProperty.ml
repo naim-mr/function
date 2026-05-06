@@ -11,8 +11,8 @@
    
 *)
 
-type player = I | R | IR 
-type controllable_players = player option
+  type player = I | R | IR 
+  type controllable_players = player option
 type 'a generic_property =
   | Atomic of ('a * string option) (* atomic property with optional label *)
   | X of  (controllable_players * 'a generic_property )(* next *)

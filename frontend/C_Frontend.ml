@@ -480,7 +480,7 @@ let parse_file (f : string) : Typed_syntax.prog =
   parse_file "clang" !Config.filename [ "-fbracket-depth=512" ] false false
     false false ctx [];
   let prj = link_project ctx in
-  C_print.print_project stdout prj;
+  (* C_print.print_project stdout prj; *)
   let st = { input_vars = ref [] } in
   (* StringMap.to_seq returns the functions in random order. This may
      cause some problems as a function calling another one may be

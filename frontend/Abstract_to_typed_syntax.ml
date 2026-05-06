@@ -221,8 +221,6 @@ let rec pure_expr env pre post (e, x) =
       | A_NOT -> ((T_unary (op, as_bool e1), A_BOOL, x), pre, post)
       | A_cast (t', x) -> (cast e1 t' x, pre, post))
   | A_binary (op, e1, e2) -> (
-      Format.fprintf Format.std_formatter "\nin pure expr, %a\n"
-        Abstract_syntax.pp_expr e;
       let e1, pre, post = pure_expr env pre post e1 in
       let e2, pre, post = pure_expr env pre post e2 in
       match op with
