@@ -1,22 +1,23 @@
-(* open InvMap
+open InvMap
 open Semantics
-open AbstractSyntax
-open Signature
+open Typed_syntax
+open Domains
+open Sig
 open Decision_Tree
 open Apron
 open ForwardIterator
-open Partition
+open AP_Partition
 open Config
 open VarSet
+open Utils
+open InvMap
+open Datatypes
 
 module type CDA_ITERATOR = sig
   val analyze :
-    ?precondition:bExp option ->
-    ?property:'a Semantics.p ->
-    func StringMap.t ->
-    var StringMap.t ->
-    block ->
-    string ->
+    ?precondition:expr typed option ->
+    ?property:'a p ->
+    Typed_syntax.prog ->
     bool
 end
 
@@ -24,7 +25,11 @@ module Make (S : SEMANTIC) : sig
   include CDA_ITERATOR
 end = struct
   module D = S.D
-  module B = S.B
+  module B = S.D.B
+
+  (* Bundle commonly used values (AST, Apron env. variable list) to one struct *)
+
+  type env = S.D.B.env
 
   let fwdMap_print fmt m =
     InvMap.iter
@@ -44,38 +49,22 @@ end = struct
         (fun l a -> Format.fprintf fmt "%a:\n%a\n" label_print l D.print a)
         m
 
-  let rec analyze ?(precondition = Some A_TRUE) ?(property = S.dummy_prop) funcs
-      vars stmts main =
-    (* f =  main function *)
-    let f = StringMap.find main funcs in
-    (* We collect the vars defined in the program and by the function *)
-    let v1 = snd (List.split (StringMap.bindings vars)) in
-    let v2 = snd (List.split (StringMap.bindings f.funcVars)) in
-    let vars = List.append v1 v2 in
-    let rec init_env xs env =
-      match xs with
-      | [] -> env
-      | x :: xs ->
-          init_env xs (Environment.add env [| Var.of_string x.varId |] [||])
+  let rec analyze ?(precondition = Some dummy_precond)
+      ?(property = S.dummy_prop) prog =
+    let module Init = EnvInit.Make (B) in
+    let f_env, vars = Init.env prog in
+    let env = f_env |> D.lift_fenv in
+
+    let precondition =
+      Option.bind precondition (fun e ->
+          Some (Typed_syntax.expr_prop_handler e vars))
     in
-
-    (* Apron env initalized for every variable *)
-    let env = init_env vars (Environment.make [||] [||]) in
-    let s = f.funcBody in
-    AbstractSyntax.block_print "main" !fmt s;
-    S.fwdTaintMap := fst (ForwardIteratorB.fwdTBlk funcs VarSet.empty s);
-    Format.fprintf !fmt "\nForward Analysis taint: size %d\n"
-      (InvMap.cardinal !S.fwdTaintMap);
-    InvMap.iter
-      (fun l a ->
-        Format.printf "%a: %s\n" label_print l
-          (VarSet.fold (fun x acc -> acc ^ " " ^ x.varName) a ""))
-      !S.fwdTaintMap;
     (* Conflict driven analysis result *)
-    let i = cda_recursive ~property funcs env vars stmts main f in
-
+    let block, funcmap, elt = prog in
+    let f = StringMap.find !Config.main funcmap in
+    let i = cda_recursive ~property funcmap env vars block main elt f in
     let block_label block =
-      match block with A_empty l -> l | A_block (l, _, _) -> l
+      match block with T_empty l -> fst l | T_stat (l, _, _) -> fst l
     in
     if not !minimal then
       Format.fprintf !fmt "\n Conflict Driven Analysis Result: %a@." D.print i;
@@ -84,26 +73,28 @@ end = struct
     let result = if ret then "TRUE" else "UNKNOWN" in
     Format.fprintf !fmt "%s\n" result;
     S.bwdInvMap :=
-      InvMap.update (block_label f.funcBody) (fun _ -> Some i) !S.bwdInvMap;
+      InvMap.update (block_label f.func_body) (fun _ -> Some i) !S.bwdInvMap;
     ret
 
-  and cda_recursive ?(property = S.dummy_prop) funcs env vars stmts main f =
+  and cda_recursive ?(property : 'a p = S.dummy_prop) funcmap env vars block
+      main elt f =
     let open S in
-    let s = f.funcBody in
+    let s = f.func_body in
     let compress () =
       S.bwdInvMap := InvMap.map (fun a -> D.compress a) !S.bwdInvMap
     in
     let reinit () =
       S.bwdInvMap := InvMap.map (fun a -> D.reinit a) !S.bwdInvMap
     in
-    let rec aux b p n =
+    let rec aux (b:S.D.B.t) p n =
       (* Forward Analysis *)
       if !tracefwd && not !minimal then
         Format.fprintf !fmt "\nForward Analysis[%i] Trace:\n" n;
       let startfwd = Sys.time () in
       (* Compute the forward analysis starting from the environment b (top at the begining) *)
-      S.fwdInvMap := ForwardIteratorB.compute (vars, stmts, funcs) b main env;
-
+      let b_env = S.D.B.env b in
+      ForwardIteratorB.analyze b_env (block, funcmap, elt);
+      fwdInvMap := !ForwardIteratorB.fwdInvMap;
       (* fwdBlk funcs env vars (fwdBlk funcs env vars b stmts) s in *)
       let stopfwd = Sys.time () in
       if not !minimal then (
@@ -121,13 +112,11 @@ end = struct
           Compute the backward analysis for the given Semantic. 
           Refine option is always activated for cda 
       *)
-      let tree0 =
-        if !analysis = "termination" then D.zero env vars else D.bot env vars
-      in
+      let tree0 = if !analysis = "termination" then S.D.zero env else S.D.bot env in
       let i =
-        bwdRec ~property funcs env vars
-          (bwdRec ~property funcs env vars tree0 s)
-          stmts
+        bwdRec ~property funcmap env vars
+          (bwdRec ~property funcmap env vars tree0 s)
+          block
       in
       let stopbwd = Sys.time () in
       if not !minimal then (
@@ -137,9 +126,9 @@ end = struct
         else Format.fprintf !fmt "\nBackward Analysis[%i]:\n" n;
         bwdMap_print !fmt !S.bwdInvMap);
       if not !minimal then
-        if D.defined i then Format.fprintf !fmt "Analysis[%i] Result: TRUE\n" n
+        if S.D.defined i then Format.fprintf !fmt "Analysis[%i] Result: TRUE\n" n
         else Format.fprintf !fmt "Analysis[%i] Result: UNKNOWN\n" n;
-      if D.defined i || n > !size then
+      if S.D.defined i || n > !size then
         (* 
           Return if we can already infer the property or if the maximum number of
           iteration is reached 
@@ -151,20 +140,20 @@ end = struct
           Cumulate the constraints along the path to an undefined piece of
           the ranking function i.e. the conflicts
         *)
-        let bs = D.conflict i in
+        let bs = S.D.conflict i in
         if not !minimal then (
           Format.fprintf !fmt "CONFLICTS: { ";
-          List.iter (fun b -> Format.fprintf !fmt "%a; " B.print b) bs;
+          List.iter (fun b -> Format.fprintf !fmt "%a; " D.B.print b) bs;
           Format.fprintf !fmt "}\n");
         let i =
           List.fold_left
-            (fun (ai : D.t) (ab : B.t) ->
+            (fun (ai : S.D.t) (ab : S.D.B.t) ->
               (* 
                 [ai] is a tree,
                 [ab] is a contraint toward an undefined leaf the tree
               *)
               if
-                B.is_leq b ab
+                S.D.B.is_leq APPROXIMATION b ab
                 (* If the current domain [b] from which we start is smaller that the one define by the constraint [ab]
                    we need to split [ab]. 
                    Needed to divide the domain if after one iteration we cannot infer the property
@@ -173,35 +162,36 @@ end = struct
                 (*
                   [b1] \cup [b2] == ab
                 *)
-                let b1, b2 = B.assume ~pow:(float_of_int n) ab in
+                let b1, b2 = S.D.B.assume ~pow:(float_of_int n) ab in
                 (* We reinit the leaf that are at top *)
-                assert (B.is_leq ab (B.join b1 b2));
-                assert (B.is_leq (B.join b1 b2) ab);
-                assert (not (B.is_bot b1));
-                assert (not (B.is_bot b2));
+                assert (S.D.B.is_leq APPROXIMATION ab (S.D.B.join APPROXIMATION b1 b2));
+                assert (S.D.B.is_leq APPROXIMATION (S.D.B.join  APPROXIMATION b1 b2) ab);
+                assert (not (S.D.B.is_bot b1));
+                assert (not (S.D.B.is_bot b2));
                 reinit ();
                 compress ();
                 if not !minimal then
-                  Format.fprintf !fmt "\nASSUME-1: %a\n" B.print b1;
+                  Format.fprintf !fmt "\nASSUME-1: %a\n" S.D.B.print b1;
                 (* restart with b1 *)
                 let i = aux b1 ai (n + 1) in
                 reinit ();
                 compress ();
                 if not !minimal then
-                  Format.fprintf !fmt "\nASSUME-2: %a\n" B.print b2;
+                  Format.fprintf !fmt "\nASSUME-2: %a\n" S.D.B.print b2;
                 (* continue with b2*)
                 aux b2 i (n + 1))
               else (
                 reinit ();
                 compress ();
                 if not !minimal then
-                  Format.fprintf !fmt "\nASSUME: %a\n" B.print ab;
+                  Format.fprintf !fmt "\nASSUME: %a\n" S.D.B.print ab;
                 aux ab ai (n + 1)))
             i bs
         in
         (* We learn from the cda analysis new part of the domain where the property of interest holds *)
-        D.learn p (D.compress i))
+        S.D.learn p (S.D.compress i))
     in
     (* We start from the numerical domain top and decision tree bot *)
-    aux (B.top env vars) (D.bot env vars) 1
-end *)
+    let bot = S.D.bot env in
+    aux (S.D.B.top (S.D.f_env bot)) bot 1
+end

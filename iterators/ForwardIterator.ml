@@ -196,9 +196,7 @@ module ForwardIterator (B : PARTITION) = struct
     let ctx = { ctx with summary = false } in
     let _ = fwdBlk ctx (fwdBlk ctx (B.top env) block) s in
     let stopfwd = Sys.time () in
-    (* Format.fprintf !fmt "\nForward Summary :\n";
-    fwdMap_print !fmt !fwdSummaryMap StringMap.iter (fun fmt ->
-        Format.fprintf fmt "%s"); *)
+    Format.fprintf !fmt "\nForward Summary :\n";
     if not !minimal then
       if !timefwd then
         Format.fprintf !fmt "\nForward Analysis (Time: %f s):\n"

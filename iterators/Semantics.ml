@@ -7,16 +7,19 @@ open Typed_syntax
 open Domains
 open Sig
 open Sig.Domain
+open Sig.Ranking
 open Decision_Tree
 open Apron
 open InvMap
 open CTLProperty
 open VarSet
 open Utils.Datatypes
-
-type ctl_property = expr typed CTLProperty.generic_property
-type atl_property = expr typed ATLProperty.generic_property
 type 'a p = Ctl of ctl_property | Atl of atl_property | Other
+and
+ctl_property = expr typed CTLProperty.generic_property
+and
+atl_property = expr typed ATLProperty.generic_property
+
 
 let get_ctl prop =
   match prop with
@@ -29,13 +32,18 @@ let get_atl prop =
   | _ -> raise (Invalid_argument "Expected a atl property: got an other")
 
 module type SEMANTIC = sig
-  type bwd_t
+  module D : RANKING_FUNCTION
+  module B : PARTITION
+
+  val dummy_prop: 'a p 
+
+  type bwd_t = D.t
   (** [BWD]: Underlying Abstract Domain that will be use in the bwd analysis *)
 
-  type fwd_t
+  type fwd_t = D.B.t
   (** [B]: Underlying Abstract Domain used in the fwd analysis *)
 
-  type env
+  type env = D.env
 
   val fwdInvMap : fwd_t InvMap.t ref
   (** [fwdInvMap]: a map from the label of the program to an associated

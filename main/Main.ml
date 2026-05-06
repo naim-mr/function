@@ -423,9 +423,9 @@ let run_ctl_ast_new (module S : Semantics.SEMANTIC) prog property =
   if !Config.result then Format.fprintf !fmt "\nFinal Analysis Result: TRUE\n"
   else Format.fprintf !fmt "\nFinal Analysis Result: UNKNOWN\n"
 
-(* let run_cda s : (module Cda.CDA_ITERATOR) =
-  let module D = (val s : SEMANTIC) in
-  (module Cda.Make (D)) *)
+let run_cda s : (module Cda.CDA_ITERATOR) =
+  let module D = (val s : Semantics.SEMANTIC) in
+  (module Cda.Make (D))
 
 let run_atl_ast (module S : Semantics.SEMANTIC) prog property =
   let starttime = Sys.time () in
@@ -471,30 +471,32 @@ let doit () =
     Typed_syntax.pp_prog !fmt prog);
   let module S = (val semantic : Semantics.SEMANTIC) in
   (* Launch the analysis and get the returned output "true" or "unknow" *)
-  (* (if !Config.cda then
-     let module C = (val run_cda semantic : CDA_ITERATOR) in
-     let parsedPrecondition = parsePropertyString !precondition in
-     let precondition =
-       fst
-       @@ AbstractSyntax.StringMap.find ""
-       @@ ItoA.property_itoa_of_prog program !main parsedPrecondition
+  (if !Config.cda then
+     let module C = (val run_cda semantic : Cda.CDA_ITERATOR) in
+     let precondition = parsePropertyStringNew !precondition in
+     let property =
+       match !analysis with
+       | "termination" -> Semantics.Other
+       | "ctl" -> Ctl (parseCTLPropertyStringNew !Config.property)
+       | "atl" -> Atl (parseATLPropertyString !Config.property)
+       | _ -> raise (Invalid_argument "Unknow Property")
      in
      Config.result :=
-       C.analyze ~property ~precondition:(Some precondition) funcs vars b !main
-   else *)
-  (match !analysis with
-  | "termination" -> run_termination_new prog
-  | "non-termination" ->
-      Config.refine := false;
-      run_non_termination prog
-  | "ctl" ->
-      run_ctl_ast_new
-        (module S)
-        prog
-        (parseCTLPropertyStringNew !Config.property)
-  | "atl" ->
-      run_atl_ast (module S) prog (parseATLPropertyString !Config.property)
-  | _ -> raise (Invalid_argument "Unknow Property"));
+       C.analyze ~property ~precondition:(Some precondition) prog
+   else
+     match !analysis with
+     | "termination" -> run_termination_new prog
+     | "non-termination" ->
+         Config.refine := false;
+         run_non_termination prog
+     | "ctl" ->
+         run_ctl_ast_new
+           (module S)
+           prog
+           (parseCTLPropertyStringNew !Config.property)
+     | "atl" ->
+         run_atl_ast (module S) prog (parseATLPropertyString !Config.property)
+     | _ -> raise (Invalid_argument "Unknow Property"));
   if !Config.json_output then Regression.output_json ()
 (* if !Config.vulnerability then ( *)
 (* Launch the vulnerability analysisand output the infered variables *)

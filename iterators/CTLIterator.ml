@@ -5,7 +5,6 @@ open Sig.Ranking
 open Sig.Domain
 open Config
 open ForwardIterator
-open Config
 open VarSet
 open Utils
 open Datatypes
@@ -766,7 +765,7 @@ module CTLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
       Format.printf "\nAbstract ctl typed Syntax:\n ";
       Typed_syntax.pp_prog !fmt (prog_of_program program));
     if !Config.refine then (* Run forward analysis if 'refine' flag is set *)
-      ForwardIteratorB.analyze f_env prog;
+      ForwardIteratorB.analyze f_env (prog_of_program (program));
     fwdInvMap := !ForwardIteratorB.fwdInvMap;
     let inv = compute program property in
     let initialLabel = block_label program.mainFunction.func_body in

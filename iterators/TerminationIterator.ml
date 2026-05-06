@@ -29,7 +29,7 @@ module TerminationIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
   type fwd_t = D.B.t
   type env = D.env
 
-  let dummy_prop = StringMap.empty
+  let dummy_prop = Other
   let fwdInvMap = ref InvMap.empty
   let fwdTaintMap = ref InvMap.empty
   let bwdInvMap = ref InvMap.empty

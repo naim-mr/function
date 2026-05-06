@@ -668,7 +668,7 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
 
   (* ATL 'or' opperator *)
   let logic_or (fp1 : inv) (fp2 : inv) : inv =
-    let f _ t1 t2 = Some (D.join COMPUTATIONAL t1 t2) in
+    let f _ t1 t2 = Some (D.join RESILIENCE t1 t2) in
     InvMap.union f fp1 fp2
 
   (* ATL 'and' opperator *)
@@ -750,7 +750,7 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
       Format.printf "\nAbstract atl typed Syntax:\n ";
       Typed_syntax.pp_prog !fmt (prog_of_program program));
     if !Config.refine then (* Run forward analysis if 'refine' flag is set *)
-      ForwardIteratorB.analyze f_env prog;
+      ForwardIteratorB.analyze f_env (prog_of_program (program));
     fwdInvMap := !ForwardIteratorB.fwdInvMap;
     let inv = compute program property in
     let initialLabel = block_label program.mainFunction.func_body in
@@ -761,5 +761,6 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
       if !Config.analysis = "non-termination" then
         D.partially_defined ?condition:precondition programInvariant
       else D.defined ?condition:precondition programInvariant;
+    Format.printf "\n Resulting tree:  \n %a" D.print programInvariant;
     !Config.result
 end
