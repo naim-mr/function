@@ -174,7 +174,7 @@ module ForwardIterator (B : PARTITION) = struct
   and fwdTaintMap : VarSet.t InvMap.t ref = ref InvMap.empty
   and addFwdTaint l (a : VarSet.t) = fwdTaintMap := InvMap.add l a !fwdTaintMap
 
-  let analyze env prog =
+  let analyze ?(precondition = Some dummy_precond) env prog =
     let block, funcmap, varmap = prog in
     let f = StringMap.find !Config.main funcmap in
     let s = f.func_body in
@@ -194,7 +194,12 @@ module ForwardIterator (B : PARTITION) = struct
           ())
       ctx.funcs; *)
     let ctx = { ctx with summary = false } in
-    let _ = fwdBlk ctx (fwdBlk ctx (B.top env) block) s in
+    let pre =
+      match precondition with
+      | Some precondition -> B.fwd_filter (B.top env) precondition
+      | None -> B.top env
+    in
+    let _ = fwdBlk ctx (fwdBlk ctx pre block) s in
     let stopfwd = Sys.time () in
     Format.fprintf !fmt "\nForward Summary :\n";
     if not !minimal then
