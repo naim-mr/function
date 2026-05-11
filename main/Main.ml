@@ -372,9 +372,13 @@ let run_termination_new program =
 
 let run_non_termination program =
   let ntprog, labels = Typed_syntax.nt_prog program in
+  let parsedPrecondition =
+    if !precondition <> "" then Some (parsePropertyStringNew !precondition)
+    else None
+  in
   let nonterm label =
     CTLProperty.AG
-      (CTLProperty.AF
+      (CTLProperty.EF
          (CTLProperty.Atomic
             ( ( Typed_syntax.T_bool_const True,
                 Abstract_syntax.A_BOOL,
@@ -392,7 +396,9 @@ let run_non_termination program =
   | Some p -> (
       try
         let module Nonterm = (val ctl_iterator_new ()) in
-        Config.result := Nonterm.analyze ~property:(Semantics.Ctl p) ntprog;
+        Config.result :=
+          Nonterm.analyze ~precondition:parsedPrecondition
+            ~property:(Semantics.Ctl p) ntprog;
         if !Config.result then
           Format.printf "\nFinal Analysis Result: false(TERM)\n"
         else Format.printf "\nFinal Analysis Result: UNKNOWN\n"
@@ -481,8 +487,7 @@ let doit () =
        | "atl" -> Atl (parseATLPropertyString !Config.property)
        | _ -> raise (Invalid_argument "Unknow Property")
      in
-     Config.result :=
-       C.analyze ~property ~precondition:(Some precondition) prog
+     Config.result := C.analyze ~property ~precondition:(Some precondition) prog
    else
      match !analysis with
      | "termination" -> run_termination_new prog
