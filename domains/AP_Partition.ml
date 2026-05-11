@@ -15,6 +15,7 @@ open Sig.Constraints
 open Sig.Ranking
 open Sig.Domain
 open AP_LinearConstraint
+open Utils.Apron_utils
 
 (** Single partition of the domain of a ranking function represented by an APRON
     numerical abstract domain. *)
@@ -143,7 +144,243 @@ struct
 
   (**)
 
-  let assume ?(pow = 5.) b = (b, b)
+  let rec assume ?(pow = 5.) b =
+    let env = b.env in
+    (* count occurrences of variables within the polyhedral constraints *)
+    let blookup =
+      let filter_equality =
+        List.filter
+          (fun (c : C.t) -> not (Lincons1.get_typ c.cons = Lincons1.EQ))
+          b.constraints
+      in
+      match filter_equality with
+      | [] -> b
+      | _ -> { b with constraints = filter_equality }
+    in
+    let occ =
+      List.map
+        (fun x ->
+          let o =
+            List.fold_left
+              (fun ao c -> if C.var x c then ao + 1 else ao)
+              0 blookup.constraints
+          in
+          (x, o))
+        (vars b)
+    in
+    (* selecting the variable with less occurrences *)
+    let x =
+      fst
+        (List.hd
+           (List.sort
+              (fun (x1, o1) (x2, o2) ->
+                if
+                  x1.var_name = Z.to_string x1.var_id
+                  && x2.var_name != Z.to_string x2.var_id
+                then 1
+                else if
+                  x1.var_name = Z.to_string x1.var_id
+                  && x2.var_name = Z.to_string x2.var_id
+                then -1
+                else compare o1 o2)
+              occ))
+    in
+    (* creating an APRON variable *)
+    let v = apron_of_var x in
+    (* creating an APRON polyhedra *)
+    let ap_env = ap_env env in
+    let a = Lincons1.array_make ap_env (List.length b.constraints) in
+    let i = ref 0 in
+    List.iter
+      (fun (c : C.t) ->
+        Lincons1.array_set a !i c.cons;
+        i := !i + 1)
+      b.constraints;
+    let p = Abstract1.of_lincons_array manager ap_env a in
+    (* creating an APRON polyhedra *)
+    (* getting the interval of variation of the variable in the polyhedra *)
+    let i = Abstract1.bound_variable manager p v in
+    (* splitting the interval making assumtions *)
+    let inf = i.Interval.inf in
+    let sup = i.Interval.sup in
+    if 1 = Scalar.is_infty sup then (
+      if -1 = Scalar.is_infty inf then (
+        (* infinite domain: for -inf <= v <= +oo*)
+        let e = Linexpr1.make ap_env in
+        Linexpr1.set_coeff e v (Coeff.s_of_int 1);
+        Linexpr1.set_cst e (Coeff.s_of_int (-1));
+        let c = Lincons1.make e Lincons1.SUPEQ in
+        (* split on : c = v >= -1 *)
+        assert (
+          not (is_bot { constraints = { cons = c; env } :: b.constraints; env }));
+        assert (
+          not
+            (is_bot
+               {
+                 constraints = C.negate { cons = c; env } :: b.constraints;
+                 env;
+               }));
+        ( { constraints = { cons = c; env } :: b.constraints; env },
+          { constraints = C.negate { cons = c; env } :: b.constraints; env } ))
+      else if
+        (*  m <= v <= +oo *)
+        pow > 30.
+      then (
+        assert (not (is_bot { constraints = b.constraints; env }));
+        ( { constraints = b.constraints; env },
+          { constraints = b.constraints; env } ))
+      else
+        let p2 = 2. ** pow in
+        if Scalar.cmp inf (Scalar.of_float p2) > 0 then
+          assume ~pow:(2. ** (pow +. 1.)) b
+        else
+          let mid = int_of_float p2 in
+          let e = Linexpr1.make ap_env in
+          Linexpr1.set_coeff e v (Coeff.s_of_int 1);
+          Linexpr1.set_cst e
+            (Coeff.Scalar (mul_scalar (Scalar.of_int (-1)) inf));
+          let c = Lincons1.make e Lincons1.SUPEQ in
+          (*  c =  v  >= m  *)
+          let e1 = Linexpr1.make ap_env in
+          Linexpr1.set_coeff e1 v (Coeff.s_of_int (-1));
+          Linexpr1.set_cst e1 (Coeff.s_of_int mid);
+          let c1 = Lincons1.make e1 Lincons1.SUPEQ in
+          let e3 = Linexpr1.make ap_env in
+          Linexpr1.set_coeff e3 v (Coeff.s_of_int 1);
+          Linexpr1.set_cst e3 (Coeff.s_of_int (-mid));
+          let c3 = Lincons1.make e3 Lincons1.SUPEQ in
+          (* c3 =  v >= 2 ^ n *)
+          (* split on: 
+                a- c && c1 ==  m <= v <= 2^n
+                b- c3      ==  2^n <= v <= +oo
+              
+              *)
+          assert (
+            not
+              (is_bot
+                 {
+                   constraints =
+                     { cons = c; env } :: { cons = c1; env } :: b.constraints;
+                   env;
+                 }));
+          assert (
+            not
+              (is_bot
+                 { constraints = { cons = c3; env } :: b.constraints; env }));
+          ( {
+              constraints =
+                { cons = c; env } :: { cons = c1; env } :: b.constraints;
+              env;
+            },
+            { constraints = { cons = c3; env } :: b.constraints; env } ))
+    else if -1 = Scalar.is_infty inf then (
+      (* -oo <= v <= M*)
+      let mid =
+        if Scalar.cmp sup (Scalar.of_int 0) >= 0 then
+          div_scalar sup (Scalar.of_int 2)
+        else mul_scalar sup (Scalar.of_int 2)
+      in
+      let e = Linexpr1.make ap_env in
+      Linexpr1.set_coeff e v (Coeff.s_of_int (-1));
+      Linexpr1.set_cst e (Coeff.Scalar sup);
+      let c = Lincons1.make e Lincons1.SUPEQ in
+      (* c ==  v <= (M ) *)
+      let e1 = Linexpr1.make ap_env in
+      Linexpr1.set_coeff e1 v (Coeff.s_of_int 1);
+      Linexpr1.set_cst e1 (Coeff.Scalar (Scalar.neg mid));
+      let c1 = Lincons1.make e1 Lincons1.SUPEQ in
+      (* c1 ==  v >= M/2 *)
+      let e2 = Linexpr1.make ap_env in
+      Linexpr1.set_coeff e2 v (Coeff.s_of_int (-1));
+      Linexpr1.set_cst e2 (Coeff.Scalar mid);
+      let c2 = Lincons1.make e2 Lincons1.SUPEQ in
+      (* c2 ==   M/2 >= v   *)
+      (* split on: 
+             a- c1 && c2 ==  M/2 <= v <= M -1 
+             b- c        ==  -oo<= v <= M/2
+        *)
+      assert (
+        not
+          (is_bot
+             {
+               constraints =
+                 { cons = c; env } :: { cons = c1; env } :: b.constraints;
+               env;
+             }));
+      assert (
+        not (is_bot { constraints = { cons = c2; env } :: b.constraints; env }));
+      ( {
+          constraints = { cons = c; env } :: { cons = c1; env } :: b.constraints;
+          env;
+        },
+        { constraints = { cons = c2; env } :: b.constraints; env } ))
+    else if Scalar.equal inf sup then (
+      (* -m <= v <= m : v == m *)
+      (* let e = Linexpr1.make env in
+        Linexpr1.set_coeff e v (Coeff.s_of_int 1) ;
+        Linexpr1.set_cst e (Coeff.Scalar (mulScalar (Scalar.of_int (-1)) inf));
+        let c = Lincons1.make e Lincons1.SUPEQ in *)
+      (* split on: 
+             c == v >= m && v<=m
+        *)
+      assert (not (is_bot { constraints = b.constraints; env }));
+      assert (not (is_bot { constraints = b.constraints; env }));
+      ( { constraints = b.constraints; env },
+        { constraints = b.constraints; env } ))
+    else
+      (* m <= v <= M *)
+      let e = Linexpr1.make ap_env in
+      Linexpr1.set_coeff e v (Coeff.s_of_int 1);
+      let s = add_scalar sup inf in
+      let s = div_scalar s (Scalar.of_int 2) in
+      (* s = ((m + M) / 2 *)
+      Linexpr1.set_cst e (Coeff.Scalar (Scalar.neg s));
+      let c = Lincons1.make e Lincons1.SUPEQ in
+      (* c = x >= ((m + M) / 2)   *)
+      let e2 = Linexpr1.make ap_env in
+      Linexpr1.set_coeff e2 v (Coeff.s_of_int (-1));
+      Linexpr1.set_cst e2 (Coeff.Scalar sup);
+      let c2 = Lincons1.make e2 Lincons1.SUPEQ in
+      (* c2 = x <= M *)
+      let e3 = Linexpr1.make ap_env in
+      Linexpr1.set_coeff e3 v (Coeff.s_of_int (-1));
+      Linexpr1.set_cst e3 (Coeff.Scalar s);
+      let c3 = Lincons1.make e3 Lincons1.SUPEQ in
+      (* c3 = x <= ((m + M / 2) + 1) *)
+      let e4 = Linexpr1.make ap_env in
+      Linexpr1.set_coeff e4 v (Coeff.s_of_int 1);
+      Linexpr1.set_cst e4 (Coeff.Scalar inf);
+      let c4 = Lincons1.make e2 Lincons1.SUPEQ in
+      (* c4 = x >= m *)
+      (* split on: 
+             a- c && c2   == ((m + M / 2) + 1) <= v <= M 
+             b- c3 && c4  ==  m <= v <= ((m + M / 2) ) 
+        *)
+      assert (
+        not
+          (is_bot
+             {
+               constraints =
+                 { cons = c; env } :: { cons = c2; env } :: b.constraints;
+               env;
+             }));
+      assert (
+        not
+          (is_bot
+             {
+               constraints =
+                 { cons = c3; env } :: { cons = c4; env } :: b.constraints;
+               env;
+             }));
+      ( {
+          constraints = { cons = c; env } :: { cons = c2; env } :: b.constraints;
+          env;
+        },
+        {
+          constraints =
+            { cons = c3; env } :: { cons = c4; env } :: b.constraints;
+          env;
+        } )
 
   let lift2_apron op b1 b2 =
     let env = env b1 in
@@ -218,7 +455,7 @@ struct
           let b2 = f man b (x, e) in
           { b1 with constraints = b1.constraints @ b2.constraints; env } 
           raise (Invalid_argument "resilience need to use boxes to complete") *)
-       f manager b (x, e)
+        f manager b (x, e)
     | _ -> raise (Invalid_argument "bwd_assign: unexpected lvalue")
 
   let ubwd_filter (t : t) (e : expr typed) : t =

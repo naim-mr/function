@@ -20,6 +20,34 @@ let compare_coeff c1 c2 =
       if inf = 0 then if sup = 0 then 0 else sup else inf
   | Coeff.Scalar c1, Coeff.Scalar c2 -> Scalar.cmp c1 c2
 
+let add_scalar c1 c2 =
+  match (c1, c2) with
+  | Scalar.Float c1, Scalar.Float c2 -> Scalar.Float (c1 +. c2)
+  | Scalar.Float c1, Scalar.Mpqf c2 -> Scalar.Float (c1 +. Mpqf.to_float c2)
+  | Scalar.Float c1, Scalar.Mpfrf c2 -> Scalar.Float (c1 +. Mpfrf.to_float c2)
+  | Scalar.Mpqf c1, Scalar.Float c2 -> Scalar.Float (Mpqf.to_float c1 +. c2)
+  | Scalar.Mpqf c1, Scalar.Mpqf c2 -> Scalar.Mpqf (Mpqf.add c1 c2)
+  | Scalar.Mpqf c1, Scalar.Mpfrf c2 ->
+      Scalar.Mpqf (Mpqf.add c1 (Mpfrf.to_mpqf c2))
+  | Scalar.Mpfrf c1, Scalar.Float c2 -> Scalar.Float (Mpfrf.to_float c1 +. c2)
+  | Scalar.Mpfrf c1, Scalar.Mpqf c2 ->
+      Scalar.Mpqf (Mpqf.add (Mpfrf.to_mpqf c1) c2)
+  | Scalar.Mpfrf c1, Scalar.Mpfrf c2 -> Scalar.Mpfrf (Mpfrf.add c1 c2 Mpfr.Zero)
+
+let div_scalar c1 c2 =
+  match (c1, c2) with
+  | Scalar.Float c1, Scalar.Float c2 -> Scalar.Float (c1 /. c2)
+  | Scalar.Float c1, Scalar.Mpqf c2 -> Scalar.Float (c1 /. Mpqf.to_float c2)
+  | Scalar.Float c1, Scalar.Mpfrf c2 -> Scalar.Float (c1 /. Mpfrf.to_float c2)
+  | Scalar.Mpqf c1, Scalar.Float c2 -> Scalar.Float (Mpqf.to_float c1 /. c2)
+  | Scalar.Mpqf c1, Scalar.Mpqf c2 -> Scalar.Mpqf (Mpqf.div c1 c2)
+  | Scalar.Mpqf c1, Scalar.Mpfrf c2 ->
+      Scalar.Mpqf (Mpqf.div c1 (Mpfrf.to_mpqf c2))
+  | Scalar.Mpfrf c1, Scalar.Float c2 -> Scalar.Float (Mpfrf.to_float c1 /. c2)
+  | Scalar.Mpfrf c1, Scalar.Mpqf c2 ->
+      Scalar.Mpqf (Mpqf.div (Mpfrf.to_mpqf c1) c2)
+  | Scalar.Mpfrf c1, Scalar.Mpfrf c2 -> Scalar.Mpfrf (Mpfrf.div c1 c2 Mpfr.Zero)
+
 let mul_scalar c1 c2 =
   match (c1, c2) with
   | Scalar.Float c1, Scalar.Float c2 -> Scalar.Float (c1 *. c2)
