@@ -849,60 +849,6 @@ module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
     in
     lunify t1 (remove_redundant (rebalance_tree t2 []) []) []
 
-  (* Evolving widening heuristic (TACAS 2017, §4.1).
-     For each constraint c in t2 that is not in t1, substitute c by
-     [C.evolve c c1] where c1 is a constraint from t1 found on the same
-     root-to-leaf path. Result is re-normalized via [sort_tree]. *)
-  let apply_evolve t1 t2 =
-    let module CSet = Set.Make (struct
-      type t = C.t
-
-      let compare = C.compare
-    end) in
-    let t1_set =
-      let s = ref CSet.empty in
-      let rec aux = function
-        | Bot | Leaf _ -> ()
-        | Node ((c, nc), l, r) ->
-            s := CSet.add c (CSet.add nc !s);
-            aux l;
-            aux r
-      in
-      aux t1;
-      !s
-    in
-    let subst = ref CMap.empty in
-    let rec collect t path_t1 =
-      match t with
-      | Bot | Leaf _ -> ()
-      | Node ((c, _), l, r) ->
-          if CSet.mem c t1_set then (
-            collect l (c :: path_t1);
-            collect r (c :: path_t1))
-          else (
-            (if not (CMap.mem c !subst) then
-               match path_t1 with
-               | c1 :: _ ->
-                   let c_new = C.evolve c c1 in
-                   if not (C.is_eq c_new c) then
-                     subst := CMap.add c c_new !subst
-               | [] -> ());
-            collect l path_t1;
-            collect r path_t1)
-    in
-    collect t2 [];
-    if CMap.is_empty !subst then t2
-    else
-      let rec apply = function
-        | Bot -> Bot
-        | Leaf f -> Leaf f
-        | Node ((c, _), l, r) ->
-            let c' = try CMap.find c !subst with Not_found -> c in
-            let nc' = C.negate c' in
-            Node ((c', nc'), apply l, apply r)
-      in
-      sort_tree (apply t2)
-
   let widen ?(jokers = 0) t1 t2 =
     let env = t1.env in
     let domain = env.domain in
@@ -1173,9 +1119,6 @@ module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
       Format.fprintf !Config.fmt "WIDENING\n";
       Format.fprintf !Config.fmt "t1: %a\n" print_tree t1;
       Format.fprintf !Config.fmt "\nt2: %a\n" print_tree t2);
-    let t2 = if !Config.evolving then apply_evolve t1 t2 else t2 in
-    if !tracebwd && !Config.evolving then
-      Format.fprintf !Config.fmt "\nt2[evolve]: %a\n" print_tree t2;
     let t2 = widen_right (t1, t2) [] in
     if !tracebwd then
       Format.fprintf !Config.fmt "\nt2[widen_right]: %a\n" print_tree t2;
