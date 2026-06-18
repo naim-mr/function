@@ -6,6 +6,7 @@ let label_name l = String.sub l 0 (String.length l - 1)
 %}
 
 %token <string> ATOMIC
+%token <string list> COALITION
 %token <string> LABEL
 %token X
 %token F
@@ -15,9 +16,7 @@ let label_name l = String.sub l 0 (String.length l - 1)
 %token AND
 %token OR
 %token NOT
-%token I 
-%token IR
-%token R
+
 %token NP
 %token LEFT_BRACE
 %token RIGHT_BRACE
@@ -26,10 +25,7 @@ let label_name l = String.sub l 0 (String.length l - 1)
 %%
 
 player: 
-  | I  {Some I}
-  | R  {Some R}
-  | IR {Some IR}
-  | NP {None}
+  | c=COALITION  { c }
 ;
 prog:
   | e = ATOMIC { Atomic (e, None) }

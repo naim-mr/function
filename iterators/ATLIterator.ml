@@ -22,17 +22,15 @@ type quantifier = UNIVERSAL | EXISTENTIAL
 let controllable controllable_players e =
   match e with
   | Typed_syntax.T_var v, typ, ext
-    when String.starts_with ~prefix:"nondet_in" v.var_name -> (
-      match controllable_players with Some IR | Some R -> true | _ -> false)
-  | Typed_syntax.T_INPUT, typ, ext -> (
-      match controllable_players with Some IR | Some I -> true | _ -> false)
+    when String.starts_with ~prefix:"nondet_in" v.var_name -> 
+      List.exists (fun id -> String.compare id "rand" = 0) controllable_players
+  | Typed_syntax.T_INPUT, typ, ext ->  
+      List.exists (fun id -> String.compare id "input" = 0) controllable_players
   | _ -> false
 
-let print_controllables fmt = function
-  | Some I -> Format.fprintf fmt "i"
-  | Some R -> Format.fprintf fmt "r"
-  | Some IR -> Format.fprintf fmt "ir"
-  | None -> Format.fprintf fmt " "
+let print_controllables fmt = 
+  fun controllable_player -> List.iter (fun s -> Format.fprintf fmt "%s " s) controllable_player
+  
 
 let rec print_atl_property fmt (property : atl_property) =
   match property with
@@ -750,7 +748,7 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
       Format.printf "\nAbstract atl typed Syntax:\n ";
       Typed_syntax.pp_prog !fmt (prog_of_program program));
     if !Config.refine then (* Run forward analysis if 'refine' flag is set *)
-      ForwardIteratorB.analyze f_env (prog_of_program (program));
+      ForwardIteratorB.analyze f_env (prog_of_program program);
     fwdInvMap := !ForwardIteratorB.fwdInvMap;
     let inv = compute program property in
     let initialLabel = block_label program.mainFunction.func_body in

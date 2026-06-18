@@ -23,17 +23,23 @@ let atomic_first = ['a'-'z' 'A'-'Z' '0'-'9' '(' ')' '_' '=' '!' '&' '|' '+' '*' 
 let atomic_rest  = ['a'-'z' 'A'-'Z' '0'-'9' '(' ')' '_' '<' '>' '=' '!' '&' '|' '+' '*' '-' '/' ' ' '\t']
 let atomic = atomic_first atomic_rest*
 
-let label = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']* ':'
+let ident = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
+let label = ident ':'
+let ws = [' ' '\t']*
+let coalition = '<' ws ident (ws ',' ws ident)* ws '>'
+
 
 rule read =
   parse
   | white    { read lexbuf }
   | newline  { next_line lexbuf; read lexbuf }
-  | "<i>"  {I}
-  | "<r>"  {R}
-  | "<ri>" {IR}
-  | "<ir>" {IR}
-  | "<emp>"   {NP}
+  | coalition {
+    let s = Lexing.lexeme lexbuf in
+    let inner = String.sub s 1 (String.length s - 2) in   (* enlève < > *)
+    let ids = String.split_on_char ',' inner
+              |> List.map String.trim in
+    COALITION ids
+  }
   | "X"   { X }
   | "F"   { F }
   | "G"   { G }
