@@ -1,0 +1,39 @@
+Bit Transmission Problem -- original model (MCMAS benchmark)
+==========================================================
+
+Reference
+---------
+Tool : MCMAS (A. Lomuscio, H. Qu, F. Raimondi).
+       https://vas.doc.ic.ac.uk/software/mcmas/
+Paper: "MCMAS: an open-source model checker for the verification of
+        multi-agent systems", IJSTTT 2017,
+        https://link.springer.com/article/10.1007/s10009-015-0378-x
+
+Informal model
+--------------
+Two agents, a Sender and a Receiver, communicate over an unreliable
+channel that may lose messages. The Sender keeps sending the same bit
+until it receives an acknowledgement; the Receiver, once it gets the bit,
+keeps sending an acknowledgement.
+
+The hallmark property of this benchmark is TEMPORAL-EPISTEMIC, e.g.
+
+    AG ( ack -> K_Sender ( recbit ) )
+    AF ( K_Sender K_Receiver bit )
+
+i.e. it talks about the agents' KNOWLEDGE (K operators), which is the whole
+point of the example. ATL alone (and a purely numeric encoding) cannot
+express the K operators -- this needs ATEL / epistemic ATL (see the MCMAS
+examples and the epistemic-ATL notes in ../README.md).
+
+Strategic (non-epistemic) reachability used for FuncTion
+--------------------------------------------------------
+We keep the protocol's reachability core:
+
+    << sender, channel >>  F  ack
+
+C transcription: ../mcmas/bit_transmission.c
+
+Caveat: this captures only that delivery+ack is reachable when the channel
+cooperates; it does NOT capture the epistemic content of the original
+specification.

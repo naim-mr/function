@@ -1,0 +1,31 @@
+Microgrid Demand-Side Management -- original model (PRISM-games)
+==============================================================
+
+Reference
+---------
+Tool : PRISM-games (stochastic multi-player games, rPATL).
+Case study page: https://www.prismmodelchecker.org/games/casestudies/mdsm.php
+Paper: Chen, Forejt, Kwiatkowska, Parker, Simaitis, et al.
+
+Informal model
+--------------
+A set of households connected to a microgrid each follow a (randomised)
+demand-side-management protocol: a household runs a load only if the
+current energy price (a function of total load) is below an agreed limit.
+The original analysis is a stochastic game with rPATL properties about the
+expected cost / fairness when some households deviate.
+
+De-probabilised version for FuncTion
+------------------------------------
+Model the households as an adversary issuing load demands and a grid
+controller (coalition) that admits or defers loads. The strategic
+safety property:
+
+    << controller >>  G  ( total_load <= cap )
+
+C transcription: ../prism_games/microgrid.c
+  (2 households; controller admits a subset so that the instantaneous load
+   never exceeds the cap)
+
+NOTE: drops the probabilistic / cost (reward) dimension of the original
+rPATL model; keeps the strategic safety core.

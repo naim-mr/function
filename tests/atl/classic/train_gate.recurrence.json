@@ -1,0 +1,6 @@
+{
+    "property": "<controller>G{<controller>F{in1 == 1}}",
+    "domain": "polyhedra",
+    "description": "Controllable recurrence: the controller can guarantee that, forever, it keeps the ability to eventually admit train 1 into the tunnel. Nested strategic operator.",
+    "model": "train_gate.c"
+}

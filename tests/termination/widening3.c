@@ -13,6 +13,7 @@ int main() {
   int y;
   while (x > 0) {
     x = x - y;
+    loop:
   }
   return 0;
 }

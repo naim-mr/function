@@ -1,0 +1,44 @@
+Two Robots and a Carriage -- original concurrent game structure (CGS)
+====================================================================
+
+Reference
+---------
+N. Bulling, V. Goranko, W. Jamroga.
+"Logics for Reasoning about Strategic Abilities: Two-and-a-Half Decades
+ of the Logic of Strategic Ability" (survey / tutorial).
+https://home.ipipan.waw.pl/w.jamroga/papers/satol15.pdf
+
+Informal model
+--------------
+A carriage stands on a circular rail track with (here) 3 positions: 0,1,2.
+Two robots, robot1 and robot2, are attached to opposite sides of the
+carriage. At each step every robot chooses simultaneously one of:
+
+    push_clockwise (+1)  |  push_counterclockwise (-1)  |  wait (0)
+
+The carriage moves by the SUM of the two pushes. Hence:
+  - if both robots push the same way, the carriage definitely moves;
+  - if they push opposite ways, the pushes cancel and it stays put;
+  - a single robot can never guarantee a particular displacement, since
+    the other robot may cancel or override its push.
+
+Concurrent game structure:
+  - agents = { robot1, robot2 }
+  - states Q = { position 0, 1, 2 }
+  - moves of each robot in { -1, 0, +1 }
+  - delta(pos, m1, m2) = pos + m1 + m2   (on the chosen track)
+
+Strategic properties
+--------------------
+Coalition of both robots CAN drive the carriage to a target position:
+
+    << robot1, robot2 >>  F  ( pos = target )           -- TRUE
+
+A single robot CANNOT force it (the other is adversarial):
+
+    << robot1 >>  F  ( pos = target )                   -- FALSE
+
+This is the canonical illustration that coalitions strictly increase
+strategic power.
+
+C transcription: ../robots_carriage.c

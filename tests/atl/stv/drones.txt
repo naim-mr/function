@@ -1,0 +1,37 @@
+Drones & Pollution -- original model (STV built-in benchmark)
+============================================================
+
+Reference
+---------
+Tool : STV (StraTegic Verifier), W. Jamroga, D. Kurpiewski, et al.
+       https://github.com/blackbat13/stv   (newer: blackbat13/stv_v2)
+Related: "Approximating Strategic Abilities under Imperfect Information"
+       https://arxiv.org/pdf/1510.06587
+
+Informal model
+--------------
+A set of drones patrols a region modelled as a grid of cells, each cell
+carrying a pollution level that the environment increases over time. Each
+drone is an agent that, every round, can move and/or take a measurement /
+cleaning action in its current cell. The drones have imperfect information
+(each sees only local pollution / neighbouring cells).
+
+Typical strategic questions:
+  - can the team of drones keep every cell's pollution below a threshold?
+  - can a single drone guarantee to visit / measure a target cell?
+
+State (numeric): the pollution level(s) and the drone positions.
+
+Strategic property (the one encoded for FuncTion)
+-------------------------------------------------
+The coalition of drones can keep pollution bounded forever:
+
+    << drone_1, ..., drone_k >>  G  ( pollution <= K )
+
+C transcription: ../stv/drones.c
+  (single aggregate pollution counter p; environment adds up to 2/round,
+   each of the 2 drones can clean 1/round -> coalition keeps p bounded)
+
+Parameterisation for a benchmark family
+---------------------------------------
+Vary the number of drones, the environment rate, and the bound K.

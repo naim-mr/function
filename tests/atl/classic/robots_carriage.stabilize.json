@@ -1,0 +1,6 @@
+{
+    "property": "<r1,r2>F{<r1,r2>G{pos >= 2}}",
+    "domain": "polyhedra",
+    "description": "Stabilization: the two robots can eventually drive the carriage to the target and then keep it there forever (F of a nested G).",
+    "model": "robots_carriage.c"
+}

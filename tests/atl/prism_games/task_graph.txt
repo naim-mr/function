@@ -1,0 +1,31 @@
+Task-Graph Scheduling -- original model (PRISM-games case study)
+==============================================================
+
+Reference
+---------
+Tool : PRISM-games (stochastic / turn-based games).
+Case study page: https://www.prismmodelchecker.org/games/casestudies/task_graph.php
+
+Informal model
+--------------
+A job described by a task graph (tasks with precedence constraints) must be
+executed on a set of processors with different speeds and energy use. A
+scheduler chooses, at each step, which task to run on which processor. Task
+execution times / energy are uncertain (modelled probabilistically in the
+original). Typical objectives mix time and energy (multi-objective rPATL):
+
+    << scheduler >>  R{"time"}_{min=?} [ F all_tasks_done ]
+    << scheduler >>  R{"energy"}_{min=?} [ F all_tasks_done ]
+
+De-probabilised version for FuncTion
+------------------------------------
+The environment provides adversarial duration jitter; the scheduler
+(coalition) must finish all tasks within a fixed time budget:
+
+    << scheduler >>  F  ( all tasks done )
+
+C transcription: ../prism_games/task_graph.c
+  (4 tasks, worst-case 3 time units each, budget 12)
+
+NOTE: drops the multi-objective reward (time/energy) quantities of the
+original rPATL specification; keeps strategic reachability of completion.

@@ -1,0 +1,4 @@
+{
+    "property": "<r1,r2>F{pos >= 2}",
+    "domain": "polyhedra"
+}

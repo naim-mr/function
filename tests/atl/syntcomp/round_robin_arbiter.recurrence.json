@@ -1,0 +1,6 @@
+{
+    "property": "<arb>G{<arb>F{g1 == 1}}",
+    "domain": "polyhedra",
+    "description": "Controllable recurrence: at every reachable state the arbiter still retains a strategy to eventually grant client 1. Nested strategic operator -- NOT expressible in CTL.",
+    "model": "round_robin_arbiter.c"
+}

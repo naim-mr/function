@@ -1,0 +1,30 @@
+Intrusion Detection -- original model (PRISM-games case study)
+============================================================
+
+Reference
+---------
+Tool : PRISM-games (stochastic multi-player games, rPATL).
+Case study page: https://www.prismmodelchecker.org/games/casestudies/ids.php
+
+Informal model
+--------------
+A security game between a defender (running intrusion-detection / patching
+policies) and an attacker probing a networked system. Actions and outcomes
+are uncertain (probabilistic). rPATL properties quantify the defender's
+ability to limit successful intrusions / expected damage, e.g.
+
+    << defender >>  P_{max=?} [ G !compromised ]
+    << defender >>  R{"damage"}_{min=?} [ ... ]
+
+De-probabilised version for FuncTion
+------------------------------------
+The attacker is an adversary that may attack each round; the defender
+(coalition) may patch. The strategic safety property:
+
+    << defender >>  G  ( !compromised )
+
+C transcription: ../prism_games/intrusion_detection.c
+  (defender patches to clear exposure each round and keep the system safe)
+
+NOTE: drops the probability / damage-reward dimension of the original
+rPATL model; keeps the strategic safety core.

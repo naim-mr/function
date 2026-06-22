@@ -1,0 +1,37 @@
+Robot Coordination -- original model (PRISM-games case study)
+============================================================
+
+Reference
+---------
+Tool : PRISM-games (stochastic multi-player games, rPATL).
+       https://www.prismmodelchecker.org/games/
+Case study page:
+       https://www.prismmodelchecker.org/games/casestudies/robot_coordination.php
+Paper: Kwiatkowska, Parker et al., "PRISM-games 2.0 / 3.0"
+       http://www.cs.ox.ac.uk/david.parker/papers/tacas16pg2.pdf
+
+Informal model
+--------------
+Two robots navigate a grid from opposite corners to the diagonally
+opposite corners; each cell may be hazardous, causing a robot's move to
+fail (it stays put) with some probability. The original property is rPATL:
+
+    << r1, r2 >>  P_{max=?} [ F (both robots reached their goals) ]
+
+i.e. the maximal probability with which the coalition can guarantee both
+robots reach their destinations.
+
+De-probabilised version for FuncTion
+------------------------------------
+Replace "move fails with probability p" by demonic non-determinism
+(the environment "env" may make a move fail). The strategic question
+becomes a sure-reachability ATL query:
+
+    << r1, r2 >>  F  ( goal reached )
+
+C transcription: ../prism_games/robot_coordination.c
+  1-D corridor; a firm step advances 2 cells, an adversarial slip costs 1,
+  so the coalition still nets progress and reaches the goal.
+
+NOTE: this drops the quantitative (probability / reward) aspect of the
+original rPATL specification; it keeps the strategic-reachability core.

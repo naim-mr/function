@@ -1,0 +1,4 @@
+{
+    "property": "<sender,chan>F{ack == 1}",
+    "domain": "polyhedra"
+}

@@ -1,0 +1,42 @@
+Train Gate Controller -- original concurrent game structure (CGS)
+================================================================
+
+Reference
+---------
+R. Alur, T. A. Henzinger, O. Kupferman.
+"Alternating-Time Temporal Logic". Journal of the ACM 49(5):672-713, 2002.
+https://www.cis.upenn.edu/~alur/Jacm02.pdf  (Section 2, running example)
+
+Informal model
+--------------
+Agents: a controller and (one or more) trains sharing a single tunnel.
+Each train cycles through the local states:
+
+    out  --request-->  wait  --(grant)-->  in (tunnel)  --leave-->  out
+
+The controller observes requests and issues, at each step, a "grant" to at
+most one waiting train. A train enters the tunnel only after a grant.
+
+Concurrent game structure  G = (k, Q, Pi, pi, d, delta):
+  - k = number of agents (controller + trains)
+  - Q = global states  =  controller state  x  (state of each train)
+  - Pi = { in_i : train i is in the tunnel }
+  - at each state every agent picks a move simultaneously:
+        controller move  in  { grant_none, grant_1, ..., grant_n }
+        train i move     in  { idle, request, enter, leave } (when enabled)
+  - delta = synchronous product of the local transitions above.
+
+Strategic property (the one encoded for FuncTion)
+-------------------------------------------------
+The controller can keep mutual exclusion of the tunnel forever:
+
+    << controller >>  G  ( at most one train in the tunnel )
+
+i.e. there is a controller strategy such that, for all behaviours of the
+trains, never are two trains simultaneously inside the tunnel.
+
+Other classical ATL properties on this CGS:
+    << train_i >>  F  in_i                 (a train can force entry)
+    << controller >> G ( request_i -> F in_i )   (fair access, liveness)
+
+C transcription: ../train_gate.c

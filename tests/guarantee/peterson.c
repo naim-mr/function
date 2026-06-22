@@ -9,9 +9,10 @@ suggested parameters:
 */
 
 void main() {
-	int flag1 = 0, flag2 = 0, turn;
-	
-	while (true) {
+	int flag1 = 0;
+	int flag2 = 0;
+	int turn;
+	while (1) {
 	// flag1 = 1;
 	// turn = 2;
 	// await (flag2 == 0 || turn == 1);
@@ -23,7 +24,7 @@ void main() {
 	// await (flag1 == 0 || turn == 2);
 	// C2:
 	// flag2 = 0;
-	if (?) {
+	if ( rand() ) {
 		flag1 = 1;
 		// turn = 2;
 		// await (flag2 == 0 || turn == 1);
@@ -35,7 +36,7 @@ void main() {
 		// await (flag1 == 0 || turn == 2);
 		// C2:
 		// flag2 = 0;
-		if (?) {
+		if ( rand() ) {
 			turn = 2;
 			// await (flag2 == 0 || turn == 1);
 			// C1:
@@ -55,7 +56,7 @@ void main() {
 				// await (flag1 == 0 || turn == 2);
 				// C2:
 				// flag2 = 0;
-				if (?) {
+				if ( rand() ) {
 					C1:
 					// flag1 = 0;
 					//
@@ -64,7 +65,7 @@ void main() {
 					// await (flag1 == 0 || turn == 2);
 					// C2:
 					// flag2 = 0;
-					if (?) {
+					if ( rand() ) {
 						flag1 = 0;
 						flag2 = 1;
 						turn = 1;
@@ -79,7 +80,7 @@ void main() {
 						// await (flag1 == 0 || turn == 2);
 						// C2:
 						// flag2 = 0;
-						if (?) {
+						if ( rand() ) {
 							flag1 = 0;
 							turn = 1;
 							while (flag1 != 0 && turn == 1);
@@ -97,7 +98,7 @@ void main() {
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -106,7 +107,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -131,7 +132,7 @@ void main() {
 					// await (flag1 == 0 || turn == 2);
 					// C2:
 					// flag2 = 0;
-					if (?) {
+					if ( rand() ) {
 						C1:
 						// flag1 = 0;
 						//
@@ -139,7 +140,7 @@ void main() {
 						// await (flag1 == 0 || turn == 2);
 						// C2:
 						// flag2 = 0;
-						if (?) {
+						if ( rand() ) {
 							flag1 = 0;
 							turn = 1;
 							while (flag1 != 0 && turn == 1);
@@ -157,7 +158,7 @@ void main() {
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -166,7 +167,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -195,13 +196,13 @@ void main() {
 							//
 							// C2:
 							// flag2 = 0;
-							if (?) {
+							if ( rand() ) {
 								C1:
 								// flag1 = 0;
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -210,7 +211,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -224,12 +225,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -254,7 +255,7 @@ void main() {
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -263,7 +264,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -298,7 +299,7 @@ void main() {
 					// await (flag1 == 0 || turn == 2);
 					// C2:
 					// flag2 = 0;
-					if (?) {
+					if ( rand() ) {
 						C1:
 						// flag1 = 0;
 						//
@@ -306,7 +307,7 @@ void main() {
 						// await (flag1 == 0 || turn == 2);
 						// C2:
 						// flag2 = 0;
-						if (?) {
+						if ( rand() ) {
 							flag1 = 0;
 							turn = 1;
 							while (flag1 != 0 && turn == 1);
@@ -324,7 +325,7 @@ void main() {
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -333,7 +334,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -362,13 +363,13 @@ void main() {
 							//
 							// C2:
 							// flag2 = 0;
-							if (?) {
+							if ( rand() ) {
 								C1:
 								// flag1 = 0;
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -377,7 +378,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -391,12 +392,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -421,7 +422,7 @@ void main() {
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -430,7 +431,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -468,13 +469,13 @@ void main() {
 							//
 							// C2:
 							// flag2 = 0;
-							if (?) {
+							if ( rand() ) {
 								C1:
 								// flag1 = 0;
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -483,7 +484,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -497,12 +498,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -527,7 +528,7 @@ void main() {
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -536,7 +537,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -564,13 +565,13 @@ void main() {
 							//
 							// C2:
 							// flag2 = 0;
-							if (?) {
+							if ( rand() ) {
 								C1:
 								// flag1 = 0;
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -579,7 +580,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -593,12 +594,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -623,12 +624,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -661,7 +662,7 @@ void main() {
 			// await (flag1 == 0 || turn == 2);
 			// C2:
 			// flag2 = 0;
-			if (?) {
+			if ( rand() ) {
 				turn = 2;
 				// await (flag2 == 0 || turn == 1);
 				// C1:
@@ -679,7 +680,7 @@ void main() {
 					// await (flag1 == 0 || turn == 2);
 					// C2:
 					// flag2 = 0;
-					if (?) {
+					if ( rand() ) {
 						C1:
 						// flag1 = 0;
 						//
@@ -687,7 +688,7 @@ void main() {
 						// await (flag1 == 0 || turn == 2);
 						// C2:
 						// flag2 = 0;
-						if (?) {
+						if ( rand() ) {
 							flag1 = 0;
 							turn = 1;
 							while (flag1 != 0 && turn == 1);
@@ -705,7 +706,7 @@ void main() {
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -714,7 +715,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -743,13 +744,13 @@ void main() {
 							//
 							// C2:
 							// flag2 = 0;
-							if (?) {
+							if ( rand() ) {
 								C1:
 								// flag1 = 0;
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -758,7 +759,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -772,12 +773,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -802,7 +803,7 @@ void main() {
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -811,7 +812,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -849,13 +850,13 @@ void main() {
 							//
 							// C2:
 							// flag2 = 0;
-							if (?) {
+							if ( rand() ) {
 								C1:
 								// flag1 = 0;
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -864,7 +865,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -878,12 +879,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -908,7 +909,7 @@ void main() {
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -917,7 +918,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -945,13 +946,13 @@ void main() {
 							//
 							// C2:
 							// flag2 = 0;
-							if (?) {
+							if ( rand() ) {
 								C1:
 								// flag1 = 0;
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -960,7 +961,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -974,12 +975,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -1004,12 +1005,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -1048,7 +1049,7 @@ void main() {
 					//
 					// C2:
 					// flag2 = 0;
-					if (?) {
+					if ( rand() ) {
 						turn = 2;
 						// await (flag2 == 0 || turn == 1);
 						// C1:
@@ -1062,13 +1063,13 @@ void main() {
 							//
 							// C2:
 							// flag2 = 0;
-							if (?) {
+							if ( rand() ) {
 								C1:
 								// flag1 = 0;
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -1077,7 +1078,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -1091,12 +1092,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -1121,12 +1122,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -1153,7 +1154,7 @@ void main() {
 						// flag1 = 0;
 						//
 						// flag2 = 0;
-						if (?) {
+						if ( rand() ) {
 							turn = 2;
 							// await (flag2 == 0 || turn == 1);
 							// C1:
@@ -1165,12 +1166,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -1218,13 +1219,13 @@ void main() {
 							//
 							// C2:
 							// flag2 = 0;
-							if (?) {
+							if ( rand() ) {
 								C1:
 								// flag1 = 0;
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -1233,7 +1234,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -1247,12 +1248,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -1277,7 +1278,7 @@ void main() {
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -1286,7 +1287,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -1314,13 +1315,13 @@ void main() {
 							//
 							// C2:
 							// flag2 = 0;
-							if (?) {
+							if ( rand() ) {
 								C1:
 								// flag1 = 0;
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -1329,7 +1330,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -1343,12 +1344,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -1373,12 +1374,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -1413,7 +1414,7 @@ void main() {
 		// await (flag1 == 0 || turn == 2);
 		// C2:
 		// flag2 = 0;
-		if (?) {
+		if ( rand() ) {
 			flag1 = 1;
 			// turn = 2;
 			// await (flag2 == 0 || turn == 1);
@@ -1424,7 +1425,7 @@ void main() {
 			// await (flag1 == 0 || turn == 2);
 			// C2:
 			// flag2 = 0;
-			if (?) {
+			if ( rand() ) {
 				turn = 2;
 				// await (flag2 == 0 || turn == 1);
 				// C1:
@@ -1442,7 +1443,7 @@ void main() {
 					// await (flag1 == 0 || turn == 2);
 					// C2:
 					// flag2 = 0;
-					if (?) {
+					if ( rand() ) {
 						C1:
 						// flag1 = 0;
 						//
@@ -1450,7 +1451,7 @@ void main() {
 						// await (flag1 == 0 || turn == 2);
 						// C2:
 						// flag2 = 0;
-						if (?) {
+						if ( rand() ) {
 							flag1 = 0;
 							turn = 1;
 							while (flag1 != 0 && turn == 1);
@@ -1468,7 +1469,7 @@ void main() {
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -1477,7 +1478,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -1506,13 +1507,13 @@ void main() {
 							//
 							// C2:
 							// flag2 = 0;
-							if (?) {
+							if ( rand() ) {
 								C1:
 								// flag1 = 0;
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -1521,7 +1522,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -1535,12 +1536,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -1565,7 +1566,7 @@ void main() {
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -1574,7 +1575,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -1612,13 +1613,13 @@ void main() {
 							//
 							// C2:
 							// flag2 = 0;
-							if (?) {
+							if ( rand() ) {
 								C1:
 								// flag1 = 0;
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -1627,7 +1628,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -1641,12 +1642,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -1671,7 +1672,7 @@ void main() {
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -1680,7 +1681,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -1708,13 +1709,13 @@ void main() {
 							//
 							// C2:
 							// flag2 = 0;
-							if (?) {
+							if ( rand() ) {
 								C1:
 								// flag1 = 0;
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -1723,7 +1724,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -1737,12 +1738,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -1767,12 +1768,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -1811,7 +1812,7 @@ void main() {
 					//
 					// C2:
 					// flag2 = 0;
-					if (?) {
+					if ( rand() ) {
 						turn = 2;
 						// await (flag2 == 0 || turn == 1);
 						// C1:
@@ -1825,13 +1826,13 @@ void main() {
 							//
 							// C2:
 							// flag2 = 0;
-							if (?) {
+							if ( rand() ) {
 								C1:
 								// flag1 = 0;
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -1840,7 +1841,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -1854,12 +1855,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -1884,12 +1885,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -1916,7 +1917,7 @@ void main() {
 						// flag1 = 0;
 						//
 						// flag2 = 0;
-						if (?) {
+						if ( rand() ) {
 							turn = 2;
 							// await (flag2 == 0 || turn == 1);
 							// C1:
@@ -1928,12 +1929,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -1981,13 +1982,13 @@ void main() {
 							//
 							// C2:
 							// flag2 = 0;
-							if (?) {
+							if ( rand() ) {
 								C1:
 								// flag1 = 0;
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -1996,7 +1997,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -2010,12 +2011,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -2040,7 +2041,7 @@ void main() {
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -2049,7 +2050,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -2077,13 +2078,13 @@ void main() {
 							//
 							// C2:
 							// flag2 = 0;
-							if (?) {
+							if ( rand() ) {
 								C1:
 								// flag1 = 0;
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -2092,7 +2093,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -2106,12 +2107,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -2136,12 +2137,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -2183,7 +2184,7 @@ void main() {
 				//
 				// C2:
 				// flag2 = 0;
-				if (?) {
+				if ( rand() ) {
 					flag1 = 1;
 					// turn = 2;
 					// await (flag2 == 0 || turn == 1);
@@ -2192,7 +2193,7 @@ void main() {
 					//
 					// C2:
 					// flag2 = 0;
-					if (?) {
+					if ( rand() ) {
 						turn = 2;
 						// await (flag2 == 0 || turn == 1);
 						// C1:
@@ -2206,13 +2207,13 @@ void main() {
 							//
 							// C2:
 							// flag2 = 0;
-							if (?) {
+							if ( rand() ) {
 								C1:
 								// flag1 = 0;
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -2221,7 +2222,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -2235,12 +2236,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -2265,12 +2266,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -2297,7 +2298,7 @@ void main() {
 						// flag1 = 0;
 						//
 						// flag2 = 0;
-						if (?) {
+						if ( rand() ) {
 							turn = 2;
 							// await (flag2 == 0 || turn == 1);
 							// C1:
@@ -2309,12 +2310,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -2349,7 +2350,7 @@ void main() {
 					// flag1 = 0;
 					//
 					// flag2 = 0;
-					if (?) {
+					if ( rand() ) {
 						flag1 = 1;
 						// turn = 2;
 						// await (flag2 == 0 || turn == 1);
@@ -2357,7 +2358,7 @@ void main() {
 						// flag1 = 0;
 						//
 						// flag2 = 0;
-						if (?) {
+						if ( rand() ) {
 							turn = 2;
 							// await (flag2 == 0 || turn == 1);
 							// C1:
@@ -2369,12 +2370,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -2426,7 +2427,7 @@ void main() {
 					//
 					// C2:
 					// flag2 = 0;
-					if (?) {
+					if ( rand() ) {
 						turn = 2;
 						// await (flag2 == 0 || turn == 1);
 						// C1:
@@ -2440,13 +2441,13 @@ void main() {
 							//
 							// C2:
 							// flag2 = 0;
-							if (?) {
+							if ( rand() ) {
 								C1:
 								// flag1 = 0;
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -2455,7 +2456,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -2469,12 +2470,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -2499,12 +2500,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -2531,7 +2532,7 @@ void main() {
 						// flag1 = 0;
 						//
 						// flag2 = 0;
-						if (?) {
+						if ( rand() ) {
 							turn = 2;
 							// await (flag2 == 0 || turn == 1);
 							// C1:
@@ -2543,12 +2544,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -2596,13 +2597,13 @@ void main() {
 							//
 							// C2:
 							// flag2 = 0;
-							if (?) {
+							if ( rand() ) {
 								C1:
 								// flag1 = 0;
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -2611,7 +2612,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -2625,12 +2626,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -2655,7 +2656,7 @@ void main() {
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -2664,7 +2665,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -2692,13 +2693,13 @@ void main() {
 							//
 							// C2:
 							// flag2 = 0;
-							if (?) {
+							if ( rand() ) {
 								C1:
 								// flag1 = 0;
 								//
 								// C2:
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									flag1 = 0;
 									C2:
 									flag2 = 0;
@@ -2707,7 +2708,7 @@ void main() {
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -2721,12 +2722,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {
@@ -2751,12 +2752,12 @@ void main() {
 								// flag1 = 0;
 								//
 								// flag2 = 0;
-								if (?) {
+								if ( rand() ) {
 									C1:
 									// flag1 = 0;
 									//
 									// flag2 = 0;
-									if (?) {
+									if ( rand() ) {
 										flag1 = 0;
 										flag2 = 0;
 									} else {

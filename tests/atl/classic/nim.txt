@@ -1,0 +1,36 @@
+Nim -- subtraction game {1,2,3}  (original model)
+=================================================
+
+Background
+----------
+Turn-based, perfect-information, zero-sum two-player game. A standard
+textbook example for reasoning about strategic ability and for controller
+synthesis.
+
+Rules
+-----
+  - A single pile starts with N tokens.
+  - Players "me" and "opp" alternate; "me" moves first.
+  - On a move a player removes 1, 2 or 3 tokens.
+  - The player who removes the LAST token wins (normal play convention).
+
+Game structure
+--------------
+  - agents = { me, opp }  (turn-based: exactly one moves per state)
+  - state  = (tokens, whose_turn)
+  - move   = remove k in {1,2,3}, k <= tokens
+  - terminal: tokens = 0; winner = player who just moved.
+
+Winning strategy
+----------------
+The P-positions (previous player wins, i.e. losing for the player to move)
+are exactly the multiples of 4. With N = 7, the first mover "me" wins:
+take 3 (leaving 4, a P-position), then always restore a multiple of 4 by
+taking 4 - (opp's last move).
+
+Strategic property
+-----------------
+    << me >>  F  ( win = me )      -- TRUE for N = 7
+                                  -- FALSE for N a multiple of 4
+
+C transcription: ../nim.c  (uses N = 7)

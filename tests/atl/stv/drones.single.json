@@ -1,0 +1,6 @@
+{
+    "property": "<d1>G{p <= 5}",
+    "domain": "polyhedra",
+    "description": "Soundness check (no winning strategy): one drone alone cannot keep pollution bounded -- the environment adds up to 2/round while a single drone removes only 1, so the adversary can drive p unbounded. Must NOT be reported TRUE. Contrast with <d1,d2>G{p <= 5} (TRUE).",
+    "model": "drones.c"
+}

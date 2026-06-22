@@ -10,6 +10,7 @@ suggested parameters:
 
 int main() {
   int x, y;
+  if ( x >= 4) return 0 ;
   if (y < 0 && y % 2 == 0) {
     x = 2;
   } else if (y < 0) {

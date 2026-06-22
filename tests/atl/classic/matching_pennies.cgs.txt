@@ -1,0 +1,39 @@
+Matching Pennies -- original concurrent game structure (CGS)
+============================================================
+
+Reference
+---------
+R. Alur, T. A. Henzinger, O. Kupferman.
+"Alternating-Time Temporal Logic". Journal of the ACM 49(5), 2002.
+https://www.cis.upenn.edu/~alur/Jacm02.pdf
+
+Informal model
+--------------
+A one-shot, simultaneous-move game. Two agents:
+  - matcher : picks a bit a in {0,1}
+  - hider   : picks a bit b in {0,1}
+Both choose at the same time, with no knowledge of the other's choice.
+The matcher wins iff a = b.
+
+Concurrent game structure:
+  - agents = { matcher, hider }
+  - from the initial state both move simultaneously
+  - delta sends to a "win" state iff a = b, otherwise to a "lose" state
+  - both terminal states are absorbing.
+
+Strategic properties
+--------------------
+No single player has a winning strategy (simultaneous move, zero info):
+
+    << matcher >>  F  win        -- FALSE
+    << hider   >>  F  ! win      -- FALSE
+
+The grand coalition trivially decides the outcome:
+
+    << matcher, hider >>  F  win -- TRUE
+
+This is the textbook example separating ATL from CTL: the existence of a
+path to "win" (CTL: EF win, true) does NOT imply any single agent can
+enforce it (ATL: <<matcher>> F win, false).
+
+C transcription: ../matching_pennies.c

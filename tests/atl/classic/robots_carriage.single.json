@@ -1,0 +1,6 @@
+{
+    "property": "<r1>F{pos >= 2}",
+    "domain": "polyhedra",
+    "description": "Soundness check (no winning strategy): a SINGLE robot cannot force the carriage to the target -- the other robot (adversary) can always cancel its push. Must NOT be reported TRUE. Contrast with the coalition <r1,r2>F{pos >= 2} (TRUE).",
+    "model": "robots_carriage.c"
+}
