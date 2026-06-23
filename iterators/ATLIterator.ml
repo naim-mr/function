@@ -76,7 +76,9 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
   }
 
   let controllable cp taint e =
-    B.is_representable e && not (Taint.is_tainted ~cp e taint)
+    let b = B.is_representable e && not (Taint.is_tainted ~cp e taint) in
+    Format.printf "check if is controlled %a ? %b \n " Typed_syntax.pp_expr e b;
+    b
 
   (* Computes the set of all labels of a program *)
 
@@ -319,7 +321,12 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
                     out_enter
                     (* current 'out' state when entering the loop body *) n =
                   (* iteration counter *)
-                  let in_state' = d_until (branch_join out_exit out_enter) in
+                  let in_state' =
+                    d_until
+                      (if controllable cp (fwdTaintMap (blockLabel, ext)) b then
+                         D.join RESILIENCE out_exit out_enter
+                       else D.join APPROXIMATION out_exit out_enter)
+                  in
                   (* 'in' state for this iteration *)
                   if !tracebwd && not !minimal then (
                     Format.fprintf !fmt "### %a:%i ###:\n" label_print (fst l) n;
@@ -522,7 +529,12 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
                       (* current 'out' state when entering the loop body *)
                     (n : int) : D.t =
                   (* iteration counter *)
-                  let out_joined = branch_join out_exit out_enter in
+                  let bexpr,_,_ = b  in
+                  let out_joined =
+                    if controllable cp (fwdTaintMap (blockLabel, ext)) bexpr then
+                      D.join RESILIENCE out_exit out_enter
+                    else D.join APPROXIMATION out_exit out_enter
+                  in
                   (* new 'in' state after joining the incoming branches *)
                   let updated_in = D.mask current_in out_joined in
                   (* join two branches and combine with current 'in' state using mask *)

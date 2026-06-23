@@ -56,6 +56,8 @@ let from_json filename =
     | `Assoc [] -> ()
     | `Assoc (("analysis", `String a) :: q) ->
         analysis := a;
+        (* mirror the -atl flag, which also turns on resilience *)
+        if String.equal a "atl" then resilience := true;
         aux (`Assoc q)
     | `Assoc (("property", `String a) :: q) ->
         property := a;
@@ -73,6 +75,8 @@ let from_json filename =
     | `Assoc (("joinbwd", `Int i) :: q) ->
         joinbwd := i;
         aux (`Assoc q)
+    (* skip unknown keys (e.g. "description", "model") instead of aborting *)
+    | `Assoc (_ :: q) -> aux (`Assoc q)
     | _ -> ()
   in
   aux json
