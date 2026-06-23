@@ -86,14 +86,14 @@ end = struct
     let reinit () =
       S.bwdInvMap := InvMap.map (fun a -> D.reinit a) !S.bwdInvMap
     in
-    let rec aux (b:S.D.B.t) p n =
+    let rec aux (b : S.D.B.t) p n =
       (* Forward Analysis *)
       if !tracefwd && not !minimal then
         Format.fprintf !fmt "\nForward Analysis[%i] Trace:\n" n;
       let startfwd = Sys.time () in
       (* Compute the forward analysis starting from the environment b (top at the begining) *)
       let b_env = S.D.B.env b in
-      ForwardIteratorB.analyze b_env (block, funcmap, elt);
+      ForwardIteratorB.analyze ~env:b_env (block, funcmap, elt);
       fwdInvMap := !ForwardIteratorB.fwdInvMap;
       (* fwdBlk funcs env vars (fwdBlk funcs env vars b stmts) s in *)
       let stopfwd = Sys.time () in
@@ -112,7 +112,9 @@ end = struct
           Compute the backward analysis for the given Semantic. 
           Refine option is always activated for cda 
       *)
-      let tree0 = if !analysis = "termination" then S.D.zero env else S.D.bot env in
+      let tree0 =
+        if !analysis = "termination" then S.D.zero env else S.D.bot env
+      in
       let i =
         bwdRec ~property funcmap env vars
           (bwdRec ~property funcmap env vars tree0 s)
@@ -126,7 +128,8 @@ end = struct
         else Format.fprintf !fmt "\nBackward Analysis[%i]:\n" n;
         bwdMap_print !fmt !S.bwdInvMap);
       if not !minimal then
-        if S.D.defined i then Format.fprintf !fmt "Analysis[%i] Result: TRUE\n" n
+        if S.D.defined i then
+          Format.fprintf !fmt "Analysis[%i] Result: TRUE\n" n
         else Format.fprintf !fmt "Analysis[%i] Result: UNKNOWN\n" n;
       if S.D.defined i || n > !size then
         (* 
@@ -164,8 +167,10 @@ end = struct
                 *)
                 let b1, b2 = S.D.B.assume ~pow:(float_of_int n) ab in
                 (* We reinit the leaf that are at top *)
-                assert (S.D.B.is_leq APPROXIMATION ab (S.D.B.join APPROXIMATION b1 b2));
-                assert (S.D.B.is_leq APPROXIMATION (S.D.B.join  APPROXIMATION b1 b2) ab);
+                assert (
+                  S.D.B.is_leq APPROXIMATION ab (S.D.B.join APPROXIMATION b1 b2));
+                assert (
+                  S.D.B.is_leq APPROXIMATION (S.D.B.join APPROXIMATION b1 b2) ab);
                 assert (not (S.D.B.is_bot b1));
                 assert (not (S.D.B.is_bot b2));
                 reinit ();

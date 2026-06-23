@@ -592,27 +592,32 @@ struct
       b1
     else b1
 
+  let is_representable = N.is_representable
   (**)
 end
 
 module AP_Box : AP_NUMERICAL = struct
   type lib = Box.t
-
+  let is_representable = Typed_syntax.expr_is_univariate
   let manager = Box.manager_alloc ()
   let supports_underapproximation = false
 end
 
 module AP_Oct : AP_NUMERICAL = struct
   type lib = Oct.t
+  
+  let is_representable = fun e -> false
 
   let manager = Oct.manager_alloc ()
   let supports_underapproximation = false
 end
 
 module AP_Poly : AP_NUMERICAL = struct
-  type lib = Polka.loose Polka.t
+  type lib = Polka.loose Polka.t (* ou Pkgrid.loose Pkgrid.t selon strictness *)
+  type t = lib Abstract1.t
 
-  let manager = Polka.manager_alloc_loose ()
+  let is_representable = Typed_syntax.expr_is_linear
+  let manager : lib Manager.t = Polka.manager_alloc_loose ()
   let supports_underapproximation = true
 end
 

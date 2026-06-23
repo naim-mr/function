@@ -196,7 +196,7 @@ module TerminationIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
     (* Forward Analysis *)
     if !tracefwd && not !minimal then
       Format.fprintf !fmt "\nForward Analysis Trace:\n";
-    if !refine then ForwardIteratorB.analyze f_env prog;
+    if !refine then ForwardIteratorB.analyze ~env:f_env prog;
     fwdInvMap := !ForwardIteratorB.fwdInvMap;
     fwdTaintMap := !ForwardIteratorB.fwdTaintMap;
     (* Backward Analysis *)

@@ -1,4 +1,4 @@
-(* open Abstract_syntax
+open Typed_syntax
 open VarSet
 
 module Taint = struct
@@ -13,42 +13,45 @@ module Taint = struct
   let is_bot = VarSet.is_empty
 
   (* List of vars in an expression *)
-  let avars (e, ext) =
+  let vars_in_expr e =
     let rec aux e acc =
       match e with
-      | A_var x -> add x acc
-      | A_interval _ | A_const _ | A_INPUT | A_RANDOM -> acc
-      | A_aunary (_, (a, _)) -> aux a acc
-      | A_abinary (_, (a1, _), (a2, _)) -> join (aux a1 acc) (aux a2 acc)
+      | T_var x -> add x acc
+      | T_unary (_, (e, _, _)) -> aux e acc
+      | T_binary (_, (e1, _, _), (e2, _, _)) -> join (aux e1 acc) (aux e2 acc)
+      | _ -> acc
     in
     aux e bot
 
-  (* Test if a boolean expression is taint *)
-  let taint_b (e, ext) tvl =
+  (* Test if an expression is tainted *)
+  let is_tainted e t =
     let rec aux e =
       match e with
-      | A_MAYBE_INP -> true
-      | A_TRUE | A_MAYBE | A_FALSE -> false
-      | A_bunary (_, (b, l)) -> aux b
-      | A_bbinary (_, (b1, _), (b2, l)) -> aux b1 || aux b2
-      | A_rbinary (_, a1, a2) ->
-          let vl1 = avars a1 in
-          let vl2 = avars a2 in
-          if is_bot (meet tvl vl1) || is_bot (meet tvl vl2) then true else false
+      | T_var x -> VarSet.mem x t
+      | T_unary (_, (e, _, _)) -> is_bot (meet (vars_in_expr e) t)
+      | T_binary (_, (e1, _, _), (e2, _, _)) -> aux e1 || aux e2
+      | _ -> false
     in
     aux e
 
   let assigned block =
     let rec aux stmt acc =
       match stmt with
-      | A_assign ((A_var x, _), (_, _)) -> add x acc
-      | A_if ((b, ba), s1, s2) -> join (aux_block s1 acc) (aux_block s2 acc)
-      | A_while (l, (b, ba), s) -> aux_block s acc
-      | _ -> acc
+      | T_label _ | T_print _
+      | T_add_var (_, None)
+      | T_del_var _ | T_RETURN | T_assert _ | T_expr _ | T_assume _ ->
+          acc
+      | T_add_var (v, Some (e, t, ext)) -> add v acc
+      | T_assign (lval, rval) -> (
+          match lval with T_var v, typ, ext -> add v acc | _ -> failwith "nyi")
+      | T_if (b, s1, s2) -> join (aux_block s1 acc) (aux_block s2 acc)
+      | T_while ((l, _), b, s) -> aux_block s acc
+      | T_call (f, ss) -> aux_block f.func_body acc
+      | T_BREAK -> raise (Invalid_argument "bwdStm:T_BREAK")
     and aux_block s acc =
       match s with
-      | A_empty l -> acc
-      | A_block (l, (s, _), b) -> join (aux s acc) (aux_block b acc)
+      | T_empty (l, _) -> acc
+      | T_stat ((l, _), (s, _), b) -> join (aux s acc) (aux_block b acc)
     in
     aux_block block bot
-end *)
+end

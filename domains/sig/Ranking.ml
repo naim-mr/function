@@ -11,6 +11,8 @@ module type PARTITION = sig
       conjunction of such constraints *)
 
   include DOMAIN with type dim = C.dim
+  
+  val is_representable: expr -> bool
 
   val constraints : t -> C.cons list
   (** [constraints t] returns the conjunction of constraints as a list of
@@ -51,9 +53,9 @@ end
 *)
 module type AP_NUMERICAL = sig
   type lib
-
   val manager : lib Manager.t
   val supports_underapproximation : bool
+  val is_representable: expr -> bool
 end
 
 (** [module type AP_PARTITION] module type for [PARTITION] relying on APRON *)

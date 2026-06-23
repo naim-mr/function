@@ -20,8 +20,7 @@ module Make (B : PARTITION) : ENVINIT with type env = B.env = struct
         match lval with
         | T_var v, typ, ext when not @@ B.dim_in_env t v ->
             (B.add_dim_to_env t v, v :: vars)
-        | T_var v, typ, ext when B.dim_in_env t v ->
-            (t, vars)
+        | T_var v, typ, ext when B.dim_in_env t v -> (t, vars)
         | T_deref (T_var v, typ, ext), _, _ ->
             let v =
               {

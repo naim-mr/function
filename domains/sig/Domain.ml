@@ -31,7 +31,6 @@ module type DOMAIN = sig
   val widen : ?jokers:int -> t -> t -> t
   (** [widen jokers t t] widening operator on t. The optional type jokers is
       mainly for widening. *)
-
   val init_env : unit -> env
   (** [init env ()] returns an empty env *)
 

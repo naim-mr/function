@@ -272,7 +272,20 @@ let rec convert_expr (st : state) ((kind, typ, _) : C_AST.expr) :
         (* return the variable *)
         (Abstract_syntax.A_identifier input_v_name, hint))
       else if String.compare func_name "input" = 0 then
-        (Abstract_syntax.A_INPUT, H_INT)
+        let rec strip_cast (e, _, _) =
+          match e with
+          | C_AST.E_cast ((e', t', r'), _) -> strip_cast (e', t', r')
+          | _ -> e
+        in        
+        let id =
+          if Array.length args >= 1 then
+            match strip_cast args.(0) with
+            | C_AST.E_string_literal (s, _) -> s
+            | _ -> raise (UnsupportedFeature "input() expects a string literal agent id")
+          else
+            raise (UnsupportedFeature "input() expects an agent id")
+        in
+        (Abstract_syntax.A_INPUT id, H_INT)
       else
         let args =
           List.map

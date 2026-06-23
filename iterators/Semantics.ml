@@ -14,12 +14,10 @@ open InvMap
 open CTLProperty
 open VarSet
 open Utils.Datatypes
-type 'a p = Ctl of ctl_property | Atl of atl_property | Other
-and
-ctl_property = expr typed CTLProperty.generic_property
-and
-atl_property = expr typed ATLProperty.generic_property
 
+type 'a p = Ctl of ctl_property | Atl of atl_property | Other
+and ctl_property = expr typed CTLProperty.generic_property
+and atl_property = expr typed ATLProperty.generic_property
 
 let get_ctl prop =
   match prop with
@@ -35,7 +33,7 @@ module type SEMANTIC = sig
   module D : RANKING_FUNCTION
   module B : PARTITION
 
-  val dummy_prop: 'a p 
+  val dummy_prop : 'a p
 
   type bwd_t = D.t
   (** [BWD]: Underlying Abstract Domain that will be use in the bwd analysis *)

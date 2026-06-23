@@ -73,6 +73,6 @@ let from_json filename =
     | `Assoc (("joinbwd", `Int i) :: q) ->
         joinbwd := i;
         aux (`Assoc q)
-    | _ -> raise (Invalid_argument "Wrong config json format.")
+    | _ -> ()
   in
   aux json

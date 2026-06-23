@@ -13,15 +13,17 @@ open Config
 open Semantics
 open Utils.Datatypes
 open VarSet
-(* open Taint *)
+open Domains.Taint
 
 module ForwardIterator (B : PARTITION) = struct
-  let fwdMap_print fmt m fprint =
+  let fwdTaintMap_print fmt m =
     InvMap.iter
-      (fun l a -> Format.fprintf fmt "%a: %a\n" label_print l fprint a)
+      (fun l a ->
+        Format.fprintf fmt "%a: %s\n" label_print l
+          (VarSet.fold (fun v acc -> v.var_name ^ " -- " ^ acc) a ""))
       m
 
-  let fwdMap_print fmt m iter printkey =
+  let fwdInvMap_print fmt m iter printkey =
     iter (fun l a -> Format.fprintf fmt "%a: %a\n" printkey l B.print a) m
 
   let fwdInvMap = ref InvMap.empty
@@ -38,6 +40,7 @@ module ForwardIterator (B : PARTITION) = struct
     prog : Typed_syntax.prog;
     f_cur : func;
     summary : bool;
+    cp : string list;
   }
   (* compute invariant map based on forward analysis *)
 
@@ -171,10 +174,71 @@ module ForwardIterator (B : PARTITION) = struct
         addFwdTaint l p;
         fwdTBlk funcs p' b *)
 
-  and fwdTaintMap : VarSet.t InvMap.t ref = ref InvMap.empty
-  and addFwdTaint l (a : VarSet.t) = fwdTaintMap := InvMap.add l a !fwdTaintMap
+  let rec fwdTStm ctx p s =
+    let open Taint in
+    match s with
+    | T_label _ | T_print _ | T_add_var (_, None) | T_del_var _ -> p
+    | T_RETURN ->
+        (* if ctx.summary then
+                if not (StringMap.mem ctx.f_cur.func_name !fwdSummaryMap) then
+                  fwdSummaryMap := StringMap.add ctx.f_cur.func_name p !fwdSummaryMap
+                else
+                  fwdSummaryMap :=
+                    StringMap.update ctx.f_cur.func_name
+                      (Option.map (fun (prev : B.t) -> B.join prev p))
+                      !fwdSummaryMap; *)
+        p
+    | T_add_var (v, Some (T_INPUT id, t, ext)) ->
+        if not (List.mem id ctx.cp) then add v p else p
+    | T_add_var (v, Some (e, t, ext)) ->
+        let e_vars = vars_in_expr e in
+        if not (is_bot (meet e_vars p)) then add v p
+        else filter (fun x -> Z.compare v.var_id x.var_id != 0) p
+    | T_assign (lval, rval) -> (
+        match lval with
+        | T_var v, typ, ext ->
+            let e, _, _ = rval in
+            let e_vars = vars_in_expr e in
+            if not (is_bot (meet e_vars p)) then add v p
+            else filter (fun x -> Z.compare v.var_id x.var_id != 0) p
+        | _ -> failwith "nyi")
+    | T_assert (b, l) -> p
+    | T_expr _ | T_assume _ -> p
+    | T_if ((b, _, _), s1, s2) ->
+        let assigned_vars = join (assigned s1) (assigned s2) in
+        let r1 = fwdTBlk ctx p s1 in
+        let r2 = fwdTBlk ctx p s2 in
+        let iflow = if is_tainted b p then assigned_vars else VarSet.empty in
+        join (join r1 r2) iflow
+    | T_while (l, b, s) ->
+        let rec aux i p2 =
+          if VarSet.subset i p2 then i
+          else aux p2 (fwdTStm ctx p2 (T_if (b, s, T_empty l)))
+        in
+        let i = p in
+        let p2 = fwdTStm ctx i (T_if (b, s, T_empty l)) in
+        let p = aux i p2 in
+        addFwdTaint l p;
+        p
+    | T_call (f, ss) -> fwdTBlk ctx p f.func_body
+    | T_BREAK -> raise (Invalid_argument "bwdStm:T_BREAK")
 
-  let analyze ?(precondition = Some dummy_precond) env prog =
+  and fwdTBlk ctx p (b : block) : VarSet.t =
+    match b with
+    | T_empty l ->
+        if not ctx.summary then addFwdTaint l p;
+        p
+    | T_stat (l, (s, _), b) ->
+        if not ctx.summary then addFwdTaint l p;
+        fwdTBlk ctx (fwdTStm ctx p s) b
+
+  and fwdTaintMap : VarSet.t InvMap.t ref = ref InvMap.empty
+
+  and addFwdTaint (l, _) (a : VarSet.t) =
+    fwdTaintMap := InvMap.add l a !fwdTaintMap
+
+  let analyze ?(reachability = true) ?(precondition = Some dummy_precond)
+      ?(cp = []) ?(env = B.init_env ()) prog =
     let block, funcmap, varmap = prog in
     let f = StringMap.find !Config.main funcmap in
     let s = f.func_body in
@@ -182,7 +246,15 @@ module ForwardIterator (B : PARTITION) = struct
       Format.fprintf !fmt "\nForward Analysis Trace:\n";
     let startfwd = Sys.time () in
     let ctx =
-      { env; global = block; funcs = funcmap; prog; f_cur = f; summary = true }
+      {
+        env;
+        global = block;
+        funcs = funcmap;
+        prog;
+        f_cur = f;
+        summary = true;
+        cp;
+      }
     in
     (* StringMap.iter
       (fun _ f ->
@@ -194,19 +266,32 @@ module ForwardIterator (B : PARTITION) = struct
           ())
       ctx.funcs; *)
     let ctx = { ctx with summary = false } in
-    let pre =
-      match precondition with
-      | Some precondition -> B.fwd_filter (B.top env) precondition
-      | None -> B.top env
-    in
-    let _ = fwdBlk ctx (fwdBlk ctx pre block) s in
+    Printf.printf "debug cp \n";
+    Format.pp_print_list (fun fmt s -> Format.fprintf fmt "%s" s) Format.std_formatter cp ;
+    if reachability then (
+      let pre =
+        match precondition with
+        | Some precondition -> B.fwd_filter (B.top env) precondition
+        | None -> B.top env
+      in
+      let _ = fwdBlk ctx (fwdBlk ctx pre block) s in
+      let stopfwd = Sys.time () in
+      Format.fprintf !fmt "\nForward Summary :\n";
+      if not !minimal then
+        if !timefwd then
+          Format.fprintf !fmt "\nForward Analysis (Time: %f s):\n"
+            (stopfwd -. startfwd)
+        else Format.fprintf !fmt "\nForward Analysis numerical:\n";
+      fwdInvMap_print !fmt !fwdInvMap InvMap.iter label_print);
+    let _ = fwdTBlk ctx VarSet.empty s in
     let stopfwd = Sys.time () in
-    Format.fprintf !fmt "\nForward Summary :\n";
+    Format.fprintf !fmt "\nForward Taint Summary :\n";
     if not !minimal then
       if !timefwd then
-        Format.fprintf !fmt "\nForward Analysis (Time: %f s):\n"
+        Format.fprintf !fmt "\nForward Taint Analysis (Time: %f s):\n"
           (stopfwd -. startfwd)
       else Format.fprintf !fmt "\nForward Analysis numerical:\n";
-    fwdMap_print !fmt !fwdInvMap InvMap.iter label_print;
+    fwdTaintMap_print !fmt !fwdTaintMap;
+
     ()
 end

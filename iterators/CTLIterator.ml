@@ -765,7 +765,7 @@ module CTLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
       Format.printf "\nAbstract ctl typed Syntax:\n ";
       Typed_syntax.pp_prog !fmt (prog_of_program program));
     if !Config.refine then (* Run forward analysis if 'refine' flag is set *)
-      ForwardIteratorB.analyze ~precondition:precondition f_env (prog_of_program (program));
+      ForwardIteratorB.analyze ~precondition ~env:f_env (prog_of_program program);
     fwdInvMap := !ForwardIteratorB.fwdInvMap;
     let inv = compute program property in
     let initialLabel = block_label program.mainFunction.func_body in
@@ -773,8 +773,9 @@ module CTLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
     bwdInvMap := inv;
     tree := D.output_json program.variables programInvariant;
     Config.result :=
-      if !Config.analysis = "non-termination" then
-        D.partially_defined ?condition:precondition programInvariant
+      if !Config.analysis = "non-termination" then (
+        print_endline "bah la?";
+        D.partially_defined ?condition:precondition programInvariant)
       else D.defined ?condition:precondition programInvariant;
     !Config.result
 end

@@ -32,7 +32,7 @@ type expr =
   | T_binary of binary_op * expr typed * expr typed
   | T_float_const of float_set
   | T_int_const of int_set
-  | T_INPUT
+  | T_INPUT of string
   | T_bool_const of bool_set
   | T_var of var
   | T_deref of expr typed
@@ -194,7 +194,7 @@ let rec pp_expr_ext fmt ((e, _, _) : expr typed) =
   | T_float_const f -> Format.pp_print_string fmt (string_of_float_set f)
   | T_int_const i -> Format.pp_print_string fmt (string_of_int_set i)
   | T_bool_const b -> Format.pp_print_string fmt (string_of_tbool b)
-  | T_INPUT -> Format.print_string "input()"
+  | T_INPUT id -> Format.fprintf fmt "input('%s')" id
   | T_var v -> print_var_name fmt v
   | T_deref e -> Format.fprintf fmt " *%a " pp_expr_ext e
   | T_address_of e -> Format.fprintf fmt " &%a " pp_expr_ext e
@@ -217,7 +217,7 @@ let rec pp_expr fmt e =
   | T_float_const f -> Format.pp_print_string fmt (string_of_float_set f)
   | T_int_const i -> Format.pp_print_string fmt (string_of_int_set i)
   | T_bool_const b -> Format.pp_print_string fmt (string_of_tbool b)
-  | T_INPUT -> Format.print_string "input()"
+  | T_INPUT id -> Format.fprintf fmt "input('%s')" id
   | T_var v -> print_var_name fmt v
   | T_deref (e, _, _) -> Format.fprintf fmt " *%a " pp_expr e
   | T_address_of (e, _, _) -> Format.fprintf fmt " &%a " pp_expr e
@@ -454,6 +454,28 @@ let rec neg_bexp (b, t, x) =
   | T_binary (op, e1, e2) -> invert_comp_expr (b, t, x)
   | T_unary (A_NOT, e) -> e
   | _ -> raise (Invalid_argument "Unexpected rvalue")
+
+let is_var e = match e with T_var _ -> true | _ -> false
+
+let is_var2 e1 e2 =
+  match (e1, e2) with T_var _, T_var _ -> true | _, _ -> false
+
+let rec expr_is_linear e =
+  match e with
+  | T_unary (op, (e, _, _)) -> expr_is_linear e
+  | T_binary (op, (e1, _, _), (e2, _, _)) -> (
+      match op with
+      | A_MULTIPLY | A_MODULO | A_DIVIDE ->
+          expr_is_linear e1 && expr_is_linear e2 && not (is_var2 e1 e2)
+      | _ -> expr_is_linear e1 && expr_is_linear e2)
+  | _ -> true
+
+let rec expr_is_univariate e =
+  match e with
+  | T_unary (op, (e, _, _)) -> expr_is_univariate e
+  | T_binary (op, (e1, _, _), (e2, _, _)) -> 
+      expr_is_univariate e1 && expr_is_univariate e2 && not (is_var2 e1 e2)
+  | _ -> true
 
 (************************************************************************)
 (* MISC *)

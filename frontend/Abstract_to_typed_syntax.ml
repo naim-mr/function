@@ -179,7 +179,7 @@ let rec pure_expr env pre post (e, x) =
   | A_identifier s ->
       let v = get_var env s x in
       ((T_var v, v.var_typ, x), pre, post)
-  | A_INPUT -> ((T_INPUT, A_int (A_INT, A_SIGNED), x), pre, post)
+  | A_INPUT id -> ((T_INPUT id, A_int (A_INT, A_SIGNED), x), pre, post)
   | A_float_const s ->
       (* always double type *)
       (* TODO: return a sound interval enclosing the decimal literal *)
@@ -515,7 +515,7 @@ let decl env d =
       let scope =
         match kind with
         | A_VARIABLE -> T_GLOBAL
-        | A_INPUT -> T_INPUT
+        | A_INPUT  -> T_INPUT 
         | A_VOLATILE -> T_VOLATILE
       in
       let env, rstats =
