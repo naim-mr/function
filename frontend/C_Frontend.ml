@@ -276,14 +276,16 @@ let rec convert_expr (st : state) ((kind, typ, _) : C_AST.expr) :
           match e with
           | C_AST.E_cast ((e', t', r'), _) -> strip_cast (e', t', r')
           | _ -> e
-        in        
+        in
         let id =
           if Array.length args >= 1 then
             match strip_cast args.(0) with
             | C_AST.E_string_literal (s, _) -> s
-            | _ -> raise (UnsupportedFeature "input() expects a string literal agent id")
-          else
-            raise (UnsupportedFeature "input() expects an agent id")
+            | _ ->
+                raise
+                  (UnsupportedFeature
+                     "input() expects a string literal agent id")
+          else raise (UnsupportedFeature "input() expects an agent id")
         in
         (Abstract_syntax.A_INPUT id, H_INT)
       else

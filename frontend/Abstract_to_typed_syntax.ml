@@ -515,7 +515,7 @@ let decl env d =
       let scope =
         match kind with
         | A_VARIABLE -> T_GLOBAL
-        | A_INPUT  -> T_INPUT 
+        | A_INPUT -> T_INPUT
         | A_VOLATILE -> T_VOLATILE
       in
       let env, rstats =

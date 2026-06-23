@@ -4,6 +4,7 @@ open VarSet
 module Taint = struct
   type t = VarSet.t
 
+  let cp : string list ref = ref []
   let bot = VarSet.empty
   let join = VarSet.union
   let add x t = VarSet.add x t
@@ -24,12 +25,13 @@ module Taint = struct
     aux e bot
 
   (* Test if an expression is tainted *)
-  let is_tainted e t =
+  let is_tainted ?(cp = []) e t =
     let rec aux e =
       match e with
       | T_var x -> VarSet.mem x t
       | T_unary (_, (e, _, _)) -> is_bot (meet (vars_in_expr e) t)
       | T_binary (_, (e1, _, _), (e2, _, _)) -> aux e1 || aux e2
+      | T_INPUT id -> List.mem id cp
       | _ -> false
     in
     aux e

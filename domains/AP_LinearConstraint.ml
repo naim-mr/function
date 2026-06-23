@@ -215,7 +215,10 @@ module AP_LinearConstraint : AP_CONSTRAINT = struct
         try
           let x =
             List.find
-              (fun y -> String.compare (Var.to_string x) (apron_of_var y |> Var.to_string) = 0)
+              (fun y ->
+                String.compare (Var.to_string x)
+                  (apron_of_var y |> Var.to_string)
+                = 0)
               vars
           in
           Format.fprintf Format.str_formatter "$%s{%s}" (Z.to_string x.var_id)

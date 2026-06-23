@@ -75,8 +75,8 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
     globalBlock : Typed_syntax.block;
   }
 
-  let controllable taint e =
-    B.is_representable e && not (Taint.is_tainted e taint)
+  let controllable cp taint e =
+    B.is_representable e && not (Taint.is_tainted ~cp e taint)
 
   (* Computes the set of all labels of a program *)
 
@@ -227,8 +227,8 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
      defined and it discards those parts of the ranking function where neither inv_keep nor inv_reset are defined.
   *)
   let until (quantifier : quantifier) (fwdInv : label -> D.B.t)
-      (program : program) (fwdTaintMap : label -> Taint.t) (inv_keep : inv)
-      (inv_reset : inv) : inv =
+      (program : program) (fwdTaintMap : label -> Taint.t)
+      (cp : controllable_players) (inv_keep : inv) (inv_reset : inv) : inv =
     let branch_join, bwd_assign, bwd_filter = abstract_transformer quantifier in
     let inv = ref InvMap.empty in
     (* variable where the resulting invariant/fixed-point is stored *)
@@ -276,7 +276,7 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
                 let expr, _, _ = e in
                 bwd_assign
                   ~controllable:
-                    (controllable (fwdTaintMap (blockLabel, ext)) expr)
+                    (controllable cp (fwdTaintMap (blockLabel, ext)) expr)
                   ?domain:pre_dom out_state
                   ((T_var l, l.var_typ, l.var_extent), e)
             | T_assign (lval, rval) -> (
@@ -285,7 +285,7 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
                     let expr, _, _ = rval in
                     bwd_assign
                       ~controllable:
-                        (controllable (fwdTaintMap (blockLabel, ext)) expr)
+                        (controllable cp (fwdTaintMap (blockLabel, ext)) expr)
                       ?domain:pre_dom out_state (lval, rval)
                 | _ -> failwith "nyi")
             | T_assert (b, _) | T_assume b ->
@@ -304,7 +304,7 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
                 in
                 (* filter *)
                 (* join the two branches *)
-                if controllable (fwdTaintMap (blockLabel, ext)) b then
+                if controllable cp (fwdTaintMap (blockLabel, ext)) b then
                   D.join RESILIENCE in_if_filtered in_else_filtered
                 else D.join APPROXIMATION in_if_filtered in_else_filtered
             | T_while (l, (b, typ, ba), loop_body) ->
@@ -429,7 +429,8 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
 
   let global (quantifier : quantifier) (fwdInv : label -> D.B.t)
       ?(use_sink_state = false) (program : program)
-      (fwdTaintMap : label -> Taint.t) (fixed_point : inv) : inv =
+      (fwdTaintMap : label -> Taint.t) (cp : controllable_players)
+      (fixed_point : inv) : inv =
     let branch_join, bwd_assign, bwd_filter = abstract_transformer quantifier in
     let inv = ref (InvMap.union (fun _ _ _ -> None) fixed_point InvMap.empty) in
     (* initialize InvMap with given fixed-point for nested property *)
@@ -476,7 +477,7 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
                 D.mask current_in
                 @@ bwd_assign
                      ~controllable:
-                       (controllable (fwdTaintMap (blockLabel, ext)) expr)
+                       (controllable cp (fwdTaintMap (blockLabel, ext)) expr)
                      ?domain:pre_dom out_state
                 @@ ((T_var l, l.var_typ, l.var_extent), e)
             | T_assign (lval, rval) -> (
@@ -486,7 +487,9 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
                     D.mask current_in
                     @@ bwd_assign
                          ~controllable:
-                           (controllable (fwdTaintMap (blockLabel, ext)) expr)
+                           (controllable cp
+                              (fwdTaintMap (blockLabel, ext))
+                              expr)
                          ?domain:pre_dom out_state (lval, rval)
                 | _ -> failwith "nyi")
             | T_assert (b, _) | T_assume b ->
@@ -500,8 +503,8 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
                 let bexpr, _, _ = b in
                 (* compute 'out' state for else-block *)
                 D.mask current_in
-                  ((if controllable (fwdTaintMap (blockLabel, ext)) bexpr then
-                      D.join RESILIENCE
+                  ((if controllable cp (fwdTaintMap (blockLabel, ext)) bexpr
+                    then D.join RESILIENCE
                     else D.join APPROXIMATION)
                      out_if out_else)
                 (* join the two branches and combine with current 'in' state using mask *)
@@ -590,7 +593,8 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
     This is done by passing in said state through the recursion of the backward analysis.
   *)
   let next (quantifier : quantifier) (program : program)
-      (fwdTaintMap : label -> Taint.t) (fp : inv) : inv =
+      (fwdTaintMap : label -> Taint.t) (cp : controllable_players) (fp : inv) :
+      inv =
     let branch_join, bwd_assign, bwd_filter = abstract_transformer quantifier in
     let invMap = ref InvMap.empty in
     let addInv label state = invMap := InvMap.add label state !invMap in
@@ -612,7 +616,7 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
               in
               let bexpr, _, _ = b in
               let s =
-                (if controllable (fwdTaintMap (blockLabel, ext)) bexpr then
+                (if controllable cp (fwdTaintMap (blockLabel, ext)) bexpr then
                    D.join RESILIENCE
                  else D.join APPROXIMATION)
                   sIf sElse
@@ -634,7 +638,7 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
               let s =
                 bwd_assign
                   ~controllable:
-                    (controllable (fwdTaintMap (blockLabel, ext)) expr)
+                    (controllable cp (fwdTaintMap (blockLabel, ext)) expr)
                   nextBlockState
                   ((T_var l, l.var_typ, l.var_extent), e)
               in
@@ -645,7 +649,7 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
                   let expr, _, _ = rval in
                   bwd_assign
                     ~controllable:
-                      (controllable (fwdTaintMap (blockLabel, ext)) expr)
+                      (controllable cp (fwdTaintMap (blockLabel, ext)) expr)
                     nextBlockState (lval, rval)
                   |> addInv blockLabel
               | _ -> failwith "nyi")
@@ -737,28 +741,25 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
               (ForwardIteratorB.analyze ~reachability:false ~cp
                  (prog_of_program program);
                fun (l, _) -> InvMap.find l !ForwardIteratorB.fwdTaintMap)
-              (inv p)
+              cp (inv p)
         | F (cp, p) ->
-            ForwardIteratorB.analyze ~reachability:false ~cp
-              (prog_of_program program);
-            fwdTaintMap := !ForwardIteratorB.fwdInvMap;
             a_until program
               (ForwardIteratorB.analyze ~reachability:false ~cp
                  (prog_of_program program);
                fun (l, _) -> InvMap.find l !ForwardIteratorB.fwdTaintMap)
-              atomic_true_inv (inv p)
+              cp atomic_true_inv (inv p)
         | G (cp, p) ->
             a_global program
               (ForwardIteratorB.analyze ~reachability:false ~cp
                  (prog_of_program program);
                fun (l, _) -> InvMap.find l !ForwardIteratorB.fwdTaintMap)
-              (inv p)
+              cp (inv p)
         | U (cp, p1, p2) ->
             a_until program
               (ForwardIteratorB.analyze ~reachability:false ~cp
                  (prog_of_program program);
                fun (l, _) -> InvMap.find l !ForwardIteratorB.fwdTaintMap)
-              (inv p1) (inv p2)
+              cp (inv p1) (inv p2)
         | AND (p1, p2) -> logic_and (inv p1) (inv p2)
         | OR (p1, p2) -> logic_or (inv p1) (inv p2)
         | NOT (Atomic (b, None)) -> atomic program @@ neg_bexp b

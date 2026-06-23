@@ -267,7 +267,9 @@ module ForwardIterator (B : PARTITION) = struct
       ctx.funcs; *)
     let ctx = { ctx with summary = false } in
     Printf.printf "debug cp \n";
-    Format.pp_print_list (fun fmt s -> Format.fprintf fmt "%s" s) Format.std_formatter cp ;
+    Format.pp_print_list
+      (fun fmt s -> Format.fprintf fmt "%s" s)
+      Format.std_formatter cp;
     if reachability then (
       let pre =
         match precondition with

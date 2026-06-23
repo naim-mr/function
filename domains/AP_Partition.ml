@@ -449,13 +449,44 @@ struct
           in
           of_apron_t env b
         in
+        let b1 = f manager b (x, e) in
+        if !Config.analysis = "atl" && !Config.domain = "polyhedra" then
+          let env = env b in
+          let ap_env = ap_env env in
+          let p = to_apron_t b1 in
+          let box_constraints : C.t list =
+            List.concat_map
+              (fun (var : var) ->
+                let v = apron_of_var var in
+                let itv = Abstract1.bound_variable manager p v in
+                let inf = itv.Interval.inf in
+                let sup = itv.Interval.sup in
+                let lower =
+                  if Scalar.is_infty inf = 0 then (
+                    let e = Linexpr1.make ap_env in
+                    Linexpr1.set_coeff e v (Coeff.s_of_int 1);
+                    Linexpr1.set_cst e (Coeff.Scalar (Scalar.neg inf));
+                    [ ({ cons = Lincons1.make e Lincons1.SUPEQ; env } : C.t) ])
+                  else []
+                and upper =
+                  if Scalar.is_infty sup = 0 then (
+                    let e = Linexpr1.make ap_env in
+                    Linexpr1.set_coeff e v (Coeff.s_of_int (-1));
+                    Linexpr1.set_cst e (Coeff.Scalar sup);
+                    [ ({ cons = Lincons1.make e Lincons1.SUPEQ; env } : C.t) ])
+                  else []
+                in
+                lower @ upper)
+              (vars b1)
+          in
+          b1 (* { b1 with constraints = b1.constraints @ box_constraints } *)
+        else b1
         (* if !Config.resilience && !Config.domain = "polyhedra" then
           let b1 = f manager b (x, e) in
           let man: lib Manager.t = N.of () in 
           let b2 = f man b (x, e) in
           { b1 with constraints = b1.constraints @ b2.constraints; env } 
           raise (Invalid_argument "resilience need to use boxes to complete") *)
-        f manager b (x, e)
     | _ -> raise (Invalid_argument "bwd_assign: unexpected lvalue")
 
   let ubwd_filter (t : t) (e : expr typed) : t =
@@ -474,7 +505,7 @@ struct
     of_apron_t env filtered
 
   let fwd_filter b (e, t, ext) =
-    let rec f manager b (e, t, ext) =
+    let rec f (manager : 'a Manager.t) b (e, t, ext) =
       match e with
       | T_bool_const True -> b
       | T_bool_const Maybe -> b
@@ -588,8 +619,35 @@ struct
     in
     let b1 = f manager b (e, t, ext) in
     if !Config.resilience && !Config.domain = "polyhedra" then
-      (* raise (Invalid_argument "resilience need to use boxes to complete") *)
-      b1
+      let env = env b in
+      let ap_env = ap_env env in
+      let p = to_apron_t b1 in
+      let box_constraints : C.t list =
+        List.concat_map
+          (fun (var : var) ->
+            let v = apron_of_var var in
+            let itv = Abstract1.bound_variable manager p v in
+            let inf = itv.Interval.inf in
+            let sup = itv.Interval.sup in
+            let lower =
+              if Scalar.is_infty inf = 0 then (
+                let e = Linexpr1.make ap_env in
+                Linexpr1.set_coeff e v (Coeff.s_of_int 1);
+                Linexpr1.set_cst e (Coeff.Scalar (Scalar.neg inf));
+                [ ({ cons = Lincons1.make e Lincons1.SUPEQ; env } : C.t) ])
+              else []
+            and upper =
+              if Scalar.is_infty sup = 0 then (
+                let e = Linexpr1.make ap_env in
+                Linexpr1.set_coeff e v (Coeff.s_of_int (-1));
+                Linexpr1.set_cst e (Coeff.Scalar sup);
+                [ ({ cons = Lincons1.make e Lincons1.SUPEQ; env } : C.t) ])
+              else []
+            in
+            lower @ upper)
+          (vars b1)
+      in
+      { b1 with constraints = b1.constraints @ box_constraints }
     else b1
 
   let is_representable = N.is_representable
@@ -598,6 +656,7 @@ end
 
 module AP_Box : AP_NUMERICAL = struct
   type lib = Box.t
+
   let is_representable = Typed_syntax.expr_is_univariate
   let manager = Box.manager_alloc ()
   let supports_underapproximation = false
@@ -605,9 +664,8 @@ end
 
 module AP_Oct : AP_NUMERICAL = struct
   type lib = Oct.t
-  
-  let is_representable = fun e -> false
 
+  let is_representable = fun e -> false
   let manager = Oct.manager_alloc ()
   let supports_underapproximation = false
 end

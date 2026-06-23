@@ -473,7 +473,7 @@ let rec expr_is_linear e =
 let rec expr_is_univariate e =
   match e with
   | T_unary (op, (e, _, _)) -> expr_is_univariate e
-  | T_binary (op, (e1, _, _), (e2, _, _)) -> 
+  | T_binary (op, (e1, _, _), (e2, _, _)) ->
       expr_is_univariate e1 && expr_is_univariate e2 && not (is_var2 e1 e2)
   | _ -> true
 
