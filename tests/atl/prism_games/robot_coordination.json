@@ -1,4 +1,7 @@
 {
-    "property": "<r1,r2>F{x1 >= 4}",
-    "domain": "polyhedra"
+    "analysis": "atl",
+    "property": "<r1,r2>F{AND{x1 >= 4}{x2 >= 4}}",
+    "domain": "polyhedra",
+    "description": "Robot coordination (de-probabilised). The coalition of both robots brings BOTH to their goal cells despite a bounded number of adversarial slips -> expected TRUE. Probabilistic move-failure is abstracted as a finite (budgeted) demonic adversary.",
+    "model": "robot_coordination.c"
 }

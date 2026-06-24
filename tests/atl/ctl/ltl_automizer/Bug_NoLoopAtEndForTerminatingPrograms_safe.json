@@ -1,4 +1,0 @@
-{
-    "property": "NOT{AF{ap > 2}}",
-    "precondition": "ap == 0"
-}

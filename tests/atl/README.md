@@ -22,9 +22,9 @@ exists, otherwise the formal model from the source paper with full citation).
 ### `classic/` — foundational ATL examples
 | File | Source | Property | Expected |
 |------|--------|----------|----------|
-| train_gate | Alur/Henzinger/Kupferman, JACM'02 | `<controller>G{in1 + in2 <= 1}` | TRUE |
-| robots_carriage | Bulling/Goranko/Jamroga | `<r1,r2>F{pos >= 2}` | TRUE (single robot: FALSE) |
-| matching_pennies | Alur/Henzinger/Kupferman, JACM'02 | `<m>F{win == 1}` | UNKNOWN (`<m,h>`: TRUE) |
+| train_gate | Alur/Henzinger/Kupferman, JACM'02 (Example 2.2) | `<train,ctr>F{s == 3}` | TRUE (`<train>` alone: UNKNOWN) |
+| robots_carriage | Demri/Goranko/Lange, *Temporal Logics in CS* 2016, Ch. 9 | `<r1,r2>F{pos == 1}` | TRUE (single robot: UNKNOWN) |
+| matching_pennies | Osborne/Rubinstein, *A Course in Game Theory* 1994, Ex. 17.1 | `<m>F{win == 1}` | UNKNOWN (`<m,h>`: TRUE) |
 | nim | classic game | `<me>F{win == 0}` | TRUE (N=7) |
 
 ### `stv/` — STV scalability benchmarks (ATL_ir)
@@ -74,9 +74,10 @@ models. Each carries an `expected` field used as an oracle.
 
 | File | Property | Kind | Expected |
 |------|----------|------|----------|
-| classic/train_gate.recurrence | `<controller>G{<controller>F{in1 == 1}}` | controllable recurrence | TRUE |
-| classic/robots_carriage.stabilize | `<r1,r2>F{<r1,r2>G{pos >= 2}}` | stabilization (F-G) | TRUE |
-| classic/robots_carriage.single | `<r1>F{pos >= 2}` | soundness (no strategy) | UNKNOWN |
+| classic/train_gate.recurrence | `<ctr>G{<ctr>F{s == 0}}` | controllable recovery | TRUE |
+| classic/train_gate.single | `<train>F{s == 3}` | soundness (no strategy) | UNKNOWN |
+| classic/robots_carriage.stabilize | `<r1,r2>F{<r1,r2>G{pos == 1}}` | stabilization (F-G) | TRUE |
+| classic/robots_carriage.single | `<r1>F{pos == 1}` | soundness (no strategy) | UNKNOWN |
 | classic/matching_pennies.coalition | `<m,h>F{win == 1}` | ATL/CTL gap (coalition) | TRUE |
 | stv/castles.until | `<att>U{hp1 > 0}{hp2 == 0}` | reach-while-avoid | TRUE |
 | stv/castles.denial | `<att>F{NOT{<def>F{hp1 == 0}}}` | coalition alternation + denial | TRUE |
@@ -93,6 +94,7 @@ are the ones a CTL-controlled analysis cannot capture.
 ## References
 
 * Alur, Henzinger, Kupferman. *Alternating-Time Temporal Logic*, JACM 2002 — https://www.cis.upenn.edu/~alur/Jacm02.pdf
+* Demri, Goranko, Lange. *Temporal Logics in Computer Science*, Cambridge Univ. Press, 2016 — Ch. 9 (robots & carriage)
 * Bulling, Goranko, Jamroga. *Logics for Reasoning about Strategic Abilities* — https://home.ipipan.waw.pl/w.jamroga/papers/satol15.pdf
 * Jamroga, Kurpiewski et al. STV — https://github.com/blackbat13/stv ; *Fixpoint Approximation...* — https://arxiv.org/pdf/1612.02684
 * SYNTCOMP benchmark library — https://github.com/SYNTCOMP/benchmarks

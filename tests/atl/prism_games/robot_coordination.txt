@@ -23,15 +23,36 @@ robots reach their destinations.
 
 De-probabilised version for FuncTion
 ------------------------------------
-Replace "move fails with probability p" by demonic non-determinism
-(the environment "env" may make a move fail). The strategic question
-becomes a sure-reachability ATL query:
+Replace "move fails with probability p<1" by a demonic BUT FINITE adversary
+(the environment may slip a robot back, but only a bounded number of times).
+The bound matters: a purely demonic adversary could stall a robot forever
+(net 0 progress), making the goal unreachable -- whereas the probabilistic
+original guarantees eventual progress (prob 1). A *bounded* number of
+failures faithfully captures that. The query is then sure-reachability:
 
-    << r1, r2 >>  F  ( goal reached )
+    << r1, r2 >>  F  ( both goals reached )
 
 C transcription: ../prism_games/robot_coordination.c
-  1-D corridor; a firm step advances 2 cells, an adversarial slip costs 1,
-  so the coalition still nets progress and reaches the goal.
+  Two symmetric robots (x1, x2); each step is +1, each slip is -1 drawn from
+  a SHARED budget of 3 disturbances. Both robots are genuinely involved (no
+  dead robot, no dead slip variable). Property:
+    << r1,r2 >> F { AND{x1 >= 4}{x2 >= 4} }      (TRUE)
 
 NOTE: this drops the quantitative (probability / reward) aspect of the
-original rPATL specification; it keeps the strategic-reachability core.
+original rPATL specification; it keeps the strategic-reachability core, and
+models "failures occur with prob < 1" as "finitely many failures".
+
+Why this modelling corresponds
+------------------------------
+The correspondence is at the level of the GAME, not the source file (this is
+a schematic abstraction, not a transcription of the .prism/.props):
+  - same controllability split: the robots are the controllable coalition,
+    the hazardous cells are the uncontrolled environment;
+  - same temporal objective: reachability of the goal configuration;
+  - probabilities -> demonic non-determinism: replacing "fails with prob p"
+    by "the adversary may make the step fail" is the WORST-CASE collapse of
+    the probabilistic model. Hence  << r1,r2 >> F goal  (sure reachability)
+    is exactly the qualitative core of  P_max[ F goal ] = 1, i.e. "can the
+    coalition guarantee arrival whatever the hazards do".
+What is faithfully preserved: who controls what + the reach objective.
+What is abstracted away: the exact maximal probability value.

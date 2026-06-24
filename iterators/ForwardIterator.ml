@@ -174,6 +174,15 @@ module ForwardIterator (B : PARTITION) = struct
         addFwdTaint l p;
         fwdTBlk funcs p' b *)
 
+  (* Detect an input source possibly wrapped in casts, e.g. the rhs of
+     `char x = (char) input(id)` is T_unary (A_cast _, (T_INPUT id, ...)). *)
+  let rec input_of_expr (e : Typed_syntax.expr) : string option =
+    match e with
+    | T_INPUT id -> Some id
+    | _ -> ( match unbox_cast e with
+             | Some (e', _) -> input_of_expr e'
+             | None -> None)
+
   let rec fwdTStm ctx p s =
     let open Taint in
     match s with
@@ -188,19 +197,25 @@ module ForwardIterator (B : PARTITION) = struct
                       (Option.map (fun (prev : B.t) -> B.join prev p))
                       !fwdSummaryMap; *)
         p
-    | T_add_var (v, Some (T_INPUT id, t, ext)) ->
-        if not (List.mem id ctx.cp) then add v p else p
-    | T_add_var (v, Some (e, t, ext)) ->
-        let e_vars = vars_in_expr e in
-        if not (is_bot (meet e_vars p)) then add v p
-        else filter (fun x -> Z.compare v.var_id x.var_id != 0) p
+    | T_add_var (v, Some (e, t, ext)) -> (
+        (* x = input(id), possibly through casts, e.g. (char) input(id) *)
+        match input_of_expr e with
+        | Some id -> if not (List.mem id ctx.cp) then add v p else p
+        | None ->
+            let e_vars = vars_in_expr e in
+            if not (is_bot (meet e_vars p)) then add v p
+            else filter (fun x -> Z.compare v.var_id x.var_id != 0) p)
     | T_assign (lval, rval) -> (
         match lval with
-        | T_var v, typ, ext ->
+        | T_var v, typ, ext -> (
             let e, _, _ = rval in
             let e_vars = vars_in_expr e in
             if not (is_bot (meet e_vars p)) then add v p
-            else filter (fun x -> Z.compare v.var_id x.var_id != 0) p
+            else
+              (* x = input(id), possibly through casts, e.g. (char) input(id) *)
+              match input_of_expr e with
+              | Some id -> if not (List.mem id ctx.cp) then add v p else p
+              | None -> filter (fun x -> Z.compare v.var_id x.var_id != 0) p)
         | _ -> failwith "nyi")
     | T_assert (b, l) -> p
     | T_expr _ | T_assume _ -> p
@@ -208,7 +223,16 @@ module ForwardIterator (B : PARTITION) = struct
         let assigned_vars = join (assigned s1) (assigned s2) in
         let r1 = fwdTBlk ctx p s1 in
         let r2 = fwdTBlk ctx p s2 in
-        let iflow = if is_tainted b p then assigned_vars else VarSet.empty in
+        Printf.printf "in if is tainted ?";
+        Typed_syntax.pp_expr !fmt b;
+        let iflow =
+          if is_tainted b p then (
+            Printf.printf "yes! \n";
+            assigned_vars)
+          else (
+            Printf.printf "no! \n";
+            VarSet.empty)
+        in
         join (join r1 r2) iflow
     | T_while (l, b, s) ->
         let rec aux i p2 =

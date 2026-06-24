@@ -44,5 +44,5 @@ int main() {
         if (dec > def) { tricks = tricks + 1; }
         round = round + 1;
     }
-    while (true) {}
+    while (1) {}
 }

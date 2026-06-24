@@ -128,6 +128,7 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
 *)
   let program_of_prog (prog : Typed_syntax.prog) (env : D.env) (vars : var list)
       (main : StringMap.key) : program =
+      let prog,_ = Typed_syntax.nt_prog prog in 
     let globalBlock, functions, globalVariables = prog in
     let mainFunction = StringMap.find main functions in
     let dummyExtent = (Lexing.dummy_pos, Lexing.dummy_pos) in
@@ -138,6 +139,7 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
       id := Z.( - ) i Z.one;
       i
     in
+    
     let rec addTerminationStmt (block : block) =
       match block with
       | T_empty l ->
@@ -169,6 +171,7 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
     let var_to_apron v = Apron.apron_of_var v in
     let apron_vars = Array.map var_to_apron (Array.of_list vars) in
     let env = Environment.make apron_vars [||] in *)
+    
     let program =
       {
         environment = env;
@@ -532,7 +535,7 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
                   let bexpr,_,_ = b  in
                   let out_joined =
                     if controllable cp (fwdTaintMap (blockLabel, ext)) bexpr then
-                      D.join RESILIENCE out_exit out_enter
+                      D.join APPROXIMATION out_exit out_enter
                     else D.join APPROXIMATION out_exit out_enter
                   in
                   (* new 'in' state after joining the incoming branches *)
@@ -784,14 +787,26 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
 
   (* Function called by cda same as analyze *)
   let bwdRec ?(property = dummy_prop) func env (vars : var list) _ b : D.t =
+    
     let f = StringMap.find !Config.main func in
     let p =
       { environment = env; variables = vars; mainFunction = f; globalBlock = b }
     in
-    let i = compute p (Semantics.get_atl property) in
+    let property =
+      get_atl property
+      |> ATLProperty.map (fun e -> Typed_syntax.expr_prop_handler e vars)
+    in
+    let f_env = D.bot env |> D.f_env in 
+    if not !minimal then (
+      Format.printf "\nAbstract atl typed Syntax:\n ";
+      Typed_syntax.pp_prog !fmt (prog_of_program p));
+    if !Config.refine then (* Run forward analysis if 'refine' flag is set *)
+      ForwardIteratorB.analyze ~env:f_env (prog_of_program p);
+    fwdInvMap := !ForwardIteratorB.fwdInvMap;
+    let inv = compute p property in
     let initialLabel = block_label p.mainFunction.func_body in
-    let programInvariant = InvMap.find initialLabel i in
-    bwdInvMap := i;
+    let programInvariant = InvMap.find initialLabel inv in
+    bwdInvMap := inv;
     programInvariant
 
   let analyze ?(precondition = Some dummy_precond) ?(property = dummy_prop) prog

@@ -34,5 +34,5 @@ int main() {
         }
         turn = 1 - turn;
     }
-    while (true) {}                // observe the winner
+    while (1) {}                // observe the winner
 }

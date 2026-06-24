@@ -27,7 +27,7 @@ module Taint = struct
     let rec aux e =
       match e with
       | T_var x -> VarSet.mem x t
-      | T_unary (_, (e, _, _)) -> is_bot (meet (vars_in_expr e) t)
+      | T_unary (_, (e, _, _)) -> not (is_bot (meet (vars_in_expr e) t))
       | T_binary (_, (e1, _, _), (e2, _, _)) -> aux e1 || aux e2
       | T_INPUT id -> not (List.mem id cp)
       | _ -> false

@@ -33,5 +33,5 @@ int main() {
             }
         }
     }
-    while (true) {}                // observe the defeat of castle 2
+    while (1) {}                // observe the defeat of castle 2
 }

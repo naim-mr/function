@@ -1,39 +1,63 @@
-Matching Pennies -- original concurrent game structure (CGS)
-============================================================
+Matching Pennies -- concurrent game structure (CGS)
+===================================================
 
 Reference
 ---------
-R. Alur, T. A. Henzinger, O. Kupferman.
-"Alternating-Time Temporal Logic". Journal of the ACM 49(5), 2002.
-https://www.cis.upenn.edu/~alur/Jacm02.pdf
+"Matching pennies" is a classic strictly-competitive zero-sum game from
+game theory:
+  M. J. Osborne, A. Rubinstein, "A Course in Game Theory",
+  MIT Press, 1994, Example 17.1.
+  (each player picks Head/Tail; player 1 wins iff the choices match.)
+
+It is NOT named in the Alur-Henzinger-Kupferman paper (whose running
+example is the train gate, Example 2.2). It is used here as the minimal
+witness that ATL strictly differs from CTL.
+
+For that ATL-vs-CTL distinction on concurrent games, see the survey:
+  N. Bulling, V. Goranko, W. Jamroga,
+  "Logics for Reasoning about Strategic Abilities",
+  https://home.ipipan.waw.pl/w.jamroga/papers/satol15.pdf
+For the ATL semantics on concurrent game structures:
+  Alur, Henzinger, Kupferman, JACM 49(5), 2002,
+  https://www.cis.upenn.edu/~alur/Jacm02.pdf
 
 Informal model
 --------------
 A one-shot, simultaneous-move game. Two agents:
-  - matcher : picks a bit a in {0,1}
-  - hider   : picks a bit b in {0,1}
+  - person 1 (p1) : picks a in {Tail=0, Head=1}
+  - person 2 (p2) : picks b in {Tail=0, Head=1}
 Both choose at the same time, with no knowledge of the other's choice.
-The matcher wins iff a = b.
 
-Concurrent game structure:
-  - agents = { matcher, hider }
-  - from the initial state both move simultaneously
-  - delta sends to a "win" state iff a = b, otherwise to a "lose" state
-  - both terminal states are absorbing.
+Payoffs (zero-sum), exactly as in Example 17.1:
+  - SAME   (a = b): person 2 pays person 1  ->  gain1 = +1, gain2 = -1
+  - DIFFER (a != b): person 1 pays person 2 ->  gain1 = -1, gain2 = +1
+So person 1 wins on a match, person 2 wins on a mismatch.
 
-Strategic properties
---------------------
-No single player has a winning strategy (simultaneous move, zero info):
+Strategic properties (qualitative ATL reading)
+----------------------------------------------
+No single player can force a positive payoff (no pure winning strategy):
 
-    << matcher >>  F  win        -- FALSE
-    << hider   >>  F  ! win      -- FALSE
+    << p1 >>  F  gain1 = 1     -- FALSE
+    << p2 >>  F  gain2 = 1     -- FALSE
 
 The grand coalition trivially decides the outcome:
 
-    << matcher, hider >>  F  win -- TRUE
+    << p1, p2 >>  F  gain1 = 1 -- TRUE
 
-This is the textbook example separating ATL from CTL: the existence of a
-path to "win" (CTL: EF win, true) does NOT imply any single agent can
-enforce it (ATL: <<matcher>> F win, false).
+This separates ATL from CTL: a path to gain1=1 exists (CTL: EF, true) yet
+no single agent can enforce it (ATL: <<p1>>F gain1=1, false). Note this is
+the *qualitative* (pure-strategy) counterpart of Osborne-Rubinstein's
+result that the game has no pure-strategy Nash equilibrium (its value is
+attained only by mixing 1/2-1/2, which ATL does not model).
+
+CAVEAT -- simultaneity vs. a turn-based analyzer
+------------------------------------------------
+The game is genuinely simultaneous, but the analysis is turn-based: the
+second-written agent effectively observes the first one's move. Hence only
+the FIRST mover's inability is captured soundly. In ../matching_pennies.c
+p1 is written first, so << p1 >> F gain1=1 = UNKNOWN is faithful, but
+<< p2 >> F gain2=1 would be reported TRUE (p2 clairvoyant) -- NOT sound. A
+sound test for person 2 requires a model with p2 written first. There is
+no single sequential model in which BOTH players' inability holds.
 
 C transcription: ../matching_pennies.c

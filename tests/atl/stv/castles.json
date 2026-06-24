@@ -1,4 +1,5 @@
 {
+    "analysis": "atl",
     "property": "<att>F{hp2 == 0}",
     "domain": "polyhedra"
 }

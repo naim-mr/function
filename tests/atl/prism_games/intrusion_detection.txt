@@ -28,3 +28,16 @@ C transcription: ../prism_games/intrusion_detection.c
 
 NOTE: drops the probability / damage-reward dimension of the original
 rPATL model; keeps the strategic safety core.
+
+Why this modelling corresponds
+------------------------------
+Schematic abstraction at the game level:
+  - same controllability split: the defender is the coalition; the attacker
+    is the uncontrolled adversary;
+  - same objective: a SAFETY property "system never compromised";
+  - the attacker's probabilistic success -> demonic non-determinism (the
+    attacker may always attack). So  << def >> G (!compromised)  is the
+    qualitative core of  P_max[ G !compromised ] = 1, i.e. "can the defender
+    stay secure whatever the attacker does".
+Preserved: defender-vs-attacker structure + the security invariant.
+Abstracted: the success/damage probabilities and reward (expected loss).

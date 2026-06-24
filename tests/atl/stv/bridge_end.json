@@ -1,4 +1,5 @@
 {
+    "analysis": "atl",
     "property": "<decl>F{tricks >= 2}",
     "domain": "polyhedra"
 }

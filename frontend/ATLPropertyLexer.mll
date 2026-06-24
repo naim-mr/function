@@ -26,7 +26,7 @@ let atomic = atomic_first atomic_rest*
 let ident = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
 let label = ident ':'
 let ws = [' ' '\t']*
-let coalition = '<' ws ident (ws ',' ws ident)* ws '>'
+let coalition = '<' (ws ident)? (ws ',' ws ident)* ws '>'
 
 
 rule read =

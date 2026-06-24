@@ -1,44 +1,53 @@
-Two Robots and a Carriage -- original concurrent game structure (CGS)
-====================================================================
+Two Robots and a Carriage -- concurrent game structure (CGS)
+===========================================================
 
 Reference
 ---------
-N. Bulling, V. Goranko, W. Jamroga.
-"Logics for Reasoning about Strategic Abilities: Two-and-a-Half Decades
- of the Logic of Strategic Ability" (survey / tutorial).
-https://home.ipipan.waw.pl/w.jamroga/papers/satol15.pdf
+S. Demri, V. Goranko, M. Lange.
+"Temporal Logics in Computer Science", Cambridge University Press, 2016.
+Chapter 9, "Alternating-Time Temporal Logics" -- canonical CGS example.
+https://www.cambridge.org/core/books/temporal-logics-in-computer-science/
+
+(The example also appears in V. Goranko's lecture notes on logics for
+strategic reasoning; it is the standard illustration of concurrent game
+models for ATL.)
 
 Informal model
 --------------
-A carriage stands on a circular rail track with (here) 3 positions: 0,1,2.
-Two robots, robot1 and robot2, are attached to opposite sides of the
-carriage. At each step every robot chooses simultaneously one of:
+A carriage stands on a CIRCULAR track with 3 positions: 0, 1, 2.
+Two robots, robot1 and robot2, are on opposite sides. At each step each
+robot independently chooses one of two actions:
 
-    push_clockwise (+1)  |  push_counterclockwise (-1)  |  wait (0)
+    push   |   wait
 
-The carriage moves by the SUM of the two pushes. Hence:
-  - if both robots push the same way, the carriage definitely moves;
-  - if they push opposite ways, the pushes cancel and it stays put;
-  - a single robot can never guarantee a particular displacement, since
-    the other robot may cancel or override its push.
+The carriage moves ONLY IF EXACTLY ONE robot pushes:
+  - only robot1 pushes  -> clockwise        (pos := pos + 1 mod 3)
+  - only robot2 pushes  -> counter-clockwise (pos := pos - 1 mod 3)
+  - both push, or both wait -> the pushes cancel, the carriage stays put.
 
 Concurrent game structure:
   - agents = { robot1, robot2 }
-  - states Q = { position 0, 1, 2 }
-  - moves of each robot in { -1, 0, +1 }
-  - delta(pos, m1, m2) = pos + m1 + m2   (on the chosen track)
+  - states Q = { 0, 1, 2 }
+  - each robot's moves = { push, wait }
+  - delta is the "exactly one pusher moves the carriage" rule above.
 
 Strategic properties
 --------------------
-Coalition of both robots CAN drive the carriage to a target position:
+The coalition of both robots can drive the carriage to a target:
 
-    << robot1, robot2 >>  F  ( pos = target )           -- TRUE
+    << robot1, robot2 >>  F  (pos = target)   -- TRUE
 
-A single robot CANNOT force it (the other is adversarial):
+A single robot CANNOT force it: whatever robot1 does, robot2 has a
+counter-strategy keeping the carriage still (push when robot1 pushes, wait
+when robot1 waits, so the move is always cancelled or never initiated):
 
-    << robot1 >>  F  ( pos = target )                   -- FALSE
+    << robot1 >>  F  (pos = target)           -- FALSE
 
 This is the canonical illustration that coalitions strictly increase
 strategic power.
 
-C transcription: ../robots_carriage.c
+C transcription: ../robots_carriage.c   (pos in {0,1,2}, push=1 / wait=0)
+  encoded properties:
+    robots_carriage.json            <r1,r2>F{pos == 1}            (TRUE)
+    robots_carriage.single.json     <r1>F{pos == 1}              (UNKNOWN)
+    robots_carriage.stabilize.json  <r1,r2>F{<r1,r2>G{pos == 1}} (TRUE)

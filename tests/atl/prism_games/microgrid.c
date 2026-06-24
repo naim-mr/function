@@ -18,7 +18,7 @@
 
 int main() {
     int load = 0;          // instantaneous load on the grid
-    while (true) {
+    while (1) {
         int d1 = input("hh");     // household 1 wants to run a load?
         int d2 = input("hh");     // household 2 wants to run a load?
         int admit = input("ctrl");// controller: 0 none, 1 hh1, 2 hh2, 3 both

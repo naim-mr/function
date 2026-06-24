@@ -4,40 +4,20 @@ import re
 import itertools
 
 def generate_combinations(content, pattern):
-    print("""Generate all combinations of replacing occurrences of the pattern with 'input' or 'rand'.""")
-    # Find all occurrences of the pattern in the content
-
-
-    # Find all occurrences of the pattern in the content
+    """All combinations of assigning each nondet occurrence to one agent."""
     occurrences = re.findall(pattern, content)
     print(occurrences)
-    positions = [(m.group(),m.start(),m.end()) for m in re.finditer(pattern, content)]
-    print("---pos---")
-    print(positions)
-    # Generate all possible combinations of 'input' or 'rand' for each occurrence
-    replacements = list(itertools.product(['input()', 'rand()'], repeat=len(positions)))
-    combination = []
-    # Create all versions of the content based on the combinations
-    for replacement in replacements:       
-        for idx, (g,s,e) in enumerate(positions):
-            # Replace the occurrence at the position with the corresponding replacement
-            # print("start : "+ str(s))
-            # print("end : "+ str(e))
-            # print("content")
-            # print(content[s:e])
-            # print("replacement")
-            # print(replacement[idx])
-
-            l=len(replacement[idx])
-            add = ""
-
-            for i in range(0,(e-s)-l):
-                 add  = add+' '
-            
-            content = content[:s]+ replacement[idx] + add + content[e:]
-        combination.append(''.join(content))
-
-    return combination
+    n = len(occurrences)
+    options = ['input("env")', 'input("adv")']
+    combinations = []
+    for combo in itertools.product(options, repeat=n):
+        it = iter(combo)
+        # re.sub scans left-to-right; the lambda pops the next replacement.
+        # Rebuilt from the ORIGINAL content each time -> no cross-contamination,
+        # and no manual offset math (so replacements may differ in length).
+        new_content = re.sub(pattern, lambda _m: next(it), content)
+        combinations.append(new_content)
+    return combinations
 
 def process_file(file_path, pattern):
     """Process a file to generate all possible combinations of the pattern replacement."""
@@ -60,18 +40,23 @@ def process_file(file_path, pattern):
 def process_directory(directory, pattern):
     """Process all .c files in the given directory."""
     i = 0
-    for file_name in os.listdir(directory):
+    for file_name in sorted(os.listdir(directory)):
         file_path = os.path.join(directory, file_name)
-        if os.path.isfile(file_path):  # Check if it's a file (not a subdirectory)
-             process_file(file_path, pattern)
-             os.remove(file_path)
+        # Only expand .c source files; never touch .json (or other) files,
+        # and skip already-generated combinations.
+        if (os.path.isfile(file_path)
+                and file_name.endswith('.c')
+                and '_combination_' not in file_name):
+            process_file(file_path, pattern)
+            os.remove(file_path)  # remove only the expanded .c source
         i=i+1
 # Example usage:
 fod = sys.argv[1]  # Set this to the path of your repository
 print("fod "+fod)
 path = sys.argv[2]  # Set this to the path of your repository
 
-pattern=r'__VERIFIER_nondet_.*?\(\)'
+pattern = r'(?:__VERIFIER_nondet_.*?|rand)\(\)'
+
 if fod == '-f': 
     process_file(path, pattern)
 elif fod == '-d':

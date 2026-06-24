@@ -13,7 +13,8 @@
 //   agent "env"   = input("env")    -> task duration jitter (adversary)
 //
 // Scheduler completes the job in time (TRUE):
-//   -atl "<sched>F{done == 1}"
+////   -atl "<sched>F{done == 1}"
+//   -atl "<sched>F{done == 1 && time <= budget}"
 // =====================================================================
 
 int main() {
@@ -31,6 +32,6 @@ int main() {
             time = time + 2 + jitter;   // worst case 3 per task, 4 tasks <= 12
         }
     }
-    if (remaining == 0) { done = 1; }
-    while (true) {}
+    if (remaining == 0 && time <= budget) { done = 1; }
+    while (1) {}
 }

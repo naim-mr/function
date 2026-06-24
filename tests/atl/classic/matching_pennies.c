@@ -1,30 +1,43 @@
 // =====================================================================
 // Matching Pennies -- minimal concurrent game (ATL vs CTL)
 // ---------------------------------------------------------------------
-// Source : R. Alur, T. A. Henzinger, O. Kupferman,
-//          "Alternating-Time Temporal Logic", JACM 49(5), 2002.
-//          https://www.cis.upenn.edu/~alur/Jacm02.pdf
-// Original concurrent game structure: see originals/matching_pennies.cgs.txt
+// "Matching pennies" is a classic strictly-competitive zero-sum game:
+//   M. J. Osborne, A. Rubinstein, "A Course in Game Theory",
+//   MIT Press, 1994, Example 17.1:
+//   "Each of two people chooses Head or Tail. If the choices DIFFER,
+//    person 1 pays person 2 a dollar; if they are the SAME, person 2 pays
+//    person 1 a dollar."  -> person 1 wins on a match, person 2 on a mismatch.
+// We expose BOTH payoffs (gain1, gain2 = +/-1), as in the payoff matrix.
+// It is NOT named in the AHK paper; used here as the minimal witness that
+// ATL differs from CTL (no single agent can force its preferred outcome).
+// Game structure: see matching_pennies.cgs.txt
 // ---------------------------------------------------------------------
-// Two players simultaneously pick a bit. The "matcher" wins iff the bits
-// are equal. Neither player alone has a winning strategy (simultaneous
-// move, no information) -- this is the textbook case where ATL differs
-// from CTL.
+//   agent "p1" = input("p1")  -> person 1 (wins iff choices are the same)
+//   agent "p2" = input("p2")  -> person 2 (wins iff choices differ)
 //
-//   agents "m" (matcher) and "h" (hider)
+// Person 1 cannot force a positive gain (expected UNKNOWN):
+//   -atl "<p1>F{gain1 == 1}"
 //
-// Matcher alone has NO winning strategy (expected UNKNOWN):
-//   -atl "<m>F{win == 1}"
-// The grand coalition trivially wins (TRUE):
-//   -atl "<m,h>F{win == 1}"
+// CAVEAT (simultaneity): this is a genuinely SIMULTANEOUS one-shot game,
+// but the analysis is turn-based. With p1 written first we get the sound
+// reading exists-p1 forall-p2, so <p1>F{gain1==1} is faithful. The symmetric
+// query <p2>F{gain2==1} is NOT sound here (p2, written second, would be
+// clairvoyant); a sound test for person 2 needs the swapped-order model.
 // =====================================================================
 
 int main() {
-    int win = 0;
-    int a = input("m");   // matcher's bit
-    int b = input("h");   // hider's bit
+    int a = input("p1");   // person 1's choice: Head (1) / Tail (0)
+    int b = input("p2");   // person 2's choice: Head (1) / Tail (0)
     if (a > 0) { a = 1; } else { a = 0; }
     if (b > 0) { b = 1; } else { b = 0; }
-    if (a == b) { win = 1; }
-    while (true) {}        // observe the outcome
+    int gain1=0;
+    int gain2=0;
+    if (a == b) {          // same   -> person 2 pays person 1
+        gain1 = 1;
+        gain2 = -1;
+    } else {               // differ -> person 1 pays person 2
+        gain1 = -1;
+        gain2 = 1;
+    }
+    while (1) {}           // observe the payoffs
 }

@@ -1,4 +1,5 @@
 {
+    "analysis": "atl",
     "property": "<att>U{hp1 > 0}{hp2 == 0}",
     "domain": "polyhedra",
     "description": "Reach-while-avoid (strategic Until): the coalition keeps its own castle alive (hp1 > 0) UNTIL the enemy castle is defeated (hp2 == 0). Stronger than F{hp2==0}, which ignores dying first.",

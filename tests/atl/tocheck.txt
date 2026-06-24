@@ -1,0 +1,5 @@
+[nim] : voir si c'est bien le bon jeu
+[grub] : bon encodage
+
+[prism] : est ce que la version est fidèle ? par exemple les robots
+ 

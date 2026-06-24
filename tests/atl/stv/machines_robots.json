@@ -1,4 +1,5 @@
 {
+    "analysis": "atl",
     "property": "<r1,r2>F{produced >= 4}",
     "domain": "polyhedra"
 }

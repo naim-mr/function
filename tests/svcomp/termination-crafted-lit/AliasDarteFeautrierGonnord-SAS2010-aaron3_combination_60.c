@@ -1,0 +1,26 @@
+/*
+ * Program used in the experimental evaluation of the following paper.
+ * 2010SAS - Alias,Darte,Feautrier,Gonnord, Multi-dimensional Rankings, Program Termination, and Complexity Bounds of Flowchart Programs
+ *
+ * Date: 2014
+ * Author: Caterina Urban
+ */
+
+extern int __VERIFIER_nondet_int(void);
+
+int main() {
+	int x = input("adv");
+	int y = input("adv");
+	int z = input("adv");
+	int tx = input("env");
+	while (x >= y && x <= tx + z) {
+		if (input("adv")) {
+			z = z - 1;
+			tx = x;
+			x = input("adv");
+		} else {
+			y = y + 1;
+		}
+	}
+	return 0;
+}

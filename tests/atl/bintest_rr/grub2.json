@@ -1,4 +1,5 @@
 {
+    "analysis": "atl",
     "property": "<attacker>F{canary == 1}",
     "domain": "polyhedra",
     "description": "grub2 CVE-2015-8370 (back-to-28). Robust reachability of the canary overwrite. All input is attacker-controlled, so robustly reachable = TRUE (attacker: one backspace to underflow cur_len, then a printable char writes onto the canary).",

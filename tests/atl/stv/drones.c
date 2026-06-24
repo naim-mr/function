@@ -19,7 +19,7 @@
 
 int main() {
     int p = 0;             // current pollution level
-    while (true) {
+    while (1) {
         int rise = input("env");   // environment adds at most 2 units/round
         if (rise < 0) { rise = 0; }
         if (rise > 2) { rise = 2; }

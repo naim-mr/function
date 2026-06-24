@@ -1,4 +1,5 @@
 {
+    "analysis": "atl",
     "property": "<def>G{compromised == 0}",
     "domain": "polyhedra"
 }

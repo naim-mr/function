@@ -1,6 +1,7 @@
 {
-    "property": "<m,h>F{win == 1}",
+    "analysis": "atl",
+    "property": "<p1,p2>F{gain1 == 1}",
     "domain": "polyhedra",
-    "description": "Companion to matching_pennies.json: the grand coalition controlling BOTH bits trivially forces a match. Contrast <m>F{win == 1} (UNKNOWN: matcher alone has no winning strategy). Together they witness the ATL/CTL gap.",
+    "description": "Companion to matching_pennies.json: the grand coalition controlling BOTH choices trivially forces a match (gain1 == 1) -> TRUE. Contrast <p1>F{gain1 == 1} (UNKNOWN: person 1 alone has no winning strategy). Together they witness the ATL/CTL gap.",
     "model": "matching_pennies.c"
 }

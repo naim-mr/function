@@ -48,5 +48,5 @@ int main() {
         if (mine > king) { wins = wins + 1; }
         round = round + 1;
     }
-    while (true) {}                         // observe the number of wins
+    while (1) {}                         // observe the number of wins
 }

@@ -1,42 +1,55 @@
-Train Gate Controller -- original concurrent game structure (CGS)
+Train Gate Controller -- game structure (AHK Example 2.2, Fig. 1)
 ================================================================
 
 Reference
 ---------
 R. Alur, T. A. Henzinger, O. Kupferman.
 "Alternating-Time Temporal Logic". Journal of the ACM 49(5):672-713, 2002.
-https://www.cis.upenn.edu/~alur/Jacm02.pdf  (Section 2, running example)
+https://www.cis.upenn.edu/~alur/Jacm02.pdf  (Example 2.2, Figure 1)
 
-Informal model
---------------
-Agents: a controller and (one or more) trains sharing a single tunnel.
-Each train cycles through the local states:
+This is the paper's running example: a SINGLE train entering a railroad
+crossing, modelled as a TURN-BASED synchronous game structure (NOT a
+concurrent one). Exactly two players.
 
-    out  --request-->  wait  --(grant)-->  in (tunnel)  --leave-->  out
+Players
+-------
+  k = 2.  Player 1 = the train,  Player 2 = the gate controller.
 
-The controller observes requests and issues, at each step, a "grant" to at
-most one waiting train. A train enters the tunnel only after a grant.
+Atomic propositions
+-------------------
+  Pi = { out_of_gate, in_gate, request, grant }
 
-Concurrent game structure  G = (k, Q, Pi, pi, d, delta):
-  - k = number of agents (controller + trains)
-  - Q = global states  =  controller state  x  (state of each train)
-  - Pi = { in_i : train i is in the tunnel }
-  - at each state every agent picks a move simultaneously:
-        controller move  in  { grant_none, grant_1, ..., grant_n }
-        train i move     in  { idle, request, enter, leave } (when enabled)
-  - delta = synchronous product of the local transitions above.
-
-Strategic property (the one encoded for FuncTion)
+States  Q = { q0, q1, q2, q3 }  with labelling pi
 -------------------------------------------------
-The controller can keep mutual exclusion of the tunnel forever:
+  q0 : { out_of_gate }            -- train is outside the gate
+  q1 : { out_of_gate, request }   -- train has requested to enter
+  q2 : { out_of_gate, grant }     -- controller has granted permission
+  q3 : { in_gate }                -- train is in the gate
 
-    << controller >>  G  ( at most one train in the tunnel )
+Turns and transitions (di = number of moves of player i)
+--------------------------------------------------------
+  q0 : train's turn  (d_train=2, d_ctr=1)
+        move 1 -> stay in q0 (out)        move 2 -> request, go to q1
+  q1 : controller's turn (d_train=1, d_ctr=3)
+        move 1 -> grant, go to q2         move 2 -> deny, go to q0
+        move 3 -> delay, stay in q1
+  q2 : train's turn  (d_train=2, d_ctr=1)
+        move 1 -> enter the gate, go to q3   move 2 -> relinquish, go to q0
+  q3 : controller's turn (d_train=1, d_ctr=2)
+        move 1 -> keep the gate closed (stay q3)  move 2 -> reopen, go to q0
 
-i.e. there is a controller strategy such that, for all behaviours of the
-trains, never are two trains simultaneously inside the tunnel.
+So q1 and q3 are controlled by the controller; q0 and q2 by the train.
 
-Other classical ATL properties on this CGS:
-    << train_i >>  F  in_i                 (a train can force entry)
-    << controller >> G ( request_i -> F in_i )   (fair access, liveness)
+Classical ATL properties on this structure
+-------------------------------------------
+  << train >>        F in_gate     -- FALSE: the train alone cannot force
+                                      entry (the controller may deny/delay).
+  << train, ctr >>   F in_gate     -- TRUE : together they reach the gate.
+  << ctr >>          G !in_gate    -- TRUE : the controller can keep the
+                                      train out forever.
 
-C transcription: ../train_gate.c
+C transcription: ../train_gate.c   (state s in {0,1,2,3} = q0..q3)
+  encoded properties:
+    train_gate.json            <train,ctr>F{s == 3}   (TRUE)
+    train_gate.single.json     <train>F{s == 3}       (UNKNOWN, soundness)
+    train_gate.recurrence.json <ctr>G{<ctr>F{s == 0}} (controllable recovery)

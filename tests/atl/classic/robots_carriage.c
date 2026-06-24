@@ -1,31 +1,42 @@
 // =====================================================================
-// Two Robots and a Carriage -- classic ATL coalition example
+// Two Robots and a Carriage -- canonical CGS example for ATL
 // ---------------------------------------------------------------------
-// Source : N. Bulling, V. Goranko, W. Jamroga,
-//          "Logics for Reasoning about Strategic Abilities" (tutorial/handbook).
-//          https://home.ipipan.waw.pl/w.jamroga/papers/satol15.pdf
-// Original concurrent game structure: see originals/robots_carriage.cgs.txt
+// Source : S. Demri, V. Goranko, M. Lange,
+//          "Temporal Logics in Computer Science", Cambridge Univ. Press,
+//          2016, Chapter 9 "Alternating-Time Temporal Logics".
+// Faithful CGS: see robots_carriage.cgs.txt
 // ---------------------------------------------------------------------
-// A carriage sits on a track. Two robots can each push it. A single robot
-// alone cannot force the carriage to a target position (the other may push
-// the opposite way), but the COALITION of both robots can.
+// A carriage sits on a CIRCULAR track with 3 positions {0,1,2}. At each
+// step each robot independently chooses to PUSH or WAIT. The carriage moves
+// ONLY IF EXACTLY ONE robot pushes:
+//   - only r1 pushes -> clockwise        (+1 mod 3)
+//   - only r2 pushes -> counter-clockwise (-1 mod 3)
+//   - both push, or both wait -> stationary (the pushes cancel).
 //
-//   agents "r1" and "r2" = input("r1"), input("r2")   (each pushes -1 / +1)
+//   agents "r1" (clockwise) and "r2" (counter-clockwise)
 //
-// Coalition CAN force the target (TRUE):
-//   -atl "<r1,r2>F{pos >= 2}"
-// A single robot CANNOT force it (expected UNKNOWN):
-//   -atl "<r1>F{pos >= 2}"
+// The coalition of both robots can move the carriage to a target:
+//   -atl "<r1,r2>F{pos == 1}"     (TRUE)
+// A single robot cannot force it -- the other has a counter-strategy that
+// keeps the carriage still (see robots_carriage.single.json: UNKNOWN).
 // =====================================================================
 
 int main() {
     int pos = 0;
-    while (pos < 2) {
-        int a = input("r1");   // robot 1 push
-        int b = input("r2");   // robot 2 push
-        if (a > 0) { a = 1; } else { a = -1; }
-        if (b > 0) { b = 1; } else { b = -1; }
-        pos = pos + a + b;     // both push +1  =>  pos += 2
+    while (1) {
+        int p1 = input("r1");   // robot 1: push (1) or wait (0)
+        int p2 = input("r2");   // robot 2: push (1) or wait (0)
+        if (p1 > 0) { p1 = 1; } else { p1 = 0; }
+        if (p2 > 0) { p2 = 1; } else { p2 = 0; }
+        // the carriage moves only if EXACTLY one robot pushes
+        if (p1 == 1) {
+            if (p2 == 0) {                    // only r1 -> clockwise (+1 mod 3)
+                if (pos == 2) { pos = 0; } else { pos = pos + 1; }
+            }
+        } else {
+            if (p2 == 1) {                    // only r2 -> counter-clockwise (-1 mod 3)
+                if (pos == 0) { pos = 2; } else { pos = pos - 1; }
+            }
+        }
     }
-    while (true) {}            // observe the reached position
 }

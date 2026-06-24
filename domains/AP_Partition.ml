@@ -479,6 +479,8 @@ struct
                 lower @ upper)
               (vars b1)
           in
+          (* Format.printf "\n BEFORE %a " print b ;
+          Format.printf "AFTER %a \n" print b1 ; *)
           b1 (* { b1 with constraints = b1.constraints @ box_constraints } *)
         else b1
         (* if !Config.resilience && !Config.domain = "polyhedra" then

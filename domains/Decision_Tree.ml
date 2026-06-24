@@ -1526,10 +1526,12 @@ module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
       | Leaf f -> if flag && F.is_bot f then Leaf f else Leaf (F.reset f)
       | Node (c, l, r) -> Node (c, reset flag l, reset flag r)
     in
+    let expr, _, _ = e in
+    let filter = if B.is_representable expr then filter else ubwd_filter in
     let t2 =
       match mask with
-      | None -> reset false (tree (ubwd_filter t e))
-      | Some mask -> reset true (tree (ubwd_filter mask e))
+      | None -> reset false (tree (filter t e))
+      | Some mask -> reset true (tree (filter mask e))
     in
     let rec aux (t1, t2) =
       match (t1, t2) with

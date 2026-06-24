@@ -67,7 +67,7 @@ end = struct
       match block with T_empty l -> fst l | T_stat (l, _, _) -> fst l
     in
     if not !minimal then
-      Format.fprintf !fmt "\n Conflict Driven Analysis Result: %a@." D.print i;
+      Format.fprintf !fmt "\n Final Analysis Result: %a@." D.print i;
     let ret = D.defined ~condition:(Option.get precondition) i in
     Format.fprintf !fmt "Final Analysis Result: ";
     let result = if ret then "TRUE" else "UNKNOWN" in

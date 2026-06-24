@@ -1,4 +1,5 @@
 {
+    "analysis": "atl",
     "property": "<ctrl>G{AND{load <= 3}{<ctrl>F{load == 0}}}",
     "domain": "polyhedra",
     "description": "Invariant + liveness with nested strategy: the controller keeps the load bounded (load <= 3) forever AND, at every state, retains the ability to drain the grid to 0. G of a conjunction containing a nested strategic F.",

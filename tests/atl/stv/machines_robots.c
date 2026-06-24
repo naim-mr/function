@@ -31,5 +31,5 @@ int main() {
             if (a2 == 1) { produced = produced + 1; }
         }
     }
-    while (true) {}
+    while (1) {}
 }

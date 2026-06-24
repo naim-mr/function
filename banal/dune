@@ -5,7 +5,6 @@
   utils
   apron
   frontend
-  oUnit
   apron.boxMPQ
   apron.octMPQ
   apron.polkaMPQ)

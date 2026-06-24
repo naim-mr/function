@@ -7,8 +7,8 @@
 // Original C / SSE config: see originals/grub.c , originals/grub.config.ini
 // ---------------------------------------------------------------------
 // Robust reachability  =  <<controlled>> F bug :  a bug is robustly
-// reachable iff the attacker (controlled input) can trigger it WHATEVER
-// the uncontrolled input does. Here ALL input is attacker-controlled
+// reachable iff the attacker inputs can trigger it WHATEVER
+// the others input does. Here ALL input is attacker-controlled
 // (the keystrokes), so robust = standard reachability.
 //
 // The bug: backspace decrements cur_len with no underflow check; the
@@ -24,7 +24,7 @@
 int main() {
     int cur_len = 0;
     int canary = 0;
-    while (true) {
+    while (1) {
         int key = input("attacker");   // attacker-controlled keystroke
         if (key == 1) {                // backspace: NO underflow check (the bug)
             cur_len = cur_len - 1;

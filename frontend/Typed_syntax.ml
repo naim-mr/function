@@ -396,7 +396,7 @@ let nt_prog ((b, funcs, v) : prog) : prog * label list =
         let block =
           T_stat
             ( label,
-              (T_label (Z.to_string id, extent_unknown), extent_unknown),
+              (T_label ("loop", extent_unknown), extent_unknown),
               b )
         in
         T_while (l, e, block)

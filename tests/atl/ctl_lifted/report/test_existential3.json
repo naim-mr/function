@@ -1,0 +1,5 @@
+{
+    "property": "EF{r == 1}",
+    "precondition": "precondition x==2",
+    "joinbwd": 5
+} 

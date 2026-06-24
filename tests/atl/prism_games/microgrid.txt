@@ -29,3 +29,17 @@ C transcription: ../prism_games/microgrid.c
 
 NOTE: drops the probabilistic / cost (reward) dimension of the original
 rPATL model; keeps the strategic safety core.
+
+Why this modelling corresponds
+------------------------------
+Schematic abstraction at the game level (not a transcription of the PRISM
+source):
+  - same controllability split: the grid controller is the coalition; the
+    households (their load demands) are the uncontrolled environment;
+  - same objective class: a SAFETY invariant on the instantaneous load;
+  - the households' randomised demand protocol -> demonic non-determinism
+    (any demand pattern). So  << ctrl >> G (load <= cap)  is the qualitative
+    core of the rPATL question "can the controller keep the grid within
+    limits whatever the households do", i.e. the worst-case (prob-1) reading.
+Preserved: controller-vs-demand structure + the load-bound objective.
+Abstracted: the expected energy cost / fairness rewards of the rPATL specs.

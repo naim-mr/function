@@ -29,3 +29,16 @@ C transcription: ../prism_games/task_graph.c
 
 NOTE: drops the multi-objective reward (time/energy) quantities of the
 original rPATL specification; keeps strategic reachability of completion.
+
+Why this modelling corresponds
+------------------------------
+Schematic abstraction at the game level:
+  - same controllability split: the scheduler is the coalition; task
+    durations / jitter are the uncontrolled environment;
+  - same objective: reachability of "all tasks done" within a time budget;
+  - uncertain durations -> demonic non-determinism (worst-case jitter). So
+    << sched >> F done  asks "can the scheduler always finish in time
+    against the worst durations", the qualitative core of the rPATL
+    expected-time/energy objectives.
+Preserved: scheduler-vs-uncertainty structure + deadline reachability.
+Abstracted: the multi-objective expected time / energy minimisation.

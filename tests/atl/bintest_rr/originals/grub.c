@@ -50,7 +50,9 @@ grub_username_get (char buf[], unsigned buf_size)
       if (key == '\n' || key == '\r')
         break;
 
-      if (key == '\e')
+      if (key == '\e')return 1;
+  };
+}
         {
           cur_len = 0;
           break;

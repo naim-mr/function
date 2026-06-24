@@ -1,6 +1,7 @@
 {
-    "property": "<controller>G{<controller>F{in1 == 1}}",
+    "analysis": "atl",
+    "property": "<ctr>G{<ctr>F{s == 0}}",
     "domain": "polyhedra",
-    "description": "Controllable recurrence: the controller can guarantee that, forever, it keeps the ability to eventually admit train 1 into the tunnel. Nested strategic operator.",
+    "description": "Controllable recovery (nested strategic G-F): at every reachable state the controller retains a strategy to bring the system back to out_of_gate (s == 0) -- deny at q1, reopen at q3. Not expressible in CTL.",
     "model": "train_gate.c"
 }

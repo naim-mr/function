@@ -34,3 +34,4 @@ script/proton
 script/UAutomizer-linux
 results*
 logs/*
+regression_out/

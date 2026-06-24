@@ -2,7 +2,7 @@
 // Intrusion Detection -- PRISM-games case study (de-probabilised)
 // ---------------------------------------------------------------------
 // Source : PRISM-games, "Intrusion detection policies".
-//   https://www.prismmodelchecker.org/games/casestudies/ids.php
+//   https://www.prismmodelchecker.org/casestudies/ids.php
 // Original model description: see intrusion_detection.txt
 // ---------------------------------------------------------------------
 // A defender runs a system facing an attacker who repeatedly probes it.
@@ -19,7 +19,7 @@
 int main() {
     int compromised = 0;
     int exposure = 0;      // accumulated unpatched exposure
-    while (true) {
+    while (1) {
         int attack = input("atk");   // attacker launches an attack?
         int patch = input("def");    // defender patches this round?
         if (attack == 1) { exposure = exposure + 1; }

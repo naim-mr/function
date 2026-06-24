@@ -1,0 +1,63 @@
+/home/nmoussaoui/Documents/phd/v2function/function/./main.exe /home/nmoussaoui/Documents/phd/v2function/function/tests/termination/example1.c -config /home/nmoussaoui/Documents/phd/v2function/function/tests/termination/example1.json -json_output /home/nmoussaoui/Documents/phd/v2function/function/regression_out/
+
+
+Abstract typed Syntax:
+{
+  {17}
+}
+int main()@
+{
+  {6} int x;
+  {7} while {8} (x <= 10)
+  {
+    {9} x = x + 1;
+    {10}
+  }
+  {11} break#8:;
+  {12} __return4 = 0;
+  {13} return;
+  {14} return#3:;
+  {15} delete x;
+  {16}
+}
+
+Backward Analysis:
+[6:]: 0 >= -9 ? 24
+0 == 10 ? 4
+0 >= 11 ? 2
+
+[7:]: 0 >= -9 ? 24
+0 == 10 ? 4
+0 >= 11 ? 2
+
+[8:]: 0 >= -9 ? 24
+0 == 10 ? 4
+0 >= 11 ? 2
+
+[9:]: 0 >= -8 ? 23
+0 == 9 ? 5
+0 >= 10 ? 3
+
+[ 10:]: 0 >= -9 ? 24
+0 == 10 ? 4
+0 >= 11 ? 2
+
+[11:]: top ? 1
+
+[12:]: top ? 1
+
+[13:]: top ? 0.
+
+[14:]: top ? 0.
+
+[15:]: top ? 0.
+
+[16:]: top ? 0.
+
+[17:]: 0 >= -9 ? 24
+0 == 10 ? 4
+0 >= 11 ? 2
+
+
+Final Analysis Result: TRUE
+Fatal error: exception Sys_error("/home/nmoussaoui/Documents/phd/v2function/function/regression_out//home/nmoussaoui/Documents/phd/v2function/function/tests/termination/example1.c-domainpolyhedra.json: No such file or directory")

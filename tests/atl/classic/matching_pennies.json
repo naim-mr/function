@@ -1,4 +1,7 @@
 {
-    "property": "<m>F{win == 1}",
-    "domain": "polyhedra"
+    "analysis": "atl",
+    "property": "<p1>F{gain1 == 1}",
+    "domain": "polyhedra",
+    "description": "Matching Pennies (Osborne-Rubinstein, Ex. 17.1). Person 1 (wins on a match) cannot force a positive payoff against person 2 -> expected UNKNOWN. With p1 written first this is the sound exists-p1 forall-p2 reading. Witness that ATL differs from CTL.",
+    "model": "matching_pennies.c"
 }
