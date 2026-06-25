@@ -1,4 +1,0 @@
-{
-    "analysis": "atl",
-    "property": "NOT{<>G{OR{timer_1 != 0}{<>F{output_1 == 1}}}}"
-}

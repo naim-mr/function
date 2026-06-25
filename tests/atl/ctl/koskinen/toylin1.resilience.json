@@ -1,5 +1,0 @@
-{
-    "analysis": "atl",
-    "property": "<env>F{resp > 5}",
-    "precondition": "c > 5"
-}

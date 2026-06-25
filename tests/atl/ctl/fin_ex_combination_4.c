@@ -4,7 +4,7 @@
 // -domain polyhedra
 
 void main() {
-    int n = input("env");  //assume n > 0
+    int n = input("adv");  //assume n > 0
     if (n < 0) return 1;
     while (n > 0) {
         n--;

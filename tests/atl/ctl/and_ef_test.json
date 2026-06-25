@@ -1,5 +1,0 @@
-{
-    "analysis": "atl",
-    "property": "AND{<env,adv>F{x == 2}}{<env,adv>F{x==3}}",
-    "domain": "polyhedra"
-}

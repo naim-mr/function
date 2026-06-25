@@ -1,4 +1,0 @@
-{
-    "analysis": "atl",
-    "property": "<env>F{AND{<env>F{j >= 21}}{i==100}}"
-}

@@ -3,7 +3,7 @@
 // should return UNKNONW
 int main() {
     int r = 0;
-    int x = input("env");
+    int x = input("adv");
     int y = input("env");
     if (x*x < y*y + 3*x*y) { 
         // here we use non-linear expression that can't be expressed 

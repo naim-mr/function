@@ -3,7 +3,7 @@
 int main() {
     int i;
     int temp = 0;
-    int r = input("env");
+    int r = input("adv");
     i = input("env");
     if (i <0 && i>1){
         return 1;

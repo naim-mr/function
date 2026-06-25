@@ -5,6 +5,9 @@ int main() {
     // assume x > y
     int x = input("adv");
     int y = input("env");
+    if ( x <= y){
+        return 1;
+    }
     while (x > y) {
         x = x - 1;
     }

@@ -1,3 +1,0 @@
-{
-    "property": "AU{init == 0}{OR{AU{init == 1}{AG{init == 3}}}{AG{init == 1}}}"
-}

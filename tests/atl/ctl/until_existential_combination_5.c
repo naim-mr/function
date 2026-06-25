@@ -3,7 +3,7 @@
 // -precondition "x > y"
 int main() {
     // assume x > y
-    int x = input("env");
+    int x = input("adv");
     int y = input("env");
     if ( x <= y){
         return 1;

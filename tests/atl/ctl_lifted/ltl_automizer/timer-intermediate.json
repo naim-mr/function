@@ -1,3 +1,0 @@
-{
-    "property": "AG{OR{input_1 >= 1000}{AF{output_1 == 1}}}"
-}

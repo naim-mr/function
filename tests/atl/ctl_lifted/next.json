@@ -1,4 +1,0 @@
-{
-    "property": "AX{x==0}",
-    "precondition": "x == 0"
-}

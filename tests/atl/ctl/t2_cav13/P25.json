@@ -1,4 +1,0 @@
-{
-    "analysis": "atl",
-    "property": "OR{varC <= 5}{<>F{varR > 5}}"
-}

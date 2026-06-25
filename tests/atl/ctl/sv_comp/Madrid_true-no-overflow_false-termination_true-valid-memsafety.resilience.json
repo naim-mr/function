@@ -1,4 +1,0 @@
-{
-    "analysis": "atl",
-    "property": "<env>F{AND{x==7}{<env>F{<env>G{x==2}}}}"
-}

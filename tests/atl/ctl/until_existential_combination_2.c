@@ -3,9 +3,11 @@
 // -precondition "x > y"
 int main() {
     // assume x > y
-    int x;
-    int y;
-
+    int x = input("env");
+    int y = input("env");
+    if ( x <= y){
+        return 1;
+    }
    if (input("adv")){
         // loop invariant: x >= y
         while (x > y) {

@@ -2,8 +2,8 @@
 // -precondition "2*x <= y+3"
 int main() {
     int r = 0;
-    int x;
-    int y;
+    int x = input("env");
+    int y = input("env");
     if (2*x <= y+3) {
         if (input("adv") == 1) {
             r = 1;

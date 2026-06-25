@@ -4,11 +4,11 @@
 int main() {
     // assume x > y
     int x = input("env");
-    int y = input("env");
+    int y = input("adv");
     if ( x <= y){
         return 1;
     }
-   if (input("env")){
+   if (input("adv")){
         // loop invariant: x >= y
         while (x > y) {
             x = x - 1;

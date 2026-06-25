@@ -11,7 +11,7 @@
 // -ctl_str "AF{AG{WItemsNum >= 1}}"
 //
 void main() {
-    int WItemsNum = input("env");
+    int WItemsNum = input("adv");
     
     while(true) {
         while(WItemsNum <= 5 || input("env") == 1) {

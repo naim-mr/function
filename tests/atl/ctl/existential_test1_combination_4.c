@@ -3,9 +3,9 @@
 int main() {
     int r = 0;
     int x = input("env");
-    int y = input("env");
+    int y = input("adv");
     if (2*x <= y+3) {
-        if (input("env") == 1) {
+        if (input("adv") == 1) {
             r = 1;
         } 
     }

@@ -1,3 +1,0 @@
-{
-    "property": "OR{varC > 5}{EG{varR <= 5}}"
-}

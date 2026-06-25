@@ -1,5 +1,0 @@
-{
-    "analysis": "atl",
-    "property": "<>G{OR{A!=1}{<>F{R==1}}}",
-    "precondition": "A==0 && R==0"
-}

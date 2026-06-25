@@ -1,5 +1,0 @@
-{
-    "property": "EU{x >= y}{x == y}",
-    "precondition": "x > y",
-    "domain":"polyhedra"
-}

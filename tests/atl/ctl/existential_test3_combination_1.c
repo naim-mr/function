@@ -10,7 +10,7 @@
 //
 int main() {
     int r = 0;
-    int x;
+    int x = input("env");
     while (x > 0) {
         x = x - 1;
        if (input("env")){

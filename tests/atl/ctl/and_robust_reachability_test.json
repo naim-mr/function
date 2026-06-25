@@ -1,3 +1,0 @@
-{
-    "property": "AND{<env>F{x == 2}}{<env>F{x==3}}"
-}

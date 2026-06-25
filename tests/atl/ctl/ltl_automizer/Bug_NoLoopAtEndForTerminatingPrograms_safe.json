@@ -1,5 +1,0 @@
-{
-    "analysis": "atl",
-    "property": "NOT{<>F{ap > 2}}",
-    "precondition": "ap==0"
-}
