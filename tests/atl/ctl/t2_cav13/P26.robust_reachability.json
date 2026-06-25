@@ -1,0 +1,4 @@
+{
+    "analysis": "atl",
+    "property": "OR{varC > 5}{<adv>G{varR <= 5}}"
+}

@@ -1,0 +1,4 @@
+{
+    "analysis": "atl",
+    "property": "OR{<env>F{<env>G{x < -100}}}{<env>F{x==20}}"
+}

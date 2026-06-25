@@ -1,0 +1,4 @@
+{
+    "analysis": "atl",
+    "property": "NOT{<env>G{OR{timer_1 != 0}{<env>F{output_1 == 1}}}}"
+}

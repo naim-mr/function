@@ -1,0 +1,4 @@
+{
+    "analysis": "atl",
+    "property": "<env>G{OR{limit <= -273 && limit >= 10}{OR{tempIn >= 0}{<env>F{ warnLED == 1}}}}"
+}

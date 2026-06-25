@@ -1,0 +1,4 @@
+{
+    "analysis": "atl",
+    "property": "<env>G{OR{chainBroken != 1}{<env>G{chainBroken == 1}}}"
+}

@@ -1,0 +1,6 @@
+{
+    "analysis": "atl",
+    "property": "<adv>U{x >= y}{x == y}",
+    "domain": "polyhedra",
+    "precondition": "x > y"
+}

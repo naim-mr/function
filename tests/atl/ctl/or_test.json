@@ -1,0 +1,4 @@
+{
+    "analysis": "atl",
+    "property": "OR{<>F{<>G{x < -100}}}{<>F{x==20}}"
+}

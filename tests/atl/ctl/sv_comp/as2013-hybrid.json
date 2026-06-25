@@ -1,0 +1,4 @@
+{
+    "analysis": "atl",
+    "property": "AND{<>G{<>F{assert:0 > i}}{<>F{assert: i > 10 }}}"
+}

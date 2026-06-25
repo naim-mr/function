@@ -1,0 +1,4 @@
+{
+    "analysis": "atl",
+    "property": "AND{<env>G{<env>F{assert:0 > i}}{<env>F{assert: i > 10 }}}"
+}

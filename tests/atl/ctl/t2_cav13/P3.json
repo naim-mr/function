@@ -1,0 +1,4 @@
+{
+    "property": "OR{varA != 1}{<adv>F{varR==1}}",
+    "precondition": "varA == 0"
+}

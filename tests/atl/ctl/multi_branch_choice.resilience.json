@@ -1,0 +1,4 @@
+{
+    "analysis": "atl",
+    "property": "<env>F{OR{x==4}{x==-4}}"
+}

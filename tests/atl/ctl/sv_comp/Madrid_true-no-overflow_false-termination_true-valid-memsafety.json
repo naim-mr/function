@@ -1,0 +1,4 @@
+{
+    "analysis": "atl",
+    "property": "<>F{AND{x==7}{<>F{<>G{x==2}}}}"
+}

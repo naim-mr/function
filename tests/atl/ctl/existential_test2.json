@@ -1,0 +1,5 @@
+{
+    "analysis": "atl",
+    "property": "<env,adv>F{r == 1}",
+    "domain": "polyhedra"
+}

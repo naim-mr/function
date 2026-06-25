@@ -1,0 +1,4 @@
+{
+    "analysis": "atl",
+    "property": "<>G{OR{init != 3}{<>G{<>F{time > otime}}}}"
+}

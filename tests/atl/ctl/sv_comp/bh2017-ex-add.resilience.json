@@ -1,0 +1,4 @@
+{
+    "analysis": "atl",
+    "property": "<env>F{assert1: n <= 60}"
+}

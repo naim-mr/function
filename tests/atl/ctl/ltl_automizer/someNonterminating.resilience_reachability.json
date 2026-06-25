@@ -1,0 +1,5 @@
+{
+    "analysis": "atl",
+    "property": "<env>G{x > 0}",
+    "precondition": "x > 0"
+}

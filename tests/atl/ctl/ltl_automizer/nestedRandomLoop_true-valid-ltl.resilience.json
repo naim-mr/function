@@ -1,0 +1,5 @@
+{
+    "analysis": "atl",
+    "property": "<env>G{i >= n}",
+    "precondition": "i == 1 && n >= 0 && i > n"
+}

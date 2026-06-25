@@ -1,0 +1,4 @@
+{
+    "analysis": "atl",
+    "property": "OR{i >= 5}{<>F{exit: true}}"
+}
