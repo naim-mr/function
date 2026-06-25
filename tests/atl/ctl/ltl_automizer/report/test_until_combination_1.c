@@ -3,8 +3,8 @@
 // -precondition "x >= y"
 int main() {
     // assume x > y
-    int x;
-    int y;
+    int x = input("env");
+    int y = input("env");
     while (x > y) {
         x = x - 1;
     }

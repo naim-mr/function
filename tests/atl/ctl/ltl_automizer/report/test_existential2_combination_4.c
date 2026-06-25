@@ -1,0 +1,14 @@
+// -ctl "EF{r == 1}"
+// -domain polyhedra
+int main() {
+    int x = input("env");
+    int y = input("adv");
+    int r = 0;
+    while (input("adv")) { 
+        x = x + 1;
+        if (x == 200) {
+            r = 1;
+        }
+    }
+}
+
