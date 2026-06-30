@@ -2,11 +2,7 @@
 //#Unsafe
 //@ ltl invariant positive: AP(init == 0) U( (AP(init == 1) U [] AP(init == 3)) || [] AP(init == 1));
 
-#include <stdio.h> 
 
-extern void __VERIFIER_error() __attribute__ ((__noreturn__));
-extern void __VERIFIER_assume() __attribute__ ((__noreturn__));
-extern int input("env") __attribute__ ((__noreturn__));
 
 int error, tempDisplay, warnLED, tempIn, chainBroken,
 warnLight, temp, otime = 0, time = 0, limit, init = 0;
@@ -25,7 +21,7 @@ int vinToCels(int kelvin)
 		error = 1;
 		display(kelvin - 273, error);
 	}
-	return kelvin -273;
+	return;
 }
 
 void coolantControl()
@@ -63,7 +59,7 @@ int main()
 		{
 			error = 0;
 			display(0, error);
-			break;
+			return;
 		} else {
 			error = 1;
 			display(0, error);

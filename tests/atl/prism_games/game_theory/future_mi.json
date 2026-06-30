@@ -1,0 +1,7 @@
+{
+    "analysis": "atl",
+    "property": "<investor>F{gain >= cap}",
+    "domain": "polyhedra",
+    "description": "Futures market investor (de-probabilised). The investor (coalition) chooses when to reserve (lock an entry price) and when to cash in (realise gain = value - entry); the market (adversary) picks the price ceiling cap, moves the value within [0, cap], and may bar reservation a finite number of times. Can the investor force the MAXIMAL profit gain >= cap (the perfect spread: enter at 0, cash at cap)? Expected UNKNOWN -- soundness witness: a worst-case market denies any favourable spread (the quantitative original gives a probability < 1). cap is market-chosen, not fixed.",
+    "model": "future_mi.c"
+}

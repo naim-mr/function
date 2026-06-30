@@ -1,0 +1,7 @@
+{
+    "analysis": "atl",
+    "property": "<ctrl>G{AND{load <= cap}{<ctrl>F{load == 0}}}",
+    "domain": "polyhedra",
+    "description": "Invariant + liveness with nested strategy: the controller keeps the load within the (arbitrary) capacity cap forever AND, at every state, retains the ability to drain the grid to 0. G of a conjunction containing a nested strategic F. cap and the household count are not fixed in advance.",
+    "model": "microgrid.c"
+}

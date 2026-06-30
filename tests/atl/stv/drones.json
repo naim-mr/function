@@ -1,5 +1,0 @@
-{
-    "analysis": "atl",
-    "property": "<d1,d2>G{p <= 5}",
-    "domain": "polyhedra"
-}

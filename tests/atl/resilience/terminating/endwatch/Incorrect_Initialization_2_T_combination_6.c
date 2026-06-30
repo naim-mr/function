@@ -30,15 +30,15 @@ int main()
             switch( id ){
                 case 1:
                     if( res = res_return() < 0 )
-                        break;
+                        return;
                     if( res = res_return() == 0 )
                         res = 1;
-                    break;
+                    return;
 
                 default:
                 case 2:
                     res = res_return();
-                    break;
+                    return;
             }
         }
         if( res == -1 )

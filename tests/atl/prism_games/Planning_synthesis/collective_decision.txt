@@ -1,0 +1,58 @@
+CDMSN: Collective Decision Making for Sensor Networks -- original model
+=====================================================================
+
+Reference
+---------
+Tool : PRISM-games (turn-based stochastic multi-player games, rPATL).
+Paper: T. Chen, V. Forejt, M. Kwiatkowska, D. Parker, A. Simaitis,
+       "Automatic Verification of Competitive Stochastic Systems",
+       Formal Methods in System Design, 2013 -- section 5.3 (CDMSN).
+Algorithm after: distributed consensus for sensor networks (ref. [33] therein).
+
+Informal model (from the paper)
+-------------------------------
+N sensors are deployed among a set of targets K, each target k with quality
+Q_k in [0,1]. Each sensor stores a preferred target p_i, its quality, and a
+confidence level l_i. The goal is for all sensors to AGREE on the target of
+MAXIMUM quality (k1). Sensors act by sleep / explore (pick a random target,
+maybe switch preference) / communicate (compare with a random sensor; one
+adopts the other's preference, with a probability depending on quality and
+confidence). The system is an SMG with one player per sensor; only a subset C
+of sensors is controlled (coalition), the rest may be faulty / adversarial.
+rPATL queries studied:
+  - speed of convergence:  <<C>> R{time}min=? [ F (all p_i = k1) ]
+  - robustness (recovery): <<C>> Pmax=? [ F<=n  phi_good ]
+  - nested:  <<C>> Pmax=? [ F<=n  <<C>> P>0.9 [ F<=10 (all p_i = k1) ] ]
+KEY POINT: the results are QUANTITATIVE and < 1 (probabilities / expected
+times); consensus is not a sure event, and larger coalitions converge faster.
+
+De-probabilised version for FuncTion
+------------------------------------
+Keep the controllability split (controlled honest sensors = coalition C; faulty
+sensors = adversary) and ask SURE reachability of consensus on the best target:
+
+    << net >>  F  ( best == N )
+
+C transcription: ../Planning_synthesis/collective_decision.c
+  TURN-BASED with a NON-DETERMINISTIC scheduler (as in the paper, but worst-case
+  instead of random): each round exactly ONE sensor is active. The scheduler is
+  part of the uncontrolled environment (demonic). If a controlled (coalition)
+  sensor is scheduled, the coalition makes it adopt the best target (best++); if
+  a faulty sensor is scheduled, it pulls a neighbour to a worse target (best--).
+  Crucially, the coalition and the faulty sensors do NOT both act in the same
+  round -- only the scheduled agent plays. (count `best` = sensors preferring
+  the best target; consensus = best == N.)
+
+Expected result: UNKNOWN (soundness witness). Under worst-case scheduling the
+adversary can keep activating faulty sensors -- and never the coalition -- so
+the coalition cannot SURELY drive all sensors to the best target. This is
+exactly why the paper, which assumes RANDOM (fair) scheduling, measures a
+probability / expected time (< 1) rather than a sure guarantee.
+
+NOTE: two successive corrections. (1) An early version used a bounded-adversary
+budget to force TRUE -- not faithful (faulty sensors are not budget-limited).
+(2) The next version let a coalition sensor AND a faulty sensor each act every
+round (simultaneous influence) -- also wrong: the original is turn-based with a
+single scheduled agent per step. This version models the non-deterministic
+scheduler explicitly. Abstracts: target qualities, confidence levels,
+communication probabilities, and the time/energy rewards.

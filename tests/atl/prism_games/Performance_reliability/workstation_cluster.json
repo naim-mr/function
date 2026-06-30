@@ -1,0 +1,7 @@
+{
+    "analysis": "atl",
+    "property": "<rep>G{qos == 1}",
+    "domain": "polyhedra",
+    "description": "Workstation cluster (de-probabilised, game cast on a reliability CTMC). The repair unit (coalition) keeps the minimum quality of service (at least N operational workstations) satisfied forever by restoring failed workstations, whatever the failures -> expected TRUE. The sub-cluster size N and the QoS threshold are arbitrary (input(\"env\"), not fixed in advance). Qualitative core of the rPATL QoS/reliability objective.",
+    "model": "workstation_cluster.c"
+}

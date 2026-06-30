@@ -1,0 +1,7 @@
+{
+    "analysis": "atl",
+    "property": "<atk>F{poisoned == 1}",
+    "domain": "polyhedra",
+    "description": "Kaminsky DNS cache-poisoning (de-probabilised, after Alexiou-Basagiannis-Katsaros-Deshpande-Smolka HASE 2010). The intruder floods the resolver with forged responses, each guessing the randomised source port (range [1, maxport]); the cache is poisoned iff a guess matches. Can the intruder FORCE poisoning? Expected UNKNOWN/FALSE -- it commits its guess before the random port is revealed, so it cannot guarantee a match; this is the qualitative core of the paper's attack probability ~ 1/maxport (< 1, -> 0 as the port range grows). With the fix off (maxport = 1) poisoning is forced. Soundness witness, not a sure attack.",
+    "model": "kaminsky_dns.c"
+}

@@ -1,0 +1,47 @@
+Safe Vehicle Control in a Hostile Environment -- original (PRISM case study)
+==========================================================================
+
+Reference
+---------
+Tool : PRISM (MDP). https://www.prismmodelchecker.org/casestudies/
+Model: probabilistically safe vehicle control in a hostile environment.
+
+Informal model
+--------------
+A vehicle (e.g. a UAV/ground vehicle) must traverse a region toward a goal
+while a hostile environment exposes it to threats. Threat occurrence is
+stochastic; the vehicle chooses headings/lanes to minimise the probability of
+being hit while still reaching the goal. The original PRISM analysis bounds
+the probability of safe arrival.
+
+De-probabilised version for FuncTion
+------------------------------------
+Keep the controllability split (vehicle = coalition, hostile environment =
+adversary) and two qualitative objectives:
+
+    << veh >>  G  ( never hit )        -- safety
+    << veh >>  F  ( goal reached )     -- reachability
+
+C transcription: ../Planning_synthesis/vehicle_control_hostile.c
+  (each step the environment threatens a lane and the vehicle picks a lane;
+   driving into the threatened lane is a hit; threats are bounded so the goal
+   stays reachable.)
+
+NOTE: the player/adversary split is natural here (the environment is
+explicitly "hostile"). Drops the probabilistic threat model / safe-arrival
+probability; keeps the strategic safety and reachability cores. Threats are
+limited by an adversary-chosen finite budget (input("env"), not fixed in
+advance -- see BOUNDED_ADVERSARY.md) so a purely blocking adversary cannot
+stall the vehicle forever.
+
+Why this modelling corresponds
+------------------------------
+Schematic abstraction at the game level:
+  - controllability split: the vehicle is the coalition; the hostile threats
+    are the uncontrolled (bounded) adversary;
+  - objective classes: safety (never hit) and reachability (goal);
+  - probabilistic threats -> bounded demonic non-determinism. So  << veh >> G
+    !hit  and  << veh >> F goal  are the worst-case cores of the rPATL
+    safe-arrival probability objective.
+Preserved: vehicle-vs-threat structure + the safety and goal objectives.
+Abstracted: the threat probabilities and the safe-arrival probability value.

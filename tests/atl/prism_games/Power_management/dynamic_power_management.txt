@@ -1,0 +1,60 @@
+Dynamic Power Management -- original model (PRISM case study)
+===========================================================
+
+Reference
+---------
+Tool : PRISM (MDP). https://www.prismmodelchecker.org/casestudies/power.php
+Model: dynamic power management of a service provider with a request queue
+       (after Qiu, Pedram et al.); controller = power manager (PM).
+
+Informal model
+--------------
+A power manager controls a service provider (SP) that serves requests from a
+service request queue (SRQ). Requests arrive stochastically; the PM chooses
+the SP's power state (sleep / active) to trade energy against responsiveness.
+The original PRISM model is an MDP/CTMC with reward properties on expected
+energy and expected queue size / lost requests.
+
+De-probabilised version for FuncTion
+------------------------------------
+This is NOT a PRISM-games model: we IMPOSE the game split (the PM is the
+natural decision-maker -> coalition; the request arrivals -> adversary) and
+keep the queue-bound safety property:
+
+    << pm >>  G  ( queue <= cap )
+
+C transcription: ../Power_management/dynamic_power_management.c
+Explicit mapping (PRISM concept -> encoding):
+  - requests arriving           -> arr = input("env"); if arr: queue++   (adversary)
+  - PM chooses serve / sleep    -> cmd = input("pm");  if cmd: queue--   (coalition)
+  - never overflow the queue    -> << pm >> G ( queue <= cap )
+Why TRUE: the PM reads arr BEFORE choosing cmd, so it serves every round; the
+queue just oscillates 0 -> 1 -> 0 (one arrival, one service), so it never
+exceeds 1 <= cap (cap >= 1). cap is read from input("env"), arbitrary.
+
+NOTE: this is a stronger modelling step than the PRISM-games de-prob -- the
+original is a single-agent MDP, so the player/adversary split is a modelling
+choice (a natural one: the PM really is a controller). Drops the energy /
+expected-queue rewards; keeps the strategic queue-safety core.
+
+HONEST LIMITATIONS:
+  - not a game in the original: the coalition/adversary split is IMPOSED on an
+    MDP, not present in the source;
+  - the winning strategy is TRIVIAL ("serve every round"), so the strategic
+    content is thin;
+  - the dynamics are 1-for-1 (one arrival, one service per round), chosen so
+    the queue stays bounded by 1 -- hence the cap threshold is loose and the
+    safety is easy. A non-trivial variant would let the adversary enqueue
+    faster than the PM can serve.
+
+Why this modelling corresponds
+------------------------------
+Schematic abstraction at the game level:
+  - controllability split: the power manager is the controller (coalition);
+    the request arrivals are the uncontrolled environment;
+  - objective: a SAFETY invariant on the queue length;
+  - stochastic arrivals -> demonic non-determinism (any arrival pattern). So
+    << pm >> G (queue <= cap)  is the worst-case core of the rPATL/expected
+    queue objective: "can the PM keep the queue bounded whatever arrives".
+Preserved: manager-vs-arrivals structure + the queue-bound objective.
+Abstracted: the energy and expected-queue rewards.

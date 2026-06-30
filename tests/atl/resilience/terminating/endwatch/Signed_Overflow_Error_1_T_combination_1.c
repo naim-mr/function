@@ -14,7 +14,7 @@ int main()
     for( i = 1 ; i <= 0xFFFFFFFF ; i <<= 1 )
     {
         if( i == ( (long)1 << 31 ))
-            break;
+            return;
     }
     return 0;
 }

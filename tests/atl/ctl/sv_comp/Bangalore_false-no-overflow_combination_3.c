@@ -19,5 +19,5 @@ int main()
 	    	x = x - y;
     	}
 	}
-	return 0;
+	return;
 }

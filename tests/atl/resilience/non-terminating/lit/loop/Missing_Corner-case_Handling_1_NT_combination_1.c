@@ -39,7 +39,7 @@ int main()
     while(1)
     {
         if( read() < 0 )
-            break;
+            return;
     }
     return 0;
 }

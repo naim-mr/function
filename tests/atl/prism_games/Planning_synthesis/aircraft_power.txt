@@ -1,0 +1,66 @@
+Aircraft Power Distribution -- original model (PRISM-games case study)
+====================================================================
+
+Reference
+---------
+Tool : PRISM-games (turn-based stochastic games, long-run/ratio rewards).
+Paper: N. Basset, M. Kwiatkowska, U. Topcu, C. Wiltsche,
+       "Strategy Synthesis for Stochastic Games with Multiple Long-Run
+        Objectives", TACAS 2015 (case study: aircraft primary electric power
+        distribution; extends the game-theoretic model of Xu-Topcu-Murray).
+
+Informal model (from the paper)
+-------------------------------
+An aircraft electrical power network routes power from generators to buses
+(and their loads) through controllable contactors (switches). The contactors
+are controlled by Player diamond (our coalition), while the contactor delays,
+the interfaces, and the generator status (each generator powered w.p. pg,
+refreshed every N steps) are controlled by Player box / stochastically. Short
+circuits (e.g. connecting two generators) must be avoided. Because the system
+is reactive (the aircraft runs continually), correctness is specified with
+LONG-RUN RATIO rewards: keep the bus uptime (fraction of time the buses are
+powered) above a threshold b, while keeping the failure rate below f -- a
+multi-dimensional almost-sure satisfaction objective, synthesised
+COMPOSITIONALLY (one sub-game per HVAC component) with fairness. The paper
+obtains bus uptimes up to ~95% for generator health pg = 0.8.
+
+De-probabilised version for FuncTion
+------------------------------------
+Keep the controllability split (control unit = coalition reconfiguring
+contactors, generator outages = adversary) and a POWER-BALANCE safety
+invariant (energy threshold), not a mere on/off flag:
+
+    << ctrl >>  G  ( supplied power >= load demand )
+
+C transcription: ../Planning_synthesis/aircraft_power.c
+  (generators with a power capacity feed one critical bus with a power demand;
+   each round the adversary takes one generator down and the control unit
+   routes the bus to a generator. supplied = the connected generator's capacity
+   (0 if it is the one down). The demand never exceeds a single generator's
+   capacity and there are >= 2 generators, so a healthy source can always cover
+   it. Capacity, demand and generator count are arbitrary, not fixed.)
+
+NOTE: the original objective is a LONG-RUN RATIO reward (bus uptime fraction
+>= b); we abstract it to a PER-ROUND power-adequacy invariant supplied >= demand
+(if every round the load is met, the long-run uptime is 1). Drops the
+probabilistic generator failure rates, the contactor delays, the compositional
+structure and the quantitative uptime value; keeps the routing-vs-failure core.
+Earlier versions used a bus on/off boolean with no energy quantities -- this
+version models capacity vs demand explicitly, the faithful element of an
+electrical-power case study.
+
+Why this modelling corresponds
+------------------------------
+Schematic abstraction at the game level (not a transcription of the PRISM
+source / AADL composition):
+  - same controllability split: the bus control unit is the coalition; the
+    generator failures are the uncontrolled environment;
+  - same objective class: a SAFETY invariant "the critical load is met"
+    (supplied power >= demand);
+  - probabilistic generator failures -> demonic non-determinism (the
+    adversary takes one generator down each round). So  << ctrl >> G (supplied
+    >= demand)  is the qualitative core of  P_max[ G powered ] = 1 / the
+    expected-uptime objective, i.e. "can the control unit keep the load met
+    whatever fails".
+Preserved: control-vs-failure structure + the power-adequacy invariant.
+Abstracted: the failure probabilities and the expected-uptime reward.

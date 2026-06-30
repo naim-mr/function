@@ -6,7 +6,7 @@ int main() {
     int r = input("adv");
     i = input("adv");
     if (i <0 && i>1){
-        return 1;
+        return;
     }
     if (temp + i > 0) {
         r = 1;

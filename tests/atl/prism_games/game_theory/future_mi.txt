@@ -1,0 +1,66 @@
+Futures Market Investor -- original model (PRISM-games case study)
+================================================================
+
+Reference
+---------
+Tool : PRISM-games (stochastic multi-player game, rPATL).
+Case study page: https://www.prismmodelchecker.org/games/casestudies.php
+Model: futures market investor (McIver & Morgan).
+
+Informal model
+--------------
+An investor trades a stock against a market. Over successive months the market
+value fluctuates (probabilistically) and the investor decides when to reserve
+a position so that subsequent price changes accrue to its profit; a "bar"
+phase models market conditions in which reservations are restricted. The
+original rPATL analysis computes the maximal expected / guaranteed profit the
+investor can secure against the market.
+
+De-probabilised version for FuncTion
+------------------------------------
+Keep the controllability split (investor = coalition, market = adversary) and
+ask sure reachability of the MAXIMAL profit:
+
+    << investor >>  F  ( gain >= cap )
+
+C transcription: ../game_theory/future_mi.c
+  (the market picks the price ceiling cap (input("stock"), not fixed), moves the
+   stock value within [0, cap] each month, and may bar reservation only an
+   adversary-chosen FINITE number of months (bars = input("market"), not fixed
+   in advance -- see BOUNDED_ADVERSARY.md) -- otherwise it could block the
+   investor forever and trivialise the game. The investor chooses WHEN to
+   reserve -- locking an entry price -- and WHEN to cash in, realising
+   gain = value - entry. Since gain is bounded by cap, the target gain >= cap
+   demands the PERFECT spread: enter at 0, cash at cap. No magic constant
+   remains -- cap itself is market-chosen.)
+
+MODELLING SCOPE: this is a SINGLE-TRADE model -- exactly one reservation
+followed by one cash-in, after which the game ends. The `bars` budget therefore
+applies ONLY before the reservation (the bar branch is unreachable once the
+position is reserved); it merely guarantees the investor can eventually enter
+the game. A multi-trade variant (after each cash-in: reset the position,
+refresh the bar budget, and accumulate the gain across trades) is possible but
+NOT modelled here -- and it would not change the UNKNOWN verdict, since a
+worst-case market can keep every individual trade unprofitable.
+
+Expected result: UNKNOWN (soundness witness). The investor has a genuine
+two-sided timing lever (reserve + cash in), but against a worst-case
+adversarial market -- which controls every value move -- it cannot SURELY
+force a favourable spread; the quantitative original yields a probability < 1.
+So  << investor >> F (gain >= cap)  is expected UNKNOWN, a soundness companion
+to the TRUE strategic-safety benchmarks (cf. train_gate single-train). The
+target is exactly the ceiling cap: reachable in principle (the cooperative
+optimum is cap), so the verdict is "not guaranteeable" rather than
+"structurally impossible".
+
+Why this modelling corresponds
+------------------------------
+  - controllability split: the investor is the coalition; the market moves are
+    the uncontrolled adversary;
+  - objective: reachability of a profit threshold;
+  - probabilistic market -> demonic non-determinism (worst-case price path).
+    So  << investor >> F profit  is the qualitative (sure) core of the rPATL
+    expected/guaranteed-profit objective; here it exposes the gap between
+    "almost-sure under a real market" and "sure under a demonic market".
+Preserved: investor-vs-market structure + the profit objective.
+Abstracted: the price-move probabilities and the expected-profit value.

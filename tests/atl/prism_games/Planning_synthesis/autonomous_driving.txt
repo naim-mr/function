@@ -1,0 +1,64 @@
+Autonomous Urban Driving -- original model (PRISM-games case study)
+=================================================================
+
+Reference
+---------
+Tool : PRISM-games (stochastic two-player games, multi-objective synthesis).
+Paper: T. Chen, M. Kwiatkowska, A. Simaitis, C. Wiltsche,
+       "Synthesis for Multi-Objective Stochastic Games: An Application to
+        Autonomous Urban Driving", QEST 2013 (DARPA Urban Challenge, real
+        OpenStreetMap data).
+
+Informal model (from the paper)
+-------------------------------
+A car drives a road network (a graph of road segments, imported from
+OpenStreetMap) toward a destination. It is a stochastic two-player game:
+Player 1 = the car (we synthesise its strategy), Player 2 = the environment.
+On each segment the environment ADVERSARIALLY selects from a set of hazards
+(pedestrian, jam, obstacle); the car picks a reaction (brake, honk, change
+lane, U-turn). A reaction inappropriate for the road causes a rule violation;
+an appropriate reaction still leads to an accident with a (small) PROBABILITY.
+The specification is a multi-objective conjunctive query with a Pareto
+trade-off: reach the target (F goal) with probability >= v1, AVOID accidents
+(G not-accident) with probability >= v2, and keep expected road quality >= v3.
+KEY POINT: the objectives TRADE OFF (Pareto) -- e.g. reaching faster incurs more
+expected accidents/ROZ-like risk; accident probability is MINIMISED, not 0.
+
+De-probabilised version for FuncTion
+------------------------------------
+Keep the controllability split (vehicle controller = coalition, hazards =
+adversary) and two qualitative objectives:
+
+    << car >>  G  ( no collision )         -- safety
+    << car >>  F  ( destination reached )  -- reachability
+
+C transcription: ../Planning_synthesis/autonomous_driving.c
+  (the environment may present a hazard each round; advancing into a hazard
+   collides, yielding is safe; hazards are bounded so the goal stays
+   reachable.)
+
+CAVEAT vs the paper: here the car can avoid EVERY collision by yielding, so
+<car>G{crash==0} is TRUE. In the paper an appropriate reaction still causes an
+accident with a small probability, so accident-avoidance is MINIMISED (Pareto),
+not surely achieved -- a faithful qualitative variant would let the adversary
+force a residual collision (making the safety property UNKNOWN, like the UAV ROZ
+objective). We keep the simpler bounded-hazard abstraction here.
+
+NOTE: drops the probabilistic hazard model and the route-cost reward of the
+original rPATL specification; keeps the strategic safety and reachability
+cores. Probabilistic hazards are modelled as an adversary-chosen finite budget
+(input("env"), not fixed in advance -- see BOUNDED_ADVERSARY.md).
+
+Why this modelling corresponds
+------------------------------
+Schematic abstraction at the game level (not a transcription of the source):
+  - same controllability split: the vehicle controller is the coalition; the
+    urban hazards are the uncontrolled environment;
+  - same objective classes: safety (no collision) and reachability (arrival);
+  - probabilistic hazards -> demonic non-determinism, BOUNDED so that a
+    purely cancelling adversary cannot stall the car forever (mirrors the
+    robot_coordination de-probabilisation). So  << car >> G !crash  and
+    << car >> F arrived  are the qualitative cores of the rPATL safety /
+    progress objectives.
+Preserved: car-vs-hazard structure + the safety and arrival objectives.
+Abstracted: the hazard probabilities and the route-cost reward.

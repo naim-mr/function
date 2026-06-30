@@ -13,7 +13,6 @@
 */
 
 /* extended Euclid's algorithm */
-extern int __VERIFIER_nondet_int(void);
 
 int main() {
     int x, y;
@@ -32,14 +31,14 @@ int main() {
 
     while (1) {
         if (!(b != 0))
-            break;
+            return;
         int c, k;
         c = a;
         k = 0;
 
         while (1) {
             if (!(c >= b))
-                break;
+                return;
             int d, v;
             d = 1;
             v = b;
@@ -51,7 +50,7 @@ int main() {
                 //__VERIFIER_assert(v == b * d);
 
                 if (!(b == x * q + y * s))
-                    break;
+                    return;
                 d = 2 * d;
                 v = 2 * v;
             }

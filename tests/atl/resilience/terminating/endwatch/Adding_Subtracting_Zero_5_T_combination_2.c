@@ -35,7 +35,7 @@ int main()
     {
         INSDS *nxt = ip->nxtact;
         if( ip == nxt )
-            break;
+            return;
         ip = nxt;
     }
     return 0;

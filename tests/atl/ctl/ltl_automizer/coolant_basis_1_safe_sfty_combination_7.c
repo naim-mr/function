@@ -2,11 +2,7 @@
 //#Safe
 //@ ltl invariant positive: [](AP(chainBroken == 1) ==> []AP(chainBroken == 1));
 
-#include <stdio.h>
 
-extern void __VERIFIER_error() __attribute__ ((__noreturn__));
-extern void __VERIFIER_assume() __attribute__ ((__noreturn__));
-extern int input("adv") __attribute__ ((__noreturn__));
 
 int error, tempDisplay, warnLED, tempIn, chainBroken,
 warnLight, temp, limit, init;
@@ -25,7 +21,7 @@ int vinToCels(int kelvin)
 		error = 1;
 		display(kelvin - 273, error);
 	}
-	return kelvin -273;
+	return;
 }
 
 void coolantControl()
@@ -67,14 +63,14 @@ int main()
 		{
 			error = 0;
 			display(0, error);
-			break;
+			return;
 		} else {
 			error = 1;
 			display(0, error);
 		}	
 		if (try >= 3) {
 			limit = 7;
-			break;
+			return;
 		}
 		try++;
 	}

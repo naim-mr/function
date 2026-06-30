@@ -1,4 +1,4 @@
 {
     "analysis": "atl",
-    "property": "\"<env>U{init == 0}{OR{<env>U{init == 1}{<env>G{init == 3}}}{<env>G{init == 1}}}\""
+    "property": "<env>U{init == 0}{OR{<env>U{init == 1}{<env>G{init == 3}}}{<env>G{init == 1}}}"
 }

@@ -1,8 +1,6 @@
 //#Safe
 //@ ltl invariant someinv: ([](AP(input_1 < 1000) ==> <>(AP(output_1 == 1))));
 
-extern void __VERIFIER_assume() __attribute__ ((__noreturn__));
-extern int input("adv") __attribute__ ((__noreturn__));
 
 int timer_1;
 int timer_2;
@@ -25,8 +23,8 @@ void run_timer(){
 
 int read_input_1(){
 	input_1 = input("env");
-	__VERIFIER_assume(input_1 < 65535); 
-	return input_1;
+	assume_abort_if_not(input_1 < 65535); 
+	return;
 }
 
 void main()

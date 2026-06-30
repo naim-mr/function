@@ -4,11 +4,7 @@
 //
 // -ctl_cfg  AU{init == 0}{OR{AU{init == 1}{AG{init == 3}}}{AG{init == 1}}};
 
-#include <stdio.h> 
 
-extern void __VERIFIER_error() __attribute__ ((__noreturn__));
-extern void __VERIFIER_assume() __attribute__ ((__noreturn__));
-extern int input("adv") __attribute__ ((__noreturn__));
 
 int error, tempDisplay, warnLED, tempIn, chainBroken,
 warnLight, temp, otime = 0, time = 0, limit, init = 0;
@@ -29,7 +25,7 @@ int vinToCels(int kelvin)
 		error = 1;
 		display(kelvin - 273, error);
 	}
-	return kelvin -273;
+	return;
 }
 
 void coolantControl()
@@ -67,7 +63,7 @@ int main()
 		{
 			error = 0;
 			display(0, error);
-			break;
+			return;
 		} else {
 			error = 1;
 			display(0, error);

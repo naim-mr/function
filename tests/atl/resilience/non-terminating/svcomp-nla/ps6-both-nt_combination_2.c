@@ -12,7 +12,6 @@
   Adapted from the original nonlinear benchmark nla-digbench. 
 */
 
-extern int __VERIFIER_nondet_int(void);
 
 int main() {
     int k, y, x, c;
@@ -26,7 +25,7 @@ int main() {
         // __VERIFIER_assert(-2*y*y*y*y*y*y - 6 * y*y*y*y*y - 5 * y*y*y*y + y*y + 12*x == 0);
 
         if (!(-2*y*y*y*y*y*y - 6 * y*y*y*y*y - 5 * y*y*y*y + y*y + 12*x == 0))
-            break;
+            return;
 
         c = c + 1;
         y = y + 1;

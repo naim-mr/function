@@ -6,7 +6,7 @@ int main() {
 
     int i, n, a, b;
     i = 0; a = 0; b = 0; n = input("adv");
-    if (!(n >= 0 && n <= 1000000)) return 0;
+    if (!(n >= 0 && n <= 1000000)) return;
     while (i < n) {
         if (input("adv")) {
             a = a + 1;
@@ -19,5 +19,5 @@ int main() {
     }
     assert1:
     //__VERIFIER_assert(a + b == 3*n);
-    return 0;
+    return;
 }

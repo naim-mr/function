@@ -1,0 +1,46 @@
+Non-Repudiation Protocol -- original model (PRISM-games case study)
+=================================================================
+
+Reference
+---------
+Tool : PRISM-games (turn-based probabilistic timed games, TPTG / rPATL).
+Case study page:
+       https://www.prismmodelchecker.org/games/casestudies/non_repudiation.php
+Protocol: Markowitch & Roggeman, probabilistic non-repudiation protocol.
+
+Informal model
+--------------
+A fair-exchange protocol between an originator (sender) and a recipient.
+The originator sends a message over several rounds, mixing it with decoys;
+the recipient must return a receipt (non-repudiation-of-receipt evidence).
+The security goal is FAIRNESS: the protocol must never reach a state where
+the recipient has obtained the message while the originator has NO receipt.
+The original is a turn-based (timed) stochastic game; the recipient may try
+to stop early to break fairness, with rPATL bounding its success.
+
+De-probabilised version for FuncTion
+------------------------------------
+Keep the controllability split (originator = coalition, recipient = adversary)
+and the fairness safety invariant:
+
+    << orig >>  G  ( fairness preserved )
+
+C transcription: ../Security/non_repudiation.c
+  (the originator releases the message only once it holds the receipt; the
+   recipient may withhold the receipt; fairness == not(msg held by recipient
+   while no receipt held by originator).)
+
+NOTE: drops the timing and probabilistic decoy/guessing dimension of the
+original TPTG model; keeps the strategic fairness core.
+
+Why this modelling corresponds
+------------------------------
+Schematic abstraction at the game level (not a transcription of the source):
+  - same controllability split: the originator is the coalition, the
+    recipient is the uncontrolled adversary;
+  - same objective: a SAFETY invariant "fairness is never violated";
+  - the recipient's randomised stop strategy -> demonic non-determinism (it
+    may withhold the receipt at any time). So  << orig >> G fair  is the
+    qualitative core of the rPATL non-repudiation/fairness guarantee.
+Preserved: originator-vs-recipient structure + the fairness invariant.
+Abstracted: protocol timing and the probabilistic decoy/guessing analysis.

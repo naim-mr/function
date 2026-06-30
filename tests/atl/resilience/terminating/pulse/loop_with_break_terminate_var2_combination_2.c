@@ -5,7 +5,7 @@ void loop_with_break_terminate_var2(int y) {
     if (y == 50)
       {
 	y--;
-	break;
+	return;
       }
     else
       y++;

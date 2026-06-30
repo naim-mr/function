@@ -13,7 +13,7 @@
 void main() {
     int WItemsNum = input("adv");
     
-    while(true) {
+    while(1) {
         while(WItemsNum <= 5 || input("env") == 1) {
                if (WItemsNum <= 5) {
                    WItemsNum++;
@@ -26,6 +26,6 @@ void main() {
         }
     }
 
-    while(true) {}
+    while(1) {}
 }
     

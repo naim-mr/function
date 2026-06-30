@@ -1,4 +1,5 @@
 {
     "analysis": "atl",
-    "property": "\"<env>G{<env>F{otime < time}}\""
+    "property": "<env>G{<env>F{otime < time}}",
+    "domain": "polyhedra"
 }

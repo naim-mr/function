@@ -14,9 +14,7 @@
 
 /* Compute the floor of the square root, by Dijkstra */
 /*
-extern int __VERIFIER_nondet_int(void);
 */
-extern int __VERIFIER_nondet_int(void);
 
 int main() {
     int n, p, q, r, h;
@@ -30,7 +28,7 @@ int main() {
 
     /*
     while ( q <= n ) {
-      // if (!(q <= n)) break;
+      // if (!(q <= n)) return;
 
         q = 4 * q;
     }
@@ -47,7 +45,7 @@ int main() {
       //__VERIFIER_assert(p * p - n * q + q * r == 0);
 
       //if (!(q != 1))
-      //    break;
+      //    return;
       if (4 * (q / 4) == q && 2 * (p / 2) == p) {
         q = q / 4;
         h = p + q;

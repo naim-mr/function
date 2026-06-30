@@ -1,0 +1,7 @@
+{
+    "analysis": "atl",
+    "property": "<veh>G{hit == 0}",
+    "domain": "polyhedra",
+    "description": "Safe vehicle control in a hostile environment (de-probabilised). The vehicle (coalition) avoids every threat by steering to the unthreatened lane, whatever the hostile environment does -> expected TRUE. Qualitative core of the rPATL safety objective.",
+    "model": "vehicle_control_hostile.c"
+}

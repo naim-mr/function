@@ -1,6 +1,5 @@
 typedef enum {false,true} bool;
 
-extern int __VERIFIER_nondet_int(void);
 /* Diverges if  y >= 0 x > 0 */
 int main() {
     int x;

@@ -1,0 +1,60 @@
+Real-Time Dynamic Voltage Scaling -- original model (PRISM case study)
+====================================================================
+
+Reference
+---------
+Tool : PRISM (MDP/PTA). https://www.prismmodelchecker.org/casestudies/power.php
+Model: real-time dynamic voltage scaling (Pillai & Shin).
+
+Informal model
+--------------
+A real-time scheduler runs periodic tasks on a CPU whose voltage/frequency it
+can scale. High frequency finishes work faster but uses more energy; low
+frequency saves energy but risks deadline misses. Task execution times are
+uncertain. The original PRISM analysis minimises expected energy subject to
+deadline guarantees.
+
+De-probabilised version for FuncTion
+------------------------------------
+This is NOT a PRISM-games model: we IMPOSE the game split (the scheduler is
+the natural decision-maker -> coalition; the workload -> adversary) and keep
+the deadline safety property:
+
+    << dvs >>  G  ( no deadline missed )
+
+C transcription: ../Power_management/dvs.c
+Explicit mapping (PRISM concept -> encoding):
+  - task of varying size        -> load = input("env"); backlog += 2 (heavy) / 1 (light)  (adversary)
+  - scheduler picks frequency   -> hi = input("dvs"); backlog -= 2 (high) / 1 (low)        (coalition)
+  - never miss a deadline       -> << dvs >> G ( missed == 0 ),  missed = backlog > buf
+Why TRUE: the scheduler reads load BEFORE choosing the frequency, so it runs
+high on a heavy task (clears 2 >= the +2 arrival); the backlog never grows and
+stays at 0, so missed is never set. buf is read from input("env"), arbitrary.
+
+NOTE: stronger modelling step than the PRISM-games de-prob -- the original is
+a single-agent MDP, so the player/adversary split is a (natural) modelling
+choice. Drops the expected-energy reward; keeps the deadline-safety core.
+
+HONEST LIMITATIONS:
+  - not a game in the original: the coalition/adversary split is IMPOSED on an
+    MDP;
+  - NO ENERGY is modelled -- so this captures only the schedulability side of
+    DVS, NOT its defining energy-vs-performance trade-off (running "low" has no
+    cost here, so the scheduler can always run "high"). It is therefore not a
+    faithful model of DVS's energy objective, only of deadline feasibility;
+  - the winning strategy is TRIVIAL ("always high frequency"), and the 1-vs-2
+    rates keep the backlog at 0, so the deadline buffer is loose. A faithful
+    DVS variant would add an energy budget that high frequency consumes, making
+    the low/high choice a genuine trade-off.
+
+Why this modelling corresponds
+------------------------------
+Schematic abstraction at the game level:
+  - controllability split: the frequency scheduler is the controller
+    (coalition); the workload is the uncontrolled environment;
+  - objective: a SAFETY invariant "no deadline missed";
+  - stochastic execution times -> demonic non-determinism (worst-case load).
+    So  << dvs >> G !missed  is the worst-case core of the deadline-guarantee
+    objective: "can the scheduler always meet deadlines whatever the load".
+Preserved: scheduler-vs-workload structure + the deadline objective.
+Abstracted: the expected-energy minimisation reward.

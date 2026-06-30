@@ -1,15 +1,11 @@
 //#Safe
 //@ ltl invariant positive: <>AP(phi_io_compl == 1) || <>AP(phi_nSUC_ret == 1);
 
-extern void __VERIFIER_error() __attribute__ ((__noreturn__));
-extern void __VERIFIER_assume();
-extern int __VERIFIER_nondet_int();
 
 #define NTSTATUS int
 #define PIRP int
 #define PDEVICE_OBJECT int
 #define KIRQL int
-#include<stdio.h>
 #define STATUS_UNSUCCESSFUL 1
 #define STATUS_SUCCESS 2
 #define IOCTL_SERIAL_GET_WAIT_MASK 3
@@ -122,8 +118,8 @@ int phi_nSUC_ret; int phi_io_compl;
 
 unsigned int pc;
 // AG(A => AF(R)
-//int __phi() { return CAG(COR(  CAF(CAP(keR == 1)), CAP(keA != 1) )); }
-//int __phi() { return CAG(COR(  CAF(CAP(ioR == 1)), CAP(ioA != 1) )); }
+//int __phi() { return; }
+//int __phi() { return; }
 /* prove that either IoCompleteRequest is called, 
    or a value other than STATUS_SUCCESS is returned. */
 /*int __phi() { return COR(
@@ -260,7 +256,7 @@ int main() {
        else {
 
            KeReleaseSpinLock(&lock4, Irql);
-           break;
+           return;
        }
    }
 
@@ -312,7 +308,7 @@ int main() {
        else {
 
            KeReleaseSpinLock(&lock5, Irql);
-           break;
+           return;
        }
    }
 

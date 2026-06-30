@@ -1,0 +1,51 @@
+Kaminsky DNS Cache-Poisoning -- original model (HASE 2010)
+=========================================================
+
+Reference
+---------
+Tool : PRISM (CTMC).
+Paper: N. Alexiou, S. Basagiannis, P. Katsaros, T. Deshpande, S. A. Smolka,
+       "Formal Analysis of the Kaminsky DNS Cache-Poisoning Attack Using
+        Probabilistic Model Checking", HASE 2010.
+
+Informal model (from the paper)
+-------------------------------
+The intruder hijacks a domain by poisoning a victim resolver's cache: it floods
+the resolver with forged referral responses while the resolver awaits a
+legitimate answer. A forged response is ACCEPTED (cache poisoned) iff it matches
+the query id AND the source port the resolver used. The proposed fix randomises
+the source port over 1..max_port_id, so the intruder must GUESS it (on top of
+the 16-bit query id). The CTMC has modules CS (victim), RS (root), DS (target
+domain), IS (intruder); the property is P=?[F cache_poisoned].
+KEY FINDING: the attack SUCCEEDS but only probabilistically -- the attack
+probability follows a 1/N law (N = max_port_id): high with the fix off
+(max_port_id = 1, P -> ~1), and -> 0 as the port range grows. It also rises with
+the number of forged attempts and the guess rate.
+
+De-probabilised version for FuncTion
+------------------------------------
+Because the attack is a probabilistic GUESSING race, we model the attacker's
+reachability of poisoning -- and the key faithful element is that the intruder
+guesses BLINDLY:
+
+    << atk >>  F  ( cache poisoned:  poisoned == 1 )
+
+C transcription: ../Security/kaminsky_dns.c
+Explicit mapping (paper -> encoding):
+  - source-port range / the fix   -> maxport (= input("res"))
+  - resolver's random source port -> port = input("res"), revealed AFTER the guess
+  - intruder's forged guesses     -> guess = input("atk") (committed first, blind)
+  - bounded flood of attempts     -> tries
+  - cache_poisoned                -> guess == port
+Expected result: UNKNOWN/FALSE. The intruder commits each guess before the
+resolver's random port is revealed, so against a worst-case (randomising)
+resolver it cannot FORCE a match -- exactly why the attack probability is
+1/maxport < 1 (and -> 0 as maxport grows). With the fix off (maxport = 1) the
+guess always matches and poisoning is forced (TRUE).
+
+NOTE: this is a partial-information / probabilistic game; perfect-information
+ATL cannot reproduce the 1/N value, only the qualitative fact that a SURE attack
+is impossible under port randomisation. Modelling the port as revealed after the
+blind guess captures this. The earlier version used <res>G{poisoned==0} TRUE
+(deterministic validation), which contradicted the paper's finding that the
+attack succeeds with positive probability. Corrected here.

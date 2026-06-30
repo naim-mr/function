@@ -1,7 +1,0 @@
-{
-    "analysis": "atl",
-    "property": "<d1,d2>F{<d1,d2>G{p == 0}}",
-    "domain": "polyhedra",
-    "description": "Stabilization (F of nested G): the drones can eventually reach a regime where they keep pollution at 0 forever (two drones clean 2/round, environment adds at most 2/round).",
-    "model": "drones.c"
-}

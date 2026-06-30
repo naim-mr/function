@@ -1,7 +1,0 @@
-{
-    "analysis": "atl",
-    "property": "<att>F{NOT{<def>F{hp1 == 0}}}",
-    "domain": "polyhedra",
-    "description": "Coalition alternation + denial: the attacker can reach a state from which the defender NO LONGER has a strategy to destroy our castle (hp1 == 0). Combines two opposing coalitions under a negation -- a genuinely ATL property.",
-    "model": "castles.c"
-}

@@ -3,7 +3,6 @@
 
 //@ ltl invariant positive: []AP(x > 0);
 
-extern int input("env");
 
 int x,y;
 

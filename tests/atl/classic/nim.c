@@ -4,13 +4,16 @@
 // Background : turn-based zero-sum game, standard textbook ATL/synthesis
 //              example. P-positions are the multiples of 4 (last to move
 //              wins). With 7 tokens the first mover ("me") has a winning
-//              strategy: take 3, leaving 4, then mirror the opponent.
+//              strategy: take 3, leaving 4, then always restore a multiple
+//              of 4 by taking 4 - (opponent's last move).
 // Original model: see originals/nim.txt
 // ---------------------------------------------------------------------
 //   agent "me"  = input("me")   -> coalition (angelic), moves first
 //   agent "opp" = input("opp")  -> adversary
 //
-// First mover has a winning strategy (TRUE):
+// First mover has a winning strategy (TRUE in the game; the analyzer may
+// report UNKNOWN -- proving it needs relational precision the abstract
+// domain lacks):
 //   -atl "<me>F{win == 0}"
 // =====================================================================
 
@@ -21,18 +24,18 @@ int main() {
     while (tokens > 0) {
         int take;
         if (turn == 0) {
-            take = input("me");    // angelic
+            take = input("me");    // angelic: me chooses how much to take
         } else {
             take = input("opp");   // adversary
         }
-        if (take < 1) { take = 1; }
-        if (take > 3) { take = 3; }
+        if (take < 1) { take = 1; }       // a legal move removes 1..3 tokens,
+        if (take > 3) { take = 3; }       // never more than what remains
         if (take > tokens) { take = tokens; }
         tokens = tokens - take;
         if (tokens == 0) {
             win = turn;            // whoever took the last token wins
         }
-        turn = 1 - turn;
+        turn = 1 - turn;           // hand over to the other player
     }
-    while (1) {}                // observe the winner
+
 }

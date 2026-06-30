@@ -19,11 +19,11 @@ int main()
     for( ;  ; )
     {
         if( st_max < cur )
-        break;
+        return;
         pre = cur;
         cur += best;
         if( cur <= pre )
-            break;
+            return;
     }
     return 0;
 }

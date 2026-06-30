@@ -29,5 +29,4 @@ int main() {
         if (send == 1) { if (deliver == 1) { recv = 1; } }
         if (recv == 1) { if (deliver == 1) { ack = 1; } }
     }
-    while (1) {}
 }

@@ -28,11 +28,11 @@ int main()
             case EOF:
                 return 0;
             case '=':
-                break;
+                return;
             case '\0':
-                break;
+                return;
             default:
-                break;
+                return;
         }
     }
     return 0;

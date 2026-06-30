@@ -1,0 +1,54 @@
+Collective Adaptive Systems Resilience -- original model (CMU)
+=============================================================
+
+Reference
+---------
+Tool : PRISM-games (turn-based stochastic multi-player games, rPATL).
+Paper: T. J. Glazier, J. Camara, B. Schmerl, D. Garlan,
+       "Analyzing Resilience Properties of Different Topologies of Collective
+        Adaptive Systems" (Carnegie Mellon University).
+
+Informal model (from the paper)
+-------------------------------
+A collective of N self-adaptive managers (CAS) -- e.g. the multi-region
+deployments of a Netflix-like system -- cooperates to defend against an external
+attacker. It is a turn-based stochastic game with TWO players: all self-adaptive
+managers are modelled as ONE cooperative coalition (CAS), and the attacker (ATT)
+is the adversary. Each member can detect an attack (with a probability that
+grows with the attacker's deployed resources), defend, and NOTIFY others
+according to a communication topology (line, ring, mesh, tree, star, full); a
+notified member ADAPTS and becomes invulnerable to the breach. The attacker has
+bounded resources it deploys against members. The metric is the percentage of
+members compromised; the rPATL query is
+
+    <<ATT>> R{"compromised"}max=? [ F stop ]
+
+i.e. the maximum number the attacker can compromise whatever the CAS does.
+KEY FINDING: resilience is topology-dependent -- "line" lets the attacker
+compromise ~100%, "full" only ~39% -- so notification/adaptation saves members,
+but not all against a strong attacker.
+
+De-probabilised version for FuncTion
+------------------------------------
+Two-player split (cooperative CAS = coalition, attacker = adversary), with the
+attacker's resources de-probabilised as a bounded breach budget and notification
+de-probabilised as "a notified member adapts (becomes invulnerable)":
+
+    << cas >>  F  ( adapted >= 1 )     resilience -- expected TRUE
+
+C transcription: ../Planning_synthesis/self_adaptive.c
+  (each round the CAS notifies one member -> it adapts; the attacker breaches one
+   un-adapted member while it has resources; the run ends when every member is
+   either compromised or adapted.)
+
+Why TRUE: the collective can notify/adapt members before they are compromised,
+so at least one survives -- the qualitative core of "the topology provides
+resilience". Dually, << att >> F (compromised == N) -- "the attacker compromises
+the WHOLE collective" -- is expected UNKNOWN, since notification adapts members
+the attacker can then no longer breach (matching that even the worst topology is
+not always 100% compromised, and good topologies keep a majority safe).
+
+NOTE: this REPLACES an earlier, unrelated "manager vs request-load SLA" model
+that did not correspond to this case study at all. Abstracts: the detection /
+notification probabilities, the per-topology communication structure, and the
+quantitative compromised-count reward.

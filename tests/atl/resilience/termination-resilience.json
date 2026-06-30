@@ -1,4 +1,5 @@
 {
+    "analysis": "atl",
     "property": "<env>F{exit:true}",
     "domain": "polyhedra"
 }

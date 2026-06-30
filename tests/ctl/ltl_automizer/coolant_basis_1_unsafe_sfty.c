@@ -81,5 +81,6 @@ int main()
 	}
 	
 	init = 3;
-	coolantControl();	
+	coolantControl();
+	return 0;	
 }

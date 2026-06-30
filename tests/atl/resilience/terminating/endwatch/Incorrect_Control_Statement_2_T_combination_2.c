@@ -21,19 +21,19 @@ int main()
         switch( slots_used[i] )
         {
             case EVEBT_EPOLL_SLOTS:
-                break;
+                return;
             case 0:
                 if( !ereg[i] )
                     return 0;
                 else
                     table = ereg[i];
-                break;
+                return;
             default:
                 table = ereg[i];
-                break;
+                return;
         }
         if( table )
-            break;
+            return;
         i++;
     }
     return 0;

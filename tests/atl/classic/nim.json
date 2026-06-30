@@ -1,5 +1,5 @@
 {
     "analysis": "atl",
     "property": "<me>F{win == 0}",
-    "domain": "polyhedra"
+    "domain": "boxes"
 }

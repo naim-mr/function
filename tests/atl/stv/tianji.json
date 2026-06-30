@@ -1,5 +1,0 @@
-{
-    "analysis": "atl",
-    "property": "<tj>F{wins >= 2}",
-    "domain": "polyhedra"
-}

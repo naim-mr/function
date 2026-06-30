@@ -18,5 +18,5 @@ int main() {
     }     
     while (x == y) { }
     
-    return 0;
+    return;
 }

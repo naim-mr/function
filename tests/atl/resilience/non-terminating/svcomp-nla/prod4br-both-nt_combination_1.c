@@ -14,7 +14,6 @@
 
 /* algorithm for computing the product of two natural numbers */
 
-extern int __VERIFIER_nondet_int(void);
 
 int main() {
     int x, y;
@@ -37,7 +36,7 @@ int main() {
         // __VERIFIER_assert(q + a * b * p == x * y);
 
         if (!(q + a * b * p == x * y))
-            break;
+            return;
 
         if (a % 2 == 0 && b % 2 == 0) {
             a = a / 2;

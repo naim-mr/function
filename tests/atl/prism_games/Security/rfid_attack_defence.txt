@@ -1,0 +1,54 @@
+RFID Goods-Management Attack-Defence -- original model (CSF 2016)
+===============================================================
+
+Reference
+---------
+Tool : PRISM-games (turn-based stochastic two-player games, rPATL).
+Paper: Z. Aslanyan, F. Nielson, D. Parker,
+       "Quantitative Verification and Synthesis of Attack-Defence Scenarios",
+       CSF 2016.
+
+Informal model (from the paper)
+-------------------------------
+Attack-defence TREES model the interplay between an attacker and a defender; the
+paper compiles them to stochastic two-player games and analyses them in
+PRISM-games with rPATL. The RFID case study: an attacker wants to physically
+remove RFID tags from a warehouse. The tree has three phases (sequential
+conjunction):
+  1. get into the premises  -- climb the fence (defence: barbed wire; counter:
+     carpet / protective clothing) OR enter through the gate;
+  2. get into the warehouse -- through the door (defence: biometric sensors) OR
+     the loading dock;
+  3. evade monitoring       -- defeat the security cameras (laser OR video-loop,
+     countered by guards).
+Basic actions succeed only with a probability and incur a cost. Properties
+include <<A>>Pmax=?[F success] (max attack-success probability) and
+multi-objective cost/probability queries.
+KEY FINDING: the maximum attack-success probability is 0.41 (< 1) -- the attack
+is feasible (the system is open) but not certain, owing to the probabilistic
+success of the basic actions; <<A>>P>=0.5[F success] is false.
+
+De-probabilised version for FuncTion
+------------------------------------
+Keep the two-player split (attacker = coalition, defender = adversary) and the
+tree's OR-structure over phases; ask the attacker's reachability of a breach:
+
+    << atk >>  F  ( breached == 1 )
+
+C transcription: ../Security/rfid_attack_defence.c
+  (three sequential phases; each phase the attacker picks a route (0/1) and the
+   defender blocks one route; an unblocked route completes the phase; three
+   phases completed => tags removed.)
+
+Why TRUE: each phase offers alternative routes (OR) but the defender can block
+only one per phase, so the attacker always finds an unblocked route and
+eventually completes all phases -- the qualitative core of "attack-success
+probability > 0" (the system is open to attack). The basic-action success
+probabilities, which make the original value 0.41 < 1, are abstracted to
+deterministic routes; the cost rewards and the Pareto cost/probability
+trade-off are dropped.
+
+NOTE: this REPLACES an earlier "defender authenticates forged tags,
+<def>G{compromised==0} TRUE" model, which both ignored the attack-defence-tree
+structure and gave the opposite verdict to the paper (which shows the attack
+succeeds with notable probability). Corrected here.

@@ -1,4 +1,5 @@
 {
     "analysis": "atl",
-    "property": "\"<>G{<>F{otime < time}}\""
+    "property": "<>G{<>F{otime < time}}",
+    "domain": "polyhedra"
 }

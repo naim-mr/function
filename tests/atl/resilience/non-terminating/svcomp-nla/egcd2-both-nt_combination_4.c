@@ -13,7 +13,6 @@
 */
 
 /* extended Euclid's algorithm */
-extern int __VERIFIER_nondet_int(void);
 
 int main() {
     int x, y;
@@ -40,7 +39,7 @@ int main() {
     k = 0;
     while (1) {
         if (!(b != 0))
-            break;
+            return;
         c = a;
         k = 0;
 

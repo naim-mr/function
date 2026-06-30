@@ -1,4 +1,5 @@
 {
     "analysis": "atl",
-    "property": "<env>F{assert3:a + b == 3*n}"
+    "property": "<env>F{assert3:a + b == 3*n}",
+    "domain": "polyhedra"
 }

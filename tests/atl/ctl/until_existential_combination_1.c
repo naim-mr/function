@@ -6,7 +6,7 @@ int main() {
     int x = input("env");
     int y = input("env");
     if ( x <= y){
-        return 1;
+        return;
     }
    if (input("env")){
         // loop invariant: x >= y
@@ -14,7 +14,7 @@ int main() {
             x = x - 1;
         }
         // now x == y
-        while(true){}
+        while(1){}
     } else {
         // on this trace be break the until property
         x = y - 1;

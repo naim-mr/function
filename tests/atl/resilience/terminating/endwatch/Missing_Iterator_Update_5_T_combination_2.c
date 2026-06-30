@@ -24,7 +24,7 @@ int main()
             entry++;
             continue;
         }
-        break;
+        return;
     }
     return 0;
 }

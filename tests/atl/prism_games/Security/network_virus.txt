@@ -1,0 +1,42 @@
+Network Virus Infection -- original model (PRISM case study)
+==========================================================
+
+Reference
+---------
+Tool : PRISM (CTMC/MDP). https://www.prismmodelchecker.org/casestudies/
+Model: network virus / epidemic infection (Kwiatkowska, Norman, Parker).
+
+Informal model
+--------------
+A virus propagates through a network of nodes: an infected node may infect its
+neighbours, while a detection/recovery mechanism may clean nodes. Propagation
+and recovery are stochastic. The original PRISM analysis studies the expected
+number of infected nodes / time to infect a target over time.
+
+De-probabilised version for FuncTion
+------------------------------------
+This is NOT a PRISM-games model: we IMPOSE the game split (the administrator /
+recovery mechanism is the controller -> coalition; the virus spread ->
+adversary) and keep the containment safety property:
+
+    << admin >>  G  ( infected <= bound )
+
+C transcription: ../Security/network_virus.c
+  (each round the virus infects one node and the admin disinfects one; the
+   admin keeps the infected count bounded.)
+
+NOTE: stronger modelling step than the PRISM-games de-prob (single-process
+epidemic CTMC). Drops the expected-infection rewards; keeps the strategic
+containment core.
+
+Why this modelling corresponds
+------------------------------
+Schematic abstraction at the game level:
+  - controllability split: the administrator is the coalition; the virus
+    spread is the uncontrolled adversary;
+  - objective: a SAFETY invariant on the number of infected nodes;
+  - stochastic propagation -> demonic non-determinism (worst-case spread). So
+    << admin >> G (infected <= bound)  is the worst-case core of the expected
+    infection objective: "can the admin contain the virus whatever it does".
+Preserved: admin-vs-virus structure + the containment objective.
+Abstracted: the propagation/recovery probabilities and expected counts.

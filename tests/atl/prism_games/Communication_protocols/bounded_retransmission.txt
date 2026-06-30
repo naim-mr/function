@@ -1,0 +1,48 @@
+Bounded Retransmission Protocol -- original model (PRISM case study)
+==================================================================
+
+Reference
+---------
+Tool : PRISM (DTMC/MDP/PTA).
+       https://www.prismmodelchecker.org/casestudies/brp.php
+Model: bounded retransmission protocol (Helmink, Sellink & Vaandrager).
+
+Informal model
+--------------
+A sender transmits a file split into N chunks over an unreliable channel.
+Each chunk (and its acknowledgement) may be lost; the protocol retransmits up
+to a bounded number of times before aborting. The original PRISM analysis
+gives the probability of successful / failed delivery.
+
+De-probabilised version for FuncTion
+------------------------------------
+This is NOT a PRISM-games model: we IMPOSE the game split (the sender is the
+controller -> coalition; the lossy channel -> adversary) and ask sure
+delivery:
+
+    << snd >>  F  ( all chunks delivered )
+
+C transcription: ../Communication_protocols/bounded_retransmission.c
+  (the sender transmits chunks; the channel may lose a transmission, but only
+   finitely often, so the file is delivered. Both the file size N (chunks) and
+   the loss budget are adversary-chosen and NOT fixed in advance, so the goal
+   "delivered >= chunks" must be reached for any N and any number of losses --
+   no magic constants remain. See BOUNDED_ADVERSARY.md.)
+
+NOTE: stronger modelling step than the PRISM-games de-prob (single-agent
+DTMC/MDP). Models "loss with prob < 1" by an adversary-chosen FINITE loss
+budget (input("env"), not fixed in advance -- see BOUNDED_ADVERSARY.md) -- a
+purely lossy adversary would block delivery forever, whereas the
+probabilistic original delivers with prob 1 within the retransmission bound.
+
+Why this modelling corresponds
+------------------------------
+Schematic abstraction at the game level:
+  - controllability split: the sender is the coalition; the channel losses
+    are the uncontrolled (bounded) adversary;
+  - objective: reachability of full delivery;
+  - probabilistic loss -> bounded demonic non-determinism. So  << snd >> F
+    delivered  is the qualitative core of  P[ delivered ] = 1 under the
+    retransmission bound.
+Preserved: sender-vs-channel structure + the delivery objective.
+Abstracted: the exact delivery / failure probabilities.

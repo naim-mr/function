@@ -1,0 +1,47 @@
+Workstation Cluster -- original model (PRISM case study)
+======================================================
+
+Reference
+---------
+Tool : PRISM (CTMC reliability model).
+       https://www.prismmodelchecker.org/casestudies/cluster.php
+Model: workstation cluster (Haverkort, Hermanns & Katoen).
+
+Informal model
+--------------
+Two sub-clusters of workstations, each connected by a switch to a central
+backbone, provide a service. Workstations, switches and the backbone fail and
+are repaired (single repair unit). Quality of service requires a minimum
+number of connected, operational workstations. The original PRISM analysis
+computes availability / QoS reliability metrics.
+
+De-probabilised version for FuncTion
+------------------------------------
+This is NOT a PRISM-games model: we IMPOSE the game split (the repair unit is
+the controller -> coalition; failures -> adversary) and keep the QoS safety
+property:
+
+    << rep >>  G  ( minimum QoS satisfied )
+
+C transcription: ../Performance_reliability/workstation_cluster.c
+  (two sub-clusters of N workstations each; every round the adversary fails one
+   workstation in a sub-cluster and the repair unit restores one; QoS fails
+   only if fewer than N remain operational across both. The sub-cluster size N
+   and the QoS threshold are arbitrary -- read from input("env"), not fixed in
+   advance -- so the verdict must hold for any cluster size.)
+
+NOTE: stronger modelling step than the PRISM-games de-prob (reliability CTMC,
+not a game). Drops the failure/repair rates and the QoS reward; keeps the
+strategic QoS-safety core. Same pattern as embedded_control / aircraft_power.
+
+Why this modelling corresponds
+------------------------------
+Schematic abstraction at the game level:
+  - controllability split: the repair unit is the coalition; the failures are
+    the uncontrolled adversary;
+  - objective: a SAFETY invariant "minimum QoS always met";
+  - stochastic failures -> demonic non-determinism (worst-case failures). So
+    << rep >> G qos  is the worst-case core of the availability/QoS objective:
+    "can the repair unit keep QoS whatever fails".
+Preserved: repair-vs-failure structure + the QoS invariant.
+Abstracted: the failure/repair rates and the QoS reliability metrics.

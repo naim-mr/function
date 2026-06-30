@@ -1,0 +1,56 @@
+Human-in-the-Loop UAV Mission Planning -- original model (ICCPS 2015)
+===================================================================
+
+Reference
+---------
+Tool : PRISM / PRISM-games (stochastic two-player games).
+Paper: L. Feng, C. Wiltsche, L. Humphrey, U. Topcu,
+       "Controller Synthesis for Autonomous Systems Interacting with Human
+        Operators", ICCPS 2015.
+
+Informal model (from the paper)
+-------------------------------
+A UAV performs an ISR (intelligence/surveillance/reconnaissance) mission over
+a road network: 6 waypoints (w1..w6), 8 angle points per waypoint, 9 road
+points, with some Restricted Operating Zones (ROZs). It is modelled as a
+stochastic TWO-PLAYER GAME:
+  - Player 1 = UAV autonomy (controllable): flies the route, loiters, picks
+    points; we synthesise its strategy.
+  - Player 2 = human operator (uncontrollable / worst-case): steers sensors and,
+    at CHECKPOINTS (w2, w5, w6), chooses the road (and, in one variant, the
+    approach angle), nondeterministically.
+Key mechanism -- DELEGATION: if the operator had full power at checkpoints it
+could route the UAV in a loop forever (w2,w6,w5,...), so the mission never
+completes. The paper introduces a delegation probability pdel > 0: with prob
+pdel the operator delegates road choice to the UAV. Objectives are
+multi-objective rPATL (Pareto): minimise expected mission-completion time AND
+minimise expected ROZ visits. ROZ visits are MINIMISED but generally > 0
+(reduced to 0 only by allowing much longer missions -- a trade-off).
+
+De-probabilised version for FuncTion
+------------------------------------
+Two-player split (UAV autonomy = coalition, operator = adversary), with the
+delegation mechanism de-probabilised as a BOUNDED number of operator diversions
+(pdel > 0 => the operator must eventually delegate, so it cannot loop the UAV
+forever). Two properties:
+
+    << uav >>  F  ( wp >= goal )    mission coverage  -- expected TRUE
+    << uav >>  G  ( roz == 0 )      total ROZ avoidance -- expected UNKNOWN
+
+C transcription: ../Planning_synthesis/uav_planning.c
+  (at a checkpoint the operator may DIVERT the UAV -- no progress that round,
+   and it may route through a ROZ -- but only `diverts` times (delegation);
+   when delegated, the UAV advances to the next waypoint on a safe road.)
+
+Why completion is TRUE: the diversions are bounded, so the operator cannot
+stall the UAV forever; after they are spent it delegates and the UAV covers the
+route. (This is exactly the role of pdel in the paper.)
+Why ROZ-avoidance is UNKNOWN: a worst-case operator can divert the UAV through
+a ROZ; the autonomy cannot prevent every such diversion -- matching the paper's
+finding that ROZ visits are minimised (Pareto), not driven to zero against an
+adversarial operator.
+
+NOTE: earlier version let the UAV "reroute" around every ROZ (making ROZ
+avoidance TRUE) and ignored the operator's control of checkpoint routing and
+the delegation mechanism -- not faithful. Corrected here. Abstracts: the
+operator proficiency/workload/fatigue probabilities and the time/fuel rewards.

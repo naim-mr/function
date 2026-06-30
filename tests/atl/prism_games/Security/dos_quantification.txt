@@ -1,0 +1,55 @@
+DoS Threat Quantification (HIP base-exchange) -- original model (COMPSAC 2008)
+============================================================================
+
+Reference
+---------
+Tool : PRISM (DTMC).
+Paper: S. Basagiannis, P. Katsaros, A. Pombortsis, N. Alexiou,
+       "A Probabilistic Attacker Model for Quantitative Verification of DoS
+        Security Threats", COMPSAC 2008 (extended in Computers & Security 2009).
+
+Informal model (from the paper)
+-------------------------------
+A DoS threat against the Host Identity Protocol (HIP) base-exchange, which uses
+a CLIENT PUZZLE for DoS protection. The puzzle carried in message R1 is NOT in
+R1's signed part, so the attacker can COUNTERFEIT R1 messages (message-integrity
+violation) and REPLAY them, tricking the Initiator (I) into solving bogus
+puzzles. State variables include the Initiator's admission queue (capacity B)
+and the number of messages processed simultaneously (proc_limit); puzzle
+difficulty k sets the cost of solving. Denial of service (fail = 2) is reached
+when I simultaneously processes proc_limit counterfeited messages AND its
+admission queue holds B messages -- any valid R1 is then dropped, so I is
+unavailable. Property: P=?[true U fail=2], with cost rewards comparing the
+attacker's expended cost against the Initiator's.
+KEY FINDING: the counterfeiting attack SUCCEEDS with high probability (P ~
+0.895); resistance improves only for large queues (>= 250) with proc_limit <= 50.
+
+De-probabilised version for FuncTion
+------------------------------------
+Because the paper's point is that the ATTACK SUCCEEDS, we model the attacker's
+reachability of a full admission queue (not a defender safety invariant):
+
+    << atk >>  F  ( admission queue full:  queue >= B )
+
+C transcription: ../Security/dos_quantification.c
+Explicit mapping (paper -> encoding):
+  - admission queue / capacity   -> queue, B
+  - Initiator verification rate   -> clear (messages cleared per round, BOUNDED
+                                     because solving/verifying puzzles is costly)
+  - counterfeited R1 replays      -> counterfeit = input("atk") (attacker, unbounded)
+  - DoS (fail = 2)                -> queue >= B
+Why TRUE: per round queue += counterfeit - clear. The attacker replays more
+counterfeited messages than the Initiator can verify, so the queue grows to B.
+This holds for any finite B and any bounded clearing rate -- the qualitative
+core of "DoS probability ~ 0.895".
+
+NOTE: this is a DTMC (not a game); we IMPOSE the attacker/Initiator split. The
+Initiator's verification rate is bounded (adversary side) -- the puzzle that was
+meant to protect it is precisely what the counterfeiting attack abuses, since
+the Initiator must spend effort on bogus puzzles. Abstracts: the processing-cost
+rewards, the puzzle-difficulty (k) analysis, and proc_limit (folded into the
+single admission-queue resource).
+
+Earlier (non-faithful) version used <def>G{service==1} with a flood/filter
+dynamic and gave the wrong verdict (defender always wins); the paper instead
+quantifies that the attack succeeds. Corrected here.

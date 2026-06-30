@@ -24,7 +24,7 @@ int main()
         while( old_[i] != new_[i] )
         {
             if( ++number == count )
-                break;
+                return;
         }
         i++;
         base += 8;

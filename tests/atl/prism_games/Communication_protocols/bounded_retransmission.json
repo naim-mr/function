@@ -1,0 +1,7 @@
+{
+    "analysis": "atl",
+    "property": "<snd>F{delivered >= chunks}",
+    "domain": "polyhedra",
+    "description": "Bounded retransmission protocol (de-probabilised, game cast on an MDP). The sender (coalition) delivers the whole file of N chunks despite the channel losses -> expected TRUE. Both the file size (chunks) and the loss budget are adversary-chosen and finite but NOT fixed in advance, so the verdict must hold for any N and any number of losses (see BOUNDED_ADVERSARY.md).",
+    "model": "bounded_retransmission.c"
+}

@@ -16,7 +16,6 @@
 Geometric Series
 computes x = sum(z^k)[k=0..k-1], y = z^(k-1)
 */
-extern int __VERIFIER_nondet_int(void);
 
 int main() {
     int z, k;
@@ -32,7 +31,7 @@ int main() {
         // __VERIFIER_assert(1 + x*z - x - z*y == 0);
 
         if (!(1 + x*z - x - z*y == 0))
-            break;
+            return;
 
         c = c + 1;
         x = x * z + 1;

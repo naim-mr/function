@@ -1,0 +1,52 @@
+ASW Fair Exchange Protocol -- original model (PRISM case study)
+=============================================================
+
+Reference
+---------
+Tool : PRISM (DTMC).
+Paper: S. Islam, M. A. Zaid, "Probabilistic Analysis and Verification of the
+       ASW Protocol Using PRISM", Int. J. of Network Security, 7(3), 2008.
+Protocol: Asokan, Shoup & Waidner optimistic fair exchange (with a TTP).
+
+Informal model (from the paper)
+-------------------------------
+Two parties -- originator O and responder R -- exchange commitments over a
+contract; a trusted third party T is contacted only on dispute (abort/resolve
+sub-protocols). O, R and T are modelled as state machines in PRISM, with a
+timer for timeouts. The paper verifies, via PCTL:
+  - FAIRNESS: Pmax[ F (O has a valid contract AND R only got an abort token) ]
+    = 0, and symmetrically for R -- i.e. neither party can gain an advantage;
+  - EFFECTIVENESS: Pmax[ F (both O and R hold a valid contract) ] = 1 when both
+    are honest;
+  - TIMELINESS: each honest party reaches a final state in finite time.
+KEY FINDING: fairness HOLDS (the probability of an unfair, advantaged state is
+0), confirming the protocol's security objectives.
+
+De-probabilised version for FuncTion
+------------------------------------
+Keep the controllability split (honest party = coalition, peer = adversary)
+and the fairness safety invariant:
+
+    << orig >>  G  ( fairness preserved )
+
+C transcription: ../Security/asw_fair_exchange.c
+  (the honest party commits its signature only after receiving the peer's, or
+   recovers via the TTP if it already committed; fairness == not(committed
+   while holding nothing).)
+
+NOTE: drops the probabilistic / timing aspects of the original; keeps the
+strategic fairness core. Distinct from non_repudiation by the explicit TTP
+recovery move.
+
+Why this modelling corresponds
+------------------------------
+Schematic abstraction at the game level:
+  - controllability split: the honest party is the coalition; the peer is the
+    uncontrolled adversary;
+  - objective: a SAFETY invariant "fairness never violated";
+  - the peer's arbitrary misbehaviour -> demonic non-determinism (it may
+    abort at any time). So  << orig >> G fair  is the qualitative core of the
+    fair-exchange guarantee: "can the honest party stay fair whatever the
+    peer does, using the TTP if needed".
+Preserved: honest-vs-peer structure (+ TTP) + the fairness invariant.
+Abstracted: the protocol timing and probabilistic attack analysis.

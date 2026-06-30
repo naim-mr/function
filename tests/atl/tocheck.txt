@@ -1,5 +1,19 @@
 [nim] : voir si c'est bien le bon jeu
 [grub] : bon encodage
 
-[prism] : est ce que la version est fidèle ? par exemple les robots
- 
+[prism] :
+         + vehicle_control_hostile: me parait bien. mais le dernier prompt dis non.
+         + self_adaptative.c -> bizarre
+         + asw_fair_exchange.c: on modélise qu'un seul protocole la.  
+         + dns_amplification: on modélise ça séquentiellement en supposant avoir les bornes? 
+                            ET ça serait bien d'avoir les mêmes paramètres
+         + dos_amplificatio: check + until formula possible ? 
+         + intrusion_detection: j'ai rajouté un attack_treshold
+
+//deleted safe_robot because similar to autonomous car
+//team_planning deleted because similar to collective_decision
+
+Les descriptions:  
+    -> dvs.c
+
+Reprend à kaminsky_dns    

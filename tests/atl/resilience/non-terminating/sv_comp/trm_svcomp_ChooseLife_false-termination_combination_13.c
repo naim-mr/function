@@ -1,6 +1,5 @@
 typedef enum {false,true} bool;
 
-extern int __VERIFIER_nondet_int(void);
 /* Terminates iff  life < choose <= death or life > death */
 int main() {
     int choose = input("env")                 ;

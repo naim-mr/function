@@ -15,7 +15,6 @@
 /* shift_add algorithm for computing the 
    product of two natural numbers
 */
-extern int __VERIFIER_nondet_int(void);
 
 int main() {
     int a, b;
@@ -36,7 +35,7 @@ int main() {
     while (1) {
         // __VERIFIER_assert(z + x * y == a * b);
         if (!(z + x * y == a * b))
-            break;
+            return;
 
         if (y % 2 == 1) {
             z = z + x;

@@ -8,7 +8,6 @@
 //    person 1 pays person 2 a dollar; if they are the SAME, person 2 pays
 //    person 1 a dollar."  -> person 1 wins on a match, person 2 on a mismatch.
 // We expose BOTH payoffs (gain1, gain2 = +/-1), as in the payoff matrix.
-// It is NOT named in the AHK paper; used here as the minimal witness that
 // ATL differs from CTL (no single agent can force its preferred outcome).
 // Game structure: see matching_pennies.cgs.txt
 // ---------------------------------------------------------------------

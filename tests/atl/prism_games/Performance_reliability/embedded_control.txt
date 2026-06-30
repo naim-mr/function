@@ -1,0 +1,69 @@
+Embedded Control System -- original model (PRISM case study)
+==========================================================
+
+Reference
+---------
+Tool : PRISM (CTMC reliability model).
+       https://www.prismmodelchecker.org/casestudies/
+Model: embedded control system (Muppala, Ciardo & Trivedi).
+
+Informal model
+--------------
+An embedded controller operates redundant input (sensor) and output
+(actuator) processors plus a main processor. Components fail at given rates and
+may be repaired; the system is operational while enough redundant components
+remain. The original PRISM analysis computes reliability metrics (probability
+of system failure, expected time to failure).
+
+De-probabilised version for FuncTion
+------------------------------------
+This is NOT a PRISM-games model: we IMPOSE the game split (a repair /
+reconfiguration unit is the controller -> coalition; component failures ->
+adversary). The redundancy size N is arbitrary (input("env"), not fixed in
+advance). Three properties are provided:
+
+    << ctrl >>  G  ( system operational )                    [.json,     TRUE]
+    << ctrl >>  ( operational ) U ( t >= deadline )          [.survive,  TRUE]
+    << env  >>  F  ( not operational )                        [.fail,  UNKNOWN]
+
+C transcription: ../Performance_reliability/embedded_control.c
+  (each round the adversary fails a component and the controller repairs one;
+   the system is down only if all redundancy is lost. A step clock t counts
+   rounds; deadline is an arbitrary horizon.)
+
+Mapping the PRISM CSL property list to this qualitative game
+-----------------------------------------------------------
+The PRISM source lists quantitative, timed CSL queries, e.g.
+    P=? [ true U<=T*3600 "down" ]                 (failure within T)
+    P=? [ !"down" U<=T "fail_sensors" ] ...        (which type fails first)
+    P=? [ !"down" U "fail_main" ] ...              (long-run first failure)
+Not all of these have a faithful untimed/qualitative game analog:
+  - probabilities P=?            -> dropped (no quantitative reasoning here);
+  - real-time bounds U<=T*3600   -> replaced by a discrete STEP clock t and a
+                                    deadline (so "no failure within T" becomes
+                                    "stay up until t >= deadline", the .survive
+                                    until property);
+  - "fail_sensors / actuators / io / main" (which type occurs first) -> would
+    need distinct component-type labels AND is inherently probabilistic; in a
+    worst-case game the adversary just picks which to fail, so "first type" is
+    degenerate. NOT modelled (would require a typed component variant).
+What IS captured: reachability of "down" becomes the adversarial F (.fail),
+and "no failure within the horizon" becomes the coalition Until (.survive).
+
+NOTE: stronger modelling step than the PRISM-games de-prob (the original is a
+reliability CTMC, not a game). Drops the failure/repair rates and the
+reliability rewards; keeps the strategic operational core. Same pattern as
+aircraft_power.
+
+Why this modelling corresponds
+------------------------------
+Schematic abstraction at the game level:
+  - controllability split: the repair unit is the coalition; the component
+    failures are the uncontrolled adversary;
+  - objective: a SAFETY invariant "system stays operational";
+  - stochastic failures -> demonic non-determinism (worst-case failure
+    pattern). So  << ctrl >> G operational  is the worst-case core of the
+    reliability objective: "can the controller keep the system up whatever
+    fails".
+Preserved: controller-vs-failure structure + the operational invariant.
+Abstracted: the failure/repair rates and the reliability metrics.

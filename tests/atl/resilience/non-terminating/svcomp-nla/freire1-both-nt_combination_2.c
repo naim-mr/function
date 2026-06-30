@@ -19,7 +19,6 @@ Note: for some reason using cpa was able to disprove these
 cpa.sh -kInduction -setprop solver.solver=z3 freire1.c
 */
 
-extern int __VERIFIER_nondet_int(void);
 
 int main() {
     int r;
@@ -35,7 +34,7 @@ int main() {
     while ( r*r - a - r + 2*x == 0 ) {
       //__VERIFIER_assert((int)(r*r - a - r + 2*x) == 0);
 
-      //if (!(x > r))             break;
+      //if (!(x > r))             return;
         x = x - r;
         r = r + 1;
         // 1 - 2 rnd  - 1 + 2rnd == 0 / r == 1 , x == rnd

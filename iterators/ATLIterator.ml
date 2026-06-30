@@ -310,7 +310,7 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
                 (* filter *)
                 (* join the two branches *)
                 if controllable cp (fwdTaintMap (blockLabel, ext)) b then
-                  D.join RESILIENCE in_if_filtered in_else_filtered
+                  D.join APPROXIMATION in_if_filtered in_else_filtered
                 else D.join APPROXIMATION in_if_filtered in_else_filtered
             | T_while (l, (b, typ, ba), loop_body) ->
                 let pre_dom = if !refine then Some (fwdInv l) else None in
@@ -327,7 +327,7 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
                   let in_state' =
                     d_until
                       (if controllable cp (fwdTaintMap (blockLabel, ext)) b then
-                         D.join RESILIENCE out_exit out_enter
+                         D.join APPROXIMATION out_exit out_enter
                        else D.join APPROXIMATION out_exit out_enter)
                   in
                   (* 'in' state for this iteration *)

@@ -17,10 +17,8 @@ Printing consecutive cubes, by Cohen
 http://www.cs.upc.edu/~erodri/webpage/polynomial_invariants/cohencu.htm
 */
 /*
-extern int __VERIFIER_nondet_int(void);
 */
 
-extern int __VERIFIER_nondet_int(void);
 
 int main() {
     int a, n, x, y, z;
@@ -36,7 +34,7 @@ int main() {
       //__VERIFIER_assert(x == n * n * n);
       //__VERIFIER_assert(y*z - 18*x - 12*y + 2*z - 6 == 0);
       //__VERIFIER_assert((z*z) - 12*y - 6*z + 12 == 0);
-        //if (!(n <= a))            break;
+        //if (!(n <= a))            return;
 
         n = n + 1;
         x = x + y;

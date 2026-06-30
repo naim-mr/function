@@ -17,7 +17,6 @@
   returns q==A//B
   */
 
-extern int __VERIFIER_nondet_int(void);
 
 int main() {
     int A, B;
@@ -36,7 +35,7 @@ int main() {
         // __VERIFIER_assert(q == 0);
         // __VERIFIER_assert(r == A);
         // __VERIFIER_assert(d == B * p);
-        if (!(d == B * p)) break;
+        if (!(d == B * p)) return;
 
         d = 2 * d;
         p = 2 * p;
@@ -46,7 +45,7 @@ int main() {
         // __VERIFIER_assert(A == q*B + r);
         // __VERIFIER_assert(d == B*p);
 
-        if (!(A == q*B + r)) break;
+        if (!(A == q*B + r)) return;
 
         d = d / 2;
         p = p / 2;

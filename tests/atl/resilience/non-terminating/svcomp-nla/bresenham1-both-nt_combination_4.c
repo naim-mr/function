@@ -17,9 +17,7 @@
   from Srivastava et al.'s paper From Program Verification to Program Synthesis in POPL '10 
 */
 /*
-extern int __VERIFIER_nondet_int(void);
 */
-extern int __VERIFIER_nondet_int(void);
 int main() {
     int X, Y;
     int v, x, y;
@@ -33,7 +31,7 @@ int main() {
     // r2: -1 - 1 == 0 
     while (2*Y*x - 2*X*y - X + 2*Y - v == 0) {
       //__VERIFIER_assert(2*Y*x - 2*X*y - X + 2*Y - v == 0);
-      //if (!(x <= X))            break;
+      //if (!(x <= X))            return;
         // out[x] = y
 
         if (v < 0) {

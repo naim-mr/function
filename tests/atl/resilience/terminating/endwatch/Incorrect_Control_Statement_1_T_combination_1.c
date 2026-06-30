@@ -19,18 +19,18 @@ int main()
         switch(*p){
         case '}':
             stop = 1;
-            break;
+            return;
 
         case ':':
             if( *(p+1) && (*(p+1) == '-')){
                 p += 2;
                 stop = 1;
-                break;
+                return;
             }
 
         default:
             p++;
-            break;
+            return;
         }
     }
     return 0;

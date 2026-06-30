@@ -1,0 +1,58 @@
+DNS Bandwidth Amplification Attack -- original model (PRISM, HASE 2011)
+=====================================================================
+
+Reference
+---------
+Tool : PRISM (CTMC).
+Paper: T. Deshpande, P. Katsaros, S. Basagiannis, S. A. Smolka,
+       "Formal Analysis of the DNS Bandwidth Amplification Attack and its
+        Countermeasures Using Probabilistic Model Checking", HASE 2011.
+
+Informal model (from the paper)
+-------------------------------
+A network of zombies floods a victim DNS server with bogus responses to
+requests it never made. A 60-byte request yields a 4000+ byte response, so the
+attack is AMPLIFIED by an effective amplification factor EAF (~15 for DNS).
+The CTMC has two modules:
+  - Client Server (CS): a finite bandwidth queue (capacity BQUL, e.g. 458
+    packets) shared by legitimate and bogus traffic; served at serve_rate;
+    when the queue is FULL, the available bandwidth is exhausted and packets
+    are dropped (denial of service).
+  - Net: generates legitimate (UDP_rate) and bogus (bogus_rate*zombies*EAF)
+    traffic.
+Countermeasures: filtering (FTR, blocks dp% of bogus, false positives fpp%),
+random drops (RND), aggressive retries (AGR). Property: P=?[F DenialOfService]
+where DenialOfService = a legitimate Client Request cannot be served.
+KEY FINDING: the attack probability increases nonlinearly with the number of
+zombies, approaching 1 -- the attack SUCCEEDS; countermeasures reduce but do
+not always eliminate it.
+
+De-probabilised version for FuncTion
+------------------------------------
+Because the paper's point is that the ATTACK SUCCEEDS, we model the attacker's
+reachability of bandwidth exhaustion (not a defender safety invariant):
+
+    << atk >>  F  ( bandwidth exhausted:  bw > BQUL )
+
+C transcription: ../Security/dns_amplification.c
+Explicit mapping (paper -> encoding):
+  - bandwidth queue / capacity   -> bw, BQUL
+  - amplification factor         -> EAF (each unblocked bogus request costs EAF)
+  - server service rate          -> serve (drains the queue each round)
+  - filtering countermeasure     -> fcap (blocks up to fcap bogus per round)
+  - zombies' bogus volume        -> z = input("atk") (attacker, unbounded)
+  - DenialOfService              -> bw > BQUL
+Why TRUE: per round bw += (z - min(z,fcap))*EAF - serve. The attacker picks z
+large enough that the amplified residual exceeds the (finite) service and
+filtering, so bw grows past BQUL. This holds for ANY finite BQUL/serve/fcap and
+any EAF >= 1 -- the qualitative core of "attack probability -> 1".
+
+NOTE: this is a CTMC (not a game); we IMPOSE the attacker/defender split. The
+defender's capacity and filtering are bounded (adversary side), which is why
+the attacker can overwhelm them -- amplification means a bounded defence cannot
+keep pace with an unbounded attacker. Abstracts: the rates/probabilities and
+the cost-benefit (net-benefit) reward analysis of the countermeasures.
+
+Earlier (non-faithful) version used <def>G{load <= cap} with a +1/-2 dynamic
+and NO amplification, which both missed the amplification mechanism and gave
+the wrong verdict (defender always wins). Corrected here.

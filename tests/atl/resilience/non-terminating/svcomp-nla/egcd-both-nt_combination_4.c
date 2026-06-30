@@ -13,7 +13,6 @@
 */
 
 /* extended Euclid's algorithm */
-extern int __VERIFIER_nondet_int(void);
 
 int main() {
     int a, b, p, q, r, s;
