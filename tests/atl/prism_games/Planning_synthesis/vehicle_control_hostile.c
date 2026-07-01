@@ -1,41 +1,46 @@
 // =====================================================================
-// Safe Vehicle Control in a Hostile Environment -- PRISM (de-prob., game cast)
+// Probabilistically Safe Vehicle Control in a Hostile Environment
+//   -- PRISM (MDP, de-probabilised)
 // ---------------------------------------------------------------------
-// Source : PRISM case studies, "Probabilistically safe vehicle control in a
-//          hostile environment". https://www.prismmodelchecker.org/casestudies/
+// Source : I. Cizelj, X. C. Ding, M. Lahijanian, A. Pinto, C. Belta,
+//   "Probabilistically Safe Vehicle Control in a Hostile Environment",
+//   IFAC World Congress 2011 (arXiv:1103.4065). PRISM case study.
 // Original model description: see vehicle_control_hostile.txt
 // ---------------------------------------------------------------------
-// A vehicle drives toward a goal across terrain where a hostile environment
-// places threats. Each step the vehicle picks a lane; the environment picks a
-// lane to threaten. Driving into the threatened lane is a hit; otherwise the
-// vehicle advances. Threats are adversarial but bounded, so the goal remains
-// reachable. The vehicle has a strategy that is both safe and progressing.
+// A vehicle moves through a partitioned city on a two-stage mission: reach the
+// PICK-UP region, then the DROP-OFF region, while staying ALIVE. The
+// environment is threat-rich -- moving adversaries (Poisson processes) and
+// static obstacles give every region crossing a non-zero probability of LOSING
+// the vehicle (mission failure). The paper synthesises the reactive strategy
+// that MAXIMISES the mission probability, but that probability is < 1 (0.141
+// and 0.805 for the two scenarios of the paper): even the safest route keeps a
+// residual chance of being lost. We de-probabilise this residual loss as a
+// demonic choice -- the environment may inflict the loss the vehicle cannot
+// rule out.
 //
 //   agent "veh" = input("veh")  -> vehicle controller (coalition, angelic)
-//   agent "env" = input("env")  -> hostile environment (adversary, bounded)
+//   agent "env" = input("env")  -> adversaries + obstacles (adversary, demonic)
 //
-// The vehicle is never hit (TRUE):      -atl "<veh>G{hit == 0}"
-// The vehicle reaches the goal (TRUE):  -atl "<veh>F{pos >= goal}"
+// Mission -- reach pick-up then drop-off while staying alive -- expected
+// UNKNOWN (a soundness witness: the paper's maximal probability is < 1, so the
+// vehicle cannot SURELY complete the mission against a worst-case loss):
+//   -atl "<veh>F{delivered == 1}"
 // =====================================================================
 
 int main() {
-    int pos = 0;                // progress toward the goal
-    int lane = 0;               // chosen lane this step
-    int hit = 0;                // vehicle hit a threat this step?
-    int goal = input("env");    // goal distance: arbitrary, not fixed in advance
-    int budget = input("env");  // adversary-chosen FINITE threat bound, NOT fixed in advance:
-                                // the proof must hold for any value (surrogate for "finitely many").
-    while (pos < goal) {
-        int threat = -1;             // -1 = no threat
-        // the hostile env threatens a lane only while the bounded budget remains
-        if (budget > 0) { threat = input("env"); }   // threatens lane 0 or 1
-        int steer = input("veh");                      // vehicle chooses lane (0 / 1)
-        lane = 0;
-        if (steer == 1) { lane = 1; }
-        hit = 0;
-        if (threat == lane) { hit = 1; budget = budget - 1; }
-        else { pos = pos + 1; }
+    int phase = 0;         // 0: heading to pick-up; 1: picked up, heading to drop-off
+    int delivered = 0;     // mission accomplished (drop-off reached while alive)?
+    int alive = 1;         // vehicle not yet lost
+    while (delivered == 0 && alive == 1) {
+        int cross = input("veh");   // vehicle reactively crosses toward its current target
+        int lost  = input("env");   // residual loss the best route cannot eliminate
+        if (cross == 1) {
+            if (lost == 1) {
+                alive = 0;          // lost while crossing a threatened region -> mission fails
+            } else {
+                phase = phase + 1;  // safely reached the next target region
+                if (phase >= 2) { delivered = 1; }   // pick-up (phase 1) then drop-off (phase 2)
+            }
+        }
     }
 }
-
-

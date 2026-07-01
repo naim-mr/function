@@ -53,7 +53,13 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Folders that get special handling / are skipped.
 RESILIENCE_FOLDER = "resilience"   # matrix: every .c x every root property
+CTL_FOLDER = "ctl"                 # matrix: every .c x lifting variant
+MATRIX_FOLDERS = {RESILIENCE_FOLDER, CTL_FOLDER}  # rendered as a pivot table
 SKIP_FOLDERS = {"ctl_lifted"}      # excluded from the run for now
+
+# The CTL->ATL lifting variants, in display order (column of the ctl matrix).
+CTL_VARIANTS = ["base", "resilience", "resilience_reachability",
+                "robust_reachability"]
 
 # Resilience reporting is severity-based, not TRUE/UNKNOWN: a property holding
 # (result TRUE) raises an alarm whose severity depends on the property.
@@ -107,10 +113,18 @@ def discover(tests_dir, groups, flt):
                 cfile = os.path.relpath(os.path.join(dirpath, cf_name), ROOT)
                 if pat and not pat.search(cfile):
                     continue
+                # Match configs by the .c stem, AND by its base stem (drop a
+                # "_combination_N" suffix): generated combinations share the
+                # property configs of their base test, so one config set per
+                # base suffices instead of duplicating it per combination.
+                prefixes = [stem]
+                base = re.sub(r"_combination_\d+$", "", stem)
+                if base != stem:
+                    prefixes.append(base)
                 # The "." separator avoids cross-matching stems that are
                 # prefixes of one another (e.g. "foo" must not grab "foo_bar").
                 for j in jsons:
-                    if j.startswith(stem + "."):
+                    if any(j.startswith(p + ".") for p in prefixes):
                         cfg_abs = os.path.join(dirpath, j)
                         yield group, folder, cfile, os.path.relpath(cfg_abs, ROOT)
 
@@ -156,7 +170,9 @@ def disp_time(r):
 
 
 def build_cmd(executable, group, cfile, cfg, out):
-    cmd = [executable, cfile, "-config", cfg]
+    # Default to polyhedra; -config runs afterwards so a "domain" key in the
+    # JSON still overrides this default.
+    cmd = [executable, cfile, "-domain", "polyhedra", "-config", cfg]
     flags = GROUP_MODES.get(group, [])
     if flags:
         cmd += flags + [read_config(cfg).get("property", "")]
@@ -340,6 +356,13 @@ td.prop{color:var(--text); font-weight:500}
 .badge.unknown{color:var(--unknown); background:var(--unknown-bg)}
 .badge.fail,.badge.timeout{color:var(--fail); background:var(--fail-bg)}
 .badge.info{color:var(--accent); background:rgba(91,141,239,.16)}
+/* one colour per ctl lifting variant (TRUE cells) */
+.badge.v-base{color:#3fb950; background:rgba(63,185,80,.16)}
+.badge.v-resilience{color:#5b8def; background:rgba(91,141,239,.16)}
+.badge.v-resilience_reachability{color:#1ab2a8; background:rgba(26,178,168,.16)}
+.badge.v-robust_reachability{color:#f0883e; background:rgba(240,136,62,.18)}
+.chip.v-base{color:#3fb950} .chip.v-resilience{color:#5b8def}
+.chip.v-resilience_reachability{color:#1ab2a8} .chip.v-robust_reachability{color:#f0883e}
 .tag{font-family:ui-monospace,Menlo,monospace; font-size:12px; color:var(--muted);
   background:var(--surface2); padding:2px 8px; border-radius:6px}
 .empty{color:var(--muted); text-align:center; padding:40px}
@@ -757,6 +780,61 @@ def resilience_alarms(recs):
     return len(files), n_crit, n_less, n_unknown
 
 
+def _ctl_variant(rec):
+    """The lifting variant of a ctl run, derived from its config name."""
+    name = rec["name"]
+    for v in ("resilience_reachability", "robust_reachability", "resilience"):
+        if name.endswith("." + v):
+            return v
+    return "base"
+
+
+def _write_matrix(fh, recs, esc, col_of, col_order, folder, col_class=None):
+    """Generic pivot: one row per .c file, one column per col_of(record).
+
+    col_class(col) -> CSS class used to colour that column's TRUE cells and its
+    count chip (one colour per "alarm"). Defaults to the plain TRUE colour.
+    """
+    files = sorted({r["file"] for r in recs})
+    present = {col_of(r) for r in recs}
+    cols = [c for c in col_order if c in present] + \
+           sorted(present - set(col_order))
+    cell = {(r["file"], col_of(r)): r for r in recs}
+    sep = os.sep + folder + os.sep
+    klass = col_class or (lambda c: "true")
+
+    fh.write(f'<section class="grp"><h2>{esc(folder)} '
+             f'<span class="tag">{len(files)} files</span></h2>\n')
+    # per-column TRUE counts, each in its own colour
+    fh.write('<div class="chips" style="margin:0 0 14px">'
+             f'<span class="chip total"><b>{len(files)}</b> files</span>')
+    for c in cols:
+        n = sum(1 for f in files
+                if (f, c) in cell and status_bucket(cell[(f, c)]["status"]) == "TRUE")
+        fh.write(f'<span class="chip {klass(c)}"><b>{n}</b> {esc(c)} TRUE</span>')
+    fh.write('</div>\n')
+
+    fh.write('<div class="card" style="overflow:auto"><table>\n<thead><tr><th>File</th>')
+    for c in cols:
+        fh.write(f'<th class="c">{esc(c)}</th>')
+    fh.write("</tr></thead><tbody>\n")
+    for f in files:
+        rel = f.split(sep, 1)[-1] if sep in f else os.path.basename(f)
+        fh.write(f'<tr data-search="{esc(rel.lower(), quote=True)}">'
+                 f'<td class="mono">{esc(rel)}</td>')
+        for c in cols:
+            r = cell.get((f, c))
+            if r is None:
+                fh.write('<td class="c">—</td>')
+            else:
+                # TRUE cells take the column's alarm colour; others keep status.
+                badge = klass(c) if status_bucket(r["status"]) == "TRUE" \
+                    else status_class(r["status"])
+                fh.write(f'<td class="c"><span class="badge {badge}">{esc(r["status"])}</span></td>')
+        fh.write("</tr>\n")
+    fh.write("</tbody></table></div></section>\n")
+
+
 def _write_resilience_matrix(fh, recs, esc):
     """One row per .c file, one result column per resilience property.
 
@@ -859,9 +937,9 @@ def write_html(records, results_dir, charts, group_by, compact=False):
     folders = sorted({r["folder"] for r in records})
 
     # ---- per-test pages: metadata + config + decision tree + source + log ---
-    # Skipped in --compact, and never produced for the large resilience matrix.
+    # Skipped in --compact, and never produced for the matrix folders.
     for r in ([] if compact else
-              [x for x in records if x["folder"] != RESILIENCE_FOLDER]):
+              [x for x in records if x["folder"] not in MATRIX_FOLDERS]):
         page = os.path.join(results_dir, r["key"] + ".html")
         try:
             with open(os.path.join(ROOT, r["file"])) as fh:
@@ -1014,6 +1092,11 @@ def write_html(records, results_dir, charts, group_by, compact=False):
             recs = [r for r in records if r["folder"] == folder]
             if folder == RESILIENCE_FOLDER:
                 _write_resilience_matrix(fh, recs, esc)
+            elif folder == CTL_FOLDER:
+                # columns = lifting variants; E-tests fill base/{resilience,robust}
+                # _reachability, A-tests fill base/resilience -> "-" elsewhere.
+                _write_matrix(fh, recs, esc, _ctl_variant, CTL_VARIANTS, CTL_FOLDER,
+                              col_class=lambda c: "v-" + c)
             else:
                 _write_folder_table(fh, recs, esc, compact)
             fh.write("</div>\n")
@@ -1053,6 +1136,250 @@ def write_latex(records, path):
 
 
 # --------------------------------------------------------------------------- #
+# Experiment tables (implementation.tex / fig:attacks structure)
+# --------------------------------------------------------------------------- #
+#
+# One LaTeX table per experiment, all sharing the columns
+#   Benchmark | Configuration | Property | Verified | Alarms | TO | Time (s)
+# used in implementation.tex. Verified counts TRUE verdicts, Alarms counts
+# UNKNOWN ones; the manual classification / comparison against other analysers
+# is filled in by hand.
+
+# resilience / ctl sub-folder (under tests/<grp>/{resilience,ctl}/) -> source.
+_RESILIENCE_SOURCE = {
+    "sv_comp": "SV-COMP", "svcomp-nla": "SV-COMP", "termination": "SV-COMP",
+    "pulse": "Pulse", "pulseinfinite": "Pulse",
+    "lit": "Shi et al.", "endwatch": "Shi et al.",
+}
+_CTL_SOURCE = {
+    "koskinen": "Koskinen et al.", "ltl_automizer": "Ultimate",
+    "sv_comp": "SV-COMP", "t2_cav13": "T2",
+}
+# Preferred display order of the source rows, per experiment.
+_SOURCE_ORDER = {
+    "native": ["classic", "prism_games", "mcmas", "bintest_rr"],
+    "resilience": ["SV-COMP", "Pulse", "Shi et al."],
+    "ctl": ["Koskinen et al.", "Ultimate", "SV-COMP", "T2"],
+}
+_DOMAIN_LABEL = {"boxes": r"\tool-Boxes", "polyhedra": r"\tool-Polyhedra"}
+_DOMAIN_ORDER = ["boxes", "polyhedra"]
+
+# (experiment key, output file, LaTeX label, caption).
+_EXPERIMENTS = [
+    ("native", "exp_native_atl.tex", "tab:native-eval",
+     "Evaluation of the native ATL benchmarks."),
+    ("resilience", "exp_resilience.tex", "tab:term-eval",
+     "Evaluation of the termination/non-termination benchmarks."),
+    ("ctl", "exp_ctl.tex", "tab:ctl-eval",
+     "Evaluation of the CTL benchmarks."),
+]
+
+
+def _experiment_of(rec):
+    if rec["folder"] == RESILIENCE_FOLDER:
+        return "resilience"
+    if rec["folder"] == CTL_FOLDER:
+        return "ctl"
+    return "native"
+
+
+def _source_of(rec, exp):
+    parts = rec["file"].split(os.sep)
+    if exp == "resilience":
+        try:
+            i = parts.index(RESILIENCE_FOLDER)
+            sub = parts[i + 2] if len(parts) > i + 2 else parts[i + 1]
+        except (ValueError, IndexError):
+            sub = "?"
+        return _RESILIENCE_SOURCE.get(sub, sub)
+    if exp == "ctl":
+        try:
+            i = parts.index(CTL_FOLDER)
+            sub = parts[i + 1]
+        except (ValueError, IndexError):
+            sub = "?"
+        return _CTL_SOURCE.get(sub, sub)
+    return rec["folder"]
+
+
+def _property_label(rec, exp):
+    if exp == "native":
+        # first temporal operator after the coalition <...> (or a ')').
+        m = re.search(r"(?:>|\))\s*([GFUX])", rec.get("property", ""))
+        return {"G": r"Safety ($\mathsf{G}$)",
+                "F": r"Reachability ($\mathsf{F}$)",
+                "U": r"Until ($\mathsf{U}$)",
+                "X": r"Next ($\mathsf{X}$)"}.get(m.group(1) if m else None, "ATL")
+    # resilience / ctl: the config basename is the property / lifting variant.
+    return tex_escape(rec.get("name", rec.get("property", "-")))
+
+
+def _ordered(keys, order):
+    seen = list(dict.fromkeys(keys))
+    return [k for k in order if k in seen] + sorted(k for k in seen
+                                                    if k not in order)
+
+
+# Resilience: config (property) name -> alarm class, in decreasing severity.
+# The first class whose property the analyzer proves (result TRUE) wins, so a
+# program is placed in its most severe provable class.
+_RES_CLASSES = [
+    ("termination-exploitability", "critical++"),
+    ("robust_non-termination", "critical"),
+    ("termination-non-exploitability", "safe++"),
+    ("termination-resilience", "safe"),
+]
+_RES_CLASS_COLS = ["critical++", "critical", "safe", "safe++"]
+_RES_CLASS_HEAD = {
+    "critical++": r"\textsc{critical}$^{++}$",
+    "critical": r"\textsc{critical}",
+    "safe": r"\textsc{safe}",
+    "safe++": r"\textsc{safe}$^{++}$",
+}
+
+
+def write_latex_experiments(records, results_dir):
+    """Emit one LaTeX table per experiment. Native ATL and CTL use the
+    implementation.tex structure (Verified/Alarms/TO/Time); the resilience table
+    instead classifies every program into critical++/critical/safe/safe++.
+    Returns the paths written."""
+    by_exp = {e: [] for e, _, _, _ in _EXPERIMENTS}
+    for r in records:
+        by_exp[_experiment_of(r)].append(r)
+
+    written = []
+    for exp, fname, label, caption in _EXPERIMENTS:
+        path = os.path.join(results_dir, fname)
+        with open(path, "w") as fh:
+            fh.write("% Generated by script/runtest.py -- requires nicematrix.\n")
+            recs = by_exp[exp]
+            if not recs:
+                fh.write("%% (no %s records)\n" % exp)
+            elif exp == "resilience":
+                _write_resilience_table(fh, recs, caption, label)
+            else:
+                _write_verdict_table(fh, recs, exp, caption, label)
+        written.append(path)
+    return written
+
+
+def _write_verdict_table(fh, records, exp, caption, label):
+    """Native ATL / CTL: Benchmark | Configuration | Property | Verified | Alarms
+    | TO | Time, aggregating verdicts per (source, domain, property)."""
+    agg = {}  # agg[source][domain][prop] = [verified, alarms, timeouts, time]
+    for r in records:
+        src = _source_of(r, exp)
+        dom = str(r.get("domain", "boxes")).lower()
+        prop = _property_label(r, exp)
+        cell = agg.setdefault(src, {}).setdefault(dom, {}).setdefault(
+            prop, [0, 0, 0, 0.0])
+        if str(r.get("status", "")).upper() == "TO":
+            cell[2] += 1
+        else:
+            if r.get("result") == "TRUE":
+                cell[0] += 1
+            elif r.get("result") == "UNKNOWN":
+                cell[1] += 1
+            cell[3] += num_time(r)
+
+    fh.write("\\begin{table}[t]\n")
+    fh.write("  \\caption{%s}\n" % caption)
+    fh.write("  \\label{%s}\n" % label)
+    fh.write("  \\centering\n")
+    fh.write("  \\scalebox{0.8}{\n")
+    fh.write("    \\begin{NiceTabular}{c c c r r r r}\n")
+    fh.write("      \\CodeBefore\n")
+    fh.write("        \\rowcolor{gray!50}{1}\n")
+    fh.write("        \\rowcolors{2}{gray!25}{white}[respect-blocks]\n")
+    fh.write("      \\Body\n")
+    fh.write("      \\text{Benchmark} & \\text{Configuration} & "
+             "\\text{Property} & ~Verified~ & ~Alarms~ & ~TO~ & "
+             "~Time (s)~ \\\\ \\hline\n")
+    for src in _ordered(agg.keys(), _SOURCE_ORDER[exp]):
+        doms = _ordered(agg[src].keys(), _DOMAIN_ORDER)
+        nrows_src = sum(len(agg[src][d]) for d in doms)
+        src_done = False
+        for di, dom in enumerate(doms):
+            props = _ordered(agg[src][dom].keys(), [])
+            dom_done = False
+            for prop in props:
+                v, a, to, t = agg[src][dom][prop]
+                c1 = ("\\Block{%d-1}{%s}" % (nrows_src, tex_escape(src))
+                      if not src_done else "")
+                c2 = ("\\Block{%d-1}{%s}" % (len(props),
+                      _DOMAIN_LABEL.get(dom, tex_escape(dom)))
+                      if not dom_done else "")
+                src_done = dom_done = True
+                fh.write("      %s & %s & %s & %d & %d & %d & %.1f \\\\\n"
+                         % (c1, c2, prop, v, a, to, t))
+            if di < len(doms) - 1:
+                fh.write("      \\cline{2-7}\n")
+    fh.write("    \\end{NiceTabular}\n")
+    fh.write("  }\n")
+    fh.write("\\end{table}\n")
+
+
+def _write_resilience_table(fh, records, caption, label):
+    """Resilience: Benchmark | Configuration | critical++ | critical | safe |
+    safe++ | TO | Time. Each program is classified once, into the most severe
+    class whose property the analyzer proved."""
+    class_names = {n for n, _ in _RES_CLASSES}
+    # progs[(source, domain, file)] = {property verdicts, total time, timeouts}
+    progs = {}
+    for r in records:
+        src = _source_of(r, "resilience")
+        dom = str(r.get("domain", "boxes")).lower()
+        p = progs.setdefault((src, dom, r["file"]),
+                             {"res": {}, "time": 0.0, "to": set()})
+        p["res"][r.get("name")] = r.get("result")
+        p["time"] += num_time(r)
+        if str(r.get("status", "")).upper() == "TO":
+            p["to"].add(r.get("name"))
+
+    # tally[source][domain] = {class: count, ..., "TO": n, "time": t}
+    tally = {}
+    for (src, dom, _f), p in progs.items():
+        b = tally.setdefault(src, {}).setdefault(
+            dom, dict({c: 0 for _n, c in _RES_CLASSES}, TO=0, time=0.0))
+        b["time"] += p["time"]
+        cls = next((c for n, c in _RES_CLASSES if p["res"].get(n) == "TRUE"),
+                   None)
+        if cls:
+            b[cls] += 1
+        elif p["to"] & class_names:
+            b["TO"] += 1
+
+    fh.write("\\begin{table}[t]\n")
+    fh.write("  \\caption{%s}\n" % caption)
+    fh.write("  \\label{%s}\n" % label)
+    fh.write("  \\centering\n")
+    fh.write("  \\scalebox{0.8}{\n")
+    fh.write("    \\begin{NiceTabular}{c c r r r r r r}\n")
+    fh.write("      \\CodeBefore\n")
+    fh.write("        \\rowcolor{gray!50}{1}\n")
+    fh.write("        \\rowcolors{2}{gray!25}{white}[respect-blocks]\n")
+    fh.write("      \\Body\n")
+    fh.write("      \\text{Benchmark} & \\text{Configuration} & %s & ~TO~ & "
+             "~Time (s)~ \\\\ \\hline\n"
+             % " & ".join(_RES_CLASS_HEAD[c] for c in _RES_CLASS_COLS))
+    for src in _ordered(tally.keys(), _SOURCE_ORDER["resilience"]):
+        doms = _ordered(tally[src].keys(), _DOMAIN_ORDER)
+        src_done = False
+        for dom in doms:
+            b = tally[src][dom]
+            c1 = ("\\Block{%d-1}{%s}" % (len(doms), tex_escape(src))
+                  if not src_done else "")
+            src_done = True
+            counts = " & ".join(str(b[c]) for c in _RES_CLASS_COLS)
+            fh.write("      %s & %s & %s & %d & %.1f \\\\\n"
+                     % (c1, _DOMAIN_LABEL.get(dom, tex_escape(dom)),
+                        counts, b["TO"], b["time"]))
+    fh.write("    \\end{NiceTabular}\n")
+    fh.write("  }\n")
+    fh.write("\\end{table}\n")
+
+
+# --------------------------------------------------------------------------- #
 # Main
 # --------------------------------------------------------------------------- #
 
@@ -1067,7 +1394,7 @@ def write_reports(records, results_dir, charts, args):
     if args.csv:
         write_csv(recs, os.path.join(results_dir, "stats.csv"))
     if args.latex:
-        write_latex(recs, os.path.join(results_dir, "index.tex"))
+        write_latex_experiments(recs, results_dir)
     if args.html:
         write_html(recs, results_dir, charts, args.group_by, args.compact)
 
@@ -1152,7 +1479,8 @@ def main():
     if args.csv:
         print(f"  CSV    {os.path.relpath(os.path.join(results_dir, 'stats.csv'), ROOT)}")
     if args.latex:
-        print(f"  LaTeX  {os.path.relpath(os.path.join(results_dir, 'index.tex'), ROOT)}")
+        for _f in ("exp_native_atl.tex", "exp_resilience.tex", "exp_ctl.tex"):
+            print(f"  LaTeX  {os.path.relpath(os.path.join(results_dir, _f), ROOT)}")
     if args.html:
         print(f"  HTML   {os.path.relpath(os.path.join(results_dir, 'index.html'), ROOT)}")
 

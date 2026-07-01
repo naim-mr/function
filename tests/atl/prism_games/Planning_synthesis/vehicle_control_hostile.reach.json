@@ -1,7 +1,0 @@
-{
-    "analysis": "atl",
-    "property": "<veh>F{pos >= goal}",
-    "domain": "polyhedra",
-    "description": "Safe vehicle control in a hostile environment (de-probabilised). The vehicle (coalition) reaches the goal despite the adversarial threats -> expected TRUE. Both the goal distance (goal) and the threat budget are adversary-chosen and finite but NOT fixed in advance, so the verdict must hold for any distance and any number of threats (see BOUNDED_ADVERSARY.md).",
-    "model": "vehicle_control_hostile.c"
-}

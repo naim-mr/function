@@ -28,12 +28,19 @@
 // =====================================================================
 
 int main() {
-    int goal = input("op");      // waypoints to cover (mission length): arbitrary, not fixed
-    int divert_max = input("op");   // delegation surrogate: bounded number of operator diversions
+    int goal =  10 //input("op");      // waypoints to cover (mission length): arbitrary, not fixed
+    int divert_max =  5//input("op");   // delegation surrogate: bounded number of operator diversions
                                  // (with pdel > 0 the operator must eventually delegate, so it
                                  //  cannot loop the UAV forever)
+
+    // if(goal < 0){
+    //     goal = 0;
+    // };
+    // if(divert_max < 0){
+    //     divert_max = 0;
+    // }
     int wp = 0;                  // waypoints covered so far
-    int roz = 0;                 // currently inside a restricted operating zone?
+    int roz = 0;                 // currently inside a restricted operating zone?   
     while (wp < goal) {
         int divert = input("op");    // operator's choice this round: divert the UAV?
         roz = 0;

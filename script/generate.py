@@ -55,11 +55,17 @@ fod = sys.argv[1]  # Set this to the path of your repository
 print("fod "+fod)
 path = sys.argv[2]  # Set this to the path of your repository
 
-pattern = r'(?:__VERIFIER_nondet_.*?|rand)\(\)'
+pattern = r'(?:__VERIFIER_nondet_.*?|rand)\s*\(\)'
 
 if fod == '-f': 
     process_file(path, pattern)
 elif fod == '-d':
-    process_directory(path,pattern)
+    process_directory(path,pattern) 
+elif fod =='-r':
+    for current_dir, subdirs, files in os.walk(path):
+        process_directory(current_dir,pattern)
+        for dirname in subdirs:
+            process_directory(current_dir+"/"+dirname,pattern)
+    
 else:
     raise Exception("Should be -f or -d") 

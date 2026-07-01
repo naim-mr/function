@@ -1,7 +1,7 @@
 {
     "analysis": "atl",
-    "property": "<veh>G{hit == 0}",
+    "property": "<veh>F{delivered == 1}",
     "domain": "polyhedra",
-    "description": "Safe vehicle control in a hostile environment (de-probabilised). The vehicle (coalition) avoids every threat by steering to the unthreatened lane, whatever the hostile environment does -> expected TRUE. Qualitative core of the rPATL safety objective.",
+    "description": "Probabilistically safe vehicle control in a hostile environment (de-probabilised MDP, after Cizelj-Ding-Lahijanian-Pinto-Belta, IFAC 2011). The vehicle (coalition) must reach the pick-up region and then the drop-off region while staying alive, against moving adversaries and static obstacles that give every crossing a residual, unavoidable probability of loss. Can the vehicle SURELY complete the mission? Expected UNKNOWN -- a soundness witness: in the paper the maximal mission probability is < 1 (0.141 and 0.805 for the two scenarios), so no strategy guarantees delivery against a worst-case (demonic) resolution of the residual loss. This is the qualitative reading of the paper's Pmax[ alive U (pickup & alive U dropoff) ] objective.",
     "model": "vehicle_control_hostile.c"
 }
