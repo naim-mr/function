@@ -44,6 +44,18 @@ GROUP_MODES = {
     "recurrence": ["-ctl"],
 }
 
+# The analysis flag is chosen from the config's own "analysis" field (each .json
+# declares it), so it no longer depends on the folder/group name matching
+# GROUP_MODES -- otherwise a group absent from GROUP_MODES silently falls back to
+# the default (termination) analysis instead of the ATL/CTL one the config asks.
+ANALYSIS_FLAGS = {
+    "termination": [],
+    "atl": ["-atl"],
+    "ctl": ["-ctl"],
+    "guarantee": ["-ctl"],
+    "recurrence": ["-ctl"],
+}
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -53,9 +65,32 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Folders that get special handling / are skipped.
 RESILIENCE_FOLDER = "resilience"   # matrix: every .c x every root property
+# A first-level folder is treated as the resilience matrix root if it is named
+# RESILIENCE_FOLDER OR, robustly to renames of that folder, if it holds this
+# signature config at its top level.
+RESILIENCE_SIGNATURE = "termination-resilience.json"
 CTL_FOLDER = "ctl"                 # matrix: every .c x lifting variant
 MATRIX_FOLDERS = {RESILIENCE_FOLDER, CTL_FOLDER}  # rendered as a pivot table
 SKIP_FOLDERS = {"ctl_lifted"}      # excluded from the run for now
+# With --short, these (large SV-COMP) subtrees are pruned for a quick run.
+SHORT_SKIP_FOLDERS = {"svcomp", "sv_comp"}
+
+
+def resilience_roots(gdir):
+    """First-level subdirs of `gdir` that are resilience matrix roots: named
+    RESILIENCE_FOLDER or carrying the RESILIENCE_SIGNATURE config."""
+    roots = set()
+    try:
+        entries = os.listdir(gdir)
+    except OSError:
+        return roots
+    for name in entries:
+        sub = os.path.join(gdir, name)
+        if os.path.isdir(sub) and (
+                name == RESILIENCE_FOLDER
+                or os.path.isfile(os.path.join(sub, RESILIENCE_SIGNATURE))):
+            roots.add(name)
+    return roots
 
 # The CTL->ATL lifting variants, in display order (column of the ctl matrix).
 CTL_VARIANTS = ["base", "resilience", "resilience_reachability",
@@ -67,7 +102,7 @@ RESILIENCE_CRITICAL = {"termination-exploitability", "robust_non-termination"}
 RESILIENCE_LESS = {"termination-resilience", "termination-non-exploitability"}
 
 
-def discover(tests_dir, groups, flt):
+def discover(tests_dir, groups, flt, short=False):
     """Yield (group, folder, cfile, cfg) for every (.c, config) pair.
 
     `folder` is the first path component under the group directory (the tab the
@@ -76,9 +111,12 @@ def discover(tests_dir, groups, flt):
     Normal folders: a .c is paired with every .json in the SAME directory whose
     name has the .c name as a prefix (`<stem>.json`, `<stem>.*.json`).
 
-    The `resilience` folder is special: it holds N global property configs at
-    its root, and EVERY .c in the subtree is paired with ALL of them (so the
-    report can show one row per file with one result column per property).
+    A resilience matrix root (a first-level folder named `resilience` or holding
+    a `termination-resilience.json`) is special: it holds N global property
+    configs at its root, and EVERY .c anywhere in its subtree is paired with ALL
+    of them (so the report can show one row per file with one result column per
+    property). Detection by signature keeps this working when the folder is
+    renamed.
 
     Paths are relative to ROOT (the analyzer concatenates output_dir + filename).
     """
@@ -87,15 +125,17 @@ def discover(tests_dir, groups, flt):
         gdir = os.path.join(tests_dir, group)
         if not os.path.isdir(gdir):
             continue
+        matrix_roots = resilience_roots(gdir)
         for dirpath, dirs, files in os.walk(gdir):
-            dirs[:] = [d for d in dirs if d not in SKIP_FOLDERS]  # prune
+            skip = SKIP_FOLDERS | SHORT_SKIP_FOLDERS if short else SKIP_FOLDERS
+            dirs[:] = [d for d in dirs if d not in skip]  # prune
             rel_dir = os.path.relpath(dirpath, gdir)
             folder = group if rel_dir == "." else rel_dir.split(os.sep)[0]
             cfiles = sorted(f for f in files if f.endswith(".c"))
 
-            if folder == RESILIENCE_FOLDER:
-                # global property configs at the resilience root
-                res_root = os.path.join(gdir, RESILIENCE_FOLDER)
+            if folder in matrix_roots:
+                # global property configs at this matrix root
+                res_root = os.path.join(gdir, folder)
                 props = sorted(f for f in os.listdir(res_root)
                                if f.endswith(".json"))
                 for cf_name in cfiles:
@@ -173,9 +213,14 @@ def build_cmd(executable, group, cfile, cfg, out):
     # Default to polyhedra; -config runs afterwards so a "domain" key in the
     # JSON still overrides this default.
     cmd = [executable, cfile, "-domain", "polyhedra", "-config", cfg]
-    flags = GROUP_MODES.get(group, [])
+    conf = read_config(cfg)
+    # Pick the analysis flag from the config's declared analysis; fall back to
+    # the folder/group mode only when the config does not specify one.
+    analysis = conf.get("analysis")
+    flags = ANALYSIS_FLAGS.get(analysis) if analysis in ANALYSIS_FLAGS \
+        else GROUP_MODES.get(group, [])
     if flags:
-        cmd += flags + [read_config(cfg).get("property", "")]
+        cmd += flags + [conf.get("property", "")]
     cmd += ["-json_output", out + os.sep]
     return cmd
 
@@ -1157,7 +1202,7 @@ _CTL_SOURCE = {
 }
 # Preferred display order of the source rows, per experiment.
 _SOURCE_ORDER = {
-    "native": ["classic", "prism_games", "mcmas", "bintest_rr"],
+    "native": ["classic", "prism_games", "mcmas"],
     "resilience": ["SV-COMP", "Pulse", "Shi et al."],
     "ctl": ["Koskinen et al.", "Ultimate", "SV-COMP", "T2"],
 }
@@ -1166,12 +1211,68 @@ _DOMAIN_ORDER = ["boxes", "polyhedra"]
 
 # (experiment key, output file, LaTeX label, caption).
 _EXPERIMENTS = [
-    ("native", "exp_native_atl.tex", "tab:native-eval",
-     "Evaluation of the native ATL benchmarks."),
+    ("native", "exp_native_atl.tex", "tab:atl-bench",
+     "Native ATL benchmarks and evaluation. Left: source, ATL property and "
+     "expected verdict. Right: abstract domain (boxes / polyhedra), analysis "
+     "time (s) and the verdict returned by \\tool. Cells marked ``--'' are "
+     "placeholders to be filled from actual runs."),
     ("resilience", "exp_resilience.tex", "tab:term-eval",
      "Evaluation of the termination/non-termination benchmarks."),
     ("ctl", "exp_ctl.tex", "tab:ctl-eval",
      "Evaluation of the CTL benchmarks."),
+]
+
+# Native ATL benchmarks: fixed metadata (application domain, source, ATL property,
+# expected verdict) plus the config basename used to look up the run result. The
+# Dom./Time/\tool columns are filled from actual runs (one sub-row per domain).
+# Each row: (benchmark, source, ATL property [LaTeX], expected, config-name).
+NATIVE_GROUPS = [
+    ("Classical", [
+        (r"train\_gate", r"\cite{AlurHK02}", r"$\langle\mathit{ctrl}\rangle\,\mathsf{G}\,\mathit{safe}$", "--", "train_gate"),
+        (r"matching\_pennies", r"\cite{AlurHK02}", r"$\langle p_1\rangle\,\mathsf{F}\,\mathit{win}$", "--", "matching_pennies"),
+        (r"robots\_carriage", r"\cite{}", r"--", "--", None),
+        (r"nim", r"\cite{}", r"$\langle p_1\rangle\,\mathsf{F}\,\mathit{win}$", "--", "nim"),
+        (r"bit\_transmission", r"\cite{}", r"$\langle\mathit{snd},\mathit{ch}\rangle\,\mathsf{F}\,\mathit{ack}$", "--", "bit_transmission"),
+    ]),
+    ("Game theory", [
+        (r"microgrid", r"\cite{ChenFKPS13}", r"$\langle\mathit{ctrl}\rangle\,\mathsf{G}\,(\mathit{load}\le\mathit{cap})$", r"\textsc{true}", "microgrid"),
+        (r"future\_mi", r"\cite{McIverM07}", r"$\langle\mathit{inv}\rangle\,\mathsf{F}\,(\mathit{gain}\ge\mathit{cap})$", r"\textsc{unknown}", "future_mi"),
+    ]),
+    ("Planning \\&\\ synthesis", [
+        (r"task\_graph", r"\cite{BouyerFLM}", r"$\langle\mathit{sched}\rangle\,\mathsf{F}\,(\mathit{done})$", r"\textsc{true}", "task_graph"),
+        (r"uav\_planning", r"\cite{FengWHT15}", r"$\langle\mathit{uav}\rangle\,\mathsf{F}\,(\mathit{wp}\ge\mathit{goal})$", r"\textsc{true}", "uav_planning"),
+        (r"uav\_planning (ROZ)", r"\cite{FengWHT15}", r"$\langle\mathit{uav}\rangle\,\mathsf{G}\,(\mathit{roz}=0)$", r"\textsc{unknown}", "uav_planning.roz"),
+        (r"autonomous\_driving", r"\cite{ChenKSW13}", r"$\langle\mathit{car}\rangle\,\mathsf{G}\,(\mathit{crash}=0)$", r"\textsc{true}", "autonomous_driving"),
+        (r"autonomous\_driving", r"\cite{ChenKSW13}", r"$\langle\mathit{car}\rangle\,\mathsf{F}\,(\mathit{pos}\ge\mathit{goal})$", r"\textsc{true}", "autonomous_driving.reach"),
+        (r"vehicle\_control", r"\cite{CizeljDLPB11}", r"$\langle\mathit{veh}\rangle\,\mathsf{F}\,(\mathit{delivered})$", r"\textsc{unknown}", "vehicle_control_hostile"),
+        (r"collective\_decision", r"\cite{ChenFKPS13}", r"$\langle\mathit{net}\rangle\,\mathsf{F}\,(\mathit{best}\ge N)$", r"\textsc{unknown}", "collective_decision"),
+        (r"robot\_coordination", r"\cite{prismgames}", r"$\langle r_1,r_2\rangle\,\mathsf{F}\,(x_1\!\ge\!\mathit{g}\wedge x_2\!\ge\!\mathit{g})$", r"\textsc{true}", "robot_coordination"),
+        (r"self\_adaptive (CAS)", r"\cite{GlazierCSG16}", r"$\langle\mathit{cas}\rangle\,\mathsf{F}\,(\mathit{adapted}\ge1)$", r"\textsc{true}", "self_adaptive"),
+        (r"aircraft\_power", r"\cite{BassetKTW15}", r"$\langle\mathit{ctrl}\rangle\,\mathsf{G}\,(\mathit{supplied}\ge\mathit{demand})$", r"\textsc{true}", "aircraft_power"),
+    ]),
+    ("Power management", [
+        (r"dynamic\_power\_mgmt", r"\cite{prismcasestudies}", r"$\langle\mathit{pm}\rangle\,\mathsf{G}\,(\mathit{queue}\le\mathit{cap})$", r"\textsc{true}", "dynamic_power_management"),
+        (r"dvs", r"\cite{PillaiS01}", r"$\langle\mathit{dvs}\rangle\,\mathsf{G}\,(\mathit{missed}=0)$", r"\textsc{true}", "dvs"),
+    ]),
+    ("Comm.\\ protocols", [
+        (r"bounded\_retransmission", r"\cite{HelminkSV94}", r"$\langle\mathit{snd}\rangle\,\mathsf{F}\,(\mathit{delivered}\ge\mathit{chunks})$", r"\textsc{true}", "bounded_retransmission"),
+        (r"zeroconf", r"\cite{rfc3927}", r"$\langle\mathit{host}\rangle\,\mathsf{F}\,(\mathit{configured})$", r"\textsc{true}", "zeroconf"),
+    ]),
+    ("Perf.\\ \\&\\ reliability", [
+        (r"embedded\_control", r"\cite{MuppalaCT94}", r"$\langle\mathit{ctrl}\rangle\,\mathsf{G}\,(\mathit{operational})$", r"\textsc{true}", "embedded_control"),
+        (r"embedded\_control (surv.)", r"\cite{MuppalaCT94}", r"$\langle\mathit{ctrl}\rangle\,(\mathit{operational})\,\mathsf{U}\,(t\ge\mathit{dl})$", r"\textsc{true}", "embedded_control.survive"),
+        (r"workstation\_cluster", r"\cite{HaverkortHK00}", r"$\langle\mathit{rep}\rangle\,\mathsf{G}\,(\mathit{qos})$", r"\textsc{true}", "workstation_cluster"),
+    ]),
+    ("Security", [
+        (r"intrusion\_detection", r"\cite{prismgames}", r"$\langle\mathit{def}\rangle\,\mathsf{G}\,(\mathit{compromised}=0)$", r"\textsc{true}", "intrusion_detection"),
+        (r"non\_repudiation", r"\cite{prismgames}", r"$\langle\mathit{orig}\rangle\,\mathsf{G}\,(\mathit{fair})$", r"\textsc{true}", "non_repudiation"),
+        (r"asw\_fair\_exchange", r"\cite{IslamZ08}", r"$\langle\mathit{orig}\rangle\,\mathsf{G}\,(\neg\mathit{unfair})$", r"\textsc{true}", "asw_fair_exchange"),
+        (r"network\_virus", r"\cite{prismcasestudies}", r"$\langle\mathit{admin}\rangle\,\mathsf{G}\,(\mathit{infected}\le\mathit{cap})$", r"\textsc{true}", "network_virus"),
+        (r"dns\_amplification", r"\cite{DeshpandeKBS11}", r"$\langle\mathit{atk}\rangle\,\mathsf{F}\,(\mathit{bw}>\mathit{BQUL})$", r"\textsc{true}", "dns_amplification"),
+        (r"dos\_quantification", r"\cite{BasagiannisKP08}", r"$\langle\mathit{atk}\rangle\,\mathsf{F}\,(\mathit{queue}\ge B)$", r"\textsc{true}", "dos_quantification"),
+        (r"kaminsky\_dns", r"\cite{AlexiouBK10}", r"$\langle\mathit{atk}\rangle\,\mathsf{F}\,(\mathit{poisoned})$", r"\textsc{unknown}", "kaminsky_dns"),
+        (r"rfid\_attack\_defence", r"\cite{AslanyanNP16}", r"$\langle\mathit{atk}\rangle\,\mathsf{F}\,(\mathit{breached})$", r"\textsc{true}", "rfid_attack_defence"),
+    ]),
 ]
 
 
@@ -1205,11 +1306,7 @@ def _source_of(rec, exp):
 def _property_label(rec, exp):
     if exp == "native":
         # first temporal operator after the coalition <...> (or a ')').
-        m = re.search(r"(?:>|\))\s*([GFUX])", rec.get("property", ""))
-        return {"G": r"Safety ($\mathsf{G}$)",
-                "F": r"Reachability ($\mathsf{F}$)",
-                "U": r"Until ($\mathsf{U}$)",
-                "X": r"Next ($\mathsf{X}$)"}.get(m.group(1) if m else None, "ATL")
+        return rec.get("property", "")
     # resilience / ctl: the config basename is the property / lifting variant.
     return tex_escape(rec.get("name", rec.get("property", "-")))
 
@@ -1238,6 +1335,65 @@ _RES_CLASS_HEAD = {
 }
 
 
+def _write_native_table(fh, records, caption, label):
+    """Native ATL: the fixed NATIVE_GROUPS metadata (Domain | Benchmark | Source |
+    ATL property | Exp.) with Dom./Time/\\tool filled from runs -- one sub-row per
+    domain a benchmark ran under, ``--'' where no run is available."""
+    idx = {}  # idx[config-name][domain] = (result, time)
+    for r in records:
+        idx.setdefault(r.get("name"), {})[str(r.get("domain", "")).lower()] = (
+            r.get("result"), num_time(r))
+
+    def verdict(res):
+        return {"TRUE": r"\textsc{true}", "UNKNOWN": r"\textsc{unknown}",
+                "TO": r"\textsc{t/o}"}.get(res, "--")
+
+    def domlist(cfg):
+        d = idx.get(cfg, {})
+        return [x for x in _DOMAIN_ORDER if x in d] or [None]
+
+    fh.write("\\begin{table}[t]\n")
+    fh.write("  \\caption{%s}\n" % caption)
+    fh.write("  \\label{%s}\n" % label)
+    fh.write("  \\centering\n")
+    fh.write("  \\scalebox{0.62}{\n")
+    fh.write("    \\begin{NiceTabular}{c l l l c c c c}\n")
+    fh.write("      \\CodeBefore\n")
+    fh.write("        \\rowcolor{gray!50}{1}\n")
+    fh.write("        \\rowcolors{2}{gray!25}{white}[respect-blocks]\n")
+    fh.write("      \\Body\n")
+    fh.write("      \\text{Domain} & \\text{Benchmark} & \\text{Source} & "
+             "\\text{ATL property} & \\text{Dom.} & \\text{Time (s)} & "
+             "\\text{Exp.} & \\text{\\tool} \\\\ \\hline\n")
+    for gi, (glabel, rows) in enumerate(NATIVE_GROUPS):
+        group_rows = sum(len(domlist(cfg)) for (_b, _s, _p, _e, cfg) in rows)
+        gdone = False
+        for (bench, src, prop, exp_v, cfg) in rows:
+            doms = domlist(cfg)
+            n = len(doms)
+            for k, dom in enumerate(doms):
+                c0 = ("\\Block{%d-1}{%s}" % (group_rows, glabel)
+                      if not gdone else "")
+                gdone = True
+                if k == 0:
+                    blk = lambda s: ("\\Block{%d-1}{%s}" % (n, s)) if n > 1 else s
+                    cB, cS, cP, cE = blk(bench), blk(src), blk(prop), blk(exp_v)
+                else:
+                    cB = cS = cP = cE = ""
+                if dom is None:
+                    dtxt = ttxt = tool = "--"
+                else:
+                    res, t = idx[cfg][dom]
+                    dtxt, ttxt, tool = dom, "%.1f" % t, verdict(res)
+                fh.write("      %s & %s & %s & %s & %s & %s & %s & %s \\\\\n"
+                         % (c0, cB, cS, cP, dtxt, ttxt, cE, tool))
+        if gi < len(NATIVE_GROUPS) - 1:
+            fh.write("      \\hline\n")
+    fh.write("    \\end{NiceTabular}\n")
+    fh.write("  }\n")
+    fh.write("\\end{table}\n")
+
+
 def write_latex_experiments(records, results_dir):
     """Emit one LaTeX table per experiment. Native ATL and CTL use the
     implementation.tex structure (Verified/Alarms/TO/Time); the resilience table
@@ -1264,59 +1420,46 @@ def write_latex_experiments(records, results_dir):
 
 
 def _write_verdict_table(fh, records, exp, caption, label):
-    """Native ATL / CTL: Benchmark | Configuration | Property | Verified | Alarms
-    | TO | Time, aggregating verdicts per (source, domain, property)."""
-    agg = {}  # agg[source][domain][prop] = [verified, alarms, timeouts, time]
-    for r in records:
-        src = _source_of(r, exp)
-        dom = str(r.get("domain", "boxes")).lower()
-        prop = _property_label(r, exp)
-        cell = agg.setdefault(src, {}).setdefault(dom, {}).setdefault(
-            prop, [0, 0, 0, 0.0])
-        if str(r.get("status", "")).upper() == "TO":
-            cell[2] += 1
-        else:
-            if r.get("result") == "TRUE":
-                cell[0] += 1
-            elif r.get("result") == "UNKNOWN":
-                cell[1] += 1
-            cell[3] += num_time(r)
+    """Native ATL / CTL per-benchmark table:
+    Category | Benchmark | ATL property | Dom. | Time (s) | Exp. | \\tool.
+    Category is the application-domain folder; one row per (benchmark, property,
+    domain); \\tool shows the returned verdict (\\textsc{true}/\\textsc{unknown})."""
+    def verdict(res):
+        return {"TRUE": r"\textsc{true}", "UNKNOWN": r"\textsc{unknown}",
+                "TO": r"\textsc{t/o}"}.get(res, "--")
 
-    fh.write("\\begin{table}[t]\n")
-    fh.write("  \\caption{%s}\n" % caption)
-    fh.write("  \\label{%s}\n" % label)
-    fh.write("  \\centering\n")
-    fh.write("  \\scalebox{0.8}{\n")
-    fh.write("    \\begin{NiceTabular}{c c c r r r r}\n")
-    fh.write("      \\CodeBefore\n")
-    fh.write("        \\rowcolor{gray!50}{1}\n")
-    fh.write("        \\rowcolors{2}{gray!25}{white}[respect-blocks]\n")
-    fh.write("      \\Body\n")
-    fh.write("      \\text{Benchmark} & \\text{Configuration} & "
-             "\\text{Property} & ~Verified~ & ~Alarms~ & ~TO~ & "
-             "~Time (s)~ \\\\ \\hline\n")
-    for src in _ordered(agg.keys(), _SOURCE_ORDER[exp]):
-        doms = _ordered(agg[src].keys(), _DOMAIN_ORDER)
-        nrows_src = sum(len(agg[src][d]) for d in doms)
-        src_done = False
-        for di, dom in enumerate(doms):
-            props = _ordered(agg[src][dom].keys(), [])
-            dom_done = False
-            for prop in props:
-                v, a, to, t = agg[src][dom][prop]
-                c1 = ("\\Block{%d-1}{%s}" % (nrows_src, tex_escape(src))
-                      if not src_done else "")
-                c2 = ("\\Block{%d-1}{%s}" % (len(props),
-                      _DOMAIN_LABEL.get(dom, tex_escape(dom)))
-                      if not dom_done else "")
-                src_done = dom_done = True
-                fh.write("      %s & %s & %s & %d & %d & %d & %.1f \\\\\n"
-                         % (c1, c2, prop, v, a, to, t))
-            if di < len(doms) - 1:
-                fh.write("      \\cline{2-7}\n")
-    fh.write("    \\end{NiceTabular}\n")
-    fh.write("  }\n")
-    fh.write("\\end{table}\n")
+    # rows_by_cat[category] = list of (benchmark, property, domain, result, time)
+    rows_by_cat = {}
+    for r in records:
+        cat = os.path.basename(os.path.dirname(r["file"]))   # app-domain folder
+        bench = os.path.splitext(os.path.basename(r["file"]))[0]
+        dom = _DOMAIN_LABEL.get(str(r.get("domain", "")).lower(),
+                                tex_escape(str(r.get("domain", ""))))
+        res = ("TO" if str(r.get("status", "")).upper() == "TO"
+               else r.get("result"))
+        rows_by_cat.setdefault(cat, []).append(
+            (bench, r.get("property", ""), dom, res, num_time(r)))
+
+    fh.write("\\begin{table}[t]\n  \\caption{%s}\n  \\label{%s}\n  \\centering\n"
+             % (caption, label))
+    fh.write("  \\scalebox{0.62}{\n    \\begin{NiceTabular}{c l l c c c c}\n")
+    fh.write("      \\CodeBefore\n        \\rowcolor{gray!50}{1}\n"
+             "        \\rowcolors{2}{gray!25}{white}[respect-blocks]\n      \\Body\n")
+    fh.write("      \\text{Category} & \\text{Benchmark} & \\text{ATL property} & "
+             "\\text{Dom.} & \\text{Time (s)} & \\text{Exp.} & \\text{\\tool} "
+             "\\\\ \\hline\n")
+    for cat in sorted(rows_by_cat):
+        rows = sorted(rows_by_cat[cat], key=lambda x: (x[0], x[1], x[2]))
+        first = True
+        for (bench, prop, dom, res, t) in rows:
+            c0 = ("\\Block{%d-1}{%s}" % (len(rows), tex_escape(cat))
+                  if first else "")
+            first = False
+            fh.write("      %s & %s & %s & %s & %.1f & -- & %s \\\\\n"
+                     % (c0, tex_escape(bench), tex_escape(prop), dom, t,
+                        verdict(res)))
+        fh.write("      \\hline\n")
+    fh.write("    \\end{NiceTabular}\n  }\n\\end{table}\n")
 
 
 def _write_resilience_table(fh, records, caption, label):
@@ -1425,6 +1568,9 @@ def main():
     ap.add_argument("--compact", action="store_true",
                     help="HTML: only the per-folder result tables -- no "
                          "per-test detail pages, no Statistics tab/charts")
+    ap.add_argument("--short", action="store_true",
+                    help="quick run: prune the large SV-COMP subtrees "
+                         "(%s)" % ", ".join(sorted(SHORT_SKIP_FOLDERS)))
     args = ap.parse_args()
 
     # No explicit format selected -> emit them all.
@@ -1440,7 +1586,7 @@ def main():
     tests_dir = os.path.join(ROOT, args.tests)
     groups = [g for g in args.groups.split(",") if g]
 
-    bench = list(discover(tests_dir, groups, args.filter))
+    bench = list(discover(tests_dir, groups, args.filter, args.short))
     if not bench:
         sys.exit("no benchmarks matched.")
 

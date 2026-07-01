@@ -285,6 +285,12 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
                   ?domain:pre_dom out_state
                   ((T_var l, l.var_typ, l.var_extent), e)
             | T_assign (lval, rval) -> (
+                Printf.printf "\n debug assign ";
+             
+                Typed_syntax.pp_expr_ext !fmt lval;
+                Printf.printf "= ";
+                Typed_syntax.pp_expr_ext !fmt (rval);
+                Printf.printf "\n";
                 match lval with
                 | T_var v, typ, ext' ->
                     let expr, _, _ = rval in

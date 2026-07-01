@@ -1,6 +1,0 @@
-{
-    "property":"AF{exit:true}",
-    "precondition": "x > 0",
-    "joinbwd": 5,
-    "domain": "polyhedra"
-}

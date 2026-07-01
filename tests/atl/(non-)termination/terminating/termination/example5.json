@@ -1,5 +1,0 @@
-{
-    "property":"AF{exit:true}",
-    "precondition": "x > 10",
-    "domain": "boxes"
-}

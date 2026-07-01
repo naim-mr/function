@@ -1,9 +1,0 @@
-timeout 900 ./2ls --graphml-witness witness.graphml --termination --64 Miscalling_Inherited_Method_1_NT.cpp
- 
- 
--------------------------------------------------------------------------------------------------------
- 
- 
-testfile: Miscalling_Inherited_Method_1_NT.cpp
-2LS version 0.9.5
- 

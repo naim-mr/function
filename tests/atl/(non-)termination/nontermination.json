@@ -1,5 +1,0 @@
-{
-    "analysis": "atl",
-    "property": "<env,adv>G{<env,adv>F{loop:true}}",
-    "domain": "polyhedra"
-}

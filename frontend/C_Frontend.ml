@@ -92,7 +92,7 @@ let rec convert_type_qual ((typ, _) : C_AST.type_qual) : Abstract_syntax.typ =
   | C_AST.T_array _ -> raise (UnsupportedFeature "array")
   | C_AST.T_record _ -> raise (UnsupportedFeature "struct")
   | C_AST.T_typedef _ -> raise (UnsupportedFeature "typedef")
-  | _ -> raise (UnsupportedConversion "unsupported type")
+  | _ -> Printf.printf "raise for "; raise (UnsupportedConversion "unsupported type")
 
 let convert_un_op (op : C_AST.unary_operator) : Abstract_syntax.unary_op =
   match op with
