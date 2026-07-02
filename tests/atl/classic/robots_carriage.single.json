@@ -3,5 +3,6 @@
     "property": "<r1>F{pos == 1}",
     "domain": "polyhedra",
     "description": "Soundness check (no winning strategy): a SINGLE robot cannot force the carriage to position 1 -- the other robot has a counter-strategy (push when r1 pushes, wait when r1 waits) that keeps it still -> must NOT be reported TRUE. Contrast <r1,r2>F{pos == 1} (TRUE). (Demri-Goranko-Lange, Ch. 9.)",
-    "model": "robots_carriage.c"
+    "model": "robots_carriage.c",
+    "expected": "UNKNOWN"
 }

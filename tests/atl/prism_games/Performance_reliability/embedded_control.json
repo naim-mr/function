@@ -3,5 +3,6 @@
     "property": "<ctrl>G{operational == 1}",
     "domain": "polyhedra",
     "description": "Embedded control system (de-probabilised, game cast on a reliability CTMC). The repair/reconfiguration unit (coalition) keeps the system operational forever by restoring components, whatever the failures -> expected TRUE. The redundancy size N is arbitrary (input(\"env\"), not fixed in advance), so the verdict must hold for any number of components. Qualitative core of the reliability objective.",
-    "model": "embedded_control.c"
+    "model": "embedded_control.c",
+    "expected": "TRUE"
 }

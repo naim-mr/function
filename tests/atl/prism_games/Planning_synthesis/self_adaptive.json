@@ -3,5 +3,6 @@
     "property": "<cas>F{adapted >= 1}",
     "domain": "polyhedra",
     "description": "Collective Adaptive Systems resilience (de-probabilised, after Glazier-Camara-Schmerl-Garlan). A collective of self-adaptive managers (one cooperative coalition) defends against an attacker (adversary) that breaches members with bounded resources; a detecting member notifies others, which adapt and become invulnerable. Can the collective preemptively protect at least one member? Expected TRUE -- notification-based adaptation provides resilience. The quantitative survival fraction (topology-dependent: line ~0% survive, full ~61%) is abstracted; the paper's rPATL query is <<ATT>>R{compromised}max=?[F stop]. The collective size N and attacker resources are arbitrary.",
-    "model": "self_adaptive.c"
+    "model": "self_adaptive.c",
+    "expected": "TRUE"
 }

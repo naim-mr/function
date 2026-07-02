@@ -34,18 +34,22 @@ Two-player split (cooperative CAS = coalition, attacker = adversary), with the
 attacker's resources de-probabilised as a bounded breach budget and notification
 de-probabilised as "a notified member adapts (becomes invulnerable)":
 
-    << cas >>  F  ( adapted >= 1 )     resilience -- expected TRUE
+    << cas >>  G  ( compromised < N )     resilience -- expected TRUE
 
 C transcription: ../Planning_synthesis/self_adaptive.c
   (each round the CAS notifies one member -> it adapts; the attacker breaches one
-   un-adapted member while it has resources; the run ends when every member is
-   either compromised or adapted.)
+   still-vulnerable member while it has resources; the loop runs until every
+   member is settled -- adapted or compromised -- tracked by a `vulnerable`
+   counter that starts at N.)
 
-Why TRUE: the collective can notify/adapt members before they are compromised,
-so at least one survives -- the qualitative core of "the topology provides
-resilience". Dually, << att >> F (compromised == N) -- "the attacker compromises
-the WHOLE collective" -- is expected UNKNOWN, since notification adapts members
-the attacker can then no longer breach (matching that even the worst topology is
+Why TRUE: each round the collective adapts a member before the breach lands, so
+at least one member is always saved and the whole collective is never fully
+compromised (compromised < N) -- the qualitative core of "the topology provides
+resilience". A stronger invariant << cas >> G (compromised <= adapted) also
+holds (losses never exceed saves, so at least half stay safe). Dually,
+<< att >> F (compromised >= N) -- "the attacker compromises the WHOLE
+collective" -- is expected UNKNOWN, since notification adapts members the
+attacker can then no longer breach (matching that even the worst topology is
 not always 100% compromised, and good topologies keep a majority safe).
 
 NOTE: this REPLACES an earlier, unrelated "manager vs request-load SLA" model

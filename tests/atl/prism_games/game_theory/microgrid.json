@@ -3,5 +3,6 @@
     "property": "<ctrl>G{load <= cap}",
     "domain": "polyhedra",
     "description": "Microgrid demand-side management (de-probabilised, game cast). The controller (coalition) keeps the instantaneous load within the grid capacity by admitting at most cap demanding households, whatever the households demand -> expected TRUE. Both the household count (n) and the capacity (cap) are arbitrary, not fixed in advance.",
-    "model": "microgrid.c"
+    "model": "microgrid.c",
+    "expected": "TRUE"
 }

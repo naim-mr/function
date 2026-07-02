@@ -178,11 +178,34 @@ def read_config(cfg):
 
 
 def norm_result(res):
-    """Normalise the analyzer verdict ('UKNOWN' typo, casing) to TRUE/UNKNOWN."""
+    """Normalise the analyzer verdict to TRUE/UNKNOWN, tolerating the 'UKNOWN'
+    typo, casing, and a boolean 0/1 (or false/true) encoding."""
     r = str(res).strip().upper()
-    if r in ("UKNOWN", "UNKNOWN"):
+    if r in ("UKNOWN", "UNKNOWN", "0", "FALSE"):
         return "UNKNOWN"
+    if r in ("TRUE", "1"):
+        return "TRUE"
     return r or "-"
+
+
+def count_leaves(tree):
+    """Return (defined, total) leaves of the analyzer's decision tree. A leaf is
+    \"defined\" when its value is not 'bottom'; the defined leaves are exactly the
+    partitions of the inferred sufficient precondition, so their count is the
+    number of sufficient conditions found."""
+    if not isinstance(tree, dict):
+        return (0, 0)
+    if "Leaf" in tree:
+        return (0 if str(tree["Leaf"]).strip().lower() == "bottom" else 1, 1)
+    node = tree.get("Node")
+    if isinstance(node, dict):
+        dl = tl = 0
+        for side in ("left", "right"):
+            d, t = count_leaves(node.get(side))
+            dl += d
+            tl += t
+        return (dl, tl)
+    return (0, 0)
 
 
 def parse_log_result(log):
@@ -212,7 +235,7 @@ def disp_time(r):
 def build_cmd(executable, group, cfile, cfg, out):
     # Default to polyhedra; -config runs afterwards so a "domain" key in the
     # JSON still overrides this default.
-    cmd = [executable, cfile, "-domain", "polyhedra", "-config", cfg]
+    cmd = [executable, cfile, "-domain", "polyhedra", "-refine", "-ordinals", "3", "-joinbwd", "7", "-config", cfg]
     conf = read_config(cfg)
     # Pick the analysis flag from the config's declared analysis; fall back to
     # the folder/group mode only when the config does not specify one.
@@ -255,7 +278,12 @@ def run_one(executable, group, folder, cfile, cfg, out, timeout):
         + "__" + os.path.splitext(cfile)[0].replace(os.sep, "__"),
         "property": read_config(cfg).get("property", "termination"),
         "domain": read_config(cfg).get("domain", "boxes"),
+        # expected verdict declared in the config (native benchmarks), if any.
+        "expected": read_config(cfg).get("expected", "-"),
         "result": "-", "time": round(wall, 3), "analyzer_time": "-",
+        # number of defined leaves of the decision tree (the sufficient
+        # precondition partitions) and total number of leaves.
+        "suff": 0, "leaves": 0,
         "vulnerability": "-", "status": status, "rc": rc, "log": log,
         "tree": None, "conf": {},
     }
@@ -274,6 +302,7 @@ def run_one(executable, group, folder, cfile, cfg, out, timeout):
             conf = data.get("Config", {})
             rec["conf"] = conf
             rec["tree"] = data.get("tree")
+            rec["suff"], rec["leaves"] = count_leaves(rec["tree"])
             rec["result"] = norm_result(conf.get("result", "-"))
             rec["analyzer_time"] = conf.get("time", "-")
             rec["domain"] = conf.get("domain", rec["domain"])
@@ -760,12 +789,14 @@ def write_csv(records, path):
     import csv
     with open(path, "w", newline="") as fh:
         w = csv.writer(fh)
-        w.writerow(["group", "file", "property", "domain", "result", "status",
-                    "time_s", "analyzer_time", "vulnerability"])
+        w.writerow(["group", "file", "property", "domain", "expected", "result",
+                    "status", "suff_conditions", "leaves", "time_s",
+                    "analyzer_time", "vulnerability"])
         for r in records:
             w.writerow([r["group"], r["file"], r["property"], r["domain"],
-                        r["result"], r["status"], r["time"], r["analyzer_time"],
-                        r["vulnerability"]])
+                        r.get("expected", "-"), r["result"], r["status"],
+                        r.get("suff", 0), r.get("leaves", 0), r["time"],
+                        r["analyzer_time"], r["vulnerability"]])
 
 
 HL_HEAD = (
@@ -1413,6 +1444,8 @@ def write_latex_experiments(records, results_dir):
                 fh.write("%% (no %s records)\n" % exp)
             elif exp == "resilience":
                 _write_resilience_table(fh, recs, caption, label)
+            elif exp == "ctl":
+                _write_ctl_tables(fh, recs, caption, label)
             else:
                 _write_verdict_table(fh, recs, exp, caption, label)
         written.append(path)
@@ -1421,14 +1454,15 @@ def write_latex_experiments(records, results_dir):
 
 def _write_verdict_table(fh, records, exp, caption, label):
     """Native ATL / CTL per-benchmark table:
-    Category | Benchmark | ATL property | Dom. | Time (s) | Exp. | \\tool.
+    Category | Benchmark | ATL property | Dom. | Time (s) | \\#SC | Exp. | \\tool.
     Category is the application-domain folder; one row per (benchmark, property,
-    domain); \\tool shows the returned verdict (\\textsc{true}/\\textsc{unknown})."""
+    domain); \\#SC is the number of sufficient conditions (defined leaves) found;
+    Exp. is the expected verdict from the config; \\tool the returned verdict."""
     def verdict(res):
         return {"TRUE": r"\textsc{true}", "UNKNOWN": r"\textsc{unknown}",
-                "TO": r"\textsc{t/o}"}.get(res, "--")
+                "TO": r"\textsc{t/o}"}.get(str(res).upper(), "--")
 
-    # rows_by_cat[category] = list of (benchmark, property, domain, result, time)
+    # rows_by_cat[category] = (benchmark, property, domain, result, time, exp, #SC)
     rows_by_cat = {}
     for r in records:
         cat = os.path.basename(os.path.dirname(r["file"]))   # app-domain folder
@@ -1438,26 +1472,27 @@ def _write_verdict_table(fh, records, exp, caption, label):
         res = ("TO" if str(r.get("status", "")).upper() == "TO"
                else r.get("result"))
         rows_by_cat.setdefault(cat, []).append(
-            (bench, r.get("property", ""), dom, res, num_time(r)))
+            (bench, r.get("property", ""), dom, res, num_time(r),
+             r.get("expected", "-"), r.get("suff", 0)))
 
     fh.write("\\begin{table}[t]\n  \\caption{%s}\n  \\label{%s}\n  \\centering\n"
              % (caption, label))
-    fh.write("  \\scalebox{0.62}{\n    \\begin{NiceTabular}{c l l c c c c}\n")
+    fh.write("  \\scalebox{0.62}{\n    \\begin{NiceTabular}{c l l c c c c c}\n")
     fh.write("      \\CodeBefore\n        \\rowcolor{gray!50}{1}\n"
              "        \\rowcolors{2}{gray!25}{white}[respect-blocks]\n      \\Body\n")
     fh.write("      \\text{Category} & \\text{Benchmark} & \\text{ATL property} & "
-             "\\text{Dom.} & \\text{Time (s)} & \\text{Exp.} & \\text{\\tool} "
-             "\\\\ \\hline\n")
+             "\\text{Dom.} & \\text{Time (s)} & \\text{\\#SC} & \\text{Exp.} & "
+             "\\text{\\tool} \\\\ \\hline\n")
     for cat in sorted(rows_by_cat):
         rows = sorted(rows_by_cat[cat], key=lambda x: (x[0], x[1], x[2]))
         first = True
-        for (bench, prop, dom, res, t) in rows:
+        for (bench, prop, dom, res, t, expd, suff) in rows:
             c0 = ("\\Block{%d-1}{%s}" % (len(rows), tex_escape(cat))
                   if first else "")
             first = False
-            fh.write("      %s & %s & %s & %s & %.1f & -- & %s \\\\\n"
+            fh.write("      %s & %s & %s & %s & %.1f & %s & %s & %s \\\\\n"
                      % (c0, tex_escape(bench), tex_escape(prop), dom, t,
-                        verdict(res)))
+                        suff, verdict(expd), verdict(res)))
         fh.write("      \\hline\n")
     fh.write("    \\end{NiceTabular}\n  }\n\\end{table}\n")
 
@@ -1520,6 +1555,100 @@ def _write_resilience_table(fh, records, caption, label):
     fh.write("    \\end{NiceTabular}\n")
     fh.write("  }\n")
     fh.write("\\end{table}\n")
+
+
+# CTL lifting: config-name suffix -> (output column, category E=existential /
+# A=universal). A base config (no suffix) is the CTL embedding; its category is
+# taken from the base program (which also carries the robust/resilient configs).
+_CTL_SUFFIX = [
+    ("robust_reachability", "robust", "E"),
+    ("resilience_reachability", "resilient", "E"),
+    ("resilience", "resilient", "A"),
+]
+_CTL_HEAD = {"embeddingE": r"$\exists$CTL", "embeddingA": r"$\forall$CTL",
+             "robust": r"\textsc{robust}", "resilient": r"\textsc{resilient}"}
+
+
+def _ctl_output(name):
+    """(output column, category, base) for a CTL config basename."""
+    for suf, out, cat in _CTL_SUFFIX:
+        if name.endswith("." + suf):
+            return out, cat, name[:-(len(suf) + 1)]
+    return "embedding", None, name
+
+
+def _write_ctl_tables(fh, records, caption, label):
+    """Two CTL tables (like the resilience one): existential properties with three
+    ATL outputs (embedding / robust / resilient) and universal properties with two
+    (embedding / resilient). Cells count programs proved \\textsc{true} for that
+    output, per source and configuration; plus TO and Time (s) columns."""
+    # category (E/A) of each base program, from its robust/resilient configs.
+    cat = {}
+    for r in records:
+        _out, c, base = _ctl_output(r.get("name", ""))
+        if c == "E":
+            cat[base] = "E"
+        elif c == "A":
+            cat.setdefault(base, "A")
+
+    def cell():
+        return {"embedding": 0, "robust": 0, "resilient": 0, "TO": 0, "time": 0.0}
+
+    agg = {"E": {}, "A": {}}          # agg[cat][source][domain] = cell
+    for r in records:
+        out, _c, base = _ctl_output(r.get("name", ""))
+        table = cat.get(base)
+        if table is None:
+            continue
+        src = _source_of(r, "ctl")
+        dom = str(r.get("domain", "boxes")).lower()
+        b = agg[table].setdefault(src, {}).setdefault(dom, cell())
+        if str(r.get("status", "")).upper() == "TO":
+            b["TO"] += 1
+        else:
+            if r.get("result") == "TRUE":
+                b[out] += 1
+            b["time"] += num_time(r)
+
+    _ctl_one(fh, agg["E"], ["embeddingE", "robust", "resilient"],
+             {"embeddingE": "embedding", "robust": "robust", "resilient": "resilient"},
+             "CTL benchmarks -- existential properties ($\\mathsf{E}\\psi$): number "
+             "of programs proved \\textsc{true} for each ATL lifting (the "
+             "$\\exists$CTL embedding, the robust and the resilient version), per "
+             "source and configuration.", "tab:ctl-exist")
+    _ctl_one(fh, agg["A"], ["embeddingA", "resilient"],
+             {"embeddingA": "embedding", "resilient": "resilient"},
+             "CTL benchmarks -- universal properties ($\\mathsf{A}\\psi$): number "
+             "of programs proved \\textsc{true} for each ATL lifting (the "
+             "$\\forall$CTL embedding and the resilient version), per source and "
+             "configuration.", "tab:ctl-univ")
+
+
+def _ctl_one(fh, data, cols, key_of, caption, label):
+    """One CTL table. cols are display keys; key_of maps a display key to the
+    cell field it counts (both embeddingE and embeddingA count 'embedding')."""
+    spec = "c c " + " ".join("r" for _ in range(len(cols) + 2))
+    heads = " & ".join(_CTL_HEAD[c] for c in cols)
+    fh.write("\\begin{table}[t]\n  \\caption{%s}\n  \\label{%s}\n  \\centering\n"
+             % (caption, label))
+    fh.write("  \\scalebox{0.8}{\n    \\begin{NiceTabular}{%s}\n" % spec)
+    fh.write("      \\CodeBefore\n        \\rowcolor{gray!50}{1}\n"
+             "        \\rowcolors{2}{gray!25}{white}[respect-blocks]\n      \\Body\n")
+    fh.write("      \\text{Benchmark} & \\text{Configuration} & %s & ~TO~ & "
+             "~Time (s)~ \\\\ \\hline\n" % heads)
+    for src in _ordered(data.keys(), _SOURCE_ORDER["ctl"]):
+        doms = _ordered(data[src].keys(), _DOMAIN_ORDER)
+        src_done = False
+        for dom in doms:
+            b = data[src][dom]
+            c1 = ("\\Block{%d-1}{%s}" % (len(doms), tex_escape(src))
+                  if not src_done else "")
+            src_done = True
+            counts = " & ".join(str(b[key_of[c]]) for c in cols)
+            fh.write("      %s & %s & %s & %d & %.1f \\\\\n"
+                     % (c1, _DOMAIN_LABEL.get(dom, tex_escape(dom)),
+                        counts, b["TO"], b["time"]))
+    fh.write("    \\end{NiceTabular}\n  }\n\\end{table}\n")
 
 
 # --------------------------------------------------------------------------- #

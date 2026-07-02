@@ -3,5 +3,6 @@
     "property": "<def>G{<def>F{exposure == 0}}",
     "domain": "polyhedra",
     "description": "Controllable recovery: at every reachable state the defender retains a strategy to bring the exposure back to 0 (nested strategic G-F), even though the attacker keeps probing.",
-    "model": "intrusion_detection.c"
+    "model": "intrusion_detection.c",
+    "expected": "TRUE"
 }

@@ -3,5 +3,6 @@
     "property": "<orig>G{unfair == 0}",
     "domain": "polyhedra",
     "description": "ASW optimistic fair exchange (de-probabilised, after Islam-Zaid, IJNS 2008, 'Probabilistic Analysis of the ASW Protocol Using PRISM'). The honest party (coalition) has a strategy -- wait to receive before committing, else invoke the trusted third party -- keeping fairness forever: never a state where it released its signature but holds nothing -> expected TRUE. This matches the paper's finding that fairness holds (Pmax[F advantaged state] = 0). Qualitative core of the fair-exchange guarantee; abstracts the timeout/timeliness and effectiveness analysis.",
-    "model": "asw_fair_exchange.c"
+    "model": "asw_fair_exchange.c",
+    "expected": "TRUE"
 }

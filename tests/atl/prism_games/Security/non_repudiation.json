@@ -3,5 +3,6 @@
     "property": "<orig>G{fair == 1}",
     "domain": "polyhedra",
     "description": "Non-repudiation / fair exchange (de-probabilised). The originator (coalition) has a strategy (withhold the message until the receipt is in) keeping the fairness invariant forever: never a state where the recipient holds the message but the originator holds no receipt -> expected TRUE. Qualitative core of the rPATL fairness/non-repudiation objective.",
-    "model": "non_repudiation.c"
+    "model": "non_repudiation.c",
+    "expected": "TRUE"
 }

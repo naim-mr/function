@@ -17,3 +17,14 @@ Les descriptions:
     -> dvs.c
 
 Reprend à kaminsky_dns    
+
+
+[recheck v2]
+
++ bounded_retransmission: il a y a pas moyen d'avoir autre chose, quoi qu'il arrive avec cette version 
+on aura la transmission
++ zero_conf: on va devoir le supprimer l'encodage fais pas sens. Il faut un model de broadcasting pour que ça fasse sens.
+             Ici on arrive pas avoir la notion de conflit.
++ future_mi:peut on rajouter des propriétés après avoir wrap autour de while(1) until?
++embeded:  -atl "<ctrl>U{operational == 1}{t >= deadline}" le temps ne fait pas sens
++ workstation est bien mais faut plus de propriétés

@@ -3,5 +3,6 @@
     "property": "<car>G{crash == 0}",
     "domain": "polyhedra",
     "description": "Autonomous urban driving (de-probabilised). The car (coalition) avoids every collision by yielding when a hazard appears, whatever the environment does -> expected TRUE. Qualitative core of the rPATL safety objective.",
-    "model": "autonomous_driving.c"
+    "model": "autonomous_driving.c",
+    "expected": "TRUE"
 }

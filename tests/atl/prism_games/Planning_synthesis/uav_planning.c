@@ -28,29 +28,32 @@
 // =====================================================================
 
 int main() {
-    int goal =  10 //input("op");      // waypoints to cover (mission length): arbitrary, not fixed
-    int divert_max =  5//input("op");   // delegation surrogate: bounded number of operator diversions
-                                 // (with pdel > 0 the operator must eventually delegate, so it
-                                 //  cannot loop the UAV forever)
 
-    // if(goal < 0){
-    //     goal = 0;
-    // };
-    // if(divert_max < 0){
-    //     divert_max = 0;
-    // }
-    int wp = 0;                  // waypoints covered so far
-    int roz = 0;                 // currently inside a restricted operating zone?   
-    while (wp < goal) {
-        int divert = input("op");    // operator's choice this round: divert the UAV?
-        roz = 0;
-        if (divert == 1 && divert_max > 0) {
-            divert_max = divert_max - 1;   // diversion consumes the bounded delegation budget (no progress)
-            roz = input("op");       // operator chooses whether the diverting road crosses a ROZ
-            if (roz != 1) { roz = 0; }   // normalise to a 0/1 flag
-        } else {
-            int fly = input("uav");  // delegated / budget spent: UAV advances on a safe road
-            wp = wp + 1;             // and reaches the next waypoint, avoiding ROZs
+    while(1){
+        int goal =  input("op");      // waypoints to cover (mission length): arbitrary, not fixed
+        int divert_max =  input("op");   // delegation surrogate: bounded number of operator diversions
+                                     // (with pdel > 0 the operator must eventually delegate, so it
+                                     //  cannot loop the UAV forever)
+
+        if(goal < 0){
+             goal = 0;
+        };
+        if(divert_max < 0){
+             divert_max = 0;
+        }
+        int wp = 0;                  // waypoints covered so far
+        int roz = 0;                 // currently inside a restricted operating zone?   
+        while (wp < goal) {
+            int divert = input("op");    // operator's choice this round: divert the UAV?
+            roz = 0;
+            if (divert == 1 && divert_max > 0) {
+                divert_max = divert_max - 1;   // diversion consumes the bounded delegation budget (no progress)
+                roz = input("op");       // operator chooses whether the diverting road crosses a ROZ
+                if (roz != 1) { roz = 0; }   // normalise to a 0/1 flag
+            } else {
+                        // delegated / budget spent: UAV advances on a safe road
+                wp = wp + 1;             // and reaches the next waypoint, avoiding ROZs
+            }
         }
     }
 }

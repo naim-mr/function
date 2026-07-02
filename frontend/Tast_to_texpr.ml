@@ -20,9 +20,9 @@ let rec exp_to_apron ((e, t, ext) : expr typed) =
            (Interval.of_scalar
               (Intinf.to_mpqf inf |> Scalar.of_mpqf)
               (Scalar.of_infty 1)))
-  | T_int_const (INF, INF)  |  T_int_const (MINF, INF) -> Texpr1.Cst (Coeff.Interval Interval.top)
+  | T_int_const (INF, INF) -> Texpr1.Cst (Coeff.Interval Interval.top)
   | T_INPUT _ ->
-      let itv = (INF, INF) in
+      let itv = Value_semantics.int_type_set A_INT A_SIGNED in
       exp_to_apron (T_int_const itv, t, ext)
   | T_bool_const True -> Texpr1.Cst (Coeff.s_of_int 1)
   | T_bool_const False -> Texpr1.Cst (Coeff.s_of_int 0)
@@ -55,8 +55,4 @@ let rec exp_to_apron ((e, t, ext) : expr typed) =
       )
   | T_deref (T_var v, _, _) -> Texpr1.Var (Var.of_string v.var_name)
   | _ ->
-       Printf.printf "try to convert \n";
-       Typed_syntax.pp_expr Format.std_formatter e;
-       Printf.printf "\n";
-
       raise (UnsupportedFeature "not supported or not supposed to be supported")

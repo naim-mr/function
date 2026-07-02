@@ -1,7 +1,8 @@
 {
     "analysis": "atl",
-    "property": "<car>F{pos >= goal}",
+    "property":  "<car>G{<car>F{pos >= goal}}",
     "domain": "polyhedra",
     "description": "Autonomous urban driving (de-probabilised). The car (coalition) reaches its destination despite the adversarial hazards -> expected TRUE. Both the goal distance (goal) and the hazard budget are adversary-chosen and finite but NOT fixed in advance, so the verdict must hold for any route length and any number of hazards (see BOUNDED_ADVERSARY.md).",
-    "model": "autonomous_driving.c"
+    "model": "autonomous_driving.c",
+    "expected": "TRUE"
 }

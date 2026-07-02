@@ -3,5 +3,6 @@
     "property": "<dvs>G{missed == 0}",
     "domain": "polyhedra",
     "description": "Real-time dynamic voltage scaling (de-probabilised, game cast on an MDP). Mapping: a task of varying size arrives (load=input(env), backlog += 2 heavy / 1 light); the scheduler picks the frequency (hi=input(dvs), backlog -= 2 high / 1 low); safety = no deadline missed (backlog <= buf). The scheduler reads the load before choosing, runs high on heavy tasks, so the backlog stays at 0 -> expected TRUE. buf arbitrary (input(env)). CAVEATS: the coalition/adversary split is IMPOSED on a single-agent MDP; NO energy is modelled, so this captures ONLY schedulability, NOT DVS's defining energy-vs-performance trade-off (running low has no cost, so the scheduler can always run high) -- not a faithful model of the energy objective; the winning strategy is trivial (always high frequency).",
-    "model": "dvs.c"
+    "model": "dvs.c",
+    "expected": "TRUE"
 }

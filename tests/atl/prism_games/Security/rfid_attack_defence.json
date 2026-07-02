@@ -3,5 +3,6 @@
     "property": "<atk>F{breached == 1}",
     "domain": "polyhedra",
     "description": "RFID goods-management attack-defence (de-probabilised, after Aslanyan-Nielson-Parker CSF 2016). An attack-defence tree compiled to a two-player game: the attacker (coalition) must complete three sequential phases (get into premises, get into warehouse, evade cameras), each with alternative OR-routes; the defender (adversary) blocks one route per phase. Can the attacker breach? Expected TRUE -- with more routes than the defender can block per phase, the attacker finds an unblocked path; this is the qualitative core of the paper's maximum attack-success probability 0.41 (> 0, i.e. the system is open to attack). The probabilistic success of basic actions (which makes the original < 1) is abstracted to deterministic routes.",
-    "model": "rfid_attack_defence.c"
+    "model": "rfid_attack_defence.c",
+    "expected": "TRUE"
 }

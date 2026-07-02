@@ -29,37 +29,47 @@
 //
 //  (3) the controller can keep the train out forever -- expected TRUE:
 //        <ctrl>G{q != 3}
+//  P1: Whenever the train is out of the gate and does not have a grant to enter the gate,
+//      the controller can prevent it from entering the gate:
+//       <>G{OR{q==0}{<ctlr>G{out_of_gate:true}}}
 //
-//  (4) recovery -- whenever in the gate, the controller can leave on the next
-//      step, i.e.  G( in_gate -> <ctrl>X !in_gate )  -- expected TRUE:
-//        < >G{OR{NOT{q == 3}}{<ctrl>X{q != 3}}}
+//  P2: Whenever the train is out of the gate, the controller cannot force it to enter the
+//        gate:
+//      <>G{OR{in_gate:true}{NOT{<train>F{in_gate:true}}}
+//  P3:Whenever the train is out of the gate, the train and the controller can cooperate
+//  so that the train will enter the gate
+//        <>G{OR{in_gate:true}{<ctrl,train>F{in_gate:true}}}
+//  P4:Whenever the train is out of the gate, it can eventually request a grant for
+//  entering the gate, in which case the controller decides whether the grant is
+//  given or not: 
+//    <>G{OR{in_gate:true}{AND{<train>F{AND{request:true}{<ctrl>F{grant:true}}}{NOT{<train>F{q==0 || q== 1|| q==3}}}}}
 // =====================================================================
 
 int main() {
     int q = 0;
-    //out_of_gate:
+    out_of_gate:
     while (1) {
         if (q == 0){
-            //out_of_gate:
+            out_of_gate:
             if (input("train") > 0){
                q = 1;
             }  
         } else if (q == 1){
-            //out_of_gate:
-            //request:
+            out_of_gate:
+            request:
             if (input("ctrl") > 0){
                 q = 2;   
             }
         } else if (q == 2){
-            //out_of_gate:
-            //grant:
+            out_of_gate:
+            grant:
             if (input("train") > 0){
                q = 3;
             } else {
                q = 0;
             }
         }else if (q == 3){
-           // in_gate:
+             in_gate:
              if (input("ctrl") > 0){
                 q = 0;   
             }

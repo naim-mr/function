@@ -1,5 +1,6 @@
 {
     "analysis": "atl",
-    "property": "<sender,chan>F{ack == 1}",
-    "domain": "polyhedra"
+    "property": "<sender>F{ack == 1}",
+    "domain": "polyhedra",
+    "expected": "UNKNOWN"
 }

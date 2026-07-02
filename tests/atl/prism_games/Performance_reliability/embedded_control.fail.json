@@ -3,5 +3,6 @@
     "property": "<env>F{operational == 0}",
     "domain": "polyhedra",
     "description": "Embedded control system -- adversarial dual. Can the component failures (now the coalition) FORCE the system down, against a repairing controller (now the adversary)? Expected UNKNOWN/FALSE: the controller repairs one component per round, so the failures cannot drive the redundancy to zero. Qualitative core of the PRISM P=?[ F down ] (the probability of failure is not forced to 1). Soundness dual of <ctrl>G{operational == 1}.",
-    "model": "embedded_control.c"
+    "model": "embedded_control.c",
+    "expected": "UNKNOWN"
 }

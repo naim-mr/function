@@ -1,5 +1,6 @@
 {
     "analysis": "atl",
     "property": "<me>F{win == 0}",
-    "domain": "boxes"
+    "domain": "boxes",
+    "expected": "TRUE"
 }

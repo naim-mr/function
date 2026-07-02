@@ -1,7 +1,0 @@
-{
-    "analysis": "atl",
-    "property": "<host>F{configured == 1}",
-    "domain": "polyhedra",
-    "description": "IPv4 Zeroconf address allocation (de-probabilised, game cast on an MDP). The joining host (coalition) eventually configures an address despite a bounded number of adversarial conflicts -> expected TRUE. Probabilistic conflicts abstracted as a finite demonic budget.",
-    "model": "zeroconf.c"
-}

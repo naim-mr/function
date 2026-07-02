@@ -3,5 +3,6 @@
     "property": "<atk>F{queue >= B}",
     "domain": "polyhedra",
     "description": "DoS threat quantification on the HIP base-exchange (de-probabilised, after Basagiannis-Katsaros-Pombortsis-Alexiou COMPSAC 2008). The attacker counterfeits and replays R1 messages (the puzzle is unsigned), filling the Initiator's admission queue (capacity B) with bogus messages it must waste effort verifying; the Initiator clears only a bounded number per round (puzzles are costly). The attacker (coalition) can drive the queue to full -> expected TRUE, matching the paper's finding that the counterfeiting DoS succeeds (P ~ 0.895). Abstracts the processing-cost rewards and the puzzle-difficulty analysis.",
-    "model": "dos_quantification.c"
+    "model": "dos_quantification.c",
+    "expected": "TRUE"
 }

@@ -17,9 +17,12 @@
 //
 // The controller keeps the system operational forever (TRUE):
 //   -atl "<ctrl>G{operational == 1}"
-// The controller survives the whole mission, i.e. stays up until the deadline
-// (TRUE) -- discrete analog of the time-bounded "no failure within T":
-//   -atl "<ctrl>U{operational == 1}{t >= deadline}"
+// The controller completes the MISSION within the global deadline (TRUE). Two
+// clocks: a global clock t (always ticking) and the mission uptime work (only
+// advances while the system is up), so an outage burns global time without
+// progressing the mission. The controller accumulates the required uptime
+// (work >= mission) before the global clock runs out (t <= deadline):
+//   -atl "<ctrl>F{AND{work >= mission}{t <= deadline}}"
 // The failures cannot force the system down (UNKNOWN) -- adversarial dual,
 // qualitative core of P=?[ F down ]:
 //   -atl "<env>F{operational == 0}"
@@ -30,15 +33,21 @@ int main() {
     if (n < 1) n = 1;          // the system has at least one component
     int up = n;                // all components start healthy
     int operational = 1;       // system operational?
-    int deadline = input("env"); // mission length (step deadline): arbitrary, not fixed
-    int t = 0;                 // step clock (discrete analog of elapsed time)
+    int deadline = input("env"); // global time budget for the mission: arbitrary, not fixed
+    if (deadline < 0) deadline = 0;
+    int mission = input("env");  // required operational uptime (mission workload): arbitrary
+    if (mission < 0) mission = 0;
+    if (mission > deadline) mission = deadline;  // the mission fits within the horizon
+    int t = 0;                 // global clock: elapsed real time
+    int work = 0;              // mission progress: operational uptime accumulated
     while (1) {
         int fail   = input("env");    // a component fails this round?
         int repair = input("ctrl");   // controller repairs a component?
         if (fail == 1) { if (up > 0) { up = up - 1; } }
         if (repair == 1) { if (up < n) { up = up + 1; } }
         operational = 1;
-        if (up == 0) { operational = 0; }   // all redundancy lost -> down
-        t = t + 1;                          // a step elapses
+        if (up == 0) { operational = 0; }        // all redundancy lost -> down
+        t = t + 1;                               // global time always advances
+        if (operational == 1) { work = work + 1; } // mission advances only while up
     }
 }

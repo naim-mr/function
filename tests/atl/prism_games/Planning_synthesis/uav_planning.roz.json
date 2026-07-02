@@ -3,5 +3,6 @@
     "property": "<uav>G{roz == 0}",
     "domain": "polyhedra",
     "description": "Human-in-the-loop UAV mission planning (de-probabilised, after Feng-Wiltsche-Humphrey-Topcu ICCPS 2015). ROZ avoidance: can the UAV autonomy (coalition) keep the UAV out of EVERY restricted operating zone, against a worst-case operator? Expected UNKNOWN/FALSE -- when the operator diverts the UAV at a checkpoint it can route it through a ROZ; the autonomy cannot prevent that. This matches the paper, where ROZ visits are MINIMISED (a Pareto trade-off against mission time) and are generally > 0, not driven to zero against an adversarial operator. Soundness companion to the TRUE completion property.",
-    "model": "uav_planning.c"
+    "model": "uav_planning.c",
+    "expected": "UNKNOWN"
 }

@@ -16,13 +16,18 @@ channel that may lose messages. The Sender keeps sending the same bit
 until it receives an acknowledgement; the Receiver, once it gets the bit,
 keeps sending an acknowledgement.
 
-The hallmark property of this benchmark is TEMPORAL-EPISTEMIC, e.g.
+The hallmark property of this benchmark is TEMPORAL-EPISTEMIC. The MCMAS ISPL
+example (Lomuscio-Qu-Raimondi, IJSTTT 2017, Fig. 8) verifies exactly:
 
-    AG ( ack -> K_Sender ( recbit ) )
-    AF ( K_Sender K_Receiver bit )
+    AG ( (recack and bit0) -> K_Sender ( K_Receiver bit0 ) )   -- TRUE
+    AG ( (recack and bit0) -> C_{Sender,Receiver} bit0 )       -- FALSE
 
-i.e. it talks about the agents' KNOWLEDGE (K operators), which is the whole
-point of the example. ATL alone (and a purely numeric encoding) cannot
+i.e. once the sender receives an ack, it knows that the receiver knows the bit
+(first spec, satisfied); but common knowledge is NEVER attained on a lossy
+channel (second spec, false -- the coordinated-attack impossibility). Here
+recack = "Sender.ack = true", bit0 = "Sender.bit = b0", and C is the common-
+knowledge operator (GCK in ISPL). It talks about the agents' KNOWLEDGE, which is
+the whole point of the example. ATL alone (and a purely numeric encoding) cannot
 express the K operators -- this needs ATEL / epistemic ATL (see the MCMAS
 examples and the epistemic-ATL notes in ../README.md).
 

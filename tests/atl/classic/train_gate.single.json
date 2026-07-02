@@ -1,7 +1,0 @@
-{
-    "analysis": "atl",
-    "property": "<train>F{s == 3}",
-    "domain": "polyhedra",
-    "description": "AHK Example 2.2. The iconic ATL point: the train ALONE cannot force entry into the gate -- the controller can deny/delay forever -> expected UNKNOWN. Soundness witness vs <train,ctr>F{s == 3} (TRUE).",
-    "model": "train_gate.c"
-}

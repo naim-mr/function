@@ -12,7 +12,7 @@
 // message. The COALITION {sender, channel} can guarantee delivery+ack
 // (the genuine single-agent property of the original model is EPISTEMIC --
 // "the sender comes to KNOW that the receiver received" -- and needs K
-// operators that a purely numeric encoding cannot express; see .txt).
+// operators that a  encoding cannot epurely numericxpress; see .txt).
 //
 //   agents "sender","chan" = input("sender"), input("chan")  -> coalition
 //   (no separate adversary: the faulty channel is the only environment)
@@ -23,7 +23,7 @@
 int main() {
     int recv = 0;          // receiver got the bit?
     int ack = 0;           // sender got the acknowledgement?
-    while (ack == 0) {
+    while (ack == 0) {      
         int send = input("sender");   // sender (re)transmits the bit?
         int deliver = input("chan");  // channel delivers this round?
         if (send == 1) { if (deliver == 1) { recv = 1; } }

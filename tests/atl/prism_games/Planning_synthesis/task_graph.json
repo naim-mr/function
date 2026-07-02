@@ -1,5 +1,6 @@
 {
     "analysis": "atl",
     "property": "<sched>F{done == 1}",
-    "domain": "polyhedra"
+    "domain": "polyhedra",
+    "expected": "TRUE"
 }

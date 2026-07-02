@@ -20,7 +20,7 @@
 // =====================================================================
 
 int main() {
-    int cap = input("hh");     // grid capacity: arbitrary, not fixed in advance
+    int cap = input("constructor");     // grid capacity: arbitrary, not fixed in advance
     if (cap < 0) cap = 0;      // a capacity is non-negative
     int n = input("hh");       // number of households: arbitrary, not fixed in advance
     int load = 0;              // instantaneous load on the grid
