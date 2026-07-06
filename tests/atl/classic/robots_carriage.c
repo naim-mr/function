@@ -24,10 +24,8 @@
 int main() {
     int pos = 0;
     while (1) {
-        int p1 = input("r1");   // robot 1: push (1) or wait (0)
-        int p2 = input("r2");   // robot 2: push (1) or wait (0)
-        if (p1 > 0) { p1 = 1; } else { p1 = 0; }
-        if (p2 > 0) { p2 = 1; } else { p2 = 0; }
+        int p1 = input("r1",0,1);   // robot 1: push (1) or wait (0)
+        int p2 = input("r2",0,1);   // robot 2: push (1) or wait (0)
         // the carriage moves only if EXACTLY one robot pushes
         if (p1 == 1) {
             if (p2 == 0) {                    // only r1 -> clockwise (+1 mod 3)

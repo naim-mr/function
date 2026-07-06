@@ -6,18 +6,17 @@ termination: false
 
 
 */
-#define EINTR 1
-#define OTHER 2
+
 int errno;
 int waitpid()
 {
     int num = __VERIFIER_nondet_int();
     while( num < 0 )
     {
-        if( __VERIFIER_nondet_int() && errno != EINTR )
-            errno = EINTR;
+        if( __VERIFIER_nondet_int() && errno != 1 )
+            errno = 1;
         else
-            errno = OTHER;
+            errno = 1;
         return num;
     }
     return num;
@@ -33,7 +32,7 @@ again:
         ret = waitpid();
     }
     if( ret < 0 )
-        if( errno == EINTR )
+        if( errno == 1 )
         goto again;
     return 0;
 }

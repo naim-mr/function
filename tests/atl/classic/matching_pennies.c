@@ -25,10 +25,8 @@
 // =====================================================================
 
 int main() {
-    int a = input("p1");   // person 1's choice: Head (1) / Tail (0)
-    int b = input("p2");   // person 2's choice: Head (1) / Tail (0)
-    if (a > 0) { a = 1; } else { a = 0; }
-    if (b > 0) { b = 1; } else { b = 0; }
+    int a = input("p1",0,1);   // person 1's choice: Head (1) / Tail (0)
+    int b = input("p2",0,1);   // person 2's choice: Head (1) / Tail (0)
     int gain1=0;
     int gain2=0;
     if (a == b) {          // same   -> person 2 pays person 1

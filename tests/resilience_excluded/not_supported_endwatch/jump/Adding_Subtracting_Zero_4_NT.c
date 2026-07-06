@@ -26,7 +26,6 @@ int read( int loc , int len )
             if( num < 995 ) //read a char
             {
                 loc++;
-                continue;
             }
             else // EOF
             {

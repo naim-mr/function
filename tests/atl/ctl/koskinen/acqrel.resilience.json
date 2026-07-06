@@ -1,5 +1,9 @@
 {
     "analysis": "atl",
     "property": "<env>G{OR{A!=1}{<env>F{R==1}}}",
+    "players": [
+        "adv",
+        "env"
+    ],
     "precondition": "A==0 && R==0"
 }

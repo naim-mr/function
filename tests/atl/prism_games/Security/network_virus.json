@@ -1,6 +1,10 @@
 {
     "analysis": "atl",
     "property": "<admin>G{infected <= cap}",
+    "players": [
+        "admin",
+        "virus"
+    ],
     "domain": "polyhedra",
     "description": "Network virus infection (de-probabilised, game cast on an MDP). The administrator (coalition) keeps the number of infected nodes within the tolerated bound forever by disinfecting, whatever the virus spread -> expected TRUE. The bound cap is arbitrary (input(\"virus\"), not fixed in advance). Qualitative core of the rPATL containment objective.",
     "model": "network_virus.c",

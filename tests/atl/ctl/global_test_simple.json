@@ -1,4 +1,8 @@
 {
     "analysis": "atl",
-    "property": "<>G{<>F{x <= -10}}"
+    "property": "<>G{<>F{x <= -10}}",
+    "players": [
+        "adv",
+        "env"
+    ]
 }

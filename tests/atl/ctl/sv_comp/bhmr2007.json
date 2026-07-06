@@ -1,5 +1,9 @@
 {
     "analysis": "atl",
     "property": "<>F{assert3:a + b == 3*n}",
+    "players": [
+        "adv",
+        "env"
+    ],
     "domain": "polyhedra"
 }

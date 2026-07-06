@@ -1,6 +1,10 @@
 {
     "analysis": "atl",
     "property": "<me>F{win == 0}",
+    "players": [
+        "me",
+        "opp"
+    ],
     "domain": "boxes",
     "expected": "TRUE"
 }

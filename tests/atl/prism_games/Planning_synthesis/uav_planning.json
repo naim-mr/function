@@ -1,6 +1,10 @@
 {
     "analysis": "atl",
     "property": "<uav>G{<uav>F{wp >= goal}}",
+    "players": [
+        "op",
+        "uav"
+    ],
     "domain": "polyhedra",
     "description": "Human-in-the-loop UAV mission planning (de-probabilised, after Feng-Wiltsche-Humphrey-Topcu ICCPS 2015). Two-player game: UAV autonomy (coalition) vs human operator (worst-case) who chooses roads at checkpoints. Mission completion (cover the route): the operator could loop the UAV forever, but a DELEGATION mechanism (pdel>0) forces it to eventually hand routing to the UAV -- de-probabilised as a bounded number of diversions -- so the UAV covers the route -> expected TRUE. goal and the diversion bound are arbitrary, not fixed. Abstracts the operator's proficiency/workload/fatigue probabilities and the time/fuel rewards.",
     "model": "uav_planning.c",

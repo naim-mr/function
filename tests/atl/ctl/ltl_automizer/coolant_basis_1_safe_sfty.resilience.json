@@ -1,4 +1,8 @@
 {
     "analysis": "atl",
-    "property": "<env>G{OR{chainBroken != 1}{<env>G{chainBroken == 1}}}"
+    "property": "<env>G{OR{chainBroken != 1}{<env>G{chainBroken == 1}}}",
+    "players": [
+        "adv",
+        "env"
+    ]
 }

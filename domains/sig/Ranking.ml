@@ -30,7 +30,7 @@ module type PARTITION = sig
   (** [inner env cs] returns the partitions defined by the constraints in [cs]
       on [env]*)
 
-  val bwd_assign : t -> expr typed * expr typed -> t
+  val bwd_assign : ?controllable:bool -> t -> expr typed * expr typed -> t
   (** [bwd_assign t lv exp] Over-approximating backward assignement [lv := exp]
       on [t]*)
 
@@ -42,7 +42,7 @@ module type PARTITION = sig
   (** [fwd_assign t lv exp] Over-approximating forward assignement [lv := exp]
       on [t]*)
 
-  val fwd_filter : t -> expr typed -> t
+  val fwd_filter : ?controllable:bool ->  t -> expr typed -> t
   (** [fwd_assign t exp] Over-approximating forward filter [exp != 0] on [t]*)
 
   val ubwd_filter : t -> expr typed -> t
@@ -196,9 +196,9 @@ module type RANKING_FUNCTION = sig
   val dual_widen : t -> t -> t
   val update_dom : B.t option -> env -> env
   val bwd_assign : ?domain:B.t -> ?controllable:bool -> t -> expr typed * expr typed -> t
-  val filter : ?domain:B.t -> t -> expr typed -> t
+  val filter : ?controllable:bool -> ?domain:B.t ->  t -> expr typed -> t
   val ubwd_assign : ?domain:B.t -> ?controllable:bool ->  t -> expr typed * expr typed -> t
-  val ubwd_filter : ?domain:B.t -> t -> expr typed -> t
+  val ubwd_filter :?controllable:bool -> ?domain:B.t -> t -> expr typed -> t
   val zero : env -> t
   val domain_zero : t -> t
   val plus : t -> t -> t

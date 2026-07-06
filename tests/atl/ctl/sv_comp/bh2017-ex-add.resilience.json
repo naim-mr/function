@@ -1,4 +1,8 @@
 {
     "analysis": "atl",
-    "property": "<env>F{assert1: n <= 60}"
+    "property": "<env>F{assert1: n <= 60}",
+    "players": [
+        "adv",
+        "env"
+    ]
 }

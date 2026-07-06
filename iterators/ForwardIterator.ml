@@ -178,10 +178,11 @@ module ForwardIterator (B : PARTITION) = struct
      `char x = (char) input(id)` is T_unary (A_cast _, (T_INPUT id, ...)). *)
   let rec input_of_expr (e : Typed_syntax.expr) : string option =
     match e with
-    | T_INPUT id -> Some id
-    | _ -> ( match unbox_cast e with
-             | Some (e', _) -> input_of_expr e'
-             | None -> None)
+    | T_INPUT (id, _) -> Some id
+    | _ -> (
+        match unbox_cast e with
+        | Some (e', _) -> input_of_expr e'
+        | None -> None)
 
   let rec fwdTStm ctx p s =
     let open Taint in
@@ -223,16 +224,7 @@ module ForwardIterator (B : PARTITION) = struct
         let assigned_vars = join (assigned s1) (assigned s2) in
         let r1 = fwdTBlk ctx p s1 in
         let r2 = fwdTBlk ctx p s2 in
-        Printf.printf "in if is tainted ?";
-        Typed_syntax.pp_expr !fmt b;
-        let iflow =
-          if is_tainted b p then (
-            Printf.printf "yes! \n";
-            assigned_vars)
-          else (
-            Printf.printf "no! \n";
-            VarSet.empty)
-        in
+        let iflow = if is_tainted b p then assigned_vars else VarSet.empty in
         join (join r1 r2) iflow
     | T_while (l, b, s) ->
         let rec aux i p2 =
@@ -290,10 +282,6 @@ module ForwardIterator (B : PARTITION) = struct
           ())
       ctx.funcs; *)
     let ctx = { ctx with summary = false } in
-    Printf.printf "debug cp \n";
-    Format.pp_print_list
-      (fun fmt s -> Format.fprintf fmt "%s" s)
-      Format.std_formatter cp;
     if reachability then (
       let pre =
         match precondition with

@@ -287,7 +287,6 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
                 Linexpr1.set_coeff f v (Coeff.s_of_int 0);
                 Fun f (* defined join function *))
               else
-                let _ = Printf.printf "\nraise top \n \n" in
                 Top (* otherwise *)
           | _ ->
               let p = Abstract1.join manager p1 p2 in

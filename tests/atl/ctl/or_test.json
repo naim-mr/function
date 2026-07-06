@@ -1,4 +1,8 @@
 {
     "analysis": "atl",
-    "property": "OR{<>F{<>G{x < -100}}}{<>F{x==20}}"
+    "property": "OR{<>F{<>G{x < -100}}}{<>F{x==20}}",
+    "players": [
+        "adv",
+        "env"
+    ]
 }

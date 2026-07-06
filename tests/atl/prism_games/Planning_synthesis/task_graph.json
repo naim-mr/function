@@ -1,6 +1,10 @@
 {
     "analysis": "atl",
     "property": "<sched>F{done == 1}",
+    "players": [
+        "env",
+        "sched"
+    ],
     "domain": "polyhedra",
     "expected": "TRUE"
 }

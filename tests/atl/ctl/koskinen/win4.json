@@ -1,4 +1,8 @@
 {
     "analysis": "atl",
-    "property": "<>F{<>G{WItemsNum >= 1}}"  
+    "property": "<>F{<>G{WItemsNum >= 1}}",
+    "players": [
+        "adv",
+        "env"
+    ]
 }

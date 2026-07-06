@@ -51,26 +51,26 @@ int main() {
     while (1) {
         if (q == 0){
             out_of_gate:
-            if (input("train") > 0){
+            if (input("train",0,1) == 1){
                q = 1;
             }  
         } else if (q == 1){
             out_of_gate:
             request:
-            if (input("ctrl") > 0){
+            if (input("train",0,1) == 1){
                 q = 2;   
             }
         } else if (q == 2){
             out_of_gate:
             grant:
-            if (input("train") > 0){
+            if (input("train",0,1) == 1){
                q = 3;
             } else {
                q = 0;
             }
         }else if (q == 3){
              in_gate:
-             if (input("ctrl") > 0){
+             if (input("train",0,1) == 1){
                 q = 0;   
             }
         }

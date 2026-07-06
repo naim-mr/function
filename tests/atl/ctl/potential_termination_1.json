@@ -1,4 +1,8 @@
 {
     "analysis": "atl",
-    "property": "<env,adv>F{exit: true}"
+    "property": "<env,adv>F{exit: true}",
+    "players": [
+        "adv",
+        "env"
+    ]
 }

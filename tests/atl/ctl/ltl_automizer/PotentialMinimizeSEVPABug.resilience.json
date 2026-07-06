@@ -1,4 +1,8 @@
 {
     "analysis": "atl",
-    "property": "<env>G{OR{x <= 0}{<env>F{y == 0}}}"
+    "property": "<env>G{OR{x <= 0}{<env>F{y == 0}}}",
+    "players": [
+        "adv",
+        "env"
+    ]
 }

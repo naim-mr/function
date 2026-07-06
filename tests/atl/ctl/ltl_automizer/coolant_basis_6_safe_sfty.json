@@ -1,4 +1,8 @@
 {
     "analysis": "atl",
-    "property": "<>G{OR{limit <= -273 && limit >= 10}{OR{tempIn >= 0}{<>F{ warnLED == 1}}}}"
+    "property": "<>G{OR{limit <= -273 && limit >= 10}{OR{tempIn >= 0}{<>F{ warnLED == 1}}}}",
+    "players": [
+        "adv",
+        "env"
+    ]
 }

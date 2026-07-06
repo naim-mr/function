@@ -1,6 +1,10 @@
 {
     "analysis": "atl",
     "property": "<net>F{best >= N}",
+    "players": [
+        "env",
+        "net"
+    ],
     "domain": "polyhedra",
     "description": "CDMSN -- collective decision making for sensor networks (de-probabilised, after Chen-Forejt-Kwiatkowska-Parker-Simaitis FMSD 2013, sec. 5.3). N sensors must agree on the MAXIMUM-quality target. The model is TURN-BASED with a NON-DETERMINISTIC scheduler (part of the environment, hence demonic): each round exactly one sensor is active -- a controlled (coalition) sensor adopts the best target, or a faulty sensor pulls one to a worse target. Can the coalition force full consensus (best == N)? Expected UNKNOWN -- soundness witness: under worst-case scheduling the adversary can keep activating faulty sensors and never the coalition, so sure consensus is not guaranteed; the paper (which uses RANDOM/fair scheduling) reports probabilistic results (P_max / R_min, robustness P_max[F good]) that are < 1. Abstracts target qualities, confidence levels, communication probabilities and rewards.",
     "model": "collective_decision.c",

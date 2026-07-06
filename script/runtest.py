@@ -280,6 +280,8 @@ def run_one(executable, group, folder, cfile, cfg, out, timeout):
         "domain": read_config(cfg).get("domain", "boxes"),
         # expected verdict declared in the config (native benchmarks), if any.
         "expected": read_config(cfg).get("expected", "-"),
+        # players (agents) of the benchmark, declared in the config.
+        "players": read_config(cfg).get("players", []),
         "result": "-", "time": round(wall, 3), "analyzer_time": "-",
         # number of defined leaves of the decision tree (the sufficient
         # precondition partitions) and total number of leaves.
@@ -785,18 +787,29 @@ def generate_stats(records, results_dir, key_name):
     return fname
 
 
+def _csv_group(r):
+    """Folder path of a test, relative to its group root, for easy pandas
+    filtering: e.g. 'prism_games/Communication_protocols', 'classic',
+    'resilience/terminating/pulse', 'ctl/koskinen' -- instead of just 'atl'."""
+    d = os.path.dirname(r["file"])            # e.g. tests/atl/prism_games/...
+    prefix = os.path.join("tests", r.get("group", "")) + os.sep
+    d = d[len(prefix):] if d.startswith(prefix) else d
+    return d.replace(os.sep, "/")
+
+
 def write_csv(records, path):
     import csv
     with open(path, "w", newline="") as fh:
         w = csv.writer(fh)
-        w.writerow(["group", "file", "property", "domain", "expected", "result",
-                    "status", "suff_conditions", "leaves", "time_s",
-                    "analyzer_time", "vulnerability"])
+        w.writerow(["group", "config", "file", "property", "players", "domain",
+                    "expected", "result", "status", "suff_conditions", "leaves",
+                    "time_s", "analyzer_time", "vulnerability"])
         for r in records:
-            w.writerow([r["group"], r["file"], r["property"], r["domain"],
-                        r.get("expected", "-"), r["result"], r["status"],
-                        r.get("suff", 0), r.get("leaves", 0), r["time"],
-                        r["analyzer_time"], r["vulnerability"]])
+            w.writerow([_csv_group(r), r.get("name", ""), r["file"],
+                        r["property"], ";".join(r.get("players", [])),
+                        r["domain"], r.get("expected", "-"), r["result"],
+                        r["status"], r.get("suff", 0), r.get("leaves", 0),
+                        r["time"], r["analyzer_time"], r["vulnerability"]])
 
 
 HL_HEAD = (
@@ -1454,15 +1467,21 @@ def write_latex_experiments(records, results_dir):
 
 def _write_verdict_table(fh, records, exp, caption, label):
     """Native ATL / CTL per-benchmark table:
-    Category | Benchmark | ATL property | Dom. | Time (s) | \\#SC | Exp. | \\tool.
-    Category is the application-domain folder; one row per (benchmark, property,
-    domain); \\#SC is the number of sufficient conditions (defined leaves) found;
-    Exp. is the expected verdict from the config; \\tool the returned verdict."""
+    Category | Benchmark | Players | ATL property | Dom. | Time (s) | \\#SC | Exp.
+    | \\tool. Category is the application-domain folder; Players lists the game
+    agents of the benchmark; there is one row per (benchmark, property, domain).
+    A benchmark evaluated on several properties is not duplicated: its Benchmark
+    and Players cells span all its rows with a \\Block. \\#SC is the number of
+    sufficient conditions (defined leaves) found; Exp. is the expected verdict
+    from the config; \\tool the returned verdict."""
     def verdict(res):
         return {"TRUE": r"\textsc{true}", "UNKNOWN": r"\textsc{unknown}",
                 "TO": r"\textsc{t/o}"}.get(str(res).upper(), "--")
 
-    # rows_by_cat[category] = (benchmark, property, domain, result, time, exp, #SC)
+    def fmt_players(pl):
+        return ", ".join(tex_escape(p) for p in pl) if pl else "--"
+
+    # rows_by_cat[cat] = (bench, players, property, domain, result, time, exp, #SC)
     rows_by_cat = {}
     for r in records:
         cat = os.path.basename(os.path.dirname(r["file"]))   # app-domain folder
@@ -1472,27 +1491,44 @@ def _write_verdict_table(fh, records, exp, caption, label):
         res = ("TO" if str(r.get("status", "")).upper() == "TO"
                else r.get("result"))
         rows_by_cat.setdefault(cat, []).append(
-            (bench, r.get("property", ""), dom, res, num_time(r),
-             r.get("expected", "-"), r.get("suff", 0)))
+            (bench, r.get("players", []), r.get("property", ""), dom, res,
+             num_time(r), r.get("expected", "-"), r.get("suff", 0)))
 
     fh.write("\\begin{table}[t]\n  \\caption{%s}\n  \\label{%s}\n  \\centering\n"
              % (caption, label))
-    fh.write("  \\scalebox{0.62}{\n    \\begin{NiceTabular}{c l l c c c c c}\n")
+    fh.write("  \\scalebox{0.62}{\n    \\begin{NiceTabular}{c l l l c c c c c}\n")
     fh.write("      \\CodeBefore\n        \\rowcolor{gray!50}{1}\n"
              "        \\rowcolors{2}{gray!25}{white}[respect-blocks]\n      \\Body\n")
-    fh.write("      \\text{Category} & \\text{Benchmark} & \\text{ATL property} & "
-             "\\text{Dom.} & \\text{Time (s)} & \\text{\\#SC} & \\text{Exp.} & "
-             "\\text{\\tool} \\\\ \\hline\n")
+    fh.write("      \\text{Category} & \\text{Benchmark} & \\text{Players} & "
+             "\\text{ATL property} & \\text{Dom.} & \\text{Time (s)} & "
+             "\\text{\\#SC} & \\text{Exp.} & \\text{\\tool} \\\\ \\hline\n")
     for cat in sorted(rows_by_cat):
-        rows = sorted(rows_by_cat[cat], key=lambda x: (x[0], x[1], x[2]))
-        first = True
-        for (bench, prop, dom, res, t, expd, suff) in rows:
-            c0 = ("\\Block{%d-1}{%s}" % (len(rows), tex_escape(cat))
-                  if first else "")
-            first = False
-            fh.write("      %s & %s & %s & %s & %.1f & %s & %s & %s \\\\\n"
-                     % (c0, tex_escape(bench), tex_escape(prop), dom, t,
-                        suff, verdict(expd), verdict(res)))
+        rows = sorted(rows_by_cat[cat], key=lambda x: (x[0], x[2], x[3]))
+        n = len(rows)
+        cat_done = False
+        i = 0
+        while i < n:
+            bench = rows[i][0]
+            j = i
+            while j < n and rows[j][0] == bench:   # consecutive rows of one benchmark
+                j += 1
+            k = j - i
+            for idx in range(i, j):
+                (b, players, prop, dom, res, t, expd, suff) = rows[idx]
+                c0 = ("\\Block{%d-1}{%s}" % (n, tex_escape(cat))
+                      if not cat_done else "")
+                cat_done = True
+                if idx == i:
+                    bcell = ("\\Block{%d-1}{%s}" % (k, tex_escape(b)) if k > 1
+                             else tex_escape(b))
+                    pcell = ("\\Block{%d-1}{%s}" % (k, fmt_players(players))
+                             if k > 1 else fmt_players(players))
+                else:
+                    bcell = pcell = ""
+                fh.write("      %s & %s & %s & %s & %s & %.1f & %s & %s & %s \\\\\n"
+                         % (c0, bcell, pcell, tex_escape(prop), dom, t,
+                            suff, verdict(expd), verdict(res)))
+            i = j
         fh.write("      \\hline\n")
     fh.write("    \\end{NiceTabular}\n  }\n\\end{table}\n")
 

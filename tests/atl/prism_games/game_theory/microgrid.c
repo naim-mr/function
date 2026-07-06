@@ -21,17 +21,18 @@
 
 int main() {
     int cap = input("constructor");     // grid capacity: arbitrary, not fixed in advance
-    if (cap < 0) cap = 0;      // a capacity is non-negative
+    assert(cap >= 0);
     int n = input("hh");       // number of households: arbitrary, not fixed in advance
+    assert(n >= 0)
     int load = 0;              // instantaneous load on the grid
     while (1) {
         load = 0;
         int i = 0;
         while (i < n) {
-            int demand = input("hh");    // household i wants to run a load?
-            int admit  = input("ctrl");  // controller admits household i?
-            if (demand != 0) {
-                if (admit != 0) { load = load + 1; }   // admitted demand adds to the load
+            int demand = input("hh",0,1);    // household i wants to run a load?
+            int admit  = input("ctrl",0,1);  // controller admits household i?
+            if (demand == 1) {
+                if (admit == 1) { load = load + 1; }   // admitted demand adds to the load
             }
             i = i + 1;
         }

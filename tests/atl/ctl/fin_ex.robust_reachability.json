@@ -1,6 +1,10 @@
 {
     "analysis": "atl",
     "property": "<adv>G{<adv>F{n==1}}",
+    "players": [
+        "adv",
+        "env"
+    ],
     "domain": "polyhedra",
     "precondition": "n > 0"
 }

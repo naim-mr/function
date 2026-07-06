@@ -1,5 +1,9 @@
 {
     "analysis": "atl",
     "property": "<env>G{OR{init != 3}{OR{temp <= limit}{<env>F{<env>G{chainBroken == 1}}}}}",
+    "players": [
+        "adv",
+        "env"
+    ],
     "domain": "polyhedra"
 }

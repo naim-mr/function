@@ -1,6 +1,10 @@
 {
     "analysis": "atl",
     "property": "<def>G{compromised == 0}",
+    "players": [
+        "atk",
+        "def"
+    ],
     "domain": "polyhedra",
     "expected": "TRUE"
 }

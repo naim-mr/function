@@ -24,12 +24,10 @@ int main() {
     while (tokens > 0) {
         int take;
         if (turn == 0) {
-            take = input("me");    // angelic: me chooses how much to take
+            take = input("me",1,3);    // angelic: me chooses how much to take
         } else {
-            take = input("opp");   // adversary
+            take = input("opp",1,3);   // adversary
         }
-        if (take < 1) { take = 1; }       // a legal move removes 1..3 tokens,
-        if (take > 3) { take = 3; }       // never more than what remains
         if (take > tokens) { take = tokens; }
         tokens = tokens - take;
         if (tokens == 0) {

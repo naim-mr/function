@@ -21,9 +21,8 @@ let rec exp_to_apron ((e, t, ext) : expr typed) =
               (Intinf.to_mpqf inf |> Scalar.of_mpqf)
               (Scalar.of_infty 1)))
   | T_int_const (INF, INF) -> Texpr1.Cst (Coeff.Interval Interval.top)
-  | T_INPUT _ ->
-      let itv = Value_semantics.int_type_set A_INT A_SIGNED in
-      exp_to_apron (T_int_const itv, t, ext)
+  | T_int_const (MINF, INF) -> Texpr1.Cst (Coeff.Interval Interval.top)
+  | T_INPUT (_, (min, max)) -> exp_to_apron (T_int_const (min, max), t, ext)
   | T_bool_const True -> Texpr1.Cst (Coeff.s_of_int 1)
   | T_bool_const False -> Texpr1.Cst (Coeff.s_of_int 0)
   | T_bool_const Maybe -> Texpr1.Cst (Coeff.i_of_int 0 1)

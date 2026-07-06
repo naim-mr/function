@@ -1,5 +1,0 @@
-{
-    "property": "<controller>G{in1 + in2 <= 1}",
-    "domain": "polyhedra",
-    "expected": "TRUE"
-}

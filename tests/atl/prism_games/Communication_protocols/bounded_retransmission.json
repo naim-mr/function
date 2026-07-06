@@ -1,6 +1,10 @@
 {
     "analysis": "atl",
     "property": "<snd>F{delivered >= chunks}",
+    "players": [
+        "env",
+        "snd"
+    ],
     "domain": "polyhedra",
     "description": "Bounded retransmission protocol (de-probabilised, game cast on an MDP). Each chunk may be retransmitted at most MAX times; if it is still lost afterwards the transfer ABORTS. Can the sender (coalition) SURELY deliver the whole file of N chunks against a worst-case channel? Expected UNKNOWN -- a soundness witness (the quantitative original has P[abort] > 0): a channel that drops one chunk MAX+1 times forces an abort. Both N (chunks) and the per-chunk bound (max) are adversary-chosen and NOT fixed in advance.",
     "model": "bounded_retransmission.c",

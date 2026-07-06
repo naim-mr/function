@@ -32,7 +32,7 @@ type expr =
   | T_binary of binary_op * expr typed * expr typed
   | T_float_const of float_set
   | T_int_const of int_set
-  | T_INPUT of string
+  | T_INPUT of string * int_set
   | T_bool_const of bool_set
   | T_var of var
   | T_deref of expr typed
@@ -194,7 +194,7 @@ let rec pp_expr_ext fmt ((e, _, _) : expr typed) =
   | T_float_const f -> Format.pp_print_string fmt (string_of_float_set f)
   | T_int_const i -> Format.pp_print_string fmt (string_of_int_set i)
   | T_bool_const b -> Format.pp_print_string fmt (string_of_tbool b)
-  | T_INPUT id -> Format.fprintf fmt "input('%s')" id
+  | T_INPUT (id,(min,max)) -> Format.fprintf fmt "input('%s',%s)" id (string_of_int_set (min,max))
   | T_var v -> print_var_name fmt v
   | T_deref e -> Format.fprintf fmt " *%a " pp_expr_ext e
   | T_address_of e -> Format.fprintf fmt " &%a " pp_expr_ext e
@@ -217,7 +217,7 @@ let rec pp_expr fmt e =
   | T_float_const f -> Format.pp_print_string fmt (string_of_float_set f)
   | T_int_const i -> Format.pp_print_string fmt (string_of_int_set i)
   | T_bool_const b -> Format.pp_print_string fmt (string_of_tbool b)
-  | T_INPUT id -> Format.fprintf fmt "input('%s')" id
+  | T_INPUT (id,(min,max)) -> Format.fprintf fmt "input('%s',%s)" id (string_of_int_set (min,max))
   | T_var v -> print_var_name fmt v
   | T_deref (e, _, _) -> Format.fprintf fmt " *%a " pp_expr e
   | T_address_of (e, _, _) -> Format.fprintf fmt " &%a " pp_expr e

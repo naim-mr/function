@@ -1,6 +1,10 @@
 {
     "analysis": "atl",
     "property": "<atk>F{bw > BQUL}",
+    "players": [
+        "atk",
+        "def"
+    ],
     "domain": "polyhedra",
     "description": "DNS bandwidth amplification (de-probabilised, after Deshpande-Katsaros-Basagiannis-Smolka HASE 2011). Faithful elements: a bandwidth queue of capacity BQUL, an amplification factor EAF (each unblocked bogus request costs EAF), a server drain `serve`, and a bounded filtering countermeasure `fcap`. The attacker (coalition) can drive the queue past capacity -> expected TRUE, matching the paper's central finding that the amplification attack succeeds (attack probability -> 1) against any finite provisioning. The defender's capacity/filtering (adversary, bounded) only mitigates. Abstracts the probabilities/rates and the cost-benefit reward analysis.",
     "model": "dns_amplification.c",

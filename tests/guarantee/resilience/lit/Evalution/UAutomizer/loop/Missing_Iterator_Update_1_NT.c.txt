@@ -343,15 +343,15 @@ Stem:
 [L29]  CALL, EXPR  waitpid()
 [L14]              int num = __VERIFIER_nondet_int();
 [L15]  COND TRUE   num < 0
-[L17]  COND TRUE   __VERIFIER_nondet_int() && errno != EINTR
-[L18]              errno = EINTR
+[L17]  COND TRUE   __VERIFIER_nondet_int() && errno != 1
+[L18]              errno = 1
 [L21]              return num;
 [L29]  RET, EXPR   waitpid()
 [L29]              int ret = waitpid();
 Loop:
 [L31]  COND FALSE  !(ret == 0)
 [L35]  COND TRUE   ret < 0
-[L36]  COND TRUE   errno == EINTR
+[L36]  COND TRUE   errno == 1
 End of lasso representation.
 RESULT: Ultimate proved your program to be incorrect!
 [2022-05-11 18:03:18,065 INFO  L540       MonitoredProcess]: [MP /usr/bin/z3 SMTLIB2_COMPLIANT=true -memory:1024 -smt2 -in -t:12000 (1)] Forceful destruction successful, exit code 0

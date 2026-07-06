@@ -92,7 +92,8 @@ let rec convert_type_qual ((typ, _) : C_AST.type_qual) : Abstract_syntax.typ =
   | C_AST.T_array _ -> raise (UnsupportedFeature "array")
   | C_AST.T_record _ -> raise (UnsupportedFeature "struct")
   | C_AST.T_typedef _ -> raise (UnsupportedFeature "typedef")
-  | _ -> Printf.printf "raise for "; raise (UnsupportedConversion "unsupported type")
+  | _ ->
+      raise (UnsupportedConversion "unsupported type")
 
 let convert_un_op (op : C_AST.unary_operator) : Abstract_syntax.unary_op =
   match op with
@@ -287,7 +288,36 @@ let rec convert_expr (st : state) ((kind, typ, _) : C_AST.expr) :
                      "input() expects a string literal agent id")
           else raise (UnsupportedFeature "input() expects an agent id")
         in
-        (Abstract_syntax.A_INPUT id, H_INT)
+        if Array.length args = 1 then (Abstract_syntax.A_INPUT (id, None), H_INT)
+        else (
+          assert (Array.length args = 3);
+          (* args.(0) is the agent-id string, so the bounds are args.(1)/args.(2).
+             A bound is a numeric literal, possibly negated: in C a literal like
+             -1 is parsed as a unary minus applied to 1, so we add that case and
+             fold it back into a constant string, per bound. *)
+          let const_str arg =
+            match convert_expr st arg with
+            | ( ( Abstract_syntax.A_int_const s
+                | Abstract_syntax.A_float_const s ),
+                _ ) ->
+                s
+            | ( Abstract_syntax.A_unary
+                  ( Abstract_syntax.A_UNARY_MINUS,
+                    ( ( Abstract_syntax.A_int_const s
+                      | Abstract_syntax.A_float_const s ),
+                      _ ) ),
+                _ ) ->
+                "-" ^ s
+            | _ ->
+                raise
+                  (UnsupportedConversion
+                     "unexpected kind of arguments of input func")
+          in
+          let bound =
+            ( const_str args.(1) |> attach_position,
+              const_str args.(2) |> attach_position )
+          in
+          (Abstract_syntax.A_INPUT (id, Some bound), H_INT))
       else
         let args =
           List.map

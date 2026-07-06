@@ -1,4 +1,8 @@
 {
     "analysis": "atl",
-    "property": "<>U{init == 0}{OR{<>U{init == 1}{<>G{init == 3}}}{<>G{init == 1}}}"
+    "property": "<>U{init == 0}{OR{<>U{init == 1}{<>G{init == 3}}}{<>G{init == 1}}}",
+    "players": [
+        "adv",
+        "env"
+    ]
 }

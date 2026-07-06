@@ -1,6 +1,10 @@
 {
     "analysis": "atl",
     "property": "<ctrl>F{AND{work >= mission}{t <= deadline}}",
+    "players": [
+        "ctrl",
+        "env"
+    ],
     "domain": "polyhedra",
     "description": "Embedded control system -- mission completion within a global deadline (two clocks). A global clock t always ticks; the mission uptime work advances only while the system is up, so an outage burns global time without progressing the mission. Can the controller (coalition) accumulate the required uptime (work >= mission) before the global deadline (t <= deadline)? Expected TRUE: by repairing it keeps the system operational every round, so work tracks t and the mission (which fits the horizon) completes in time. Discrete, qualitative analog of the PRISM time-bounded reliability property. Deadline and mission workload are arbitrary, not fixed in advance.",
     "model": "embedded_control.c",

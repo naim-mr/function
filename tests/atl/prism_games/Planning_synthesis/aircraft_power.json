@@ -1,6 +1,10 @@
 {
     "analysis": "atl",
     "property": "<ctrl>G{supplied >= demand}",
+    "players": [
+        "ctrl",
+        "env"
+    ],
     "domain": "polyhedra",
     "description": "Aircraft power distribution (de-probabilised, energy-balance game). The bus control unit (coalition) keeps the critical bus adequately POWERED forever -- the supplied power meets the load demand (energy threshold supplied >= demand). Each round the adversary removes up to `cap` units of power (an outage/leak) and the control unit re-routes up to `cap` units back; the invariant is on the ENERGY QUANTITY on the bus, not a generator on/off flag. Expected TRUE (the controller can offset any single-round loss). Capacity and demand (<= capacity) are arbitrary, not fixed. Qualitative core of the rPATL expected-uptime objective.",
     "model": "aircraft_power.c",

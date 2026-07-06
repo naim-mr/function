@@ -44,7 +44,6 @@ int read( int loc , int len )
             if( num < 995 ) //read a char
             {
                 loc++;
-                continue;
             }
             else // EOF
             {
@@ -71,7 +70,6 @@ int main()
             errno++;// abnormal is OK
             if( errno == 5 )
                 return 0;
-            continue;
         }
         pos += rc;
     }

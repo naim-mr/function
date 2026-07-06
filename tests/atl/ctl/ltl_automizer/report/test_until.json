@@ -1,6 +1,10 @@
 {
     "analysis": "atl",
     "property": "<>U{x >= y}{x == y}",
+    "players": [
+        "adv",
+        "env"
+    ],
     "domain": "polyhedra",
     "precondition": "x >= y"
 }

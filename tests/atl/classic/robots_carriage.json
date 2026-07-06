@@ -1,6 +1,10 @@
 {
     "analysis": "atl",
     "property": "<r1,r2>F{pos == 1}",
+    "players": [
+        "r1",
+        "r2"
+    ],
     "domain": "polyhedra",
     "description": "Demri-Goranko-Lange, Temporal Logics in CS, Ch. 9. The coalition of both robots can move the carriage to position 1 (r1 pushes, r2 waits -> clockwise) -> expected TRUE.",
     "model": "robots_carriage.c",

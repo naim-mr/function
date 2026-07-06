@@ -1,4 +1,8 @@
 {
     "analysis": "atl",
-    "property": "resp > 5"
+    "property": "resp > 5",
+    "players": [
+        "adv",
+        "env"
+    ]
 }

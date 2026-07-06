@@ -26,6 +26,8 @@ int main() {
     int aborted   = 0;            // transfer given up (retransmission bound exhausted)?
     int chunks = input("env");    // file size N: arbitrary, not fixed in advance
     int max    = input("env");    // per-chunk retransmission bound: arbitrary, not fixed
+    assert(max >= 0);
+    assert(chunks >=0);
     while (delivered < chunks && aborted == 0) {
         int retries = max;        // fresh retransmission budget for THIS chunk
         int acked   = 0;

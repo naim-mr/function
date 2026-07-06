@@ -30,19 +30,19 @@
 
 int main() {
     int n = input("env");      // number of redundant components: arbitrary, not fixed
-    if (n < 1) n = 1;          // the system has at least one component
+    assert(n>=0);         // the system has at least one component
     int up = n;                // all components start healthy
     int operational = 1;       // system operational?
     int deadline = input("env"); // global time budget for the mission: arbitrary, not fixed
-    if (deadline < 0) deadline = 0;
+    assert(n>=0);
     int mission = input("env");  // required operational uptime (mission workload): arbitrary
-    if (mission < 0) mission = 0;
+    assert(n>=0);
     if (mission > deadline) mission = deadline;  // the mission fits within the horizon
     int t = 0;                 // global clock: elapsed real time
     int work = 0;              // mission progress: operational uptime accumulated
     while (1) {
-        int fail   = input("env");    // a component fails this round?
-        int repair = input("ctrl");   // controller repairs a component?
+        int fail   = input("env",0,1);    // a component fails this round?
+        int repair = input("ctrl",0,1);   // controller repairs a component?
         if (fail == 1) { if (up > 0) { up = up - 1; } }
         if (repair == 1) { if (up < n) { up = up + 1; } }
         operational = 1;

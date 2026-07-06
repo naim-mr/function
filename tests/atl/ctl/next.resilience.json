@@ -1,5 +1,9 @@
 {
     "analysis": "atl",
     "property": "<env>X{x==0}",
+    "players": [
+        "adv",
+        "env"
+    ],
     "precondition": "x==1"
 }

@@ -1,6 +1,11 @@
 {
     "analysis": "atl",
     "property": "<r1,r2>F{AND{AND{x1 >= goal}{y1 >= goal}}{AND{x2 >= goal}{y2 >= goal}}}",
+    "players": [
+        "env",
+        "r1",
+        "r2"
+    ],
     "domain": "polyhedra",
     "description": "Robot coordination (de-probabilised). Two robots navigate a 2D grid, each with coordinates (x,y), from (0,0) to the far corner (goal,goal). The coalition of both robots brings BOTH to the goal corner despite the adversarial slips -> expected TRUE. Probabilistic move-failure is abstracted as actuator-dominance: a commanded step is +2 and a slip is -1, so a pushing robot nets +1 per axis per round whatever the (unbounded) slips. The goal coordinate is arbitrary (input(\"env\"), not fixed in advance).",
     "model": "robot_coordination.c",

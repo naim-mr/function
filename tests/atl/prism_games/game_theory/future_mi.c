@@ -41,7 +41,7 @@
 
 int main() {
     int cap = input("stock");      // price ceiling: market-chosen, not fixed in advance
-    if (cap < 0) cap = 0;          // keep the [0, cap] price range well-formed
+    assert(cap >= 0);
     int v = input("stock");        // initial stock value
     if (v < 0) v = 0;
     if (v > cap) v = cap;
@@ -51,28 +51,29 @@ int main() {
         int entry = 0;                 // price locked at reservation
         int trade = 0;                 // this trade's realised profit (value - entry)
         int done = 0;                  // position cashed in? (ends this trade, starts a new one)
-        int bars = input("market");    // pre-reservation only: market-chosen FINITE bar bound,
+        int bars = input("market",0,1);    // pre-reservation only: market-chosen FINITE bar bound,
                                    // NOT fixed in advance (the proof must hold for any value).
         while (done == 0) {
             // market (adversary) moves the value, kept within [0, cap]
-            int delta = input("stock");
-            if (delta >= 0) { v = v + 1; } else { v = v - 1; }
+            int delta = input("stock",0,1);
+            if (delta == 0) v = v + 1; 
+            if (delta == 1) v = v - 1;
             if (v < 0) v = 0;
             if (v > cap) v = cap;
 
             if (reserved == 0) {
                 int bar = 0;
                 // the market can bar reservation only while its bar budget remains
-                if (bars > 0) { bar = input("market"); }   // bar reservation this month?
-                if (bar > 0) {
+                if (bars > 0) { bar = input("market",0,1); }   // bar reservation this month?
+                if (bar == 1) {
                     bars = bars - 1;              // barred (consumes the bar budget)
                 } else {
-                    int act = input("investor");  // investor reserves now?
-                    if (act > 0) { reserved = 1; entry = v; }
+                    int act = input("investor",0,1);  // investor reserves now?
+                    if (act  == 1) { reserved = 1; entry = v; }
                 }
             } else {
-                int act = input("investor");      // investor cashes in now?
-                if (act > 0) { trade = v - entry; gain = gain + trade; done = 1; }  // realise + accumulate, start a new trade
+                int act = input("investor",0,1);      // investor cashes in now?
+                if (act == 1) { trade = v - entry; gain = gain + trade; done = 1; }  // realise + accumulate, start a new trade
             }
         }
     }

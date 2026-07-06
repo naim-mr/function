@@ -1,6 +1,10 @@
 {
     "analysis": "atl",
     "property": "<pm>G{queue <= cap}",
+    "players": [
+        "env",
+        "pm"
+    ],
     "domain": "polyhedra",
     "description": "Dynamic power management (de-probabilised, game cast on an MDP). Mapping: requests arrive (arr=input(env), queue++); the power manager serves or sleeps (cmd=input(pm), queue-- if serving); safety = queue stays within capacity. The PM reads the arrival before deciding, so serving every round keeps the queue at 0/1 <= cap -> expected TRUE. cap is arbitrary (input(env), not fixed). CAVEATS: the coalition/adversary split is IMPOSED on a single-agent MDP (not a real game); the winning strategy is trivial (serve every round); the 1-for-1 arrival/service dynamics keep the queue <= 1 so the cap threshold is loose. Captures only the queue-safety core, not the energy reward.",
     "model": "dynamic_power_management.c",

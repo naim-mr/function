@@ -76,9 +76,7 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
   }
 
   let controllable cp taint e =
-    let b = B.is_representable e && not (Taint.is_tainted ~cp e taint) in
-    Format.printf "check if is controlled %a ? %b \n " Typed_syntax.pp_expr e b;
-    b
+    B.is_representable e && not (Taint.is_tainted ~cp e taint)
 
   (* Computes the set of all labels of a program *)
 
@@ -128,7 +126,7 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
 *)
   let program_of_prog (prog : Typed_syntax.prog) (env : D.env) (vars : var list)
       (main : StringMap.key) : program =
-      let prog,_ = Typed_syntax.nt_prog prog in 
+    let prog, _ = Typed_syntax.nt_prog prog in
     let globalBlock, functions, globalVariables = prog in
     let mainFunction = StringMap.find main functions in
     let dummyExtent = (Lexing.dummy_pos, Lexing.dummy_pos) in
@@ -139,7 +137,7 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
       id := Z.( - ) i Z.one;
       i
     in
-    
+
     let rec addTerminationStmt (block : block) =
       match block with
       | T_empty l ->
@@ -171,7 +169,7 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
     let var_to_apron v = Apron.apron_of_var v in
     let apron_vars = Array.map var_to_apron (Array.of_list vars) in
     let env = Environment.make apron_vars [||] in *)
-    
+
     let program =
       {
         environment = env;
@@ -210,7 +208,7 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
   let initBlk env b = ()
 
   let printInv ?fwdInvOpt fmt (inv : inv) =
-    let inv = if !compress then InvMap.map D.compress inv else inv in
+    let inv = InvMap.map D.compress inv in
     let printState l a =
       if !dot then
         Format.fprintf fmt "%a:\n%a\nDOT: %a\n" label_print l D.print a
@@ -220,9 +218,7 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
     InvMap.iter printState inv
 
   let abstract_transformer (quantifier : quantifier) =
-    match quantifier with
-    | UNIVERSAL -> (D.join APPROXIMATION, D.bwd_assign, D.filter)
-    | EXISTENTIAL -> (D.join COMPUTATIONAL, D.ubwd_assign, D.ubwd_filter)
+    (D.join APPROXIMATION, D.bwd_assign, D.filter)
 
   (* Computes fixed-point for 'until' properties: AU{inv_keep}{inv_reset} 
      inv_keep and inv_reset are fixed-point for the nested properties
@@ -285,12 +281,6 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
                   ?domain:pre_dom out_state
                   ((T_var l, l.var_typ, l.var_extent), e)
             | T_assign (lval, rval) -> (
-                Printf.printf "\n debug assign ";
-             
-                Typed_syntax.pp_expr_ext !fmt lval;
-                Printf.printf "= ";
-                Typed_syntax.pp_expr_ext !fmt (rval);
-                Printf.printf "\n";
                 match lval with
                 | T_var v, typ, ext' ->
                     let expr, _, _ = rval in
@@ -300,18 +290,29 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
                       ?domain:pre_dom out_state (lval, rval)
                 | _ -> failwith "nyi")
             | T_assert (b, _) | T_assume b ->
-                bwd_filter ?domain:pre_dom out_state b
+                let bexp, _, _ = b in
+                bwd_filter
+                  ~controllable:
+                    (controllable cp (fwdTaintMap (blockLabel, ext)) bexp)
+                  ?domain:pre_dom out_state b
             | T_if ((b, typ, ba), s1, s2) ->
                 let in_if = bwd out_state s1 in
                 (* compute 'in state for if-block*)
                 let in_else = bwd out_state s2 in
                 (* compute 'in state for else-block *)
                 let in_if_filtered =
-                  bwd_filter ?domain:pre_dom in_if (b, typ, ba)
+                  bwd_filter
+                    ~controllable:
+                      (controllable cp (fwdTaintMap (blockLabel, ext)) b)
+                    ?domain:pre_dom in_if (b, typ, ba)
                 in
                 (* filter *)
                 let in_else_filtered =
-                  bwd_filter ?domain:pre_dom in_else (neg_bexp (b, typ, ba))
+                  let nb, _, _ = neg_bexp (b, typ, ba) in
+                  bwd_filter
+                    ~controllable:
+                      (controllable cp (fwdTaintMap (blockLabel, ext)) nb)
+                    ?domain:pre_dom in_else (nb, typ, ba)
                 in
                 (* filter *)
                 (* join the two branches *)
@@ -321,7 +322,11 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
             | T_while (l, (b, typ, ba), loop_body) ->
                 let pre_dom = if !refine then Some (fwdInv l) else None in
                 let out_exit =
-                  bwd_filter ?domain:pre_dom out_state (neg_bexp (b, typ, ba))
+                  let nb, _, _ = neg_bexp (b, typ, ba) in
+                  bwd_filter
+                    ~controllable:
+                      (controllable cp (fwdTaintMap (blockLabel, ext)) nb)
+                    ?domain:pre_dom out_state (nb, typ, ba)
                 in
                 (* 'out' state when not entering the loop body *)
                 let rec aux
@@ -370,8 +375,10 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
                       if !tracebwd && not !minimal then
                         Format.fprintf !fmt "in'': %a\n" D.print in_state'';
                       let out_enter' =
-                        bwd_filter ?domain:pre_dom (bwd in_state'' loop_body)
-                          (b, typ, ba)
+                        bwd_filter
+                          ~controllable:
+                            (controllable cp (fwdTaintMap (blockLabel, ext)) b)
+                          ?domain:pre_dom (bwd in_state'' loop_body) (b, typ, ba)
                       in
                       (* process loop body again with updated 'in' state *)
                       aux in_state'' out_enter' (n + 1) (* run next iteration *))
@@ -509,12 +516,21 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
                          ?domain:pre_dom out_state (lval, rval)
                 | _ -> failwith "nyi")
             | T_assert (b, _) | T_assume b ->
-                D.mask current_in @@ bwd_filter ?domain:pre_dom out_state b
+                let bexp, _, _ = b in
+                D.mask current_in
+                @@ (bwd_filter
+                      ~controllable:
+                        (controllable cp (fwdTaintMap (blockLabel, ext)) bexp))
+                     ?domain:pre_dom out_state b
             | T_if (b, s1, s2) ->
                 let out_if = bwd_filter ?domain:pre_dom (bwd out_state s1) b in
                 (* compute 'out' state for if-block*)
                 let out_else =
-                  bwd_filter ?domain:pre_dom (bwd out_state s2) (neg_bexp b)
+                  let nb, typ, ba = neg_bexp b in
+                  bwd_filter
+                    ~controllable:
+                      (controllable cp (fwdTaintMap (blockLabel, ext)) nb)
+                    ?domain:pre_dom (bwd out_state s2) (nb, typ, ba)
                 in
                 let bexpr, _, _ = b in
                 (* compute 'out' state for else-block *)
@@ -527,7 +543,11 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
             | T_while (l, b, loop_body) ->
                 let pre_dom = if !refine then Some (fwdInv l) else None in
                 let out_exit =
-                  bwd_filter ?domain:pre_dom out_state (neg_bexp b)
+                  let nb, typ, ba = neg_bexp b in
+                  bwd_filter
+                    ~controllable:
+                      (controllable cp (fwdTaintMap (blockLabel, ext)) nb)
+                    ?domain:pre_dom out_state (nb, typ, ba)
                 in
                 (* 'out' state when not entering the loop body *)
                 let rec aux
@@ -538,10 +558,10 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
                       (* current 'out' state when entering the loop body *)
                     (n : int) : D.t =
                   (* iteration counter *)
-                  let bexpr,_,_ = b  in
+                  let bexpr, _, _ = b in
                   let out_joined =
-                    if controllable cp (fwdTaintMap (blockLabel, ext)) bexpr then
-                      D.join APPROXIMATION out_exit out_enter
+                    if controllable cp (fwdTaintMap (blockLabel, ext)) bexpr
+                    then D.join APPROXIMATION out_exit out_enter
                     else D.join APPROXIMATION out_exit out_enter
                   in
                   (* new 'in' state after joining the incoming branches *)
@@ -574,14 +594,24 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
                       (* use dual_widen after widening threshold reached *)
                     in
                     let out_enter' =
-                      bwd_filter ?domain:pre_dom (bwd updated_in' loop_body) b
+                      let bexp, _, _ = b in
+                      bwd_filter
+                        ~controllable:
+                          (controllable cp (fwdTaintMap (blockLabel, ext)) bexp)
+                        ?domain:pre_dom
+                        (bwd updated_in' loop_body)
+                        b
                     in
                     (* process loop body again with updated 'in' state *)
                     (* next iteration *)
                     aux updated_in' out_enter' (n + 1)
                 in
                 let initial_out_enter =
-                  bwd_filter ?domain:pre_dom (bwd current_in loop_body) b
+                  let bexp, _, _ = b in
+                  bwd_filter
+                    ~controllable:
+                      (controllable cp (fwdTaintMap (blockLabel, ext)) bexp)
+                    ?domain:pre_dom (bwd current_in loop_body) b
                 in
                 (* process loop body with current 'in' state at loop-head *)
                 let final_in_state = aux current_in initial_out_enter 1 in
@@ -793,7 +823,6 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
 
   (* Function called by cda same as analyze *)
   let bwdRec ?(property = dummy_prop) func env (vars : var list) _ b : D.t =
-    
     let f = StringMap.find !Config.main func in
     let p =
       { environment = env; variables = vars; mainFunction = f; globalBlock = b }
@@ -802,7 +831,7 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
       get_atl property
       |> ATLProperty.map (fun e -> Typed_syntax.expr_prop_handler e vars)
     in
-    let f_env = D.bot env |> D.f_env in 
+    let f_env = D.bot env |> D.f_env in
     if not !minimal then (
       Format.printf "\nAbstract atl typed Syntax:\n ";
       Typed_syntax.pp_prog !fmt (prog_of_program p));
@@ -837,9 +866,6 @@ module ATLIterator (D : RANKING_FUNCTION) : Semantics.SEMANTIC = struct
         variables = vars;
       }
     in
-    if not !minimal then (
-      Format.printf "\nAbstract atl typed Syntax:\n ";
-      Typed_syntax.pp_prog !fmt (prog_of_program program));
     if !Config.refine then (* Run forward analysis if 'refine' flag is set *)
       ForwardIteratorB.analyze ~env:f_env (prog_of_program program);
     fwdInvMap := !ForwardIteratorB.fwdInvMap;

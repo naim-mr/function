@@ -1,6 +1,10 @@
 {
     "analysis": "atl",
     "property": "<r1,r2>F{<r1,r2>G{pos == 1}}",
+    "players": [
+        "r1",
+        "r2"
+    ],
     "domain": "polyhedra",
     "description": "Stabilization (F of nested G): the two robots can drive the carriage to position 1 and then keep it there forever (both wait -> stationary). Nested strategic operator.",
     "model": "robots_carriage.c",

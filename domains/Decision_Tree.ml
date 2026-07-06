@@ -1202,7 +1202,7 @@ module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
             Node ((x, nx), build t xs, Bot)
           else (* x is not normalized *) Node ((nx, x), Bot, build t xs)
     in
-    let b_bwd_assign = if underapprox then B.ubwd_assign else B.bwd_assign in
+    let b_bwd_assign = if underapprox then B.ubwd_assign else B.bwd_assign ~controllable:controllable in
     let rec aux t cs =
       match t with
       | Bot -> Bot
@@ -1296,12 +1296,12 @@ module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
   let ubwd_assign ?domain ?(controllable = false) =
     assign ?domain controllable ~underapprox:true
 
-  let rec filter_helper ?domain ?(underapprox = false) t e =
+  let rec filter_helper controllable ?domain ?(underapprox = false) t e =
     let pre = domain in
     let env = t.env in
     let f_env = env.f_env in
     let post = env.domain in
-    let b_filter = if underapprox then B.ubwd_filter else B.fwd_filter in
+    let b_filter = if underapprox then B.ubwd_filter else B.fwd_filter ~controllable:controllable in
     let rec aux t bs cs =
       let bcs =
         match pre with
@@ -1397,7 +1397,7 @@ module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
               (T_binary (A_GREATER_EQUAL, e1, e2), typ, ext),
               (T_binary (A_GREATER_EQUAL, e2, e1), typ, ext) )
         in
-        filter_helper ?domain:pre ~underapprox t (bop, typ, ext)
+        filter_helper controllable ?domain:pre ~underapprox t (bop, typ, ext)
     | T_binary (A_NOT_EQUAL, e1, e2) ->
         let bop =
           T_binary
@@ -1405,14 +1405,14 @@ module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
               (T_binary (A_GREATER, e1, e2), typ, ext),
               (T_binary (A_LESS, e1, e2), typ, ext) )
         in
-        filter_helper ?domain:pre ~underapprox t (bop, typ, ext)
+        filter_helper controllable ?domain:pre ~underapprox t (bop, typ, ext)
     | T_bool_const False -> { tree = Bot; env = { env with domain = pre } }
     | T_unary (A_NOT, e) ->
         let e = neg_bexp e in
-        filter_helper ?domain:pre ~underapprox t e
+        filter_helper controllable ?domain:pre ~underapprox t e
     | T_binary ((A_AND as op), e1, e2) | T_binary ((A_OR as op), e1, e2) -> (
-        let t1 = filter_helper ?domain:pre ~underapprox t e1
-        and t2 = filter_helper ?domain:pre ~underapprox t e2 in
+        let t1 = filter_helper controllable ?domain:pre ~underapprox t e1
+        and t2 = filter_helper controllable ?domain:pre ~underapprox t e2 in
         match op with
         | A_AND -> meet APPROXIMATION t1 t2
         | A_OR -> join APPROXIMATION t1 t2
@@ -1434,8 +1434,8 @@ module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
         let t = aux t.tree bs [] in
         { tree = t; env = { env with domain = pre } }
 
-  let filter ?domain = filter_helper ?domain ~underapprox:false
-  let ubwd_filter ?domain = filter_helper ?domain ~underapprox:true
+  let filter ?(controllable=false) ?domain = filter_helper controllable ?domain ~underapprox:false
+  let ubwd_filter ?(controllable=false) ?domain = filter_helper controllable ?domain ~underapprox:true
 
   (* 
     Check if all partitions in the decision tree are defined i.e. have a ranking function assigned to them.
@@ -1527,7 +1527,7 @@ module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
       | Node (c, l, r) -> Node (c, reset flag l, reset flag r)
     in
     let expr, _, _ = e in
-    let filter = if B.is_representable expr then filter else ubwd_filter in
+    let filter = if B.is_representable expr then filter ~controllable:false else ubwd_filter ~controllable:false in
     let t2 =
       match mask with
       | None -> reset false (tree (filter t e))

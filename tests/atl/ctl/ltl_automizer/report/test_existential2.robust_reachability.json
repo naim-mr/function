@@ -1,5 +1,9 @@
 {
     "analysis": "atl",
     "property": "<adv>F{r == 1}",
+    "players": [
+        "adv",
+        "env"
+    ],
     "domain": "polyhedra"
 }

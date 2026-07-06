@@ -1,5 +1,9 @@
 {
     "analysis": "atl",
     "property": "<>G{<>F{otime < time}}",
+    "players": [
+        "adv",
+        "env"
+    ],
     "domain": "polyhedra"
 }

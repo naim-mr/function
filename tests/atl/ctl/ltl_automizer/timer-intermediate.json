@@ -1,4 +1,8 @@
 {
     "analysis": "atl",
-    "property": "<>G{OR{input_1 >= 1000}{<>F{output_1 == 1}}}"
+    "property": "<>G{OR{input_1 >= 1000}{<>F{output_1 == 1}}}",
+    "players": [
+        "adv",
+        "env"
+    ]
 }
