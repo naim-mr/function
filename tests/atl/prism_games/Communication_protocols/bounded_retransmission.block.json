@@ -1,0 +1,12 @@
+{
+    "analysis": "atl",
+    "property": "<env>F{aborted == 1} ",
+    "players": [
+        "env",
+        "snd"
+    ],
+    "domain": "polyhedra",
+    "description": "Bounded retransmission protocol -- adversarial dual. Can the channel (now the coalition) prevent delivery FOREVER, keeping the file undelivered against the sender? Expected TRUE: by dropping every (re)transmission the channel exhausts the per-chunk bound and aborts, so delivered stays below chunks throughout. Soundness dual of the sender's delivery objective (which is therefore UNKNOWN).",
+    "model": "bounded_retransmission.c",
+    "expected": "TRUE"
+}

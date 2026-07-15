@@ -1,0 +1,13 @@
+{
+    "analysis": "atl",
+    "property": "<investor>F{trade >= cap}",
+    "players": [
+        "investor",
+        "market",
+        "stock"
+    ],
+    "domain": "polyhedra",
+    "description": "Futures market investor -- maximal single-trade spread. Can the investor (coalition) realise, on some trade, the MAXIMAL spread trade >= cap (the perfect trade: enter at 0, cash at cap), whatever the market does? Expected UNKNOWN -- soundness witness: trade = value - entry is bounded by cap, and a worst-case market denies the perfect spread by moving the value down after each reservation (the quantitative original gives a probability < 1). Per-trade companion to the cumulative-profit property <investor>F{gain >= cap}. cap is market-chosen, not fixed.",
+    "model": "future_mi.c",
+    "expected": "UNKNOWN"
+}

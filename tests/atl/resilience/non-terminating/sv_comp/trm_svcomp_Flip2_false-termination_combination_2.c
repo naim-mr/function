@@ -1,0 +1,27 @@
+typedef enum {false,true} bool;
+
+
+int main() {
+    int i;
+    int j;
+    int t;
+    i = input("adv")                ;
+    j = input("env")                 ;
+    t = 0;
+    
+    while (i > 0 && j > 0) {
+        if (i < j) {
+            t = i;
+            i = j;
+            j = t;
+        } else {
+            if (i > j) {
+                j = i;
+            } else {
+                i = i-1;
+            }
+        }
+    }
+    
+    return 0;
+}

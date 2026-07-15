@@ -1,0 +1,12 @@
+{
+    "analysis": "atl",
+    "property": "<rep>G{AND{left >= 1}{right >= 1}}",
+    "players": [
+        "env",
+        "rep"
+    ],
+    "domain": "polyhedra",
+    "description": "Workstation cluster -- premium QoS. Can the repair unit (coalition) keep BOTH sub-clusters serving forever, i.e. each sub-cluster has at least one operational workstation? Expected TRUE: the failures hit one sub-cluster per round and the repair unit can restore that same sub-cluster, so neither side is ever emptied. Stronger than the minimum QoS <rep>G{qos == 1} (total >= N); here every sub-cluster stays alive.",
+    "model": "workstation_cluster.c",
+    "expected": "TRUE"
+}

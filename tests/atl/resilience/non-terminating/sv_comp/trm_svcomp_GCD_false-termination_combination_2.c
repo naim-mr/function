@@ -1,0 +1,34 @@
+typedef enum {false,true} bool;
+
+
+int main() {
+    int x;
+    int y;
+    int tmp;
+    int xtmp;
+    x = input("adv")                ;
+    y = input("env")                 ;
+    
+    while(y != 0) {
+        tmp = y;
+        xtmp = x;
+        
+        if(x <= 0 || y <= 0) {
+            y = 0;
+        } else {
+            if (x == y) {
+                y = 0;
+            } else {
+                while(xtmp>y) {
+                    xtmp = xtmp - y;
+                }
+            }
+        }
+        
+        y = xtmp;
+        x = tmp;
+    }
+    
+    return 0;
+}
+

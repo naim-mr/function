@@ -1,0 +1,12 @@
+{
+    "analysis": "atl",
+    "property": "<env>F{qos == 0}",
+    "players": [
+        "env",
+        "rep"
+    ],
+    "domain": "polyhedra",
+    "description": "Workstation cluster -- adversarial dual. Can the workstation failures (now the coalition) FORCE a QoS violation, driving the number of operational workstations below N, against the repairing unit (now the adversary)? Expected UNKNOWN/FALSE: the repair unit restores one workstation per round, matching the failure rate, so the total never drops below the QoS threshold. Soundness dual of <rep>G{qos == 1}.",
+    "model": "workstation_cluster.c",
+    "expected": "UNKNOWN"
+}

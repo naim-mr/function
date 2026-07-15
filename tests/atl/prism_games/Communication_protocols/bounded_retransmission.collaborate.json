@@ -1,0 +1,12 @@
+{
+    "analysis": "atl",
+    "property": "<snd,env>F{delivered >= chunks}",
+    "players": [
+        "env",
+        "snd"
+    ],
+    "domain": "polyhedra",
+    "description": "Bounded retransmission protocol -- cooperative reachability. If the sender AND the channel collaborate (grand coalition), can the whole file be delivered? Expected TRUE: with a cooperative channel no (re)transmission is dropped, so every chunk is acknowledged and the file of N chunks is delivered. Companion to the single-sender property (UNKNOWN): delivery is achievable, just not enforceable by the sender alone.",
+    "model": "bounded_retransmission.c",
+    "expected": "TRUE"
+}

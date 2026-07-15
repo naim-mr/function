@@ -1,0 +1,12 @@
+{
+    "analysis": "atl",
+    "property": "<>G{OR{in_gate:true}{NOT{<train>F{in_gate:true}}}}",
+    "players": [
+        "ctrl",
+        "train"
+    ],
+    "domain": "polyhedra",
+    "description": "AHK train-gate P2: whenever the train is out of the gate, the train alone cannot force it to enter the gate.",
+    "model": "train_gate_one.c",
+    "expected": "TRUE"
+}

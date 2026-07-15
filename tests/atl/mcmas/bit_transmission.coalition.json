@@ -1,0 +1,10 @@
+{
+    "analysis": "atl",
+    "property": "<sender,chan>F{ack == 1}",
+    "players": [
+        "chan",
+        "sender"
+    ],
+    "domain": "polyhedra",
+    "expected": "TRUE"
+}

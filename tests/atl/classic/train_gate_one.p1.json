@@ -1,0 +1,12 @@
+{
+    "analysis": "atl",
+    "property": "<>G{OR{q==0}{<ctrl>G{out_of_gate:true}}}",
+    "players": [
+        "ctrl",
+        "train"
+    ],
+    "domain": "polyhedra",
+    "description": "AHK train-gate P1: whenever the train is out of the gate and has no grant to enter, the controller can prevent it from entering.",
+    "model": "train_gate_one.c",
+    "expected": "TRUE"
+}

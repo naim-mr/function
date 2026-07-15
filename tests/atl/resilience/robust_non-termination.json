@@ -1,0 +1,9 @@
+{
+    "analysis": "atl",
+    "property": "<adv>G{<adv>F{loop:true}}",
+    "players": [
+        "adv",
+        "env"
+    ],
+    "domain": "polyhedra"
+}

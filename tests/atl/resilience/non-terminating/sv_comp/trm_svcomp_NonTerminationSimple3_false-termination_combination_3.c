@@ -1,0 +1,20 @@
+/*
+ * Date: 2013-12-16
+ * Author: leike@informatik.uni-freiburg.de
+ *
+ * Does not terminate for c >= 0.
+ */
+
+typedef enum {false, true} bool;
+
+
+int main()
+{
+	int c, x;
+    c = input("env")                 ;
+	x = input("adv")                ;
+	while (x >= 0) {
+		x = x + c;
+	}
+    return 0;
+}

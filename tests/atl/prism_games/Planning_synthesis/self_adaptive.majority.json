@@ -1,0 +1,12 @@
+{
+    "analysis": "atl",
+    "property": "<cas>G{compromised <= adapted}",
+    "players": [
+        "att",
+        "cas"
+    ],
+    "domain": "polyhedra",
+    "description": "Collective Adaptive Systems -- strong resilience. Can the collective (coalition) keep the losses never exceeding the saves, i.e. the attacker never pulls ahead (compromised <= adapted at all times)? Expected TRUE: the collective notifies and adapts a member before the attacker's breach lands each round, so the count of compromised members never overtakes the count of adapted ones. Stronger than <cas>G{compromised < N} (at least one survives): here at least half the collective is always safe.",
+    "model": "self_adaptive.c",
+    "expected": "TRUE"
+}

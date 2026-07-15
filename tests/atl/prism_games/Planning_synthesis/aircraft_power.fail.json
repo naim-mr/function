@@ -1,0 +1,12 @@
+{
+    "analysis": "atl",
+    "property": "<env>F{supplied < demand}",
+    "players": [
+        "ctrl",
+        "env"
+    ],
+    "domain": "polyhedra",
+    "description": "Aircraft power distribution -- adversarial dual. Can the power losses (now the coalition) FORCE a brown-out, driving the supplied power below the demand, against the re-routing control unit (now the adversary)? Expected UNKNOWN/FALSE: the control unit offsets each round's loss (up to cap) with an equal re-routing, so the energy on the bus never drops below the demand. Soundness dual of <ctrl>G{supplied >= demand}.",
+    "model": "aircraft_power.c",
+    "expected": "UNKNOWN"
+}

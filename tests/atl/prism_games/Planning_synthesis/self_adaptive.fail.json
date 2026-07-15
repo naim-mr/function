@@ -1,0 +1,12 @@
+{
+    "analysis": "atl",
+    "property": "<att>F{compromised >= N}",
+    "players": [
+        "att",
+        "cas"
+    ],
+    "domain": "polyhedra",
+    "description": "Collective Adaptive Systems -- adversarial dual. Can the attacker (now the coalition) compromise the WHOLE collective, breaching every member against the defending managers (now the adversary)? Expected UNKNOWN/FALSE: each round the collective notifies and adapts a member before the breach lands, so at least one member always becomes invulnerable and the attacker cannot reach compromised >= N. Soundness dual of the resilience invariant <cas>G{compromised < N}; matches that even the weakest topology is not always 100% compromised.",
+    "model": "self_adaptive.c",
+    "expected": "UNKNOWN"
+}

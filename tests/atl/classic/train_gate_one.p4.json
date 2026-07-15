@@ -1,0 +1,12 @@
+{
+    "analysis": "atl",
+    "property": "<>G{OR{in_gate:true}{AND{<train>F{AND{request:true}{<ctrl>F{grant:true}}}}{NOT{<train>F{q != 2}}}}}",
+    "players": [
+        "ctrl",
+        "train"
+    ],
+    "domain": "polyhedra",
+    "description": "AHK train-gate P4: whenever the train is out of the gate, it can eventually request a grant, upon which the controller decides whether the grant is given.",
+    "model": "train_gate_one.c",
+    "expected": "TRUE"
+}
