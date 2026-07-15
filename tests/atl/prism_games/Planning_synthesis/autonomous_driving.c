@@ -20,26 +20,26 @@
 
 int main() {
     
-    int crash = 0;              // collision occurred this step?
+                 // collision occurred this step?
     
                                 // the proof must hold for any value (surrogate for "finitely many").
-    while(crash != 1 ){
+    while(1){
         int goal = input("env");    // route length (goal distance): arbitrary, not fixed in advance
         int budget = input("env");  // adversary-chosen FINITE hazard bound, NOT fixed in advance:
-                                // the proof must hold for any value (surrogate for "finitely many").    
-        int pos = 0;                // distance covered along the route
-        while (pos < goal && crash != 1) {
+                                // the proof must hold for any value (surrogate for "finitely many").                 // distance covered along the route
+        while (goal > 0) {
             int hazard = 0;
             // a genuine hazard appears only while the bounded budget remains
             if (budget > 0) { hazard = input("env"); }   // a hazard appears ahead?
             int act = input("car");                       // car: <= 0 stop (safe), > 0 advance
             if (hazard >= 1) {
-                if (act >= 1) { crash = 1;}   // advancing into a hazard -> collision
+                if (act >= 1) { return 1}   // advancing into a hazard -> collision
                 budget = budget - 1;           // the hazard passes
             } else {
-                if (act >= 1) { pos = pos + 1; }
+                if (act >= 1) { goal = goal - 1 }
             }
         }
+        win:
     }
 }
 

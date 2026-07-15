@@ -258,6 +258,9 @@ module ForwardIterator (B : PARTITION) = struct
     let block, funcmap, varmap = prog in
     let f = StringMap.find !Config.main funcmap in
     let s = f.func_body in
+    (* dumb but temporary *)
+    let module Init = EnvInit.Make (B) in
+    let f_env, vars = Init.env prog in
     if !tracefwd && not !minimal then
       Format.fprintf !fmt "\nForward Analysis Trace:\n";
     let startfwd = Sys.time () in
@@ -297,7 +300,7 @@ module ForwardIterator (B : PARTITION) = struct
             (stopfwd -. startfwd)
         else Format.fprintf !fmt "\nForward Analysis numerical:\n";
       fwdInvMap_print !fmt !fwdInvMap InvMap.iter label_print);
-    let _ = fwdTBlk ctx VarSet.empty s in
+    let _ = fwdTBlk ctx (VarSet.of_list vars)  s in
     let stopfwd = Sys.time () in
     Format.fprintf !fmt "\nForward Taint Summary :\n";
     if not !minimal then
