@@ -69,7 +69,7 @@ module type AP_PARTITION = sig
 end
 
 module type FUNCTION = sig
-  module B : AP_PARTITION
+  module B : PARTITION
   (** [module B] defines the domain on which the function is defined. *)
 
   type env = B.env
