@@ -1,156 +1,83 @@
-# FuncTion
+# ReFuncTion
 
-FuncTion is a research prototype static analyzer designed for proving conditional termination, conditional termination resilience and conditional CTL properties of C programs.
+A research prototype static analyzer for C programs, proving conditional
+**termination**, **non-termination**, **termination resilience**, **CTL** and
+**ATL** properties — the latter on *open* programs, where inputs are controlled
+by a coalition of agents and by an adversary.
 
-It is also capable of inferring minimal sets of variables with an associate sufficient precondition to ensure a CTL property and  maximal sets of variables for which a valuation might falsify it.
+It infers piecewise-defined ranking functions and sufficient preconditions by
+abstract interpretation. It answers **TRUE** when it proves the property,
+**UNKNOWN** otherwise: sound but incomplete.
 
-The tool automatically infers piecewise-defined ranking functions and sufficient preconditions by means of abstract interpretation.
+## Installation
 
-
-# Installation
-
-FuncTion requires the following applications and libraries:
-
-* OCaml: compiler version >= 4.14
-	```
-		https://ocaml.org/docs/installing-ocaml
-	```
-
-* Opam: https://opam.ocaml.org/doc/Install.html
-
-	```
-	(sudo) apt-get install opam
-	```
-
-* Menhir: LR(1) parser generator (v.3.0.0)
-
-	```
-	 opam install menhir
-	```
-* Dune: Ocaml build system (v.3.12)
-	```
-	(sudo) opam install dune
-	```		
-* APRON: numerical abstract domain library
-
-	```
-	opam install apron
-	```
-
-* Zarith: arbitrary-precision integer operations
-
-	```
-	opam install zarith
-	```
-If you have a former version of dune and menhir you can update the dune-project file. You can check the version of your packages 
-with 
-```
-opam list
-```
-## Compiling FuncTion
-
-Once all required libraries are installed, FuncTion can be compiled with 'dune':
+APRON binds to GMP/MPFR and the C frontend (mopsa) to libclang:
 
 ```
-dune build
+sudo apt-get install libgmp-dev libmpfr-dev m4 pkg-config \
+                     clang libclang-cpp-dev libclang-dev llvm-dev
 ```
 
-You can clean the generated files with:
+Then, with [opam](https://opam.ocaml.org/doc/Install.html) and OCaml >= 4.14:
 
 ```
-dune clean
+opam install . --deps-only
+dune build                        # produces main.exe
 ```
 
-# Usage
+> **dune must be < 3.21**: mopsa 1.2 does not build with newer versions. The
+> bound is in `function.opam`; if your switch has a newer dune, run
+> `opam install 'dune<3.21'` first.
 
-The command-line analyzer can be invoked using the following call pattern:
+## Usage
 
-	./main.exe <file> <analysis> [options] 
+```
+./main.exe <file> <analysis> [options]
+```
 
-where "file" is the path to the C file to be analyzed and "analysis" the type of the analysis to perform. 
+| Analysis | Invocation |
+|---|---|
+| Termination / non-termination | `-termination` · `-nontermination` |
+| Termination resilience | `-resilience` |
+| Guarantee / recurrence | `-guarantee <file>` · `-recurrence <file>` |
+| CTL | `-ctl "AF{exit:true}"` |
+| ATL | `-atl "<p1,p2>F{gain == 1}"` |
 
-The analyzer first performs a forward reachability analysis, and then a backward analysis to find a piecewise-defined ranking function and sufficient preconditions at the entry point for the program 
-to satisfy the given analyzed property.
+Main options (`./main.exe -help` for the rest):
 
-The following general command-line options are recognized
-(showing their default value):
+```
+-domain boxes|octagons|polyhedra   abstract domain (default boxes)
+-joinbwd 2                         widening delay, backward analysis
+-ordinals 2                        maximum ordinal for ranking functions
+-refine                            restrict the backward analysis to reachable states
+-precondition "x == 1"             assumed at the program entry
+-config <file.json>                read the configuration from JSON
+-vulnerability                     report the variables that could falsify the property
+```
 
-	 -main main                         set the analyzer entry point (defaults to main)
-	 -domain boxes|octagons|polyhedra   set the abstract domain (defaults to boxes)
-	 -joinfwd 2                         set the widening delay in forward analysis
-	 -joinbwd 2                         set the widening delay in backward analysis
-	 -meetbwd 2			                set the dual widening delay in backward analysis
-	 -ordinals 2                        set the maximum ordinal value for the ranking functions
-	 -refine            			    reduces the backward analysis to the reachabile states
-	 -json_ouput						To output a summary of the analaysis as a  json in a file `filename.json` 
+For ATL, inputs are attributed to agents with `input("agent", lo, hi)`, and
+`<p1,p2>F{...}` asks whether that coalition can force the goal whatever the
+others do.
 
-The analyzer answers TRUE in case it can successfully prove the property. Otherwise, it answers UNKNOWN.
+## Benchmarks
 
-FuncTion can analyze the following properties:
+`tests/` holds the benchmarks, one `.json` configuration next to each `.c`
+declaring the analysis, the property and the expected result — grouped by
+`termination`, `ctl`, `atl`, `guarantee`, `recurrence`, `vulnerability`.
 
-* Termination
-* Termination Resilience
-* Guarantee / Recurrence 
-* Computation-Tree-Logic (CTL) 
+The test tooling is in [`script/`](script/README.md), with the day-to-day
+commands in [script/WORKFLOW.md](script/WORKFLOW.md):
 
-## Termination & Termination Resilience
+```
+script/harness.py run -o regression_out --layout flat --cover logs
+python3 script/function-diff.py logs regression_out --regression --ignore-time
+```
 
-To check for termination, call the analyzer with the following call pattern:
+Both run in CI on every push.
 
-	./main.exe <file> -termination [options]
+## Docker
 
-For termination resilience: 
-
-	./main.exe <file> -resilience [options]
-
-## Guarantee / Recurrence
-
-The following call pattern can be used for guarantee properties or recurrence properties:
-
-	./main.exe <file> -guarantee <property_file> [options]
-	./main.exe <file> -recurrence <property_file> [options] 
-
-where "property\_file" is the path to the file containing the guarantee or recurrence property.
-
-## CTL
-
-CTL properties can be analyzed using the following call pattern:
-
-	./main.exe <file> -ctl <property> [options]
-
-where "property" is the CTL property to be analyzed. 
-
-The following additional command-line options exist for the CTL analysis:
-(showing their default value):
-
-	 -precondition "[prop]"                 a precondition that is assumed to hold at the start of the program e.g. "x == 1"
-	 -noinline			                disable inlining of function calls
-     -ast                               run the analysis on the abstract-syntax-tree instead of the control-flow-graph,
-                                        note that in that case function calls and goto/break/continue are not supported
-     -dot                               print out control-flow-graph and decision trees in graphviz dot format
-
-# Vulnerability 
-Automatic detection of potentially vulnerable variables that
-could be controlled to violate a CTL property of programs can be done using the option: 
-	 
-	 -vulnerability
-	
-This analyzes output sets of potentially vulnerable variable, sets
-of definitely non-vulnerable variables. It also provides sufficient constraints on the vulnerable variables that "protect" the program and ensure the property.
-## Benchmark:
-We provide different directory to test our analysis.
-
-`tests/termination`: to test termination
-`tests/ctl`: to test CTL properties
-`tests/guarantee`: to test guarantee properties
-`tests/recurrence`: to test recurrence properties
-`test_res/`: to test termination resilience
-`test_vuln/`: to test vulnerability
-
-# Docker installation 
-## To create the image
-> docker build -t function. 
-
-## To run it
-> docker run -it function
-
+```
+docker build -t function .
+docker run -it function
+```
