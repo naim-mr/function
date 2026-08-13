@@ -23,14 +23,21 @@ reconstruction propre est J4.
 
 Par ordre de rentabilité :
 
-1. **Dé-dupliquer PARTITION.** `Bool_Partition` et `Cong_Partition` réimplémentent
-   à la main la même chose : « liste de contraintes + env, meet = ajout avec
-   simplification paire à paire ». Écrire UN foncteur générique :
+1. **Dé-dupliquer PARTITION — mais APRÈS avoir deux vrais clients.**
+   L'objectif reste un foncteur générique :
    ```ocaml
    module Conj_Partition (C : CONSTRAINT) : PARTITION with module C = C
    ```
-   dans `domains/Partition_Of_Constraint.ml`. Chaque nouveau domaine n'aura plus
-   qu'à fournir son `CONSTRAINT` (~100 lignes au lieu de ~350).
+   pour qu'un nouveau domaine n'ait plus qu'à fournir son `CONSTRAINT`
+   (~100 lignes au lieu de ~350).
+
+   ⚠️ **Mais `Congruence.ml` a été supprimé** : il ne reste qu'une seule
+   implémentation écrite à la main, `Bool_Partition`, et elle est dégénérée
+   (`type t = bool`, pas une liste de contraintes du tout). Abstraire sur ce
+   seul exemple figerait une interface sur un cas qui n'en est pas un. D'où
+   l'ordre des jalons §10 : écrire d'abord un vrai domaine à la main (J1),
+   factoriser ensuite sur ce que les deux implémentations partagent
+   réellement (J2).
 
 2. **Arrêter de sceller opaquement les modules.** `module Bool_Constraint :
    CONSTRAINT = ...` cache `type cons` — impossible ensuite d'écrire un produit
@@ -581,21 +588,25 @@ mécaniques) ; ×1,5–2 en temps calendaire :
 | Jalon | Contenu | Estimation |
 |---|---|---|
 | J0 | build vert (revert Main.ml) | 0,5 h |
-| J0.5 | baseline de régression (§4.0) | 0,5 j |
-| J1 | `Conj_Partition` + migrations + scellements | 1–2 j |
-| J1.5 | harnais de test générique (§4.1) | 1 j |
-| J2 | premier nouveau domaine (+ ~1 h de tests) | 1–2 j |
-| J2.5 | (option) sortir `env` des contraintes | 1–2 j |
+| J0.5 | baseline de régression (§4.0) | 0,5 j *(réel : 1 j+)* |
+| J1 | premier domaine à la main + harnais + scellements | 2–3 j |
+| J2 | `Conj_Partition` factorisé sur deux vrais clients | 1–2 j |
+| J2.5 | (option) fiabiliser `env` (bijection + renommage) | 0,5–1 j |
 | J3 | `Sum_Constraint` (nœuds mixtes) | 2–3 j |
 | J4 | `Prod_Partition`/`AP_NUMERIC` + recâblage | 2–4 j |
 | J5 | (option) produit d'arbres | +3–5 j |
 | J6 | tables de bench avec/sans produit | 1–2 j |
-| J7 | widening pipeline + types `unified`/`canonical` | 3–5 j |
+| J7 | widening pipeline + types `unified`/`canonical` | 5–8 j |
 | J8 | passe LLM (oracle + cache + check) | 2–4 j |
 
-**Total ~14–25 j pleins hors J5/J2.5** ; cœur J0–J4+J6 ≈ 2 semaines pleines.
-Les jalons `.5` (baseline, harnais de test) coûtent 1,5 j au total et sont
-rentabilisés dès J1 — ne pas les sauter pour « gagner du temps ».
+**Total ~15–27 j pleins hors J5/J2.5** ; cœur J1–J4+J6 ≈ 2 semaines pleines.
+
+⚠️ **Ces estimations sont optimistes.** J0.5 était donné pour une demi-journée
+et en a pris plus d'une pleine, parce que toucher au code existant révèle des
+problèmes latents à chaque fois (table de groupes morte, quatre limites du
+frontend, affichage des rangs, dépendances non déclarées, trois échecs CI
+successifs). Appliquer ce facteur surtout à **J7**, qui touche les 2100 lignes
+de `Decision_Tree.ml`.
 - J7 est le poste le plus *risqué* (pas le plus long) : refactorer le widening
   sans changer son comportement exige une non-régression comportementale
   (mêmes verdicts sur toute la suite ATL avant/après) ≈ la moitié du coût.
@@ -637,16 +648,22 @@ jalon, pas ligne à ligne.
       géré, `input(v,lo,hi)` qui casse la linéarisation, et les deux
       régressions `pending`.
 
-- [ ] **J1** `Conj_Partition` générique + `Congruence.ml` et `Bool_Constraint.ml`
-      migrés dessus ; scellements rendus transparents. Baseline inchangée.
-- [ ] **J1.5** Harnais de test générique (§4.1) : `Domain_laws` +
-      `Partition_laws` sous `dune test`, instanciés sur Congruence et
-      Bool_Constraint (qui valident le harnais). ~1 j.
-- [ ] **J2** Premier nouveau domaine de contraintes (au choix) sur la recette §2,
-      avec ses `samples` + instanciation du harnais (~1 h) + son `.c` témoin.
+- [ ] **J1** **Un vrai domaine de contraintes, écrit à la main** (recette §2) :
+      son `CONSTRAINT`, sa `PARTITION` explicite, son `.c` témoin. Plus le
+      harnais de test générique (§4.1, `Domain_laws`/`Partition_laws` sous
+      `dune test`) écrit *avec* ce premier client — pas avant lui.
+      Y faire aussi les **scellements transparents** (§1.2) : indépendant,
+      deux lignes par module, et prérequis dur des produits.
+      ⚠️ Garder les `.c` témoins minimaux (une boucle, deux variables) :
+      le frontend ne gère ni `break`, ni `input(v,lo,hi)`, ni `unsigned`, ni
+      les tableaux/structs — autant de temps perdu sur des bugs qui ne sont
+      pas les tiens.
+- [ ] **J2** `Conj_Partition` générique, factorisé sur ce que J1 et
+      `Bool_Constraint` partagent **réellement**. C'est l'ancien J1, déplacé
+      ici : avec un seul client dégénéré, l'abstraction serait spéculative.
 - [ ] **J2.5** *(option)* Fiabiliser `env` (§1.1) : bijection
       `apron_of_var`/`var_of_apron` exposée, `ap_env` dédupliqué, renommage.
-      À placer ICI : après J1.5 on a un filet de tests, et juste avant J3.
+      À placer ICI : après J1 on a un filet de tests, et juste avant J3.
       Périmètre bien plus étroit que la version « supprimer `env` » qu'il
       remplace — c'est un resserrement d'API, pas une réécriture.
 - [ ] **J3** `Sum_Constraint` (produit a) + arbre à nœuds mixtes ; test témoin.
