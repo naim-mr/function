@@ -33,64 +33,17 @@ import subprocess
 import sys
 import time
 
-# group (subdir of tests/) -> extra analyzer flags. The property, when needed,
-# is read from the config and appended after the flag, mirroring logs.bash.
-GROUP_MODES = {
-    "termination": [],
-    "ctl": ["-ctl"],
-    "atl": ["-atl"],
-    "resilience": ["-atl"],
-    "guarantee": ["-ctl"],
-    "recurrence": ["-ctl"],
-}
-
-# The analysis flag is chosen from the config's own "analysis" field (each .json
-# declares it), so it no longer depends on the folder/group name matching
-# GROUP_MODES -- otherwise a group absent from GROUP_MODES silently falls back to
-# the default (termination) analysis instead of the ATL/CTL one the config asks.
-ANALYSIS_FLAGS = {
-    "termination": [],
-    "atl": ["-atl"],
-    "ctl": ["-ctl"],
-    "guarantee": ["-ctl"],
-    "recurrence": ["-ctl"],
-}
-
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-
-# --------------------------------------------------------------------------- #
-# Discovery / running
-# --------------------------------------------------------------------------- #
-
-# Folders that get special handling / are skipped.
-RESILIENCE_FOLDER = "resilience"   # matrix: every .c x every root property
-# A first-level folder is treated as the resilience matrix root if it is named
-# RESILIENCE_FOLDER OR, robustly to renames of that folder, if it holds this
-# signature config at its top level.
-RESILIENCE_SIGNATURE = "termination-resilience.json"
-CTL_FOLDER = "ctl"                 # matrix: every .c x lifting variant
-MATRIX_FOLDERS = {RESILIENCE_FOLDER, CTL_FOLDER}  # rendered as a pivot table
-SKIP_FOLDERS = {"ctl_lifted"}      # excluded from the run for now
-# With --short, these (large SV-COMP) subtrees are pruned for a quick run.
-SHORT_SKIP_FOLDERS = {"svcomp", "sv_comp"}
-
-
-def resilience_roots(gdir):
-    """First-level subdirs of `gdir` that are resilience matrix roots: named
-    RESILIENCE_FOLDER or carrying the RESILIENCE_SIGNATURE config."""
-    roots = set()
-    try:
-        entries = os.listdir(gdir)
-    except OSError:
-        return roots
-    for name in entries:
-        sub = os.path.join(gdir, name)
-        if os.path.isdir(sub) and (
-                name == RESILIENCE_FOLDER
-                or os.path.isfile(os.path.join(sub, RESILIENCE_SIGNATURE))):
-            roots.add(name)
-    return roots
+# Discovery and running live in script/harness.py, shared with the regression
+# path: keeping a second copy here is what let the two drift (the copy in the
+# old runregression.py still keyed the analysis off the folder name, so
+# tests/atl was never regression-tested). Rendering stays below.
+from harness import (  # noqa: E402
+    ROOT, GROUP_MODES, ANALYSIS_FLAGS,
+    RESILIENCE_FOLDER, RESILIENCE_SIGNATURE, CTL_FOLDER, MATRIX_FOLDERS,
+    SKIP_FOLDERS, SHORT_SKIP_FOLDERS,
+    resilience_roots, discover, read_config, norm_result, count_leaves,
+    parse_log_result, build_cmd, run_one, REPORT_FLAGS,
+)
 
 # The CTL->ATL lifting variants, in display order (column of the ctl matrix).
 CTL_VARIANTS = ["base", "resilience", "resilience_reachability",
@@ -100,118 +53,6 @@ CTL_VARIANTS = ["base", "resilience", "resilience_reachability",
 # (result TRUE) raises an alarm whose severity depends on the property.
 RESILIENCE_CRITICAL = {"termination-exploitability", "robust_non-termination"}
 RESILIENCE_LESS = {"termination-resilience", "termination-non-exploitability"}
-
-
-def discover(tests_dir, groups, flt, short=False):
-    """Yield (group, folder, cfile, cfg) for every (.c, config) pair.
-
-    `folder` is the first path component under the group directory (the tab the
-    test belongs to); it is the group name for files sitting directly in it.
-
-    Normal folders: a .c is paired with every .json in the SAME directory whose
-    name has the .c name as a prefix (`<stem>.json`, `<stem>.*.json`).
-
-    A resilience matrix root (a first-level folder named `resilience` or holding
-    a `termination-resilience.json`) is special: it holds N global property
-    configs at its root, and EVERY .c anywhere in its subtree is paired with ALL
-    of them (so the report can show one row per file with one result column per
-    property). Detection by signature keeps this working when the folder is
-    renamed.
-
-    Paths are relative to ROOT (the analyzer concatenates output_dir + filename).
-    """
-    pat = re.compile(flt) if flt else None
-    for group in groups:
-        gdir = os.path.join(tests_dir, group)
-        if not os.path.isdir(gdir):
-            continue
-        matrix_roots = resilience_roots(gdir)
-        for dirpath, dirs, files in os.walk(gdir):
-            skip = SKIP_FOLDERS | SHORT_SKIP_FOLDERS if short else SKIP_FOLDERS
-            dirs[:] = [d for d in dirs if d not in skip]  # prune
-            rel_dir = os.path.relpath(dirpath, gdir)
-            folder = group if rel_dir == "." else rel_dir.split(os.sep)[0]
-            cfiles = sorted(f for f in files if f.endswith(".c"))
-
-            if folder in matrix_roots:
-                # global property configs at this matrix root
-                res_root = os.path.join(gdir, folder)
-                props = sorted(f for f in os.listdir(res_root)
-                               if f.endswith(".json"))
-                for cf_name in cfiles:
-                    cfile = os.path.relpath(os.path.join(dirpath, cf_name), ROOT)
-                    if pat and not pat.search(cfile):
-                        continue
-                    for j in props:
-                        cfg = os.path.relpath(os.path.join(res_root, j), ROOT)
-                        yield group, folder, cfile, cfg
-                continue
-
-            jsons = sorted(f for f in files if f.endswith(".json"))
-            for cf_name in cfiles:
-                stem = cf_name[:-2]  # drop the trailing ".c"
-                cfile = os.path.relpath(os.path.join(dirpath, cf_name), ROOT)
-                if pat and not pat.search(cfile):
-                    continue
-                # Match configs by the .c stem, AND by its base stem (drop a
-                # "_combination_N" suffix): generated combinations share the
-                # property configs of their base test, so one config set per
-                # base suffices instead of duplicating it per combination.
-                prefixes = [stem]
-                base = re.sub(r"_combination_\d+$", "", stem)
-                if base != stem:
-                    prefixes.append(base)
-                # The "." separator avoids cross-matching stems that are
-                # prefixes of one another (e.g. "foo" must not grab "foo_bar").
-                for j in jsons:
-                    if any(j.startswith(p + ".") for p in prefixes):
-                        cfg_abs = os.path.join(dirpath, j)
-                        yield group, folder, cfile, os.path.relpath(cfg_abs, ROOT)
-
-
-def read_config(cfg):
-    try:
-        with open(os.path.join(ROOT, cfg)) as fh:
-            return json.load(fh)
-    except (OSError, json.JSONDecodeError):
-        return {}
-
-
-def norm_result(res):
-    """Normalise the analyzer verdict to TRUE/UNKNOWN, tolerating the 'UKNOWN'
-    typo, casing, and a boolean 0/1 (or false/true) encoding."""
-    r = str(res).strip().upper()
-    if r in ("UKNOWN", "UNKNOWN", "0", "FALSE"):
-        return "UNKNOWN"
-    if r in ("TRUE", "1"):
-        return "TRUE"
-    return r or "-"
-
-
-def count_leaves(tree):
-    """Return (defined, total) leaves of the analyzer's decision tree. A leaf is
-    \"defined\" when its value is not 'bottom'; the defined leaves are exactly the
-    partitions of the inferred sufficient precondition, so their count is the
-    number of sufficient conditions found."""
-    if not isinstance(tree, dict):
-        return (0, 0)
-    if "Leaf" in tree:
-        return (0 if str(tree["Leaf"]).strip().lower() == "bottom" else 1, 1)
-    node = tree.get("Node")
-    if isinstance(node, dict):
-        dl = tl = 0
-        for side in ("left", "right"):
-            d, t = count_leaves(node.get(side))
-            dl += d
-            tl += t
-        return (dl, tl)
-    return (0, 0)
-
-
-def parse_log_result(log):
-    """Extract 'Final Analysis Result: <verdict>' from the analyzer output."""
-    m = re.search(r"Final Analysis Result:\s*([A-Za-z()]+)", log)
-    return norm_result(m.group(1)) if m else None
 
 
 def num_time(r):
@@ -230,98 +71,6 @@ def disp_time(r):
         return f"{float(r.get('analyzer_time')):.3f}"
     except (TypeError, ValueError):
         return str(r.get("time"))
-
-
-def build_cmd(executable, group, cfile, cfg, out):
-    # Default to polyhedra; -config runs afterwards so a "domain" key in the
-    # JSON still overrides this default.
-    cmd = [executable, cfile, "-domain", "polyhedra", "-refine", "-ordinals", "3", "-joinbwd", "7", "-config", cfg]
-    conf = read_config(cfg)
-    # Pick the analysis flag from the config's declared analysis; fall back to
-    # the folder/group mode only when the config does not specify one.
-    analysis = conf.get("analysis")
-    flags = ANALYSIS_FLAGS.get(analysis) if analysis in ANALYSIS_FLAGS \
-        else GROUP_MODES.get(group, [])
-    if flags:
-        cmd += flags + [conf.get("property", "")]
-    cmd += ["-json_output", out + os.sep]
-    return cmd
-
-
-def run_one(executable, group, folder, cfile, cfg, out, timeout):
-    # Isolate the analyzer output per (c-file, config): several configs may
-    # target the same .c, and the analyzer names its JSON after the .c only,
-    # so a shared output dir would make those runs collide.
-    task_out = os.path.join(out, os.path.splitext(cfg)[0].replace(os.sep, "__"))
-    # The analyzer's own mkdir does not create nested paths: pre-create the
-    # destination directory so the JSON can be written.
-    os.makedirs(os.path.join(task_out, os.path.dirname(cfile)), exist_ok=True)
-    cmd = build_cmd(executable, group, cfile, cfg, task_out)
-    status, rc = "OK", 0
-    t0 = time.perf_counter()
-    try:
-        p = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True,
-                           timeout=timeout)
-        rc, log = p.returncode, p.stdout + p.stderr
-        if rc != 0:
-            status = "FAIL"
-    except subprocess.TimeoutExpired:
-        status, rc, log = "TO", 124, "TIMEOUT\n"
-    wall = time.perf_counter() - t0  # measured wall-clock; reliable across paths
-
-    rec = {
-        "group": group, "folder": folder, "file": cfile, "config": cfg,
-        # Identity of this run: a config may share its .c with sibling configs,
-        # so reports key off the config (name = label, key = unique filename).
-        "name": os.path.splitext(os.path.basename(cfg))[0],
-        "key": os.path.splitext(cfg)[0].replace(os.sep, "__")
-        + "__" + os.path.splitext(cfile)[0].replace(os.sep, "__"),
-        "property": read_config(cfg).get("property", "termination"),
-        "domain": read_config(cfg).get("domain", "boxes"),
-        # expected verdict declared in the config (native benchmarks), if any.
-        "expected": read_config(cfg).get("expected", "-"),
-        # players (agents) of the benchmark, declared in the config.
-        "players": read_config(cfg).get("players", []),
-        "result": "-", "time": round(wall, 3), "analyzer_time": "-",
-        # number of defined leaves of the decision tree (the sufficient
-        # precondition partitions) and total number of leaves.
-        "suff": 0, "leaves": 0,
-        "vulnerability": "-", "status": status, "rc": rc, "log": log,
-        "tree": None, "conf": {},
-    }
-
-    # The analyzer chooses the output filename itself (and may override the
-    # domain, e.g. CTL is forced to polyhedra), so locate the JSON by globbing
-    # rather than guessing the name.
-    produced = sorted(glob.glob(os.path.join(task_out, cfile + "-domain*.json")),
-                      key=os.path.getmtime)
-    log_result = parse_log_result(log)
-
-    if produced:
-        try:
-            with open(produced[-1]) as fh:
-                data = json.load(fh)
-            conf = data.get("Config", {})
-            rec["conf"] = conf
-            rec["tree"] = data.get("tree")
-            rec["suff"], rec["leaves"] = count_leaves(rec["tree"])
-            rec["result"] = norm_result(conf.get("result", "-"))
-            rec["analyzer_time"] = conf.get("time", "-")
-            rec["domain"] = conf.get("domain", rec["domain"])
-            rec["property"] = conf.get("property", rec["property"])
-            rec["vulnerability"] = (
-                data["vulnerability"] if isinstance(data.get("vulnerability"), str)
-                else json.dumps(data.get("vulnerability")))
-            if status == "OK":
-                rec["status"] = rec["result"]  # TRUE / UNKNOWN
-        except (OSError, json.JSONDecodeError):
-            rec["status"] = "FAIL"
-    elif log_result and status == "OK":
-        # Analysis reached a verdict but the JSON write failed: trust the log.
-        rec["result"] = rec["status"] = log_result
-    elif status == "OK":
-        rec["status"] = "FAIL"  # exited 0 but produced no result at all
-    return rec
 
 
 # --------------------------------------------------------------------------- #
@@ -1763,7 +1512,8 @@ def main():
     print(f"== running {len(bench)} benchmark(s)  (jobs={args.jobs}, timeout={args.timeout}s) ==")
     records = []
     with cf.ThreadPoolExecutor(max_workers=args.jobs) as ex:
-        futs = [ex.submit(run_one, executable, g, fld, c, cfg, out, args.timeout)
+        futs = [ex.submit(run_one, executable, g, fld, c, cfg, out, args.timeout,
+                          "isolated", REPORT_FLAGS)
                 for (g, fld, c, cfg) in bench]
         for fut in cf.as_completed(futs):
             r = fut.result()

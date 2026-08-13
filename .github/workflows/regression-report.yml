@@ -1,0 +1,184 @@
+name: Régression complète (rapport + issue)
+
+# Run complet, plus lourd que le CI de chaque push : hebdomadaire ou à la
+# demande. En cas de dérive, tient à jour UNE issue unique plutôt que d'en
+# ouvrir une par exécution.
+
+on:
+  schedule:
+    - cron: "0 3 * * 1"   # tous les lundis 03:00 UTC
+  workflow_dispatch:
+    inputs:
+      create_issue:
+        description: "Ouvrir/mettre à jour l'issue de dérive"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  issues: write
+
+env:
+  # Marqueur invariant : c'est lui qui permet de RETROUVER l'issue existante et
+  # de la mettre à jour au lieu d'en créer une nouvelle à chaque run.
+  ISSUE_MARKER: "<!-- baseline-drift-tracker -->"
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dépendances système
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgmp-dev libmpfr-dev libppl-dev m4 pkg-config
+
+      - uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: "4.14"
+
+      - run: opam install . --deps-only --yes
+      - run: opam exec -- dune build
+
+      - name: Régression complète
+        id: reg
+        continue-on-error: true
+        run: |
+          set +e
+          opam exec -- python3 script/harness.py run \
+            -o regression_out --layout flat --cover logs \
+            -t 60 -j 2 | tee run.txt
+          echo "run_rc=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+          python3 script/function-diff.py logs regression_out \
+            --regression --ignore-time > diff.txt 2>&1
+          echo "diff_rc=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Chiffrer la dérive
+        id: tally
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, re, os, sys
+          sys.path.insert(0, "script")
+          import harness   # lecture du résumé : une seule implémentation
+          def slurp(p):
+              try:
+                  return open(p, errors="replace").read()
+              except OSError:
+                  return ""
+          txt = slurp("diff.txt")
+          blocks = re.findall(r'--- logs/(\S+)\n\+\+\+ \S+\n\n- (\w+)\s*\n \n\+ (\w+)', txt)
+          norm = lambda v: "UNKNOWN" if v in ("UKNOWN", "UNKNOWN") else v
+          lost = [f for f, a, b in blocks if norm(a) == "TRUE" and norm(b) != "TRUE"]
+          gain = [f for f, a, b in blocks if norm(a) != "TRUE" and norm(b) == "TRUE"]
+          try:
+              _, recs = harness.load_summary("regression_out.run.json")
+          except Exception:
+              recs = []
+          fail = [r for r in recs if r.get("status") in ("FAIL", "TO")]
+          print(f"lost={len(lost)}")
+          print(f"gained={len(gain)}")
+          print(f"failed={len(fail)}")
+          body = [f"- **{len(lost)}** régressions (TRUE → UNKNOWN)",
+                  f"- **{len(gain)}** améliorations (UNKNOWN → TRUE)",
+                  f"- **{len(fail)}** tests en échec/timeout", ""]
+          if lost:
+              body += ["<details><summary>Régressions</summary>", ""]
+              body += [f"- `{f}`" for f in lost[:50]]
+              body += ["", "</details>", ""]
+          if fail:
+              body += ["<details><summary>Échecs</summary>", ""]
+              body += [f"- `{r['file']}` ({r['status']})" for r in fail[:50]]
+              body += ["", "</details>"]
+          # sortie multiligne : délimiteur, sinon GITHUB_OUTPUT tronque
+          print("body<<__EOF__")
+          print("\n".join(body))
+          print("__EOF__")
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: regression-full-${{ github.run_number }}
+          path: |
+            regression_out.run.json
+            diff.txt
+            run.txt
+          retention-days: 90
+
+      - name: Ouvrir ou mettre à jour l'issue de dérive
+        if: >
+          always() &&
+          (github.event_name == 'schedule' || inputs.create_issue) &&
+          (steps.tally.outputs.lost != '0' || steps.tally.outputs.failed != '0')
+        uses: actions/github-script@v7
+        env:
+          LOST: ${{ steps.tally.outputs.lost }}
+          GAINED: ${{ steps.tally.outputs.gained }}
+          FAILED: ${{ steps.tally.outputs.failed }}
+          DRIFT_BODY: ${{ steps.tally.outputs.body }}
+        with:
+          script: |
+            const marker = process.env.ISSUE_MARKER;
+            const title = "Dérive de la baseline de régression";
+            const body = [
+              marker,
+              `_Mis à jour automatiquement par ${context.workflow} — run [${context.runId}](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}), commit ${context.sha.slice(0,7)}._`,
+              "",
+              process.env.DRIFT_BODY,
+              "",
+              "---",
+              "Rapport complet dans les artefacts du run (`diff.txt`, `regression_out.run.json`).",
+              "",
+              "Deux issues possibles : corriger les régressions, ou promouvoir",
+              "l'état courant en référence avec `script/harness.py bless`.",
+              "Les échecs *connus* se déclarent dans la config du test :",
+              '`\"expected\": {\"status\": \"FAIL\", \"reason\": \"...\"}` — la suite',
+              "redevient verte et le test est signalé s'il se remet à réussir.",
+            ].join("\n");
+
+            // Retrouver l'issue existante par son marqueur : sans ça on ouvrirait
+            // une issue par exécution hebdomadaire.
+            const existing = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: "open", per_page: 100,
+            });
+            const hit = existing.find(i => (i.body || "").includes(marker));
+
+            if (hit) {
+              await github.rest.issues.update({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: hit.number, body,
+              });
+              core.info(`issue #${hit.number} mise à jour`);
+            } else {
+              const created = await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo,
+                title, body,
+              });
+              core.info(`issue #${created.data.number} créée`);
+            }
+
+      - name: Fermer l'issue si tout est vert
+        if: >
+          always() &&
+          steps.tally.outputs.lost == '0' && steps.tally.outputs.failed == '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const marker = process.env.ISSUE_MARKER;
+            const open = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: "open", per_page: 100,
+            });
+            for (const i of open.filter(i => (i.body || "").includes(marker))) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: i.number,
+                body: `Baseline verte au commit ${context.sha.slice(0,7)} — fermeture automatique.`,
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: i.number, state: "closed",
+              });
+            }

@@ -230,7 +230,11 @@ class ReportDiff:
         self.old = old
         self.new = new
         self.time = new.time - old.time
-        #self.speedup = 100.0 * (old.time - new.time) / old.time
+        # Guarded against a zero baseline time: the analyzer reports whole
+        # seconds, so old.time is routinely 0 and the plain division raised
+        # ZeroDivisionError -- which is why this line used to be commented out,
+        # leaving summary() to fail on a missing `speedup` attribute instead.
+        self.speedup = (100.0 * (old.time - new.time) / old.time) if old.time else 0.0
         self.new_alarms = new.alarms.difference(old.alarms)
         self.removed_alarms = old.alarms.difference(new.alarms)
         self.new_assumptions = new.assumptions.difference(old.assumptions)

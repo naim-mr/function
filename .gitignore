@@ -35,3 +35,7 @@ script/UAutomizer-linux
 results*
 logs/*
 regression_out/
+# tooling / test harness
+__pycache__/
+*.pyc
+*.run.json

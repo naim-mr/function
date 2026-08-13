@@ -1,0 +1,89 @@
+name: CI
+
+# Build = garde-fou dur. Régression = informative POUR L'INSTANT.
+#
+# La baseline logs/ n'est pas verte au HEAD courant (écarts de verdict + échecs
+# frontend sur tests/ctl : voir logs/BASELINE-DRIFT-*.txt). Câbler la régression
+# en bloquant tant que ce n'est pas tranché rendrait le CI rouge en permanence,
+# ce qui apprend surtout à l'ignorer. Une fois la baseline verte (décision sur
+# les régressions + `bless`), passer REGRESSION_GATE à "true" ci-dessous : c'est
+# le seul endroit à changer.
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  REGRESSION_GATE: "false"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # APRON se lie à GMP/MPFR/PPL : sans les en-têtes système, opam échoue à
+      # la compilation de mlgmpidl bien avant de parler d'OCaml.
+      - name: Dépendances système
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgmp-dev libmpfr-dev libppl-dev m4 pkg-config
+
+      - uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: "4.14"
+
+      - run: opam install . --deps-only --yes
+
+      - name: Build
+        run: opam exec -- dune build
+
+      - name: Régression (sous-ensemble baseliné)
+        id: reg
+        continue-on-error: true
+        run: |
+          set +e
+          opam exec -- python3 script/harness.py run \
+            -o regression_out --layout flat --cover logs \
+            --short -t 30 -j 2
+          echo "run_rc=$?" >> "$GITHUB_OUTPUT"
+          python3 script/function-diff.py logs regression_out \
+            --regression --ignore-time | tee diff.txt
+          echo "diff_rc=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+
+      - name: Résumé
+        if: always()
+        run: |
+          {
+            echo "## Régression"
+            echo ""
+            echo "run: rc=${{ steps.reg.outputs.run_rc }} · diff: rc=${{ steps.reg.outputs.diff_rc }}"
+            echo ""
+            if [ -s diff.txt ]; then
+              echo '<details><summary>diff</summary>'
+              echo ""
+              echo '```'
+              head -200 diff.txt
+              echo '```'
+              echo ""
+              echo '</details>'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: regression-${{ github.sha }}
+          path: |
+            regression_out.run.json
+            diff.txt
+          retention-days: 14
+
+      - name: Appliquer le garde-fou
+        if: env.REGRESSION_GATE == 'true'
+        run: |
+          [ "${{ steps.reg.outputs.run_rc }}" = "0" ] \
+            && [ "${{ steps.reg.outputs.diff_rc }}" = "0" ] \
+            || { echo "régression détectée"; exit 1; }
