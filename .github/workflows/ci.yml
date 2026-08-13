@@ -28,13 +28,25 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Every step below runs in repo/. The checkout is deliberately NOT at the
+    # workspace root: setup-ocaml creates a local switch in _opam/, opam builds
+    # its dependencies under _opam/.opam-switch/build/, and dune resolves the
+    # workspace root by walking UP from there. With the repo at the root, mopsa
+    # built inside our workspace and its `make install` tried to install our
+    # own package ("_build/default/function.install is missing"). Keeping the
+    # repo one level down means no ancestor of _opam holds a dune-project.
+    defaults:
+      run:
+        working-directory: repo
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: repo
 
       # APRON links against GMP/MPFR/PPL, and mopsa's C parser against libclang
       # (its depexts are: clang libclang-cpp-dev libclang-dev llvm-dev). opam
       # would fail while compiling those bindings without the system headers.
-      - name: Dépendances système
+      - name: System dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -91,9 +103,11 @@ jobs:
         if: always()
         with:
           name: regression-${{ github.sha }}
+          # upload-artifact is a `uses` step, so defaults.run.working-directory
+          # does not apply: paths are relative to the workspace root.
           path: |
-            regression_out.run.json
-            diff.txt
+            repo/regression_out.run.json
+            repo/diff.txt
           retention-days: 14
 
       - name: Appliquer le garde-fou
