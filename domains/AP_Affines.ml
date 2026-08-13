@@ -687,7 +687,9 @@ struct
               let x =
                 List.find
                   (fun y ->
-                    String.compare (Var.to_string x) (Z.to_string y.var_id) = 0)
+                    String.compare (Var.to_string x)
+                      (apron_of_var y |> Var.to_string)
+                    = 0)
                   vars
               in
               Format.fprintf Format.str_formatter "$%s{%s}"
