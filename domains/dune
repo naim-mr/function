@@ -8,7 +8,6 @@
   apron.boxMPQ
   apron.octMPQ
   apron.polkaMPQ
-  apron.ppl
   yojson
   sig)
  (flags
