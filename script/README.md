@@ -7,7 +7,7 @@
 `runtest.py` — render HTML / LaTeX / CSV reports
 
 `runtest.py` builds on `harness.py`: there is one definition of how a benchmark
-is invoked.
+is invoked. Day-to-day usage: [WORKFLOW.md](WORKFLOW.md).
 
 ## SYNOPSIS
 
@@ -28,22 +28,21 @@ is invoked.
 
 ## COMMANDS
 
-**run** — runs every discovered benchmark, writes one report per test plus a
-summary `<OUT>.run.json` (a sibling of the tree, never inside it). Exits non-zero
-on unexpected failures, missing coverage, or `expected` mismatches.
+**run** — runs the benchmarks; one report per test plus a summary
+`<OUT>.run.json` (sibling of the tree, never inside it). Non-zero on unexpected
+failures, missing coverage, or `expected` mismatches.
 
-**cover** — checks an existing run directory against a reference: every baseline
-in REF must have been reproduced.
+**cover** — every baseline in REF must have been reproduced by OUT.
 
-**bless** — writes a run's observed values into each test config's `expected`.
-Refuses failed and timed-out tests; skips shared matrix configs.
+**bless** — writes observed values into the configs' `expected`. Refuses failed
+and timed-out tests; skips shared matrix configs.
 
-**promote** — copies a run's reports into the reference directory (`logs/`).
-Never deletes a baseline the run did not reproduce.
+**promote** — copies reports into `logs/`. Never deletes a baseline the run did
+not reproduce.
 
-**compare** — puts two runs side by side: verdict movements, `suff`/`leaves`
-deltas, time factor, coverage. Precision and time are measured only over tests
-decided on both sides.
+**compare** — two runs side by side: verdict movements, `suff`/`leaves` deltas,
+time factor, coverage. Precision and time only over tests decided on both
+sides.
 
 ## OPTIONS
 
@@ -76,15 +75,14 @@ Every field is optional; only what is pinned is checked.
 | `time` | seconds, wall-clock | factor (×3) | no, unless `--strict-time` |
 | `status` | `OK`/`FAIL`/`TO` | exact | yes |
 
-Documentation keys carried alongside, never compared, preserved by `bless`:
-`reason`, `issue`, `pending`. `pending` marks a knowingly-degraded verdict:
-promote it into `logs/` so CI is green, and the note keeps it visible in every
-run. A malformed config is reported and fails the run — it used to fall back to
-`{}` in silence, running the test with no property at all.
+Documentation keys, never compared, preserved by `bless`: `reason`, `issue`,
+`pending`. `pending` marks an accepted degraded verdict — promote it into
+`logs/` too, or CI stays red. `"status": "FAIL"` declares a known failure: it
+stops blocking and its baseline is exempt from coverage. Both are reported if
+the test changes behaviour. A malformed config fails the run (it used to fall
+back to `{}` in silence, running the test with no property at all).
 
-Tolerances are global (CLI), not per test. A pinned `"status": "FAIL"` declares a
-known failure: it stops failing the run and its baseline is exempt from the
-coverage check, but it is reported if the test starts passing again.
+Tolerances are global (CLI), not per test.
 
 Other config keys: `analysis`, `property`, `domain`, `precondition`, `timeout`.
 
@@ -108,20 +106,17 @@ Ablation:
 
 ## NOTES
 
-- The two front-ends invoke the analyzer differently on purpose: `runtest.py`
-  adds `REPORT_FLAGS`, the regression uses a bare `-config`, as `logs/` was
-  produced. The analyzer encodes its options in the report filename, so mixing
-  them makes every baseline path miss.
-- Option order carries precedence: `--report-flags` goes before `-config` (the
-  test config may override it), `--force` after (it wins).
-- Discovery reads the filesystem, not a group table; coverage is computed from
-  the baselines, not from discovery. Both directions are required to detect a
-  whole group being skipped.
-- Without `--cover`, discovery yields ~223k (test, config) pairs: the resilience
-  matrix crosses every `.c` of its subtree with every root property.
+- The front-ends invoke the analyzer differently on purpose: `runtest.py` adds
+  `REPORT_FLAGS`, the regression uses a bare `-config` as `logs/` was produced.
+  The analyzer encodes its options in the report filename, so mixing them makes
+  every baseline path miss.
+- Option order is precedence: `--report-flags` before `-config` (overridable),
+  `--force` after (wins).
+- Discovery reads the filesystem; coverage reads the baselines. Both directions
+  are needed to detect a whole group being skipped.
+- Without `--cover`, discovery yields ~223k (test, config) pairs.
 - `time` is wall-clock; the analyzer's own figure is quantised to one second.
-- Shared matrix configs (`tests/atl/resilience/*.json`) cannot carry `expected`:
-  one config, thousands of sources.
+- Shared matrix configs (`tests/atl/resilience/*.json`) cannot carry `expected`.
 - `runtest.py` overwrites `results/stats.csv` with the scope of the run.
 
 ## CI

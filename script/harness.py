@@ -1,30 +1,12 @@
 #!/usr/bin/env python3
-"""Shared test harness for the FuncTion analyzer: discovery, invocation, running.
+"""Shared test harness: discovery, invocation, running. See script/README.md.
 
-This is the single source of truth for *how a benchmark is run*. Both
-front-ends build on it:
+Single source of truth for how a benchmark is run; script/runtest.py builds on
+it. Two rules, each from a bug this replaces:
 
-  * script/runtest.py   -- runs + renders HTML/LaTeX/CSV reports
-  * this file, `run`    -- runs + checks coverage, for regression testing
-                           (the comparison itself is script/function-diff.py)
-
-Regression workflow:
-
-    script/harness.py run -o regression_out --layout flat --cover logs
-    script/function-diff.py logs regression_out --regression
-
-Two design rules, both learned from bugs this replaces:
-
-1. *The config is the source of truth, not the directory name.* The analysis
-   mode comes from the config's own "analysis" field; the group table below is
-   only a fallback for configs that predate it. A group missing from a table
-   must never silently change the analysis performed.
-
-2. *Coverage is computed from the baselines, not from discovery.* Anything
-   present in the reference directory that this run did not reproduce is a
-   failure. Deriving it from discovery instead cannot detect a whole group
-   being skipped -- which is exactly how tests/atl (139 configs, all
-   baselined) went unchecked.
+1. The config decides the analysis, not the directory name.
+2. Coverage is computed from the baselines, not from discovery -- the other
+   direction cannot see a whole group being skipped.
 """
 
 import argparse
@@ -86,11 +68,8 @@ def color(tag, s):
 def default_groups(tests_dir):
     """Every subdirectory of tests/ is a group.
 
-    Derived from the filesystem rather than a hardcoded table: a table has to
-    be kept in sync with the directory names, and when it drifts the missing
-    group is skipped silently (tests/atl was never regression-tested, and
-    renaming tests/resilience to tests/resilience_excluded dropped that group
-    too, both without any error).
+    From the filesystem, not a table: a stale table skips the missing group in
+    silence (tests/atl was never regression-tested for that reason).
     """
     try:
         return sorted(d for d in os.listdir(tests_dir)
@@ -186,9 +165,8 @@ def discover(tests_dir, groups, flt, short=False):
 # Reading analyzer output
 # --------------------------------------------------------------------------- #
 
-# Configs that could not be parsed. A malformed config used to fall back to {}
-# in silence, which means the test runs with NO property and NO precondition
-# and quietly returns a meaningless verdict instead of failing.
+# Unparseable configs. Falling back to {} in silence runs the test with NO
+# property and NO precondition, returning a meaningless verdict.
 BAD_CONFIGS = {}
 
 
@@ -247,26 +225,16 @@ def parse_log_result(log):
 # Running
 # --------------------------------------------------------------------------- #
 
-# Analyzer options the *reporting* front-end adds (a richer analysis for the
-# paper's tables). They are NOT part of the regression invocation: the analyzer
-# encodes its options in the output filename, so adding them here would produce
-# `foo.c-domainpolyhedra-ordinals3-refine.json` where logs/ holds
-# `foo.c-domainpolyhedra.json`, and nothing would ever match the baselines.
-# The two front-ends differ on this on purpose -- hence the parameter.
+# Options the reporting front-end adds. NOT used by the regression: the
+# analyzer encodes its options in the report filename, so these would produce
+# `foo.c-domainpolyhedra-ordinals3-refine.json` and miss every baseline.
 REPORT_FLAGS = ["-domain", "polyhedra", "-refine", "-ordinals", "3",
                 "-joinbwd", "7"]
 
 
 def build_cmd(executable, group, cfile, cfg, out, extra=(), force=()):
-    """Assemble the analyzer invocation.
-
-    Option ORDER encodes precedence, and the two hooks differ by it:
-      * `extra`  goes BEFORE -config, so the test's own config can override it
-                 (defaults, e.g. REPORT_FLAGS' -domain polyhedra);
-      * `force`  goes AFTER, so it wins over the test config -- what an ablation
-                 needs when imposing the same knob on every test
-                 (e.g. -max-partitions 4).
-    """
+    """Assemble the invocation. Order encodes precedence: `extra` before
+    -config (the test config may override it), `force` after (it wins)."""
     cmd = [executable, cfile] + list(extra) + ["-config", cfg]
     conf = read_config(cfg)
     # Pick the analysis flag from the config's declared analysis; fall back to
@@ -282,14 +250,11 @@ def build_cmd(executable, group, cfile, cfg, out, extra=(), force=()):
 
 
 def task_dir(out, cfg, layout):
-    """Where a single run writes its report.
+    """Where one run writes its report.
 
-    "isolated" gives each (c-file, config) pair its own subdirectory: several
-    configs may target the same .c and the analyzer names its JSON after the .c
-    only, so a shared directory would make those runs overwrite each other.
-
-    "flat" writes straight into `out`, reproducing the layout of the logs/
-    baselines (which predate the isolated one) so function-diff can match paths.
+    "isolated": one subdirectory per (c-file, config) -- the analyzer names its
+    JSON after the .c only, so configs sharing a .c would overwrite each other.
+    "flat": straight into `out`, the layout of logs/, so paths match.
     """
     if layout == "flat":
         return out
@@ -394,15 +359,13 @@ def run_all(executable, bench, out, timeout, jobs, layout="isolated",
 # Expected results, declared in each test's own config
 # --------------------------------------------------------------------------- #
 #
-#   "expected": "TRUE"                      legacy form == {"result": "TRUE"}
+#   "expected": "TRUE"                      legacy, == {"result": "TRUE"}
 #   "expected": {"result": "TRUE", "suff": 3, "leaves": 7, "time": 1.23}
-#   "expected": {"status": "FAIL", "reason": "frontend: undeclared 'true'"}
+#   "expected": {"status": "FAIL", "reason": "..."}
 #
-# Every field is optional: only what is pinned gets checked. Tolerances are
-# global (defaults below, overridable on the command line) rather than per
-# test -- suff/leaves are deterministic for a given binary, so there is no
-# per-test noise to absorb, and when a knob like -max-partitions moves them it
-# moves them for the whole suite at once.
+# Every field optional; only what is pinned is checked. Tolerances are global,
+# not per test: suff/leaves are deterministic for a given binary, and a knob
+# like -max-partitions moves them for the whole suite at once.
 
 # field -> how to read it off a run record
 EXPECT_FIELDS = {
@@ -424,17 +387,15 @@ EXPECT_FIELDS = {
 # about a known bug, not a measurement)
 BLESS_FIELDS = ("result", "suff", "leaves", "time")
 
-# Free-form documentation carried alongside the pinned values: never compared,
-# but preserved by `bless` so promoting a run does not silently erase why a
-# result was accepted. `issue` is what keeps a knowingly-degraded verdict
-# traceable once its baseline has been promoted and CI is green again.
+# Documentation carried alongside the pinned values: never compared, preserved
+# by `bless`. `pending`/`issue` keep an accepted degraded verdict traceable.
 DOC_FIELDS = ("reason", "issue", "pending")
 
 DEFAULT_TOL = {
     "suff": 0,       # absolute
     "leaves": 0,     # absolute
-    "time": 3.0,     # FACTOR, and never fatal unless --strict-time: wall-clock
-                     # depends on the machine and the load
+    "time": 3.0,     # FACTOR; wall-clock is machine-dependent, so never fatal
+                     # unless --strict-time
 }
 
 
@@ -499,13 +460,8 @@ def expected_diff(rec, tol=None):
 
 
 def shared_config(cfg):
-    """True for a matrix root property config, shared by every .c of a subtree
-    (tests/atl/resilience/*.json: 6 configs for 37k sources).
-
-    Such a config cannot carry a per-test `expected` -- one file would have to
-    hold thousands of different results -- so `bless` skips it. Revisit with a
-    sidecar keyed by .c path if per-test expectations are ever needed there.
-    """
+    """Matrix root config, shared by every .c of a subtree (6 configs for 37k
+    sources). Cannot carry a per-test `expected`, so `bless` skips it."""
     d = os.path.dirname(cfg)
     return (os.path.basename(d) in MATRIX_FOLDERS
             or os.path.isfile(os.path.join(ROOT, d, RESILIENCE_SIGNATURE)))
@@ -526,12 +482,10 @@ def relset(root):
 
 
 def coverage(ref, out):
-    """Baselines in `ref` that this run did not reproduce.
+    """Baselines in `ref` this run did not reproduce.
 
-    Computed from the reference side on purpose: function-diff compares the
-    intersection of report paths, so anything the run failed to produce (crash,
-    timeout, or a group that discovery never visited) silently drops out of the
-    comparison instead of failing it.
+    From the reference side: function-diff compares the intersection of paths,
+    so anything not produced drops out of the comparison instead of failing it.
     """
     return sorted(relset(ref) - relset(out))
 
@@ -553,12 +507,8 @@ SUMMARY_FIELDS = ("group", "folder", "file", "config", "name", "domain",
 
 
 def git_rev():
-    """HEAD, suffixed -dirty when the tree has uncommitted changes.
-
-    Without the suffix a run.json would claim a revision that does not describe
-    the binary that produced it -- and a baseline blessed from a dirty tree
-    would correspond to no commit at all.
-    """
+    """HEAD, suffixed -dirty -- otherwise run.json claims a revision that does
+    not describe the binary that produced it."""
     try:
         rev = subprocess.run(["git", "rev-parse", "--short", "HEAD"],
                              cwd=ROOT, capture_output=True, text=True,
@@ -572,17 +522,11 @@ def git_rev():
 
 
 def write_summary(out, records, executable, force, args):
-    """Machine-readable summary: verdicts, precision and times, no trees/logs.
+    """Machine-readable summary: verdicts, precision, times. No trees or logs.
 
-    Carries a `meta` header recording HOW the run was produced (forced options,
-    binary, git revision). `compare` reads it to label both sides and to warn
-    when two runs differ by more than the knob under study -- comparing a run
-    made with -report-flags against one without would otherwise look like a
-    precision result.
-
-    Written as a SIBLING of the output tree, never inside it: function-diff
-    globs every *.json under the run directory and parses each as a report, so
-    a summary file sitting in there makes it crash.
+    `meta` records how the run was produced, so `compare` can warn when two
+    runs differ by more than the knob under study. Written as a SIBLING of the
+    tree: function-diff parses every *.json inside it as a report.
     """
     summary = out.rstrip(os.sep) + ".run.json"
     doc = {
@@ -622,12 +566,9 @@ def cmd_run(args):
 
     bench = list(discover(tests_dir, groups, args.filter, args.short))
 
-    # In regression mode, replay only what the reference actually baselines.
-    # tests/ holds far more than logs/ does -- the resilience matrix alone
-    # crosses every .c of a subtree with every root property, which runs for
-    # hours -- and a benchmark with no baseline has nothing to be compared
-    # against anyway. The coverage check below still scans the WHOLE reference,
-    # so a baseline that discovery never reaches is reported rather than hidden.
+    # Replay only what the reference baselines: tests/ yields ~223k pairs (the
+    # resilience matrix), and an unbaselined test has nothing to compare to.
+    # Coverage below still scans the WHOLE reference.
     if args.cover and not args.all:
         baselines = relset(os.path.join(ROOT, args.cover))
         def has_baseline(cfile):
@@ -645,24 +586,14 @@ def cmd_run(args):
     tally = {"ok": 0, "to": 0, "err": 0, "known": 0}
 
     def pending_of(rec):
-        """Free-text note when a test's degraded verdict is declared pending.
-
-        A pending test still has its `result` checked: the point is to accept a
-        known-bad verdict without blocking CI, while being told the day it
-        improves. It is not a way to stop looking at the test.
-        """
+        """Note attached to an accepted degraded verdict. `result` stays
+        checked, so an improvement is still reported."""
         return normalize_expected(
             read_config(rec["config"]).get("expected")).get("pending")
 
     def declared_failure(rec):
-        """The config pinned this exact failure status: a KNOWN bug.
-
-        It still shows in the output -- the point is to keep it visible, not to
-        hide it -- but it must not fail the run, otherwise declaring a known
-        failure would leave the suite red for ever and the whole mechanism
-        would be pointless. A test that stops failing IS reported, as a
-        mismatch against its pinned status.
-        """
+        """Config pinned this failure status: a known bug. Still shown, but not
+        blocking -- and reported if the test stops failing."""
         want = normalize_expected(read_config(rec["config"]).get("expected"))
         return want.get("status") == rec["status"]
 
@@ -672,7 +603,7 @@ def cmd_run(args):
             tag, col = ("TO", "yel") if rec["status"] == "TO" else ("ERR", "red")
             if known:
                 tally["known"] += 1
-                print(color("blu", f"  {tag}* {rec['file']} (attendu)"))
+                print(color("blu", f"  {tag}* {rec['file']} (expected)"))
             else:
                 tally["to" if rec["status"] == "TO" else "err"] += 1
                 print(color(col, f"  {tag}  {rec['file']} (rc={rec['rc']})"))
@@ -696,11 +627,8 @@ def cmd_run(args):
     if args.cover:
         ref = os.path.join(ROOT, args.cover)
         missing = coverage(ref, out)
-        # A test declared as a known failure produces no report, so its
-        # baseline can never be reproduced. Counting it here would keep the
-        # suite red for ever and defeat the declaration -- but the baseline is
-        # deliberately kept on disk (see `promote`) so the day the bug is fixed
-        # there is still something to compare against.
+        # A known-failing test produces no report, so its baseline can never
+        # be reproduced. Kept on disk (see `promote`) for when it is fixed.
         declared = {r["file"] for r in records if declared_failure(r)}
         expected_missing = [m for m in missing
                             if any(m.startswith(c + "-domain") for c in declared)]
@@ -722,16 +650,15 @@ def cmd_run(args):
 
     pend = [r for r in records if pending_of(r)]
     if pend:
-        print(color("blu", f"\n  {len(pend)} test(s) PENDING (verdict dégradé, "
-                           f"déclaré, non bloquant):"))
+        print(color("blu", f"\n  {len(pend)} PENDING (declared, non-blocking):"))
         for r in pend:
             exp = normalize_expected(read_config(r["config"]).get("expected"))
             ref = f" [{exp['issue']}]" if exp.get("issue") else ""
             print(color("blu", f"    {r['file']}{ref}: {pending_of(r)}"))
 
     if BAD_CONFIGS:
-        print(color("red", f"\n  {len(BAD_CONFIGS)} config(s) illisible(s) — "
-                           f"le test a tourné SANS propriété ni précondition:"))
+        print(color("red", f"\n  {len(BAD_CONFIGS)} unreadable config(s) — "
+                           f"test ran with NO property and NO precondition:"))
         for cfg, err in BAD_CONFIGS.items():
             print(color("red", f"    {cfg}: {err}"))
         rc = 1
@@ -773,8 +700,7 @@ def cmd_run(args):
 def cmd_bless(args):
     """Promote a run's observed values into each test config's "expected"."""
     _, records = load_summary(args.run)
-    # Same reason as promote's filter: accepting a run's values is a per-test
-    # judgement, so blessing has to be scopable to the tests just reviewed.
+    # Scopable for the same reason as promote's filter.
     if args.filter:
         pat = re.compile(args.filter)
         records = [r for r in records
@@ -787,9 +713,8 @@ def cmd_bless(args):
     changed = skipped_shared = skipped_bad = 0
     by_cfg = {}
     for r in records:
-        # Never freeze a crash or a timeout as the expected outcome: a failing
-        # run carries no measurement, and blessing it would make the bug the
-        # reference. Declare those by hand with {"status": "FAIL", "reason": ...}.
+        # Never freeze a crash as the expectation: declare those by hand with
+        # {"status": "FAIL", "reason": ...}.
         if r["status"] in ("FAIL", "TO"):
             skipped_bad += 1
             continue
@@ -839,18 +764,11 @@ def cmd_bless(args):
 
 
 def cmd_promote(args):
-    """Copy a run's reports into the reference directory (logs/).
+    """Copy a run's reports into the reference (logs/).
 
-    The counterpart of `bless` on the OTHER reference. There are two, and they
-    answer different questions:
-
-      * logs/      full reports, decision trees included, compared by
-                   function-diff -- "did anything change at all?"
-      * expected   a few scalars pinned in each test's config, checked by
-                   `run` -- "does this test still prove what it should?"
-
-    Accepting a new behaviour means updating BOTH: `promote` for logs/, `bless`
-    for the configs. Doing only the second leaves function-diff red for ever.
+    Counterpart of `bless` on the other reference: logs/ holds full reports
+    (function-diff), configs hold pinned scalars (`run`). Accepting a new
+    behaviour needs BOTH; `bless` alone leaves function-diff red.
     """
     import shutil
     out = os.path.join(ROOT, args.run)
@@ -859,9 +777,7 @@ def cmd_promote(args):
         sys.exit(color("red", f"run directory not found: {out}"))
 
     produced, baseline = relset(out), relset(ref)
-    # Accepting a new behaviour is a per-test judgement, so promoting is too:
-    # without a filter the only option is to accept every changed report at
-    # once, which is exactly what you do not want when reviewing regressions.
+    # Accepting a behaviour is a per-test judgement, so promoting is too.
     if args.filter:
         pat = re.compile(args.filter)
         produced = {p for p in produced if pat.search(p)}
@@ -869,9 +785,8 @@ def cmd_promote(args):
     updated = sorted(p for p in produced & baseline
                      if open(os.path.join(out, p), "rb").read()
                      != open(os.path.join(ref, p), "rb").read())
-    # Baselines the run did not reproduce: promoting must NOT delete them --
-    # a crashed test would silently erase its own reference, and the coverage
-    # check would then pass because there is nothing left to reproduce.
+    # Never delete a baseline the run did not reproduce: a crashed test would
+    # erase its own reference and coverage would then pass vacuously.
     scope = ({b for b in baseline if re.search(args.filter, b)}
              if args.filter else baseline)
     missing = sorted(scope - produced)
@@ -898,8 +813,8 @@ def cmd_promote(args):
     print(color("bld", f"\n  {verb} {len(added)} new + {len(updated)} changed "
                        f"report(s) into {args.ref}"))
     if not args.dry_run:
-        print("  n'oublie pas `bless` pour les `expected` des configs, et "
-              "commite logs/ avec le code qui produit ces verdicts.")
+        print("  also `bless` the configs, and commit logs/ together with "
+              "the code that produced these verdicts.")
     return 0
 
 
@@ -909,7 +824,7 @@ def _bucket(r):
 
 
 def cmd_compare(args):
-    """Put two runs side by side: what B costs and buys against A."""
+    """Two runs side by side: what B costs and buys against A."""
     meta_a, ra = load_summary(args.a)
     meta_b, rb = load_summary(args.b)
     A = {r["key"] if "key" in r else (r["config"], r["file"]): r for r in ra}
@@ -927,8 +842,8 @@ def cmd_compare(args):
         if meta_a and meta_b and meta_a.get(k) != meta_b.get(k):
             print(color("yel", f"  warning: A and B differ on {k} -- "
                                f"this is not a like-for-like comparison"))
-    print(f"  {len(common)} commun(s), {len(set(A)-set(B))} seulement dans A, "
-          f"{len(set(B)-set(A))} seulement dans B\n")
+    print(f"  {len(common)} common, {len(set(A)-set(B))} only in A, "
+          f"{len(set(B)-set(A))} only in B\n")
     if not common:
         return 1
 
@@ -943,8 +858,8 @@ def cmd_compare(args):
 
     lost = [k for k in common if _bucket(A[k]) == "TRUE" and _bucket(B[k]) != "TRUE"]
     gained = [k for k in common if _bucket(A[k]) != "TRUE" and _bucket(B[k]) == "TRUE"]
-    for label, lst, col in (("perdus (A prouve, B non)", lost, "red"),
-                            ("gagnés (B prouve, A non)", gained, "grn")):
+    for label, lst, col in (("lost (A proves, B does not)", lost, "red"),
+                            ("gained (B proves, A does not)", gained, "grn")):
         print(color(col, f"\n  {len(lst)} {label}"))
         for k in lst[:args.list]:
             print(f"    {A[k]['file']} [{A[k]['name']}] "
@@ -952,15 +867,13 @@ def cmd_compare(args):
         if len(lst) > args.list:
             print(f"    ... et {len(lst) - args.list} autres")
 
-    # Precision and time only over what BOTH runs decided: a test that crashed
-    # on one side has no measurement, and letting it drop out silently would
-    # make the faster-but-broken side look better.
+    # Only over what BOTH runs decided, else the faster-but-broken side wins.
     decided = [k for k in common
                if _bucket(A[k]) in ("TRUE", "UNKNOWN")
                and _bucket(B[k]) in ("TRUE", "UNKNOWN")]
     def tot(d, k, f):
         return sum((_num(d[x].get(f)) or 0) for x in k)
-    print(color("bld", f"\nprécision ({len(decided)} décidés des deux côtés)"))
+    print(color("bld", f"\nprecision ({len(decided)} decided on both sides)"))
     for f in ("suff", "leaves"):
         sa, sb = tot(A, decided, f), tot(B, decided, f)
         pct = f"  ({(sb - sa) / sa * 100:+.0f}%)" if sa else ""
@@ -985,9 +898,9 @@ def cmd_compare(args):
                         tot(A, decided, "suff"), tot(B, decided, "suff"),
                         tot(A, decided, "leaves"), tot(B, decided, "leaves"),
                         round(ta, 1), round(tb, 1)])
-        print(f"\n  ligne agrégée ajoutée à {args.csv}")
+        print(f"\n  aggregate row appended to {args.csv}")
 
-    print(color("bld", f"\nnet : {len(lost)} régression(s), {len(gained)} amélioration(s)"))
+    print(color("bld", f"\nnet: {len(lost)} regression(s), {len(gained)} improvement(s)"))
     if args.gate == "none":
         return 0
     if args.gate == "suff":
