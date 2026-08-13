@@ -43,6 +43,11 @@ jobs:
         with:
           ocaml-compiler: "4.14"
 
+      # setup-ocaml installs the newest dune, and mopsa 1.2 does not build with
+      # >= 3.21 (dotted module names in a (select ...); see function.opam).
+      # Pick a compatible one explicitly so the solver does not have to
+      # downgrade a package it just installed.
+      - run: opam install --yes 'dune<3.21'
       - run: opam install . --deps-only --yes
       - run: opam exec -- dune build
 

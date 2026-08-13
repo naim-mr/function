@@ -11,7 +11,11 @@ doc: "https://url/to/documentation"
 bug-reports: "https://github.com/username/reponame/issues"
 depends: [
   "ocaml" {>= "4.12.0"}
-  "dune" {>= "3.6"}
+  # Upper bound forced by mopsa 1.2: its analyzer/dune uses dotted module
+  # names in a (select ...), which dune >= 3.21 rejects as invalid module
+  # names. mopsa itself only declares {>= "3.7"}, so without this opam picks
+  # the latest dune and the dependency fails to build (CI, dune 3.24.2).
+  "dune" {>= "3.6" & < "3.21"}
   "ocamlfind"
   "apron"
   "mopsa"
