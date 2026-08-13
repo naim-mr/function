@@ -29,10 +29,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # APRON links against GMP/MPFR/PPL, and mopsa's C parser against libclang
+      # (its depexts are: clang libclang-cpp-dev libclang-dev llvm-dev). opam
+      # would fail while compiling those bindings without the system headers.
       - name: Dépendances système
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgmp-dev libmpfr-dev libppl-dev m4 pkg-config
+          sudo apt-get install -y \
+            libgmp-dev libmpfr-dev libppl-dev m4 pkg-config \
+            clang libclang-cpp-dev libclang-dev llvm-dev
 
       - uses: ocaml/setup-ocaml@v3
         with:

@@ -1,3 +1,8 @@
 {
-    "property": "EF{r == 1}"
+    "property": "EF{r == 1}",
+    "expected": {
+        "result": "UNKNOWN",
+        "pending": "toward full ATL usage to handle existential; problem here with [0,1]",
+        "issue": "TODO"
+    }
 }

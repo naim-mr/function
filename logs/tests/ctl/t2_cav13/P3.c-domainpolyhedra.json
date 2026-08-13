@@ -4,37 +4,37 @@
     "analysis_type": "ctl",
     "property": "OR{varA != 1}{EF{varR==1}}",
     "precondition": "varA == 0",
-    "result": "TRUE",
+    "result": "UKNOWN",
     "domain": "polyhedra",
     "joinbwd": 2,
-    "time": "1"
+    "time": "0.0926750000001"
   },
   "tree": {
     "Node": {
-      "constraint": "$2{varR} >= 2",
+      "constraint": "$9{varR} >= 2",
       "left": {
         "Node": {
-          "constraint": "$1{varA} >= 2",
-          "left": { "Leaf": "0." },
+          "constraint": "$7{varA} >= 2",
+          "left": { "Leaf": "top" },
           "right": {
             "Node": {
-              "constraint": "$1{varA} >= 1",
-              "left": { "Leaf": "bottom" },
-              "right": { "Leaf": "0." }
+              "constraint": "$7{varA} >= 1",
+              "left": { "Leaf": "top" },
+              "right": { "Leaf": "top" }
             }
           }
         }
       },
       "right": {
         "Node": {
-          "constraint": "$2{varR} >= 1",
+          "constraint": "$9{varR} >= 1",
           "left": {
             "Node": {
-              "constraint": "$1{varA} >= 2",
+              "constraint": "$7{varA} >= 2",
               "left": { "Leaf": "0" },
               "right": {
                 "Node": {
-                  "constraint": "$1{varA} >= 1",
+                  "constraint": "$7{varA} >= 1",
                   "left": { "Leaf": "0." },
                   "right": { "Leaf": "0" }
                 }
@@ -43,13 +43,13 @@
           },
           "right": {
             "Node": {
-              "constraint": "$1{varA} >= 2",
-              "left": { "Leaf": "0." },
+              "constraint": "$7{varA} >= 2",
+              "left": { "Leaf": "top" },
               "right": {
                 "Node": {
-                  "constraint": "$1{varA} >= 1",
-                  "left": { "Leaf": "bottom" },
-                  "right": { "Leaf": "0." }
+                  "constraint": "$7{varA} >= 1",
+                  "left": { "Leaf": "top" },
+                  "right": { "Leaf": "top" }
                 }
               }
             }

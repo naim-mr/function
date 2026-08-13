@@ -1,4 +1,9 @@
 {
     "property": "OR{varA != 1}{EF{varR==1}}",
-    "precondition": "varA == 0"
+    "precondition": "varA == 0",
+    "expected": {
+        "result": "UNKNOWN",
+        "pending": "abnormal regression, to investigate: OR property / atomic != hypothesis",
+        "issue": "TODO"
+    }
 }

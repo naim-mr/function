@@ -1,4 +1,10 @@
 {
-    "property":"AF{exit:true}",
-    "domain":"boxes"
+    "property": "AF{exit:true}",
+    "domain": "boxes",
+    "expected": {
+        "result": "UNKNOWN",
+        "suff": 7,
+        "leaves": 7,
+        "time": 0.117
+    }
 }

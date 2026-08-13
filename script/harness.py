@@ -186,11 +186,23 @@ def discover(tests_dir, groups, flt, short=False):
 # Reading analyzer output
 # --------------------------------------------------------------------------- #
 
+# Configs that could not be parsed. A malformed config used to fall back to {}
+# in silence, which means the test runs with NO property and NO precondition
+# and quietly returns a meaningless verdict instead of failing.
+BAD_CONFIGS = {}
+
+
 def read_config(cfg):
     try:
         with open(os.path.join(ROOT, cfg)) as fh:
             return json.load(fh)
-    except (OSError, json.JSONDecodeError):
+    except json.JSONDecodeError as e:
+        if cfg not in BAD_CONFIGS:
+            BAD_CONFIGS[cfg] = str(e)
+            print(color("red", f"  malformed config, ignored: {cfg} ({e})"),
+                  file=sys.stderr)
+        return {}
+    except OSError:
         return {}
 
 
@@ -412,6 +424,12 @@ EXPECT_FIELDS = {
 # about a known bug, not a measurement)
 BLESS_FIELDS = ("result", "suff", "leaves", "time")
 
+# Free-form documentation carried alongside the pinned values: never compared,
+# but preserved by `bless` so promoting a run does not silently erase why a
+# result was accepted. `issue` is what keeps a knowingly-degraded verdict
+# traceable once its baseline has been promoted and CI is green again.
+DOC_FIELDS = ("reason", "issue", "pending")
+
 DEFAULT_TOL = {
     "suff": 0,       # absolute
     "leaves": 0,     # absolute
@@ -430,12 +448,13 @@ def _num(*vals):
 
 
 def normalize_expected(v):
-    """Config "expected" -> dict of pinned fields."""
+    """Config "expected" -> dict of pinned fields, documentation included."""
     if isinstance(v, str):
         v = v.strip()
         return {"result": norm_result(v)} if v and v != "-" else {}
     if isinstance(v, dict):
-        return {k: val for k, val in v.items() if k in EXPECT_FIELDS}
+        return {k: val for k, val in v.items()
+                if k in EXPECT_FIELDS or k in DOC_FIELDS}
     return {}
 
 
@@ -457,6 +476,8 @@ def expected_diff(rec, tol=None):
     exp = normalize_expected(read_config(rec["config"]).get("expected"))
     hard, soft = [], []
     for k, want in exp.items():
+        if k in DOC_FIELDS:
+            continue
         got = EXPECT_FIELDS[k](rec)
         if k == "time":
             w, g = _num(want), _num(got)
@@ -623,6 +644,16 @@ def cmd_run(args):
 
     tally = {"ok": 0, "to": 0, "err": 0, "known": 0}
 
+    def pending_of(rec):
+        """Free-text note when a test's degraded verdict is declared pending.
+
+        A pending test still has its `result` checked: the point is to accept a
+        known-bad verdict without blocking CI, while being told the day it
+        improves. It is not a way to stop looking at the test.
+        """
+        return normalize_expected(
+            read_config(rec["config"]).get("expected")).get("pending")
+
     def declared_failure(rec):
         """The config pinned this exact failure status: a KNOWN bug.
 
@@ -689,6 +720,22 @@ def cmd_run(args):
             print(color("grn", f"\n  coverage OK: every baseline in "
                                f"{args.cover} was reproduced"))
 
+    pend = [r for r in records if pending_of(r)]
+    if pend:
+        print(color("blu", f"\n  {len(pend)} test(s) PENDING (verdict dégradé, "
+                           f"déclaré, non bloquant):"))
+        for r in pend:
+            exp = normalize_expected(read_config(r["config"]).get("expected"))
+            ref = f" [{exp['issue']}]" if exp.get("issue") else ""
+            print(color("blu", f"    {r['file']}{ref}: {pending_of(r)}"))
+
+    if BAD_CONFIGS:
+        print(color("red", f"\n  {len(BAD_CONFIGS)} config(s) illisible(s) — "
+                           f"le test a tourné SANS propriété ni précondition:"))
+        for cfg, err in BAD_CONFIGS.items():
+            print(color("red", f"    {cfg}: {err}"))
+        rc = 1
+
     # Everything the configs pinned in their "expected".
     tol = {"suff": args.tol_suff, "leaves": args.tol_leaves,
            "time": args.tol_time}
@@ -726,6 +773,12 @@ def cmd_run(args):
 def cmd_bless(args):
     """Promote a run's observed values into each test config's "expected"."""
     _, records = load_summary(args.run)
+    # Same reason as promote's filter: accepting a run's values is a per-test
+    # judgement, so blessing has to be scopable to the tests just reviewed.
+    if args.filter:
+        pat = re.compile(args.filter)
+        records = [r for r in records
+                   if pat.search(r["file"]) or pat.search(r["config"])]
     fields = tuple(f for f in args.fields.split(",") if f in EXPECT_FIELDS)
     if not fields:
         sys.exit(color("red", f"no valid field in --fields (known: "
@@ -999,6 +1052,8 @@ def main():
     b.add_argument("run", help="the run summary to promote (<out>.run.json)")
     b.add_argument("--fields", default=",".join(BLESS_FIELDS),
                    help="comma-separated fields to write (default: %(default)s)")
+    b.add_argument("-f", "--filter", default="",
+                   help="only bless tests whose path matches this regex")
     b.add_argument("-n", "--dry-run", action="store_true",
                    help="list what would change without writing")
     b.set_defaults(func=cmd_bless)

@@ -1,13 +1,20 @@
 name: CI
 
-# Build = garde-fou dur. Régression = informative POUR L'INSTANT.
+# Build et régression sont tous deux bloquants.
 #
-# La baseline logs/ n'est pas verte au HEAD courant (écarts de verdict + échecs
-# frontend sur tests/ctl : voir logs/BASELINE-DRIFT-*.txt). Câbler la régression
-# en bloquant tant que ce n'est pas tranché rendrait le CI rouge en permanence,
-# ce qui apprend surtout à l'ignorer. Une fois la baseline verte (décision sur
-# les régressions + `bless`), passer REGRESSION_GATE à "true" ci-dessous : c'est
-# le seul endroit à changer.
+# Le garde-fou porte sur DEUX vérifications, et il faut les deux :
+#   - `harness.py run`  : échecs inattendus, couverture des baselines, et les
+#     valeurs épinglées dans les `expected` des configs ;
+#   - `function-diff`   : toute dérive par rapport aux rapports de logs/, y
+#     compris les AMÉLIORATIONS. C'est délibéré : `is_regressed` compte aussi
+#     `new_success`, donc un test qui se met à réussir bloque la CI jusqu'à ce
+#     qu'on l'entérine avec `harness.py promote`. Cela évite que logs/ diverge
+#     silencieusement de la réalité.
+#
+# Les régressions connues et acceptées ne bloquent pas : leur verdict courant
+# est dans logs/ et leur config porte `"expected": {..., "pending": "..."}`.
+# Les échecs connus portent `"expected": {"status": "FAIL", "reason": "..."}`.
+# Dans les deux cas le test reste signalé s'il change de comportement.
 
 on:
   push:
@@ -16,7 +23,7 @@ on:
   workflow_dispatch:
 
 env:
-  REGRESSION_GATE: "false"
+  REGRESSION_GATE: "true"
 
 jobs:
   build:
@@ -24,12 +31,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # APRON se lie à GMP/MPFR/PPL : sans les en-têtes système, opam échoue à
-      # la compilation de mlgmpidl bien avant de parler d'OCaml.
+      # APRON links against GMP/MPFR/PPL, and mopsa's C parser against libclang
+      # (its depexts are: clang libclang-cpp-dev libclang-dev llvm-dev). opam
+      # would fail while compiling those bindings without the system headers.
       - name: Dépendances système
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgmp-dev libmpfr-dev libppl-dev m4 pkg-config
+          sudo apt-get install -y \
+            libgmp-dev libmpfr-dev libppl-dev m4 pkg-config \
+            clang libclang-cpp-dev libclang-dev llvm-dev
 
       - uses: ocaml/setup-ocaml@v3
         with:

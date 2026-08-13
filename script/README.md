@@ -1,192 +1,144 @@
-# Outillage de test — `script/`
+# script/ — test tooling
 
-Trois outils, une responsabilité chacun.
+## NAME
 
-| Outil | Rôle | Sort quoi |
-|---|---|---|
-| **`harness.py`** | lance les benchmarks (source de vérité de *comment* on invoque l'analyseur) | rapports JSON + un résumé `<out>.run.json` |
-| **`function-diff.py`** | compare deux **arbres de rapports** (vendoré depuis MOPSA, non modifié) | le diff, code ≠ 0 si régression |
-| **`runtest.py`** | rendu HTML / LaTeX / CSV pour le papier | `results/index.html`, `results/index.tex`, `results/stats.csv` |
+`harness.py` — run benchmarks, check coverage, promote references, compare runs
+`function-diff.py` — compare two report trees (vendored from MOPSA)
+`runtest.py` — render HTML / LaTeX / CSV reports
 
-`runtest.py` s'appuie sur `harness.py` : il n'y a **qu'une** implémentation de la
-découverte et de l'invocation. C'est délibéré — la duplication précédente avait
-silencieusement divergé (voir « Pièges » plus bas).
+`runtest.py` builds on `harness.py`: there is one definition of how a benchmark
+is invoked.
 
----
+## SYNOPSIS
 
-## 1. Régression : « est-ce que j'ai cassé quelque chose ? »
+    script/harness.py run     [-e EXEC] [-o OUT] [-g GROUPS] [-f RE] [-t SEC] [-j N]
+                              [--layout isolated|flat] [--cover REF] [--all]
+                              [--short] [--report-flags] [--force "OPTS"]
+                              [--tol-suff N] [--tol-leaves N] [--tol-time F]
+                              [--strict-time]
+    script/harness.py cover   REF OUT
+    script/harness.py bless   RUN.run.json [--fields F,...] [-n]
+    script/harness.py promote RUN_DIR [--ref logs] [-f RE] [-n]
+    script/harness.py compare A.run.json B.run.json [--gate verdicts|suff|none]
+                              [--list N] [--csv FILE]
 
-```bash
-script/harness.py run -o regression_out --layout flat --cover logs
-python3 script/function-diff.py logs regression_out --regression --ignore-time
-```
+    python3 script/function-diff.py REF OUT [--regression] [--ignore-time] [--summary]
 
-- `--layout flat` reproduit l'arborescence des baselines de `logs/`, sans quoi
-  aucun chemin ne correspond.
-- `--cover logs` fait deux choses : il **restreint** le run aux tests qui ont une
-  baseline, et il **vérifie** qu'aucune baseline n'a été oubliée.
+    script/runtest.py [--html] [--latex] [--csv] [-f RE] [-j N] [--short]
 
-La restriction n'est pas un détail de performance : la découverte complète sort
-**223 482 paires** (test, config), la matrice résilience croisant à elle seule
-37 116 sources avec 6 propriétés. Un run non restreint tourne des heures.
+## COMMANDS
 
-## 2. Attentes par test : `expected`
+**run** — runs every discovered benchmark, writes one report per test plus a
+summary `<OUT>.run.json` (a sibling of the tree, never inside it). Exits non-zero
+on unexpected failures, missing coverage, or `expected` mismatches.
 
-Chaque config `tests/**/<nom>.json` peut épingler ce qu'on attend d'elle.
+**cover** — checks an existing run directory against a reference: every baseline
+in REF must have been reproduced.
 
-```json
-"expected": "TRUE"
-"expected": { "result": "TRUE", "suff": 3, "leaves": 7, "time": 1.23 }
-"expected": { "status": "FAIL", "reason": "frontend: undeclared identifier 'true'" }
-```
+**bless** — writes a run's observed values into each test config's `expected`.
+Refuses failed and timed-out tests; skips shared matrix configs.
 
-La chaîne est la forme héritée (= `{"result": ...}`). Tous les champs sont
-optionnels : **on ne vérifie que ce qui est épinglé**.
+**promote** — copies a run's reports into the reference directory (`logs/`).
+Never deletes a baseline the run did not reproduce.
 
-| Champ | Sens | Comparaison | Fait échouer ? |
+**compare** — puts two runs side by side: verdict movements, `suff`/`leaves`
+deltas, time factor, coverage. Precision and time are measured only over tests
+decided on both sides.
+
+## OPTIONS
+
+`-g, --groups`   comma-separated groups; default is every subdirectory of `tests/`
+`-f, --filter`   regex on the test path
+`-t, --timeout`  per-test seconds; a config's own `timeout` overrides it
+`--layout flat`  write reports in the layout of `logs/`; required to diff against it
+`--cover REF`    check coverage against REF **and** restrict the run to baselined tests
+`--all`          with `--cover`, run everything instead
+`--short`        prune the large SV-COMP subtrees
+`--report-flags` add `-domain polyhedra -refine -ordinals 3 -joinbwd 7`
+`--force "OPTS"` analyzer options forced on every test
+`--tol-*`        allowed drift on the pinned `suff` / `leaves` (absolute) and `time` (factor)
+
+## TEST CONFIGURATION
+
+Each `tests/**/<name>.json` may declare what is expected of it:
+
+    "expected": "TRUE"
+    "expected": { "result": "TRUE", "suff": 3, "leaves": 7, "time": 1.23 }
+    "expected": { "status": "FAIL", "reason": "break unsupported" }
+
+Every field is optional; only what is pinned is checked.
+
+| field | meaning | comparison | fails the run |
 |---|---|---|---|
-| `result` | verdict `TRUE`/`UNKNOWN` | égalité | oui |
-| `suff` | feuilles **définies** = nb de préconditions suffisantes | écart absolu (`--tol-suff`, 0) | oui |
-| `leaves` | feuilles totales = taille de l'arbre | écart absolu (`--tol-leaves`, 0) | oui |
-| `time` | secondes | facteur (`--tol-time`, ×3) | **non**, sauf `--strict-time` |
-| `status` | `OK`/`FAIL`/`TO` | égalité | oui |
+| `result` | verdict `TRUE`/`UNKNOWN` | exact | yes |
+| `suff` | defined leaves = sufficient preconditions found | absolute drift | yes |
+| `leaves` | total leaves = tree size | absolute drift | yes |
+| `time` | seconds, wall-clock | factor (×3) | no, unless `--strict-time` |
+| `status` | `OK`/`FAIL`/`TO` | exact | yes |
 
-Les tolérances sont **globales**, pas par test : `suff`/`leaves` sont
-déterministes pour un binaire donné (aucun bruit à absorber), et quand un bouton
-comme `-max-partitions` les déplace, il les déplace sur toute la suite.
+Documentation keys carried alongside, never compared, preserved by `bless`:
+`reason`, `issue`, `pending`. `pending` marks a knowingly-degraded verdict:
+promote it into `logs/` so CI is green, and the note keeps it visible in every
+run. A malformed config is reported and fails the run — it used to fall back to
+`{}` in silence, running the test with no property at all.
 
-Épingler `"status": "FAIL"` déclare un échec **connu** : la suite redevient
-verte, mais si le test se remet à réussir l'outil le signale — le bug ne
-disparaît pas du radar.
+Tolerances are global (CLI), not per test. A pinned `"status": "FAIL"` declares a
+known failure: it stops failing the run and its baseline is exempt from the
+coverage check, but it is reported if the test starts passing again.
 
-Autre champ utile : `"timeout": 300` sur un test lent, pour que le `-t` global
-n'ait pas à être calé sur le pire cas.
+Other config keys: `analysis`, `property`, `domain`, `precondition`, `timeout`.
 
-### Promouvoir un run en référence
+## WORKFLOWS
 
-```bash
-script/harness.py bless regression_out.run.json -n   # ce qui changerait
-script/harness.py bless regression_out.run.json      # écrit dans les configs
-```
+Regression:
 
-`bless` **refuse** de promouvoir un test en échec ou en timeout (sinon on fige un
-crash comme attendu — ceux-là se déclarent à la main avec `status`/`reason`), et
-saute les configs partagées de `tests/atl/resilience/` : 6 configs pour 37 116
-sources, un `expected` plat y est structurellement impossible.
+    script/harness.py run -o regression_out --layout flat --cover logs
+    python3 script/function-diff.py logs regression_out --regression --ignore-time
 
-## 3. Ablations : `compare`
+Accepting a new behaviour — both references must be updated:
 
-Une ablation est une propriété du **run**, pas d'un test — d'où `--force` :
+    script/harness.py promote regression_out -f <test>      # logs/
+    script/harness.py bless regression_out.run.json -f <test>  # configs
 
-```bash
-script/harness.py run --force "-max-partitions 4" -o run_k4
-script/harness.py run --force "-max-partitions 8" -o run_k8
-script/harness.py compare run_k4.run.json run_k8.run.json --csv sweep.csv
-```
+Ablation:
 
-**La précédence passe par l'ordre des options** :
+    script/harness.py run --force "-max-partitions 4" -o run_k4
+    script/harness.py run --force "-max-partitions 8" -o run_k8
+    script/harness.py compare run_k4.run.json run_k8.run.json --csv sweep.csv
 
-| Option | Position | Effet |
-|---|---|---|
-| `--report-flags` | *avant* `-config` | un défaut, que la config du test peut écraser |
-| `--force` | *après* `-config` | gagne sur la config du test — l'ablation s'impose partout |
+## NOTES
 
-`compare` sort le mouvement des verdicts (perdus / gagnés, avec la liste), le
-delta de `suff` et `leaves`, le facteur de temps, et la couverture. Précision et
-temps ne sont mesurés que sur les tests **décidés des deux côtés** : sinon un run
-qui plante plus tôt paraît plus rapide. `--csv` ajoute une ligne agrégée par
-point d'ablation — c'est directement le tableau de balayage de k.
+- The two front-ends invoke the analyzer differently on purpose: `runtest.py`
+  adds `REPORT_FLAGS`, the regression uses a bare `-config`, as `logs/` was
+  produced. The analyzer encodes its options in the report filename, so mixing
+  them makes every baseline path miss.
+- Option order carries precedence: `--report-flags` goes before `-config` (the
+  test config may override it), `--force` after (it wins).
+- Discovery reads the filesystem, not a group table; coverage is computed from
+  the baselines, not from discovery. Both directions are required to detect a
+  whole group being skipped.
+- Without `--cover`, discovery yields ~223k (test, config) pairs: the resilience
+  matrix crosses every `.c` of its subtree with every root property.
+- `time` is wall-clock; the analyzer's own figure is quantised to one second.
+- Shared matrix configs (`tests/atl/resilience/*.json`) cannot carry `expected`:
+  one config, thousands of sources.
+- `runtest.py` overwrites `results/stats.csv` with the scope of the run.
 
-L'en-tête `meta` de `run.json` (git, options forcées, layout) étiquette les deux
-côtés et avertit s'ils diffèrent par autre chose que le bouton étudié.
+## CI
 
-## 4. Rendu pour le papier
+`.github/workflows/ci.yml` — build and regression, both gating
+(`REGRESSION_GATE`). The gate fails on ANY drift from `logs/`, improvements
+included: `function-diff`'s `is_regressed` counts `new_success` too, so a test
+that starts passing blocks until it is entered with `promote`. Declared
+failures (`status: FAIL`) and accepted regressions (`pending`) do not block.
+`.github/workflows/regression-report.yml` — weekly full run; keeps a single
+drift issue up to date, closes it when the baseline is green.
 
-```bash
-script/runtest.py                  # html + latex + csv
-script/runtest.py --csv -f termination
-script/runtest.py --short          # élague les gros sous-arbres SV-COMP
-```
-
-⚠️ `runtest.py` **écrase `results/stats.csv`** avec le périmètre du run : un
-`-f example1` réduit le CSV à une ligne. `results*` est dans `.gitignore`, donc
-non restaurable par git — relancer la suite complète pour le régénérer.
-
----
-
-## Pièges (chacun a coûté un bug)
-
-**Les deux façades n'invoquent pas l'analyseur pareil, et c'est voulu.**
-`runtest.py` ajoute `-domain polyhedra -refine -ordinals 3 -joinbwd 7`
-(`REPORT_FLAGS`) ; la régression invoque `-config` nu, comme ce qui a produit
-`logs/`. L'analyseur **encode ses options dans le nom du rapport** : avec les
-options de rendu on obtient `foo.c-domainpolyhedra-ordinals3-refine.json` là où
-la baseline est `foo.c-domainpolyhedra.json` — plus aucune correspondance.
-
-**La découverte vient du système de fichiers, pas d'une table.** Une table de
-groupes doit être tenue en phase avec les noms de répertoires ; quand elle dérive
-le groupe manquant est sauté **sans erreur**. C'est ainsi que `tests/atl`
-(139 configs, toutes baselinées) n'a jamais été testé en régression, et que
-renommer `tests/resilience` en `tests/resilience_excluded` a fait disparaître ce
-groupe aussi.
-
-**La couverture se calcule depuis les baselines, pas depuis la découverte.**
-`function-diff` compare l'**intersection** des chemins de rapports : un test qui
-plante ne produit aucun JSON et sort donc silencieusement de la comparaison au
-lieu de la faire échouer. L'inverse — vérifier depuis `logs/` — attrape aussi le
-cas d'un groupe entier jamais visité.
-
-**Le résumé `run.json` vit à côté de l'arbre, jamais dedans.** `function-diff`
-globe tous les `*.json` du répertoire et les parse comme des rapports : un
-résumé posé à l'intérieur le fait planter.
-
-**Le temps rapporté par l'analyseur est quantifié à la seconde** (`"time": "1"`).
-Une suite de 66 tests totalisait exactement 65,0 s des deux côtés d'une ablation
-qui divise pourtant le temps par cinq. `harness.py` mesure donc l'**horloge
-murale** : plus bruitée (démarrage du process, gonflée par `-j`), mais c'est la
-seule qui porte du signal.
-
-**Les configs partagées ne peuvent pas porter d'attente.** `tests/atl/resilience/`
-suit le régime « matrice » : chaque `.c` du sous-arbre est croisé avec chacune des
-6 propriétés racine. Un `expected` dans ces 6 fichiers vaudrait pour des milliers
-de résultats différents.
-
-## 5. Intégration continue
-
-Deux workflows dans `.github/workflows/` :
-
-| Workflow | Déclencheur | Rôle |
-|---|---|---|
-| `ci.yml` | chaque push / PR | build (**bloquant**) + régression sur le sous-ensemble baseliné (`--short`, informative) |
-| `regression-report.yml` | lundi 03:00 UTC + manuel | run complet, artefacts 90 j, et **tient à jour une issue** de dérive |
-
-**Le garde-fou de régression est désactivé** (`REGRESSION_GATE: "false"` dans
-`ci.yml`). Raison : la baseline n'est pas verte au HEAD courant, et un CI rouge
-en permanence s'apprend à s'ignorer. Une fois les régressions tranchées et
-`bless` passé, mettre `REGRESSION_GATE: "true"` — c'est le seul endroit à
-changer. Le build, lui, bloque déjà.
-
-**L'issue automatique** ne s'ouvre qu'une fois : le corps porte un marqueur
-invariant (`<!-- baseline-drift-tracker -->`), que le workflow recherche pour
-**mettre à jour** l'issue existante au lieu d'en créer une nouvelle à chaque
-exécution hebdomadaire. Quand la dérive disparaît, l'issue est commentée puis
-fermée automatiquement. Elle est créée dans le dépôt qui héberge le workflow —
-attention, `origin` pointe ici sur le dépôt amont (`caterinaurban/function`) et
-`fork0` sur le fork ; les issues suivent le dépôt où le workflow s'exécute.
-
-⚠️ Ces workflows n'ont **jamais été exécutés** : ils sont validés
-syntaxiquement et leur logique de comptage a été testée hors ligne sur un vrai
-diff, mais l'installation d'APRON via opam sur un runner GitHub reste à
-confirmer au premier run.
-
-## Fichiers
+## FILES
 
 | | |
 |---|---|
-| `harness.py` | lanceur + couverture + `bless` + `compare` |
-| `runtest.py` | rendu HTML/LaTeX/CSV (bâti sur `harness`) |
-| `function-diff.py` | comparateur d'arbres de rapports (MOPSA, LGPL, non modifié) |
-| `logs.bash` | boucle historique ayant produit `logs/` ; gardée comme référence |
-| `generate.py`, `clean_subset.py`, `lift_ctl.py` | génération et transformation de benchmarks |
-| `logs/` | baselines de référence (versionnées) |
-| `regression_out/`, `*.run.json` | sorties de run (ignorées par git) |
+| `logs/` | reference reports (versioned) |
+| `regression_out/`, `*.run.json` | run output (git-ignored) |
+| `logs.bash` | historical loop that produced `logs/`; kept for reference |
+| `generate.py`, `clean_subset.py`, `lift_ctl.py` | benchmark generation and transformation |
