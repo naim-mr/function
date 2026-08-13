@@ -179,7 +179,7 @@ let rec pure_expr env pre post (e, x) =
   | A_identifier s ->
       let v = get_var env s x in
       ((T_var v, v.var_typ, x), pre, post)
-  | A_INPUT (id, Some ((min,_), (max,_))) ->
+  | A_INPUT (id, Some ((min, _), (max, _))) ->
       let i1, i2 = (Int.of_string min, Int.of_string max) in
       add_prog_literal i1;
       add_prog_literal i2;

@@ -1202,7 +1202,9 @@ module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
             Node ((x, nx), build t xs, Bot)
           else (* x is not normalized *) Node ((nx, x), Bot, build t xs)
     in
-    let b_bwd_assign = if underapprox then B.ubwd_assign else B.bwd_assign ~controllable:controllable in
+    let b_bwd_assign =
+      if underapprox then B.ubwd_assign else B.bwd_assign ~controllable
+    in
     let rec aux t cs =
       match t with
       | Bot -> Bot
@@ -1301,7 +1303,9 @@ module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
     let env = t.env in
     let f_env = env.f_env in
     let post = env.domain in
-    let b_filter = if underapprox then B.ubwd_filter else B.fwd_filter ~controllable:controllable in
+    let b_filter =
+      if underapprox then B.ubwd_filter else B.fwd_filter ~controllable
+    in
     let rec aux t bs cs =
       let bcs =
         match pre with
@@ -1434,8 +1438,11 @@ module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
         let t = aux t.tree bs [] in
         { tree = t; env = { env with domain = pre } }
 
-  let filter ?(controllable=false) ?domain = filter_helper controllable ?domain ~underapprox:false
-  let ubwd_filter ?(controllable=false) ?domain = filter_helper controllable ?domain ~underapprox:true
+  let filter ?(controllable = false) ?domain =
+    filter_helper controllable ?domain ~underapprox:false
+
+  let ubwd_filter ?(controllable = false) ?domain =
+    filter_helper controllable ?domain ~underapprox:true
 
   (* 
     Check if all partitions in the decision tree are defined i.e. have a ranking function assigned to them.
@@ -1527,7 +1534,10 @@ module Decision_Tree (F : FUNCTION) : RANKING_FUNCTION = struct
       | Node (c, l, r) -> Node (c, reset flag l, reset flag r)
     in
     let expr, _, _ = e in
-    let filter = if B.is_representable expr then filter ~controllable:false else ubwd_filter ~controllable:false in
+    let filter =
+      if B.is_representable expr then filter ~controllable:false
+      else ubwd_filter ~controllable:false
+    in
     let t2 =
       match mask with
       | None -> reset false (tree (filter t e))

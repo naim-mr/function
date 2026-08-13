@@ -300,7 +300,7 @@ module ForwardIterator (B : PARTITION) = struct
             (stopfwd -. startfwd)
         else Format.fprintf !fmt "\nForward Analysis numerical:\n";
       fwdInvMap_print !fmt !fwdInvMap InvMap.iter label_print);
-    let _ = fwdTBlk ctx (VarSet.of_list vars)  s in
+    let _ = fwdTBlk ctx (VarSet.of_list vars) s in
     let stopfwd = Sys.time () in
     Format.fprintf !fmt "\nForward Taint Summary :\n";
     if not !minimal then

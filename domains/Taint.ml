@@ -3,6 +3,7 @@ open VarSet
 
 module Taint = struct
   type t = VarSet.t
+
   let bot = VarSet.empty
   let join = VarSet.union
   let add x t = VarSet.add x t
@@ -29,7 +30,7 @@ module Taint = struct
       | T_var x -> VarSet.mem x t
       | T_unary (_, (e, _, _)) -> not (is_bot (meet (vars_in_expr e) t))
       | T_binary (_, (e1, _, _), (e2, _, _)) -> aux e1 || aux e2
-      | T_INPUT (id,_) -> not (List.mem id cp)
+      | T_INPUT (id, _) -> not (List.mem id cp)
       | _ -> false
     in
     aux e

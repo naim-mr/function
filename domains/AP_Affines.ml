@@ -271,8 +271,7 @@ struct
                 in
                 Linexpr1.set_coeff f v (Coeff.s_of_int 0);
                 Fun f (* defined join function *))
-              else
-                Top (* otherwise *)
+              else Top (* otherwise *)
           | _ ->
               let p = Abstract1.join manager p1 p2 in
               (* p = convex-hull *)

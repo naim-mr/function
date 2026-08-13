@@ -194,7 +194,8 @@ let rec pp_expr_ext fmt ((e, _, _) : expr typed) =
   | T_float_const f -> Format.pp_print_string fmt (string_of_float_set f)
   | T_int_const i -> Format.pp_print_string fmt (string_of_int_set i)
   | T_bool_const b -> Format.pp_print_string fmt (string_of_tbool b)
-  | T_INPUT (id,(min,max)) -> Format.fprintf fmt "input('%s',%s)" id (string_of_int_set (min,max))
+  | T_INPUT (id, (min, max)) ->
+      Format.fprintf fmt "input('%s',%s)" id (string_of_int_set (min, max))
   | T_var v -> print_var_name fmt v
   | T_deref e -> Format.fprintf fmt " *%a " pp_expr_ext e
   | T_address_of e -> Format.fprintf fmt " &%a " pp_expr_ext e
@@ -217,7 +218,8 @@ let rec pp_expr fmt e =
   | T_float_const f -> Format.pp_print_string fmt (string_of_float_set f)
   | T_int_const i -> Format.pp_print_string fmt (string_of_int_set i)
   | T_bool_const b -> Format.pp_print_string fmt (string_of_tbool b)
-  | T_INPUT (id,(min,max)) -> Format.fprintf fmt "input('%s',%s)" id (string_of_int_set (min,max))
+  | T_INPUT (id, (min, max)) ->
+      Format.fprintf fmt "input('%s',%s)" id (string_of_int_set (min, max))
   | T_var v -> print_var_name fmt v
   | T_deref (e, _, _) -> Format.fprintf fmt " *%a " pp_expr e
   | T_address_of (e, _, _) -> Format.fprintf fmt " &%a " pp_expr e
@@ -394,10 +396,7 @@ let nt_prog ((b, funcs, v) : prog) : prog * label list =
         let label = (id, position_unknown) in
         lnew := label :: !lnew;
         let block =
-          T_stat
-            ( label,
-              (T_label ("loop", extent_unknown), extent_unknown),
-              b )
+          T_stat (label, (T_label ("loop", extent_unknown), extent_unknown), b)
         in
         T_while (l, e, block)
     | T_call (f, ss) ->

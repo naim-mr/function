@@ -70,10 +70,8 @@ module Bool_Partition : PARTITION = struct
   let dim_in_env _ _ = true
   let remove_dim_of_env t _ = t
   let print fmt t = Format.fprintf fmt "%s" (if t then "TOP" else "BOT")
-
   let is_representable _ = true
-  let constraints t =
-    if t then [] else [ (C.make_unsat (C.init_env ())).cons ]
+  let constraints t = if t then [] else [ (C.make_unsat (C.init_env ())).cons ]
   let conjunction t = if t then [] else [ C.make_unsat (C.init_env ()) ]
   let assume ?pow:_ t = (t, t)
   let inner _ cs = not (List.exists C.is_bot cs)
@@ -120,6 +118,6 @@ module Bool_Function : FUNCTION = struct
   let print fmt t = Format.fprintf fmt "%s" (if t then "DEF" else "UNDEF")
 end
 
+module TS_Bool = Decision_Tree.Decision_Tree (Bool_Function)
 (** The proof: a decision tree whose underlying constraint domain is the plain,
     APRON-free {!Bool_Constraint}. *)
-module TS_Bool = Decision_Tree.Decision_Tree (Bool_Function)

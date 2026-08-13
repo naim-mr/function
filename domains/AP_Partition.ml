@@ -62,7 +62,6 @@ struct
   (* the node-constraint domain is already linear, so the APRON projection is
      just the list of constraints *)
   let ap_constraints = constraints
-
   let env t = t.env
   let set_env env t = { t with env }
 
@@ -104,7 +103,9 @@ struct
 
   let bot e = { constraints = [ C.make_unsat e ]; env = e }
   let inner e cs = { constraints = cs; env = e }
-  let ap_inner e cs = inner e (List.map (fun c -> ({ cons = c; env = e } : C.t)) cs)
+
+  let ap_inner e cs =
+    inner e (List.map (fun c -> ({ cons = c; env = e } : C.t)) cs)
 
   (** Returns the top elements: an empty list <-> no constraints*)
   let top e = { constraints = []; env = e }
@@ -440,7 +441,7 @@ struct
         of_apron_t env assigned
     | _ -> raise (Invalid_argument "ubwd_assign: unexpected lvalue")
 
-  let bwd_assign ?(controllable=false) b (lv, e) =
+  let bwd_assign ?(controllable = false) b (lv, e) =
     let (x, t, ext) : expr typed = lv in
     match x with
     | T_var x ->
@@ -455,7 +456,11 @@ struct
           of_apron_t env b
         in
         let b1 = f manager b (x, e) in
-        if !Config.analysis = "atl" && !Config.domain = "polyhedra" && controllable then
+        if
+          !Config.analysis = "atl"
+          && !Config.domain = "polyhedra"
+          && controllable
+        then
           let env = env b in
           let ap_env = ap_env env in
           let p = to_apron_t b1 in
@@ -484,8 +489,8 @@ struct
                 lower @ upper)
               (vars b1)
           in
-          
-          {b1 with constraints = b1.constraints @ box_constraints}
+
+          { b1 with constraints = b1.constraints @ box_constraints }
         else b1
     | _ -> raise (Invalid_argument "bwd_assign: unexpected lvalue")
 
@@ -504,7 +509,7 @@ struct
     let filtered = BanalApron.bwd_filter at bot () e () pre in
     of_apron_t env filtered
 
-  let fwd_filter ?(controllable=false) b (e, t, ext) =
+  let fwd_filter ?(controllable = false) b (e, t, ext) =
     let rec f (manager : 'a Manager.t) b (e, t, ext) =
       match e with
       | T_bool_const True -> b
@@ -618,7 +623,7 @@ struct
       | _ -> raise (Invalid_argument "Unsupported float")
     in
     let b1 = f manager b (e, t, ext) in
-    if !Config.resilience && !Config.domain = "polyhedra" &&  false then
+    if !Config.resilience && !Config.domain = "polyhedra" && false then
       let env = env b in
       let ap_env = ap_env env in
       let p = to_apron_t b1 in

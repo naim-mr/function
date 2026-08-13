@@ -97,8 +97,7 @@ let rec convert_type_qual ((typ, _) : C_AST.type_qual) : Abstract_syntax.typ =
      them outright made the whole file unanalysable. Unsupported *targets*
      still raise below, so nothing is silently accepted. *)
   | C_AST.T_typedef td -> convert_type_qual td.C_AST.typedef_def
-  | _ ->
-      raise (UnsupportedConversion "unsupported type")
+  | _ -> raise (UnsupportedConversion "unsupported type")
 
 let convert_un_op (op : C_AST.unary_operator) : Abstract_syntax.unary_op =
   match op with
@@ -302,8 +301,7 @@ let rec convert_expr (st : state) ((kind, typ, _) : C_AST.expr) :
              fold it back into a constant string, per bound. *)
           let const_str arg =
             match convert_expr st arg with
-            | ( ( Abstract_syntax.A_int_const s
-                | Abstract_syntax.A_float_const s ),
+            | ( (Abstract_syntax.A_int_const s | Abstract_syntax.A_float_const s),
                 _ ) ->
                 s
             | ( Abstract_syntax.A_unary
@@ -509,7 +507,7 @@ let convert_func (st : state) (func : C_AST.func) :
      after. *)
   match func.func_body with
   | None -> None
-  | Some stmts ->
+  | Some stmts -> (
       (* MOPSA handles functions without a return value with the special
          type `void` (as in C), but in Banal we return an `None` optional.
          Handle this special case explicitly, for the other types
@@ -530,7 +528,7 @@ let convert_func (st : state) (func : C_AST.func) :
           (Array.to_list func.func_parameters)
       in
 
-      (match convert_block st stmts with
+      match convert_block st stmts with
       | Abstract_syntax.A_block stmts -> Some (return_typ, name, args, stmts)
       | _ -> raise (Invalid_argument "convert_block returned a non-A_block"))
 
