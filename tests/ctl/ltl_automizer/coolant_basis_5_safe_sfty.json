@@ -1,3 +1,7 @@
 {
-    "property": "AU{init == 0}{OR{AU{init == 1}{AG{init == 3}}}{AG{init == 1}}}"
+    "property": "AU{init == 0}{OR{AU{init == 1}{AG{init == 3}}}{AG{init == 1}}}",
+    "expected": {
+        "status": "FAIL",
+        "reason": "break unsupported in backward analysis (bwdStm:T_BREAK)"
+    }
 }

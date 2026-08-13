@@ -20,7 +20,7 @@ int R = 0;
 
 void main() {
   int n;
-  while(?) {
+  while(rand()) {
     A = 1;
     A = 0;
     n = rand();

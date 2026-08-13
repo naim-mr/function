@@ -1,4 +1,8 @@
 {
-    "property":"AF{exit:true}",
-    "domain": "polyhedra"
+    "property": "AF{exit:true}",
+    "domain": "polyhedra",
+    "expected": {
+        "status": "FAIL",
+        "reason": "Utils.Datatypes.UnsupportedFeature(\"Recursive function\")"
+    }
 }

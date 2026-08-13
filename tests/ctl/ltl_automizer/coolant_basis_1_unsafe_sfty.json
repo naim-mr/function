@@ -1,3 +1,7 @@
 {
-    "property": "AG{OR{chainBroken != 1}{AG{chainBroken == 1}}}"
+    "property": "AG{OR{chainBroken != 1}{AG{chainBroken == 1}}}",
+    "expected": {
+        "status": "FAIL",
+        "reason": "break unsupported in backward analysis (bwdStm:T_BREAK)"
+    }
 }

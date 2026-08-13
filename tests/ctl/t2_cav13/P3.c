@@ -10,12 +10,12 @@ void main() {
     int varR = 0;
 
     //loc1
-    while(?) {
+    while(rand()) {
         varA = 1;
         // loc2
         varA = 0;
         // loc3
-        while(?) {}
+        while(rand()) {}
         varR = 1;
         //loc4
     }

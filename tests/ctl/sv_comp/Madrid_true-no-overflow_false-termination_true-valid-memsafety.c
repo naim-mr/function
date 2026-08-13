@@ -1,3 +1,4 @@
+#include <stdbool.h>
 /*
  * Date: 2013-05-02
  * Author: heizmann@informatik.uni-freiburg.de

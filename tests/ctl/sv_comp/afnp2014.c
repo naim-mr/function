@@ -5,7 +5,7 @@
 int main() {
     int x = 1;
     int y = 0;
-    while (y < 1000 && ?) {
+    while (y < 1000 && rand()) {
         x = x + y;
         y = y + 1;
     }

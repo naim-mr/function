@@ -1,4 +1,8 @@
 {
     "property": "AF{resp > 5}",
-    "precondition": "c > 5"
+    "precondition": "c > 5",
+    "expected": {
+        "status": "FAIL",
+        "reason": "global initialiser referencing another global (int curr_serv = servers) -- Translate_error: unknown identifier"
+    }
 }

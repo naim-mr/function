@@ -1,3 +1,4 @@
+#include <stdbool.h>
 // FuncTion arguments:
 // -ctl "AF{AG{y > 0}}" 
 int main() {

@@ -1,3 +1,4 @@
+#include <stdbool.h>
 // -ctl_str "EU{x >= y}{x == y}"
 // -domain polyhedra
 // -precondition "x > y"

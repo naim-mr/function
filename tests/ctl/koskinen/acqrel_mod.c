@@ -1,3 +1,4 @@
+#include <stdbool.h>
 // *************************************************************
 //
 // Original source code by Byron Cook & Eric Koskinen, July 2010

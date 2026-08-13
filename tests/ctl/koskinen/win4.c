@@ -1,3 +1,4 @@
+#include <stdbool.h>
 // *************************************************************
 //
 // Original source code by Byron Cook & Eric Koskinen, July 2010
@@ -14,7 +15,7 @@ void main() {
     int WItemsNum;
     
     while(true) {
-        while(WItemsNum <= 5 || ? == 1) {
+        while(WItemsNum <= 5 || rand() == 1) {
                if (WItemsNum <= 5) {
                    WItemsNum++;
                } else {

@@ -1,3 +1,4 @@
+#include <stdbool.h>
 //#Safe
 //@ ltl invariant positive: <>(AP(x==7) && <>[]AP(x==2));
 

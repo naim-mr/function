@@ -1,3 +1,4 @@
+#include <stdbool.h>
 // OK
 // -precondition "varN > 0"
 // -ctl_cfg "EF{AND{varA == 1}{AG{varR != 1}}"

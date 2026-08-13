@@ -1,3 +1,7 @@
 {
-    "property": "AG{AF{otime < time}}"
+    "property": "AG{AF{otime < time}}",
+    "expected": {
+        "status": "FAIL",
+        "reason": "break unsupported in backward analysis (bwdStm:T_BREAK)"
+    }
 }

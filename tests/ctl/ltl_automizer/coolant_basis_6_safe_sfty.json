@@ -1,3 +1,7 @@
 {
-    "property": "AG{OR{limit <= -273 && limit >= 10}{OR{tempIn >= 0}{AF{ warnLED == 1}}}}"
+    "property": "AG{OR{limit <= -273 && limit >= 10}{OR{tempIn >= 0}{AF{ warnLED == 1}}}}",
+    "expected": {
+        "status": "FAIL",
+        "reason": "break unsupported in backward analysis (bwdStm:T_BREAK)"
+    }
 }
