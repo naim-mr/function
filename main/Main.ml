@@ -317,7 +317,7 @@ let termination_iterator_new () : (module Semantics.SEMANTIC) =
          | _ -> raise (Invalid_argument "Unknown Abstract Domain")
         : Semantics.SEMANTIC)
   in
-  (module TerminationIterator (Bool_Constraint.TS_Bool))
+  (module S)
 
 let ctl_iterator_new () : (module Semantics.SEMANTIC) =
   let open Sig in

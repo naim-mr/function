@@ -59,6 +59,10 @@ struct
         with Invalid_argument _ -> c :: cs)
       t.constraints []
 
+  (* the node-constraint domain is already linear, so the APRON projection is
+     just the list of constraints *)
+  let ap_constraints = constraints
+
   let env t = t.env
   let set_env env t = { t with env }
 
@@ -100,6 +104,7 @@ struct
 
   let bot e = { constraints = [ C.make_unsat e ]; env = e }
   let inner e cs = { constraints = cs; env = e }
+  let ap_inner e cs = inner e (List.map (fun c -> ({ cons = c; env = e } : C.t)) cs)
 
   (** Returns the top elements: an empty list <-> no constraints*)
   let top e = { constraints = []; env = e }

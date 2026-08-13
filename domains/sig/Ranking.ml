@@ -66,6 +66,31 @@ module type AP_PARTITION = sig
 
   val ap_env : env -> Environment.t
   val inner : env -> C.t list -> t
+
+  val ap_constraints : t -> Lincons1.t list
+  (** [ap_constraints t] returns the APRON (linear) projection of the partition,
+      i.e. the numerical constraints usable by the affine ranking leaves. *)
+
+  val ap_inner : env -> Lincons1.t list -> t
+  (** [ap_inner env cs] builds a partition from APRON linear constraints (dual
+      of [ap_constraints]); the non-numerical components are left at top. *)
+end
+
+(** [module type AP_NUMERIC] a partition that exposes an APRON numerical
+    projection ([ap_env]/[ap_constraints]/[N]) for the affine ranking leaves,
+    WITHOUT constraining its node-constraint domain [C]. Unlike [AP_PARTITION],
+    [C] here is a plain [CONSTRAINT] (possibly a sum of several constraint
+    domains), so a product partition can be an [AP_NUMERIC] while its decision
+    nodes range over more than just linear constraints. Every [AP_PARTITION]
+    module is also an [AP_NUMERIC]. *)
+module type AP_NUMERIC = sig
+  module C : CONSTRAINT
+  module N : AP_NUMERICAL
+  include PARTITION with module C := C and type env = C.env
+
+  val ap_env : env -> Environment.t
+  val ap_constraints : t -> Lincons1.t list
+  val ap_inner : env -> Lincons1.t list -> t
 end
 
 module type FUNCTION = sig

@@ -91,7 +91,12 @@ let rec convert_type_qual ((typ, _) : C_AST.type_qual) : Abstract_syntax.typ =
   | C_AST.T_pointer (typ, qual) -> A_pointer (convert_type_qual (typ, qual))
   | C_AST.T_array _ -> raise (UnsupportedFeature "array")
   | C_AST.T_record _ -> raise (UnsupportedFeature "struct")
-  | C_AST.T_typedef _ -> raise (UnsupportedFeature "typedef")
+  (* A typedef is only an alias: follow it to the type it denotes instead of
+     rejecting it. Benchmarks that #include a standard header (stdio.h, ...)
+     drag in typedefs they never actually use in analysed code, and refusing
+     them outright made the whole file unanalysable. Unsupported *targets*
+     still raise below, so nothing is silently accepted. *)
+  | C_AST.T_typedef td -> convert_type_qual td.C_AST.typedef_def
   | _ ->
       raise (UnsupportedConversion "unsupported type")
 
@@ -495,27 +500,37 @@ and convert_block (st : state) (block : C_AST.block) : Abstract_syntax.stat =
 
 let convert_func (st : state) (func : C_AST.func) :
     Abstract_syntax.fundecl option =
-  (* MOPSA handles functions without a return value with the special
-     type `void` (as in C), but in Banal we return an `None` optional.
-     Handle this special case explicitly, for the other types
-     use `convert_type_qual` *)
-  let return_typ =
-    match func.func_return with
-    | C_AST.T_void, _ -> None
-    | _ -> convert_type_qual func.func_return |> attach_position |> Option.some
-  in
+  (* Bail out on a body-less function BEFORE converting any of its types.
+     Such a function is a declaration only -- typically dragged in by a header
+     (`#include <stdio.h>`) and never analysed -- and its signature routinely
+     uses features we do not model (unsigned, pointers, variadics). Converting
+     it first made a whole file unanalysable because of a prototype the
+     analysis never looks at, even though the result was discarded right
+     after. *)
+  match func.func_body with
+  | None -> None
+  | Some stmts ->
+      (* MOPSA handles functions without a return value with the special
+         type `void` (as in C), but in Banal we return an `None` optional.
+         Handle this special case explicitly, for the other types
+         use `convert_type_qual` *)
+      let return_typ =
+        match func.func_return with
+        | C_AST.T_void, _ -> None
+        | _ ->
+            convert_type_qual func.func_return |> attach_position |> Option.some
+      in
 
-  let name = func.func_org_name |> attach_position in
-  let args =
-    List.map
-      (fun var ->
-        ( attach_position C_AST.(var.var_org_name),
-          convert_type_qual var.var_type |> attach_position ))
-      (Array.to_list func.func_parameters)
-  in
+      let name = func.func_org_name |> attach_position in
+      let args =
+        List.map
+          (fun var ->
+            ( attach_position C_AST.(var.var_org_name),
+              convert_type_qual var.var_type |> attach_position ))
+          (Array.to_list func.func_parameters)
+      in
 
-  Option.bind func.func_body (fun stmts ->
-      match convert_block st stmts with
+      (match convert_block st stmts with
       | Abstract_syntax.A_block stmts -> Some (return_typ, name, args, stmts)
       | _ -> raise (Invalid_argument "convert_block returned a non-A_block"))
 
@@ -555,6 +570,21 @@ let parse_file (f : string) : Typed_syntax.prog =
   let global_decl =
     C_AST.StringMap.bindings prj.proj_vars
     |> List.map (fun (_, v) -> v)
+    (* Drop extern globals we cannot type. `#include <stdio.h>` declares
+       stdin/stdout/stderr as FILE*, i.e. pointers to a struct, which killed
+       the whole analysis even though the benchmark never mentions them. An
+       extern is "declared but not defined", so there is nothing to analyse in
+       it anyway. The filter is deliberately narrow: a global of the program
+       itself still raises, so an unsupported type in analysed code is not
+       silently swallowed. *)
+    |> List.filter (fun var ->
+           match C_AST.(var.var_kind) with
+           | C_AST.Variable_extern -> (
+               try
+                 ignore (var_typ var);
+                 true
+               with UnsupportedFeature _ | UnsupportedConversion _ -> false)
+           | _ -> true)
     |> List.map (fun var ->
            Abstract_syntax.A_global
              ( ( var_typ var |> attach_position,

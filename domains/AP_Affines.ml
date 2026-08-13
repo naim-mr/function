@@ -13,7 +13,10 @@ open Sig
 open Sig.Domain
 open AP_Partition
 
-module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
+module AP_Affine
+    (N : AP_NUMERICAL)
+    (B : AP_NUMERIC with type C.env = Constraints.lincons_env) : FUNCTION =
+struct
   module B = B
 
   (**)
@@ -24,16 +27,6 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
   type env = B.env
   type t = { ranking : rank; env : env }
   type dim = B.dim
-
-  let ct_of_lincons f b =
-    let cs : B.C.t list =
-      List.map
-        (fun (c : B.C.cons) ->
-          let c : B.C.t = { cons = c; env = B.env b } in
-          c)
-        f
-    in
-    cs
 
   let v = Var.of_string "#"
   let ranking f = f.ranking
@@ -78,7 +71,7 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
     | Fun f1, Fun f2 ->
         let env = Environment.add (B.env b |> B.ap_env) [| v |] [||] in
         (* adding special variable # to environment of b *)
-        let l = List.length (B.constraints b) + 1 in
+        let l = List.length (B.ap_constraints b) + 1 in
         (* l = |b| + 1 *)
         let a1 = Lincons1.array_make env l and a2 = Lincons1.array_make env l in
         let i = ref 0 in
@@ -87,7 +80,7 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
             Lincons1.array_set a1 !i (Lincons1.extend_environment c env);
             Lincons1.array_set a2 !i (Lincons1.extend_environment c env);
             i := !i + 1)
-          (B.constraints b);
+          (B.ap_constraints b);
         (* copying constraints from b to a1 and a2 *)
         let f1 = Linexpr1.copy f1 and f2 = Linexpr1.copy f2 in
         (* creating copies of f1 and f2 *)
@@ -111,7 +104,7 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
     | Fun f1, Fun f2 ->
         let env = Environment.add (B.env b |> B.ap_env) [| v |] [||] in
         (* adding special variable # to environment of b *)
-        let l = List.length (B.constraints b) + 2 in
+        let l = List.length (B.ap_constraints b) + 2 in
         (* l = |b| + 2 *)
         let a = Lincons1.array_make env l in
         let i = ref 0 in
@@ -119,7 +112,7 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
           (fun c ->
             Lincons1.array_set a !i (Lincons1.extend_environment c env);
             i := !i + 1)
-          (B.constraints b);
+          (B.ap_constraints b);
         (* copying constraints from b to a *)
         let f1 = Linexpr1.copy f1 and f2 = Linexpr1.copy f2 in
         (* creating copies of f1 and f2 *)
@@ -139,14 +132,7 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
         for i = 0 to Lincons1.array_length cc - 1 do
           f := Lincons1.array_get cc i :: !f
         done;
-        let cs : B.C.t list =
-          List.map
-            (fun (c : B.C.cons) ->
-              let c : B.C.t = { cons = c; env = B.env b } in
-              c)
-            !f
-        in
-        B.inner (B.env b) cs
+        B.ap_inner (B.env b) !f
     | Bot, Bot | Top, Top -> b
     | _ -> B.bot (B.env b)
 
@@ -156,7 +142,7 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
     | Fun f1, Fun f2 ->
         let env = Environment.add (B.env b |> B.ap_env) [| v |] [||] in
         (* adding special variable # to environment of b *)
-        let l = List.length (B.constraints b) + 1 in
+        let l = List.length (B.ap_constraints b) + 1 in
         (* l = |b| + 1 *)
         let a1 = Lincons1.array_make env l and a2 = Lincons1.array_make env l in
         let i = ref 0 in
@@ -165,7 +151,7 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
             Lincons1.array_set a1 !i (Lincons1.extend_environment c env);
             Lincons1.array_set a2 !i (Lincons1.extend_environment c env);
             i := !i + 1)
-          (B.constraints b);
+          (B.ap_constraints b);
         (* copying constraints from b to a1 and a2 *)
         let f1 = Linexpr1.copy f1 and f2 = Linexpr1.copy f2 in
         (* creating copies of f1 and f2 *)
@@ -211,7 +197,7 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
     | Fun f1, Fun f2 ->
         let env = Environment.add (B.env b |> B.ap_env) [| v |] [||] in
         (* adding special variable # to environment of b *)
-        let l = List.length (B.constraints b) + 1 in
+        let l = List.length (B.ap_constraints b) + 1 in
         (* l = |b| + 1 *)
         let a = Lincons1.array_make env (l - 1) in
         (*REMOVE?*)
@@ -224,7 +210,7 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
             Lincons1.array_set a1 !i (Lincons1.extend_environment c env);
             Lincons1.array_set a2 !i (Lincons1.extend_environment c env);
             i := !i + 1)
-          (B.constraints b);
+          (B.ap_constraints b);
         (* copying constraints from b to a1 and a2 *)
         let f1 = Linexpr1.copy f1 and f2 = Linexpr1.copy f2 in
         (* creating copies of f1 and f2 *)
@@ -281,8 +267,7 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
                 (* There exists a constraint minimizing f1 and f2*)
                 (* f is the smaller element of the list *)
                 let f =
-                  B.C.linexpr
-                    (List.hd (List.sort B.C.compare (ct_of_lincons !f b)))
+                  Lincons1.get_linexpr1 (List.hd (List.sort lincons1_cmp !f))
                 in
                 Linexpr1.set_coeff f v (Coeff.s_of_int 0);
                 Fun f (* defined join function *))
@@ -345,7 +330,7 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
     | Fun f1, Fun f2 ->
         let env = Environment.add (B.env b |> B.ap_env) [| v |] [||] in
         (* adding special variable # to environment of b *)
-        let l = List.length (B.constraints b) + 1 in
+        let l = List.length (B.ap_constraints b) + 1 in
         (* l = |b| + 1 *)
         let a = Lincons1.array_make env (l - 1) in
         (*REMOVE?*)
@@ -358,7 +343,7 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
             Lincons1.array_set a1 !i (Lincons1.extend_environment c env);
             Lincons1.array_set a2 !i (Lincons1.extend_environment c env);
             i := !i + 1)
-          (B.constraints b);
+          (B.ap_constraints b);
         (* copying constraints from b to a1 and a2 *)
         let f1 = Linexpr1.copy f1 and f2 = Linexpr1.copy f2 in
         (* creating copies of f1 and f2 *)
@@ -416,7 +401,7 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
     | Fun f1, Fun f2 ->
         let env = Environment.add (B.env b |> B.ap_env) [| v |] [||] in
         (* adding special variable # to environment of b *)
-        let l = List.length (B.constraints b) + 1 in
+        let l = List.length (B.ap_constraints b) + 1 in
         (* l = |b| + 1 *)
         let a = Lincons1.array_make env (l - 1) in
         (*REMOVE?*)
@@ -429,7 +414,7 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
             Lincons1.array_set a1 !i (Lincons1.extend_environment c env);
             Lincons1.array_set a2 !i (Lincons1.extend_environment c env);
             i := !i + 1)
-          (B.constraints b);
+          (B.ap_constraints b);
         (* copying constraints from b to a1 and a2 *)
         let f1 = Linexpr1.copy f1 and f2 = Linexpr1.copy f2 in
         (* creating copies of f1 and f2 *)
@@ -477,9 +462,9 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
     | Fun f1, Fun f2 ->
         let env = Environment.add (B.env b1 |> B.ap_env) [| v |] [||] in
         (* adding special variable # to environment of b *)
-        let l1 = List.length (B.constraints b1) + 1 in
+        let l1 = List.length (B.ap_constraints b1) + 1 in
         (* l1 = |b1| + 1 *)
-        let l2 = List.length (B.constraints b2) + 1 in
+        let l2 = List.length (B.ap_constraints b2) + 1 in
         (* l2 = |b2| + 1 *)
         let a1 = Lincons1.array_make env l1
         and a2 = Lincons1.array_make env l2 in
@@ -488,13 +473,13 @@ module AP_Affine (N : AP_NUMERICAL) (B : AP_PARTITION) : FUNCTION = struct
           (fun c ->
             Lincons1.array_set a1 !i (Lincons1.extend_environment c env);
             i := !i + 1)
-          (B.constraints b1);
+          (B.ap_constraints b1);
         (* copying constraints from b1 to a1 *)
         List.iter
           (fun c ->
             Lincons1.array_set a2 !j (Lincons1.extend_environment c env);
             j := !j + 1)
-          (B.constraints b2);
+          (B.ap_constraints b2);
         (* copying constraints from b2 to a2 *)
         let f1 = Linexpr1.copy f1 and f2 = Linexpr1.copy f2 in
         (* creating copies of f1 and f2 *)
