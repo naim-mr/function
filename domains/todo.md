@@ -15,9 +15,9 @@ Variante APRON : `AP_CONSTRAINT` / `AP_PARTITION` / `AP_NUMERIC` + `AP_Affine (N
 Exemples complets existants : `Congruence.ml`, `Bool_Constraint.ml` (chacun fait
 Constraint + Partition + Function + instanciation `TS_*`).
 
-⚠️ **Cassé en ce moment** : `main/Main.ml` référence `Partitions_Union.TS_*Cong`
-mais `Partitions_Union.ml` a été supprimé. Premier geste : reverter les lignes
-309–316 de Main.ml vers `Decision_Tree.TS**` (ou stub), pour repartir d'un build vert.
+État au 13/08/2026 : build vert, suite de régression verte et garde-fou CI
+actif (J0 et J0.5 faits, §10). `Partitions_Union.ml` reste supprimé — sa
+reconstruction propre est J4.
 
 ## 1. Refactorisations à faire AVANT d'écrire de nouveaux domaines
 
@@ -55,12 +55,31 @@ Par ordre de rentabilité :
 Trois changements structurels au-delà du plan conservateur ci-dessus, dans
 l'ordre où les faire (chacun est utile seul) :
 
-- **Sortir `env` des contraintes.** La signature `CONSTRAINT` impose
-  `type t = { cons; env }` : chaque domaine trimballe l'environnement dans
-  chaque contrainte, alors que l'env est une propriété de l'*état d'analyse*,
-  pas du prédicat. Le gérer une fois au niveau de l'arbre (ou en paramètre de
-  foncteur `Env`) rend les contraintes pures — ça simplifie `negate`, la
-  canonisation, et surtout les sommes de contraintes (§3.a).
+- **Fiabiliser `env`, pas le supprimer.** *(Position révisée le 13/08/2026 —
+  la version précédente disait « sortir `env` des contraintes » au motif qu'il
+  relèverait de l'état d'analyse et non du prédicat. C'est faux : une
+  `Lincons1.t` est positionnelle, ses dimensions n'ont aucun sens sans leur
+  environnement, et `vars` porte une information propre au domaine — la
+  correspondance dimension APRON ↔ variable programme, et demain d'éventuelles
+  variables symboliques.)*
+
+  Le vrai problème est dans `lincons_env = { vars : var list; ap_env :
+  Environment.t }` associé à `cons = Lincons1.t` :
+
+  1. **`ap_env` est dupliqué** — la `Lincons1.t` porte déjà son propre
+     `Environment.t`. Toute duplication invite la divergence.
+  2. **La correspondance `vars` ↔ nom APRON est re-dérivée à la main à chaque
+     site**, par comparaison de chaînes. C'est la cause exacte du bug corrigé
+     le 13/08 : `AP_Affines.print` comparait `Var.to_string x` à
+     `Z.to_string y.var_id` — jamais égaux — donc le `List.find` échouait
+     toujours, le `with Not_found -> ()` avalait *tous* les termes variables,
+     et une fonction de rang affine s'affichait comme sa seule constante.
+
+  Correctif : **exposer la bijection une fois pour toutes** dans le module
+  d'environnement (`apron_of_var` / `var_of_apron`) et interdire les
+  comparaisons de chaînes ad hoc. Ça élimine la classe de bug, pas l'instance.
+  Et **renommer** : `env` évoque en compilation un liage variable→valeur, alors
+  qu'il s'agit d'un *univers de variables* — `scope`, `universe` ou `dims`.
 - **APRON comme capacité optionnelle, pas hiérarchie parallèle.** Remplacer
   les trois signatures quasi identiques `AP_CONSTRAINT`/`AP_PARTITION`/
   `AP_NUMERIC` par un petit module-vue passé séparément :
@@ -455,9 +474,31 @@ Par rapport bénéfice/coût décroissant :
    domaines — élimine le boilerplate d'ordre total et de printing de chaque
    `CONSTRAINT`.
 
+6. **Opérateurs de liaison (`let*`) — ciblés, pas partout.** Deux usages qui
+   paient, un qui ne paie pas :
+   - **Propagation de bottom** : le code est truffé de
+     `if is_bot … then bot else …` et de `match … with Bot, _ | _, Bot -> …`.
+     Un `let*` sur `Bot | Val of 'a` court-circuite et rend l'oubli d'un cas
+     impossible.
+   - **Constructions non supportées du frontend** : `UnsupportedFeature` /
+     `UnsupportedConversion` sont des exceptions qui remontent de loin. Le
+     13/08 ça a coûté deux bugs — `convert_func` typait des prototypes qu'il
+     jetait ensuite, et il a fallu un `try … with` volontairement étroit sur
+     les globaux externes. Avec un `result`, « non géré » devient une valeur
+     qui se propage, et le point où l'on décide d'ignorer devient visible dans
+     le type. Même esprit que le point 1.
+   - **PAS pour `env`** : un reader monad serait plus de cérémonie qu'un
+     paramètre explicite et ne règle pas le vrai problème (§1.1).
+
+   Réserves : `let*` dégrade la lisibilité des traces d'erreur, et les
+   opérations de `FUNCTION` sont déjà indexées par un contexte (`kind`, `b`,
+   `jokers`) qu'aucune monade ne simplifie. Commencer par le frontend : c'est
+   là que les exceptions font le plus de dégâts, et c'est isolable sans
+   toucher aux domaines.
+
 À ne PAS faire : GADTs pour indexer les arbres (coût de lisibilité > gain,
 le point 1 donne 80 % du bénéfice) ; implicites modulaires (pas dans le
-langage).
+langage) ; monadiser les domaines en bloc (cf. point 6).
 
 ## 7. Performance
 
@@ -573,24 +614,29 @@ jalon, pas ligne à ligne.
 
 - [x] **J0** Build vert — fait le 13/08/2026 (Main.ml repointé sur
       `Decision_Tree.TS*`).
-- [~] **J0.5** Outillage FAIT (`harness.py`, §4.0) ; **baseline PAS verte** —
-      état mesuré au 13/08/2026, à traiter AVANT J1 :
-      - 116 benchmarks baselinés rejoués, 95 rapports comparables ;
-      - **34 écarts de verdict : 11 régressions (TRUE→UNKNOWN) et
-        23 améliorations (UNKNOWN→TRUE)** — détail dans
-        `logs/BASELINE-DRIFT-2026-08-13.txt` ;
-      - **21 échecs frontend** sur `tests/ctl/*` : `use of undeclared
-        identifier 'true'` puis `unhandled builtin type: totally_unknown`
-        (préexistant, indépendant des changements du jour) ;
-      - **4 baselines orphelines** : `tests/ctl/report/*` (3, sources
-        disparues) et `tests/resilience/jouet.c` (dossier renommé en
-        `resilience_excluded`).
-      Décision à prendre : les 11 régressions sont-elles des bugs à corriger,
-      ou le comportement courant devient-il la nouvelle référence ? Tant que
-      ce n'est pas tranché, J1/J7/J9 n'ont pas de critère « mêmes verdicts ».
-      ⚠️ L'arbre de travail contient des modifs non commitées (AP_Affines,
-      AP_Partition, Ranking.ml) qui expliquent probablement une partie de la
-      dérive : à commiter ou remiser avant de figer quoi que ce soit.
+- [x] **J0.5** Baseline verte et garde-fou actif — fait le 13/08/2026.
+      Outillage : `script/harness.py` (lanceur unique, couverture depuis les
+      baselines, `expected`/`bless`/`promote`/`compare`), `script/README.md`,
+      deux workflows GitHub, `REGRESSION_GATE: "true"`.
+      État final : **103 rapports comparés, `no regression found`, couverture
+      complète**, 13 échecs déclarés (`status: FAIL`) et 2 régressions
+      acceptées (`pending` : P3.c, existential_test4.c).
+      Corrections de fond obtenues en chemin :
+      - `tests/atl` (139 configs) et `resilience` n'étaient **jamais** rejoués
+        — table de groupes en dur, désormais découverte par le système de
+        fichiers ;
+      - 9 tests CTL récupérés (`#include <stdbool.h>`, `?` → `rand()`), et le
+        frontend ne rejette plus un fichier entier à cause d'un prototype de
+        `stdio.h` (typedef déréférencé, corps testé avant les types, externes
+        inconvertibles filtrés) ;
+      - affichage des feuilles affines réparé (`AP_Affines.print` comparait un
+        nom APRON à un `var_id` brut, donc tous les termes variables étaient
+        silencieusement perdus) ;
+      - `mopsa` manquait dans `function.opam` : la CI aurait échoué au build.
+      Reste ouvert, suivi par issues : segfault `-Dtrue/-Dfalse`, `break` non
+      géré, `input(v,lo,hi)` qui casse la linéarisation, et les deux
+      régressions `pending`.
+
 - [ ] **J1** `Conj_Partition` générique + `Congruence.ml` et `Bool_Constraint.ml`
       migrés dessus ; scellements rendus transparents. Baseline inchangée.
 - [ ] **J1.5** Harnais de test générique (§4.1) : `Domain_laws` +
@@ -598,10 +644,11 @@ jalon, pas ligne à ligne.
       Bool_Constraint (qui valident le harnais). ~1 j.
 - [ ] **J2** Premier nouveau domaine de contraintes (au choix) sur la recette §2,
       avec ses `samples` + instanciation du harnais (~1 h) + son `.c` témoin.
-- [ ] **J2.5** *(option)* Sortir `env` des contraintes (§1.1) — 165 sites,
-      confinés à `domains/`. À placer ICI : après J1.5 on a un filet de tests,
-      et juste avant J3 qui en bénéficie. Coût si reporté : ajuster
-      `Conj_Partition` (~100 lignes), pas une réécriture — donc pas urgent.
+- [ ] **J2.5** *(option)* Fiabiliser `env` (§1.1) : bijection
+      `apron_of_var`/`var_of_apron` exposée, `ap_env` dédupliqué, renommage.
+      À placer ICI : après J1.5 on a un filet de tests, et juste avant J3.
+      Périmètre bien plus étroit que la version « supprimer `env` » qu'il
+      remplace — c'est un resserrement d'API, pas une réécriture.
 - [ ] **J3** `Sum_Constraint` (produit a) + arbre à nœuds mixtes ; test témoin.
 - [ ] **J4** `Prod_Partition` (produit b) = renaissance propre de
       `Partitions_Union` ; `TS_{Box,Oct,Poly}×Cong` recâblés dans Main.ml.
