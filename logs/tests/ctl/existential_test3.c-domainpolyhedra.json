@@ -4,21 +4,21 @@
     "analysis_type": "ctl",
     "property": "EF{r == 1}",
     "precondition": "x == 2",
-    "result": "UKNOWN",
+    "result": "TRUE",
     "domain": "polyhedra",
     "joinbwd": 5,
-    "time": "1"
+    "time": "0.297710000001"
   },
   "tree": {
     "Node": {
-      "constraint": "$3{x} >= 2",
+      "constraint": "$9{x} >= 5",
       "left": {
         "Node": {
-          "constraint": "$2{r} >= 2",
+          "constraint": "$7{r} >= 2",
           "left": { "Leaf": "top" },
           "right": {
             "Node": {
-              "constraint": "$2{r} >= 1",
+              "constraint": "$7{r} >= 1",
               "left": { "Leaf": "0." },
               "right": { "Leaf": "top" }
             }
@@ -27,29 +27,83 @@
       },
       "right": {
         "Node": {
-          "constraint": "$3{x} >= 1",
+          "constraint": "$9{x} >= 4",
           "left": {
             "Node": {
-              "constraint": "$2{r} >= 2",
-              "left": { "Leaf": "5" },
+              "constraint": "$7{r} >= 2",
+              "left": { "Leaf": "14" },
               "right": {
                 "Node": {
-                  "constraint": "$2{r} >= 1",
+                  "constraint": "$7{r} >= 1",
                   "left": { "Leaf": "0." },
-                  "right": { "Leaf": "5" }
+                  "right": { "Leaf": "14" }
                 }
               }
             }
           },
           "right": {
             "Node": {
-              "constraint": "$2{r} >= 2",
-              "left": { "Leaf": "bottom" },
+              "constraint": "$9{x} >= 3",
+              "left": {
+                "Node": {
+                  "constraint": "$7{r} >= 2",
+                  "left": { "Leaf": "11" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$7{r} >= 1",
+                      "left": { "Leaf": "0." },
+                      "right": { "Leaf": "11" }
+                    }
+                  }
+                }
+              },
               "right": {
                 "Node": {
-                  "constraint": "$2{r} >= 1",
-                  "left": { "Leaf": "0." },
-                  "right": { "Leaf": "bottom" }
+                  "constraint": "$9{x} >= 2",
+                  "left": {
+                    "Node": {
+                      "constraint": "$7{r} >= 2",
+                      "left": { "Leaf": "8" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$7{r} >= 1",
+                          "left": { "Leaf": "0." },
+                          "right": { "Leaf": "8" }
+                        }
+                      }
+                    }
+                  },
+                  "right": {
+                    "Node": {
+                      "constraint": "$9{x} >= 1",
+                      "left": {
+                        "Node": {
+                          "constraint": "$7{r} >= 2",
+                          "left": { "Leaf": "5" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$7{r} >= 1",
+                              "left": { "Leaf": "0." },
+                              "right": { "Leaf": "5" }
+                            }
+                          }
+                        }
+                      },
+                      "right": {
+                        "Node": {
+                          "constraint": "$7{r} >= 2",
+                          "left": { "Leaf": "bottom" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$7{r} >= 1",
+                              "left": { "Leaf": "0." },
+                              "right": { "Leaf": "bottom" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }

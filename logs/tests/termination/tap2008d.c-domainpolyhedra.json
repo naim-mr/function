@@ -4,26 +4,26 @@
     "analysis_type": "termination",
     "property": "AF{exit:true}",
     "precondition": "x <= 0",
-    "result": "UKNOWN",
+    "result": "TRUE",
     "domain": "polyhedra",
     "joinbwd": 2,
     "time": "1"
   },
   "tree": {
     "Node": {
-      "constraint": "$2{x} >= 11",
+      "constraint": "$5{x} >= 11",
       "left": { "Leaf": "bottom" },
       "right": {
         "Node": {
-          "constraint": "$2{x} >= 10",
+          "constraint": "$5{x} >= 10",
           "left": { "Leaf": "bottom" },
           "right": {
             "Node": {
-              "constraint": "$2{x} >= 2",
+              "constraint": "$5{x} >= 2",
               "left": { "Leaf": "bottom" },
               "right": {
                 "Node": {
-                  "constraint": "$2{x} >= 1",
+                  "constraint": "$5{x} >= 1",
                   "left": { "Leaf": "bottom" },
                   "right": { "Leaf": "3" }
                 }

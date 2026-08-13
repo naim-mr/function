@@ -4,27 +4,99 @@
     "analysis_type": "termination",
     "property": "AF{exit:true}",
     "precondition": "true",
-    "result": "TRUE",
+    "result": "UKNOWN",
     "domain": "polyhedra",
     "joinbwd": 2,
     "time": "1"
   },
   "tree": {
     "Node": {
-      "constraint": "$4{y} >= 11",
+      "constraint": "$20{y}-$7{__return7} >= 3",
       "left": {
         "Node": {
-          "constraint": "$4{y} >= 4",
-          "left": { "Leaf": "6" },
-          "right": {
+          "constraint": "$20{y} >= 11",
+          "left": {
             "Node": {
-              "constraint": "$4{y} >= 3",
-              "left": "BOT",
+              "constraint": "$20{y} >= 3",
+              "left": { "Leaf": "top" },
               "right": {
                 "Node": {
-                  "constraint": "$4{y} >= -2",
+                  "constraint": "$20{y} >= -2",
                   "left": "BOT",
                   "right": "BOT"
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$20{y} >= 3",
+              "left": {
+                "Node": {
+                  "constraint": "$20{y} >= 1",
+                  "left": { "Leaf": "top" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$20{y}+$7{__return7} >= 3",
+                      "left": "BOT",
+                      "right": {
+                        "Node": {
+                          "constraint": "$20{y}+$7{__return7} >= -2",
+                          "left": "BOT",
+                          "right": "BOT"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$20{y} >= 1",
+                  "left": {
+                    "Node": {
+                      "constraint": "$20{y} >= -2",
+                      "left": { "Leaf": "3" },
+                      "right": "BOT"
+                    }
+                  },
+                  "right": {
+                    "Node": {
+                      "constraint": "$20{y} >= -2",
+                      "left": { "Leaf": "3" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$20{y} >= -10",
+                          "left": {
+                            "Node": {
+                              "constraint": "$20{y}+$7{__return7} >= 3",
+                              "left": { "Leaf": "top" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$20{y}+$7{__return7} >= -2",
+                                  "left": { "Leaf": "11" },
+                                  "right": { "Leaf": "top" }
+                                }
+                              }
+                            }
+                          },
+                          "right": {
+                            "Node": {
+                              "constraint": "$20{y}+$7{__return7} >= 3",
+                              "left": { "Leaf": "top" },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$20{y}+$7{__return7} >= -2",
+                                  "left": { "Leaf": "11" },
+                                  "right": { "Leaf": "top" }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -33,35 +105,179 @@
       },
       "right": {
         "Node": {
-          "constraint": "$4{y} >= 4",
-          "left": { "Leaf": "6$4{y}-9" },
-          "right": {
+          "constraint": "$20{y}-$7{__return7} >= -2",
+          "left": {
             "Node": {
-              "constraint": "$4{y} >= 3",
-              "left": { "Leaf": "9" },
+              "constraint": "$20{y} >= 11",
+              "left": {
+                "Node": {
+                  "constraint": "$20{y} >= 3",
+                  "left": { "Leaf": "11" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$20{y} >= -2",
+                      "left": "BOT",
+                      "right": "BOT"
+                    }
+                  }
+                }
+              },
               "right": {
                 "Node": {
-                  "constraint": "$4{y} >= 1",
+                  "constraint": "$20{y} >= 3",
                   "left": {
                     "Node": {
-                      "constraint": "$4{y} >= -2",
-                      "left": { "Leaf": "3" },
-                      "right": "BOT"
+                      "constraint": "$20{y} >= 1",
+                      "left": { "Leaf": "11" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$20{y}+$7{__return7} >= 3",
+                          "left": "BOT",
+                          "right": {
+                            "Node": {
+                              "constraint": "$20{y}+$7{__return7} >= -2",
+                              "left": "BOT",
+                              "right": "BOT"
+                            }
+                          }
+                        }
+                      }
                     }
                   },
                   "right": {
                     "Node": {
-                      "constraint": "$4{y} >= -2",
-                      "left": { "Leaf": "3" },
+                      "constraint": "$20{y} >= 1",
+                      "left": {
+                        "Node": {
+                          "constraint": "$20{y} >= -2",
+                          "left": { "Leaf": "3" },
+                          "right": "BOT"
+                        }
+                      },
                       "right": {
                         "Node": {
-                          "constraint": "$4{y} >= -3",
-                          "left": { "Leaf": "9" },
+                          "constraint": "$20{y} >= -2",
+                          "left": { "Leaf": "3" },
                           "right": {
                             "Node": {
-                              "constraint": "$4{y} >= -10",
-                              "left": { "Leaf": "-6$4{y}-9" },
-                              "right": { "Leaf": "6" }
+                              "constraint": "$20{y} >= -10",
+                              "left": {
+                                "Node": {
+                                  "constraint": "$20{y}+$7{__return7} >= 3",
+                                  "left": { "Leaf": "top" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$20{y}+$7{__return7} >= -2",
+                                      "left": { "Leaf": "11" },
+                                      "right": { "Leaf": "top" }
+                                    }
+                                  }
+                                }
+                              },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$20{y}+$7{__return7} >= 3",
+                                  "left": { "Leaf": "top" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$20{y}+$7{__return7} >= -2",
+                                      "left": { "Leaf": "11" },
+                                      "right": { "Leaf": "top" }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "right": {
+            "Node": {
+              "constraint": "$20{y} >= 11",
+              "left": {
+                "Node": {
+                  "constraint": "$20{y} >= 3",
+                  "left": { "Leaf": "top" },
+                  "right": {
+                    "Node": {
+                      "constraint": "$20{y} >= -2",
+                      "left": "BOT",
+                      "right": "BOT"
+                    }
+                  }
+                }
+              },
+              "right": {
+                "Node": {
+                  "constraint": "$20{y} >= 3",
+                  "left": {
+                    "Node": {
+                      "constraint": "$20{y} >= 1",
+                      "left": { "Leaf": "top" },
+                      "right": {
+                        "Node": {
+                          "constraint": "$20{y}+$7{__return7} >= 3",
+                          "left": "BOT",
+                          "right": {
+                            "Node": {
+                              "constraint": "$20{y}+$7{__return7} >= -2",
+                              "left": "BOT",
+                              "right": "BOT"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "right": {
+                    "Node": {
+                      "constraint": "$20{y} >= 1",
+                      "left": {
+                        "Node": {
+                          "constraint": "$20{y} >= -2",
+                          "left": { "Leaf": "3" },
+                          "right": "BOT"
+                        }
+                      },
+                      "right": {
+                        "Node": {
+                          "constraint": "$20{y} >= -2",
+                          "left": { "Leaf": "3" },
+                          "right": {
+                            "Node": {
+                              "constraint": "$20{y} >= -10",
+                              "left": {
+                                "Node": {
+                                  "constraint": "$20{y}+$7{__return7} >= 3",
+                                  "left": { "Leaf": "top" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$20{y}+$7{__return7} >= -2",
+                                      "left": { "Leaf": "11" },
+                                      "right": { "Leaf": "top" }
+                                    }
+                                  }
+                                }
+                              },
+                              "right": {
+                                "Node": {
+                                  "constraint": "$20{y}+$7{__return7} >= 3",
+                                  "left": { "Leaf": "top" },
+                                  "right": {
+                                    "Node": {
+                                      "constraint": "$20{y}+$7{__return7} >= -2",
+                                      "left": { "Leaf": "11" },
+                                      "right": { "Leaf": "top" }
+                                    }
+                                  }
+                                }
+                              }
                             }
                           }
                         }

@@ -4,34 +4,34 @@
     "analysis_type": "termination",
     "property": "AF{exit:true}",
     "precondition": "x > 35",
-    "result": "UKNOWN",
+    "result": "TRUE",
     "domain": "polyhedra",
     "joinbwd": 2,
     "time": "1"
   },
   "tree": {
     "Node": {
-      "constraint": "$2{x} >= 36",
+      "constraint": "$5{x} >= 36",
       "left": { "Leaf": "5" },
       "right": {
         "Node": {
-          "constraint": "$2{x} >= 31",
+          "constraint": "$5{x} >= 31",
           "left": { "Leaf": "bottom" },
           "right": {
             "Node": {
-              "constraint": "$2{x} >= 2",
-              "left": { "Leaf": "5$2{x}+2" },
+              "constraint": "$5{x} >= 2",
+              "left": { "Leaf": "5$5{x}+2" },
               "right": {
                 "Node": {
-                  "constraint": "$2{x} >= 1",
+                  "constraint": "$5{x} >= 1",
                   "left": { "Leaf": "7" },
                   "right": {
                     "Node": {
-                      "constraint": "$2{x} >= 0",
+                      "constraint": "$5{x} >= 0",
                       "left": { "Leaf": "2" },
                       "right": {
                         "Node": {
-                          "constraint": "$2{x} >= -5",
+                          "constraint": "$5{x} >= -5",
                           "left": { "Leaf": "bottom" },
                           "right": { "Leaf": "5" }
                         }

@@ -11,21 +11,21 @@
   },
   "tree": {
     "Node": {
-      "constraint": "$2{x} >= 2",
-      "left": { "Leaf": "3$2{x}+2" },
+      "constraint": "$5{x} >= 2",
+      "left": { "Leaf": "3$5{x}+2" },
       "right": {
         "Node": {
-          "constraint": "$2{x} >= 1",
+          "constraint": "$5{x} >= 1",
           "left": { "Leaf": "5" },
           "right": {
             "Node": {
-              "constraint": "$2{x} >= 0",
+              "constraint": "$5{x} >= 0",
               "left": { "Leaf": "2" },
               "right": {
                 "Node": {
-                  "constraint": "$2{x} >= -1",
+                  "constraint": "$5{x} >= -1",
                   "left": { "Leaf": "5" },
-                  "right": { "Leaf": "-3$2{x}+2" }
+                  "right": { "Leaf": "-3$5{x}+2" }
                 }
               }
             }

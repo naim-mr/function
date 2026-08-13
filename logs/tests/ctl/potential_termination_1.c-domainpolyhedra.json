@@ -4,11 +4,11 @@
     "analysis_type": "ctl",
     "property": "EF{exit: true}",
     "precondition": "true",
-    "result": "UKNOWN",
+    "result": "TRUE",
     "domain": "polyhedra",
     "joinbwd": 2,
-    "time": "1"
+    "time": "0.025851"
   },
-  "tree": { "Leaf": "bottom" },
+  "tree": { "Leaf": "6" },
   "vulnerability": "Not analyzed"
 }

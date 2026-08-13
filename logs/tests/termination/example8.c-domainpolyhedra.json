@@ -4,11 +4,11 @@
     "analysis_type": "termination",
     "property": "AF{exit:true}",
     "precondition": "true",
-    "result": "UKNOWN",
+    "result": "TRUE",
     "domain": "polyhedra",
     "joinbwd": 7,
     "time": "1"
   },
-  "tree": { "Leaf": "top" },
+  "tree": { "Leaf": "38" },
   "vulnerability": "Not analyzed"
 }

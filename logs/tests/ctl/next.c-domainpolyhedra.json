@@ -4,18 +4,18 @@
     "analysis_type": "ctl",
     "property": "AX{x==0}",
     "precondition": "x == 0",
-    "result": "UKNOWN",
+    "result": "TRUE",
     "domain": "polyhedra",
     "joinbwd": 2,
-    "time": "1"
+    "time": "0.00353900000001"
   },
   "tree": {
     "Node": {
-      "constraint": "$2{x} >= 2",
+      "constraint": "$5{x} >= 1",
       "left": { "Leaf": "bottom" },
       "right": {
         "Node": {
-          "constraint": "$2{x} >= 1",
+          "constraint": "$5{x} >= 0",
           "left": { "Leaf": "0." },
           "right": { "Leaf": "bottom" }
         }

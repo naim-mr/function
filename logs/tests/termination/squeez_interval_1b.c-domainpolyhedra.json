@@ -11,31 +11,31 @@
   },
   "tree": {
     "Node": {
-      "constraint": "$2{y} >= 11",
+      "constraint": "$5{y} >= 11",
       "left": { "Leaf": "top" },
       "right": {
         "Node": {
-          "constraint": "$2{y} >= 4",
+          "constraint": "$5{y} >= 4",
           "left": { "Leaf": "top" },
           "right": {
             "Node": {
-              "constraint": "$2{y} >= 3",
+              "constraint": "$5{y} >= 3",
               "left": { "Leaf": "7" },
               "right": {
                 "Node": {
-                  "constraint": "$2{y} >= 1",
+                  "constraint": "$5{y} >= 1",
                   "left": { "Leaf": "5" },
                   "right": {
                     "Node": {
-                      "constraint": "$2{y} >= -2",
+                      "constraint": "$5{y} >= -2",
                       "left": { "Leaf": "5" },
                       "right": {
                         "Node": {
-                          "constraint": "$2{y} >= -3",
+                          "constraint": "$5{y} >= -3",
                           "left": { "Leaf": "7" },
                           "right": {
                             "Node": {
-                              "constraint": "$2{y} >= -10",
+                              "constraint": "$5{y} >= -10",
                               "left": { "Leaf": "top" },
                               "right": { "Leaf": "top" }
                             }

@@ -11,45 +11,45 @@
   },
   "tree": {
     "Node": {
-      "constraint": "$4{y} >= 41",
-      "left": { "Leaf": "6" },
+      "constraint": "$35{y} >= 41",
+      "left": { "Leaf": "bottom" },
       "right": {
         "Node": {
-          "constraint": "$4{y} >= 31",
-          "left": { "Leaf": "7" },
+          "constraint": "$35{y} >= 31",
+          "left": { "Leaf": "bottom" },
           "right": {
             "Node": {
-              "constraint": "$4{y} >= 21",
-              "left": { "Leaf": "8" },
+              "constraint": "$35{y} >= 21",
+              "left": { "Leaf": "bottom" },
               "right": {
                 "Node": {
-                  "constraint": "$4{y} >= 11",
-                  "left": { "Leaf": "9" },
+                  "constraint": "$35{y} >= 11",
+                  "left": { "Leaf": "bottom" },
                   "right": {
                     "Node": {
-                      "constraint": "$4{y} >= 4",
+                      "constraint": "$35{y} >= 4",
                       "left": { "Leaf": "bottom" },
                       "right": {
                         "Node": {
-                          "constraint": "$4{y} >= -3",
+                          "constraint": "$35{y} >= -3",
                           "left": { "Leaf": "3" },
                           "right": {
                             "Node": {
-                              "constraint": "$4{y} >= -10",
+                              "constraint": "$35{y} >= -10",
                               "left": { "Leaf": "bottom" },
                               "right": {
                                 "Node": {
-                                  "constraint": "$4{y} >= -20",
-                                  "left": { "Leaf": "9" },
+                                  "constraint": "$35{y} >= -20",
+                                  "left": { "Leaf": "bottom" },
                                   "right": {
                                     "Node": {
-                                      "constraint": "$4{y} >= -30",
-                                      "left": { "Leaf": "8" },
+                                      "constraint": "$35{y} >= -30",
+                                      "left": { "Leaf": "bottom" },
                                       "right": {
                                         "Node": {
-                                          "constraint": "$4{y} >= -40",
-                                          "left": { "Leaf": "7" },
-                                          "right": { "Leaf": "6" }
+                                          "constraint": "$35{y} >= -40",
+                                          "left": { "Leaf": "bottom" },
+                                          "right": { "Leaf": "bottom" }
                                         }
                                       }
                                     }

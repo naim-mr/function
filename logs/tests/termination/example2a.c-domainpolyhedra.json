@@ -11,21 +11,21 @@
   },
   "tree": {
     "Node": {
-      "constraint": "$2{y} >= 3",
-      "left": { "Leaf": "3$2{y}-1" },
+      "constraint": "$5{y} >= 3",
+      "left": { "Leaf": "3$5{y}-1" },
       "right": {
         "Node": {
-          "constraint": "$2{y} >= 2",
+          "constraint": "$5{y} >= 2",
           "left": { "Leaf": "5" },
           "right": {
             "Node": {
-              "constraint": "$2{y} >= -1",
+              "constraint": "$5{y} >= -1",
               "left": { "Leaf": "2" },
               "right": {
                 "Node": {
-                  "constraint": "$2{y} >= -2",
+                  "constraint": "$5{y} >= -2",
                   "left": { "Leaf": "5" },
-                  "right": { "Leaf": "-3$2{y}-1" }
+                  "right": { "Leaf": "-3$5{y}-1" }
                 }
               }
             }

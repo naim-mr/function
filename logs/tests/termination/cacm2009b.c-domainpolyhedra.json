@@ -4,52 +4,52 @@
     "analysis_type": "termination",
     "property": "AF{exit:true}",
     "precondition": "true",
-    "result": "UKNOWN",
+    "result": "TRUE",
     "domain": "polyhedra",
     "joinbwd": 2,
     "time": "1"
   },
   "tree": {
     "Node": {
-      "constraint": "$3{y} >= 2",
+      "constraint": "$13{y} >= 2",
       "left": {
         "Node": {
-          "constraint": "$2{x} >= 2",
-          "left": { "Leaf": "top" },
+          "constraint": "$11{x} >= 2",
+          "left": { "Leaf": "6442450942$11{x}+3$13{y}-6442450934" },
           "right": {
             "Node": {
-              "constraint": "$2{x} >= 1",
-              "left": { "Leaf": "3$3{y}+4" },
-              "right": { "Leaf": "3" }
+              "constraint": "$11{x} >= 1",
+              "left": { "Leaf": "3$13{y}+8" },
+              "right": { "Leaf": "7" }
             }
           }
         }
       },
       "right": {
         "Node": {
-          "constraint": "$3{y} >= 1",
+          "constraint": "$13{y} >= 1",
           "left": {
             "Node": {
-              "constraint": "$2{x} >= 2",
-              "left": { "Leaf": "top" },
+              "constraint": "$11{x} >= 2",
+              "left": { "Leaf": "6442450942$11{x}-6442450931" },
               "right": {
                 "Node": {
-                  "constraint": "$2{x} >= 1",
-                  "left": { "Leaf": "7" },
-                  "right": { "Leaf": "3" }
+                  "constraint": "$11{x} >= 1",
+                  "left": { "Leaf": "11" },
+                  "right": { "Leaf": "7" }
                 }
               }
             }
           },
           "right": {
             "Node": {
-              "constraint": "$2{x} >= 2",
-              "left": { "Leaf": "3" },
+              "constraint": "$11{x} >= 2",
+              "left": { "Leaf": "7" },
               "right": {
                 "Node": {
-                  "constraint": "$2{x} >= 1",
-                  "left": { "Leaf": "3" },
-                  "right": { "Leaf": "3" }
+                  "constraint": "$11{x} >= 1",
+                  "left": { "Leaf": "7" },
+                  "right": { "Leaf": "7" }
                 }
               }
             }
